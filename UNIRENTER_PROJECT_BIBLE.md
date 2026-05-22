@@ -286,6 +286,23 @@ Full SQL in `unirenter-setup-guide.html` Step 2.
 
 ---
 
+## SESSION UPDATE — May 2025
+All HTML files rebuilt with:
+- Hamburger nav for mobile (Samsung fold tested)
+- City switcher tabs on home page  
+- Dead links fixed (RTBA QLD → RTA, QCAT, CAV pets, QBCC)
+- PBSA duplicates removed (Iglu Sydney×1, UniLodge Brisbane×1)
+- Facebook group stats updated (Melbourne 100k, Sydney 126k, Brisbane 67k)
+- Internal links updated to Vercel clean URLs
+- Logo links to home page
+- Break lease wording softened
+- T&Cs: "not a real estate agent" clause added
+- "Service not social media" clause added to T&Cs
+- 4th "break lease" card removed from how-it-works
+- "Find your" hero text fixed for mobile
+- Favicon added (UniRenter icon) across all files
+- Phone & SIM as separate tab in settled hubs
+
 ## NEXT STEPS (priority order)
 1. Fix Vercel 404 (upload index.html + vercel.json to GitHub)
 2. Connect Supabase to HTML files (add SDK snippet)  
