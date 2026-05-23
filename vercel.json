@@ -1,3 +1,20 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "framework": null,
+  "rewrites": [
+    { "source": "/sydney", "destination": "/unirenter-sydney.html" },
+    { "source": "/brisbane", "destination": "/unirenter-brisbane.html" },
+    { "source": "/guide", "destination": "/unirenter-guide.html" },
+    { "source": "/guide/sydney", "destination": "/unirenter-guide-sydney.html" },
+    { "source": "/guide/brisbane", "destination": "/unirenter-guide-brisbane.html" },
+    { "source": "/lease", "destination": "/unirenter-lease.html" },
+    { "source": "/lease/sydney", "destination": "/unirenter-lease-sydney.html" },
+    { "source": "/lease/brisbane", "destination": "/unirenter-lease-brisbane.html" },
+    { "source": "/settled", "destination": "/unirenter-settled-melbourne.html" },
+    { "source": "/settled/sydney", "destination": "/unirenter-settled-sydney.html" },
+    { "source": "/settled/brisbane", "destination": "/unirenter-settled-brisbane.html" },
+    { "source": "/dashboard", "destination": "/unirenter-dashboard.html" },
+    { "source": "/lease-companion", "destination": "/unirenter-lease-companion.html" },
+    { "source": "/cob", "destination": "/unirenter-cob.html" },
+    { "source": "/auth", "destination": "/auth.html" }
+  ]
 }
