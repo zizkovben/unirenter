@@ -1,5 +1,7 @@
 {
   "framework": null,
+  "buildCommand": "",
+  "outputDirectory": ".",
   "rewrites": [
     { "source": "/sydney", "destination": "/unirenter-sydney.html" },
     { "source": "/brisbane", "destination": "/unirenter-brisbane.html" },
@@ -15,6 +17,8 @@
     { "source": "/dashboard", "destination": "/unirenter-dashboard.html" },
     { "source": "/lease-companion", "destination": "/unirenter-lease-companion.html" },
     { "source": "/cob", "destination": "/unirenter-cob.html" },
-    { "source": "/auth", "destination": "/auth.html" }
+    { "source": "/auth", "destination": "/auth.html" },
+    { "source": "/agent", "destination": "/unirenter-agent.html" },
+    { "source": "/legal", "destination": "/unirenter-legal.html" }
   ]
 }
