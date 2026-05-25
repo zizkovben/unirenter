@@ -3,8 +3,10 @@
   "buildCommand": "",
   "outputDirectory": ".",
   "rewrites": [
-    { "source": "/sydney", "destination": "/unirenter-sydney.html" },
-    { "source": "/brisbane", "destination": "/unirenter-brisbane.html" },
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/melbourne", "destination": "/index.html" },
+    { "source": "/auth", "destination": "/auth.html" },
+    { "source": "/cob", "destination": "/unirenter-cob.html" },
     { "source": "/guide", "destination": "/unirenter-guide.html" },
     { "source": "/guide/sydney", "destination": "/unirenter-guide-sydney.html" },
     { "source": "/guide/brisbane", "destination": "/unirenter-guide-brisbane.html" },
@@ -16,8 +18,8 @@
     { "source": "/settled/brisbane", "destination": "/unirenter-settled-brisbane.html" },
     { "source": "/dashboard", "destination": "/unirenter-dashboard.html" },
     { "source": "/lease-companion", "destination": "/unirenter-lease-companion.html" },
-    { "source": "/cob", "destination": "/unirenter-cob.html" },
-    { "source": "/auth", "destination": "/auth.html" },
+    { "source": "/sydney", "destination": "/unirenter-sydney.html" },
+    { "source": "/brisbane", "destination": "/unirenter-brisbane.html" },
     { "source": "/agent", "destination": "/unirenter-agent.html" },
     { "source": "/legal", "destination": "/unirenter-legal.html" }
   ]
