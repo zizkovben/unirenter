@@ -1279,6 +1279,7 @@ function generateMatches() {
 }
 
 function showMatches() {
+  saveProfileToSupabase();
   generateMatches();
   document.getElementById('matches').classList.add('visible');
   setTimeout(() => document.getElementById('matches').scrollIntoView({behavior:'smooth'}), 100);
@@ -1525,7 +1526,64 @@ function updateCompleteness(step) {
 
 // ── Save progress ──
 function saveProgress() {
+  saveProfileToSupabase();
   showToast("💾 Progress saved", "You can return and continue from step " + currentStep + " — we'll remember your answers.");
+}
+
+// ── Save profile to Supabase ──
+async function saveProfileToSupabase() {
+  const phone = document.getElementById('phone-num')?.value?.trim() || null;
+  const displayName = document.getElementById('display-name')?.value?.trim() || null;
+  const statusCard = document.querySelector('.status-card.selected');
+  const studentStatus = statusCard?.dataset?.type || null;
+  const activePanel = document.querySelector('.cond-panel.visible');
+  const selects = activePanel ? activePanel.querySelectorAll('select') : [];
+  const university   = selects[0]?.value || null;
+  const yearOfStudy  = selects[1]?.value || null;
+  const fieldOfStudy = selects[2]?.value || null;
+  const uniEmail     = activePanel?.querySelector('input[type="email"]')?.value?.trim() || null;
+  const accomCards = [...document.querySelectorAll('.accom-card.selected')].map(c => c.dataset?.type).filter(Boolean);
+  const seeking       = accomCards[0] || null;
+  const moveInDate    = document.getElementById('move-in-date')?.value || null;
+  const householdType = document.querySelector('.household-option.selected')?.dataset?.value || null;
+  const sleepSchedule = document.querySelector('.pref-chip.selected[data-cat="sleep"]')?.dataset?.value || null;
+  const cleanliness   = document.querySelector('.pref-chip.selected[data-cat="clean"]')?.dataset?.value || null;
+  const studyLocation = document.querySelector('.pref-chip.selected[data-cat="study"]')?.dataset?.value || null;
+  const guests        = document.querySelector('.pref-chip.selected[data-cat="guests"]')?.dataset?.value || null;
+  const substances    = document.querySelector('.pref-chip.selected[data-cat="substances"]')?.dataset?.value || null;
+  const dietary       = document.querySelector('.pref-chip.selected[data-cat="dietary"]')?.dataset?.value || null;
+  const pets          = document.querySelector('.pref-chip.selected[data-cat="pets"]')?.dataset?.value || null;
+  const suburbPrefs = [...document.querySelectorAll('.suburb-chip.selected')]
+    .map(c => c.dataset?.suburb || c.textContent.trim()).filter(Boolean);
+  const budgetMin = parseInt(document.getElementById('budget-min')?.value) || null;
+  const budgetMax = parseInt(document.getElementById('budget-max')?.value) || null;
+  const filled = [phone, displayName, university, studentStatus, seeking,
+                  moveInDate, householdType, sleepSchedule, cleanliness,
+                  budgetMin, budgetMax].filter(Boolean).length;
+  const profileComplete = Math.round((filled / 11) * 100);
+  const profileData = {
+    phone, display_name: displayName, university, student_status: studentStatus,
+    year_of_study: yearOfStudy, field_of_study: fieldOfStudy, uni_email: uniEmail,
+    seeking, move_in_date: moveInDate, household_type: householdType,
+    suburb_preferences: suburbPrefs.length > 0 ? suburbPrefs : null,
+    budget_min: budgetMin, budget_max: budgetMax,
+    sleep_schedule: sleepSchedule, cleanliness, study_location: studyLocation,
+    guests, substances, dietary, pets, city: 'melbourne', profile_complete: profileComplete,
+  };
+  const savedEmail = localStorage.getItem('unirenter_email');
+  if (savedEmail) profileData.email = savedEmail;
+  try {
+    const res = await fetch('/api/profile/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(profileData),
+    });
+    const result = await res.json();
+    if (result.success) localStorage.setItem('unirenter_profile_complete', profileComplete);
+    else console.warn('Profile save warning:', result);
+  } catch (err) {
+    console.warn('Profile save offline:', err.message);
+  }
 }
 
 // ── Red flag modal ──
