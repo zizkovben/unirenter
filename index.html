@@ -616,43 +616,33 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
 
       <!-- STEP 1: Phone verify -->
       <div class="step active" id="step-1">
-        <div class="step-title">Verify your number</div>
-        <div class="step-sub">One SMS per account keeps UniRenter scam-free. Your number is never shown on your profile or shared with anyone.</div>
+        <div class="step-title">Create your free account</div>
+        <div class="step-sub">Enter your email to get started. We'll send a 6-digit code to verify it's you — takes 30 seconds.</div>
         <div class="phone-block">
-          <div class="phone-block-title">📱 Phone verification</div>
-          <div class="phone-block-sub">Enter your mobile number — any country. We'll send a 4-digit code via SMS.</div>
+          <div class="phone-block-title">📧 Email verification</div>
+          <div class="phone-block-sub">Your email is never shown on your profile or shared with landlords.</div>
           <div class="phone-row">
-            <select id="dial-code">
-              <option value="+61">🇦🇺 +61</option><option value="+91">🇮🇳 +91</option>
-              <option value="+86">🇨🇳 +86</option><option value="+44">🇬🇧 +44</option>
-              <option value="+1">🇺🇸 +1</option><option value="+84">🇻🇳 +84</option>
-              <option value="+977">🇳🇵 +977</option><option value="+63">🇵🇭 +63</option>
-              <option value="+62">🇮🇩 +62</option><option value="+60">🇲🇾 +60</option>
-              <option value="+82">🇰🇷 +82</option><option value="+81">🇯🇵 +81</option>
-              <option value="+92">🇵🇰 +92</option><option value="+94">🇱🇰 +94</option>
-              <option value="+880">🇧🇩 +880</option><option value="+64">🇳🇿 +64</option>
-            </select>
-            <input type="tel" id="phone-num" placeholder="04xx xxx xxx" />
-            <button class="btn-send-otp" onclick="sendOTP()">Send code</button>
+            <input type="email" id="email-input" placeholder="you@email.com" style="flex:1;" />
+            <button class="btn-send-otp" id="btn-send-email-otp" onclick="sendEmailOTP()">Send code</button>
           </div>
           <div class="otp-row" id="otp-row">
             <div style="width:100%">
-              <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Enter the 4-digit code sent to your phone</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Enter the 6-digit code sent to your email</div>
               <div class="otp-inputs">
                 <input class="otp-input" maxlength="1" id="otp1" oninput="otpNext(this,'otp2')" />
                 <input class="otp-input" maxlength="1" id="otp2" oninput="otpNext(this,'otp3')" />
                 <input class="otp-input" maxlength="1" id="otp3" oninput="otpNext(this,'otp4')" />
-                <input class="otp-input" maxlength="1" id="otp4" oninput="otpNext(this,null)" />
+                <input class="otp-input" maxlength="1" id="otp4" oninput="otpNext(this,'otp5')" />
+                <input class="otp-input" maxlength="1" id="otp5" oninput="otpNext(this,'otp6')" />
+                <input class="otp-input" maxlength="1" id="otp6" oninput="otpNext(this,null)" />
               </div>
               <div class="verify-status" id="verify-status"></div>
+              <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">Didn't get it? <a href="#" onclick="sendEmailOTP();return false;" style="color:var(--brand-blue);">Resend code</a></div>
             </div>
           </div>
-          <div class="verified-badge" id="verified-badge">✅ Phone verified — you're good to go</div>
+          <div class="verified-badge" id="verified-badge">✅ Email verified — you're good to go</div>
         </div>
-        <div class="info-note">🔒 One real phone number per account is the single most effective scam deterrent. Your number is encrypted and never visible to other users or landlords.</div>
-
-        <div class="info-note" style="margin-top:14px;text-align:center;">📧 <strong>Email verification</strong> coming soon — phone verification is recommended for stronger security.</div>
-
+        <div class="info-note">🔒 Verified accounts get more matches. Your email is used only for account access and important updates — no spam.</div>
         <div class="step-nav">
           <div></div>
           <button class="btn-next" onclick="goStep(2)" id="btn-step1-next" style="opacity:0.4;pointer-events:none;">Next: Your profile →</button>
@@ -1200,40 +1190,75 @@ function previewPhoto(input) {
   }
 }
 
-function sendOTP() {
-  const num = document.getElementById('phone-num').value.trim();
-  if (!num) { showToast('⚠️ Enter your number','Please enter your mobile number first.'); return; }
-  demoOTP = Math.floor(1000 + Math.random() * 9000).toString();
-  document.getElementById('otp-row').classList.add('visible');
-  document.getElementById('otp1').focus();
-  showToast("📱 Code sent!", "Demo code: " + demoOTP + "  (production: sent via SMS)");
+async function sendEmailOTP() {
+  const email = document.getElementById('email-input').value.trim();
+  if (!email || !email.includes('@')) {
+    showToast('⚠️ Enter your email', 'Please enter a valid email address first.');
+    return;
+  }
+  const btn = document.getElementById('btn-send-email-otp');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/auth/send-email-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      document.getElementById('otp-row').classList.add('visible');
+      document.getElementById('otp1').focus();
+      showToast('📧 Code sent!', 'Check your inbox — the code expires in 10 minutes.');
+    } else {
+      showToast('⚠️ Error', data.error || 'Could not send code. Try again.');
+    }
+  } catch (err) {
+    showToast('⚠️ Offline', 'Check your connection and try again.');
+  }
+  btn.textContent = 'Resend';
+  btn.disabled = false;
 }
 
 function otpNext(input, nextId) {
   if (input.value.length === 1) {
     if (nextId) document.getElementById(nextId).focus();
-    checkOTP();
+    checkEmailOTP();
   }
 }
 
-function checkOTP() {
-  const entered = ['otp1','otp2','otp3','otp4'].map(id => document.getElementById(id).value).join('');
+async function checkEmailOTP() {
+  const entered = ['otp1','otp2','otp3','otp4','otp5','otp6'].map(id => document.getElementById(id).value).join('');
   const status = document.getElementById('verify-status');
-  if (entered.length < 4) return;
-  if (entered === demoOTP) {
-    status.className = 'verify-status ok';
-    status.textContent = '✓ Verified successfully';
-    phoneVerified = true;
-    document.getElementById('verified-badge').classList.add('show');
-    document.getElementById('otp-row').classList.remove('visible');
-    const btn = document.getElementById('btn-step1-next');
-    btn.style.opacity = '1'; btn.style.pointerEvents = 'auto';
-    showToast('✅ Phone verified!','One account per number — scammers blocked.');
-  } else if (entered.length === 4) {
+  if (entered.length < 6) return;
+  const email = document.getElementById('email-input').value.trim();
+  status.className = 'verify-status';
+  status.textContent = 'Checking…';
+  try {
+    const res = await fetch('/api/auth/verify-email-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp: entered }),
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      status.className = 'verify-status ok';
+      status.textContent = '✓ Verified successfully';
+      localStorage.setItem('unirenter_email', email);
+      document.getElementById('verified-badge').classList.add('show');
+      document.getElementById('otp-row').classList.remove('visible');
+      const btn = document.getElementById('btn-step1-next');
+      btn.style.opacity = '1'; btn.style.pointerEvents = 'auto';
+      showToast('✅ Email verified!', 'Your account is created — let\'s build your profile.');
+    } else {
+      status.className = 'verify-status err';
+      status.textContent = '✗ Incorrect code — try again';
+      ['otp1','otp2','otp3','otp4','otp5','otp6'].forEach(id => { document.getElementById(id).value = ''; });
+      document.getElementById('otp1').focus();
+    }
+  } catch (err) {
     status.className = 'verify-status err';
-    status.textContent = '✗ Incorrect code — try again';
-    ['otp1','otp2','otp3','otp4'].forEach(id => { document.getElementById(id).value = ''; });
-    document.getElementById('otp1').focus();
+    status.textContent = '✗ Connection error — try again';
   }
 }
 
@@ -1467,40 +1492,7 @@ function toggleEmailVerify() {
   block.style.display = isHidden ? 'block' : 'none';
   btn.textContent = isHidden ? 'Use phone verification instead' : "Can\'t use phone? Verify with email instead";
 }
-function sendEmailOTP() {
-  const email = document.getElementById('verify-email').value.trim();
-  if (!email || !email.includes('@')) { showToast('⚠️ Enter your email','Please enter a valid email address.'); return; }
-  demoEmailOTP = Math.floor(100000 + Math.random() * 900000).toString();
-  document.getElementById('email-otp-row').classList.add('visible');
-  document.getElementById('eotp1').focus();
-  showToast("📧 Code sent!", "Demo code: " + demoEmailOTP + " (production: sent via email)");
-}
-function eotpNext(input, nextId) {
-  if (input.value.length === 1) {
-    if (nextId) document.getElementById(nextId).focus();
-    checkEmailOTP();
-  }
-}
-function checkEmailOTP() {
-  const entered = ['eotp1','eotp2','eotp3','eotp4','eotp5','eotp6'].map(id => document.getElementById(id).value).join('');
-  const status = document.getElementById('email-verify-status');
-  if (entered.length < 6) return;
-  if (entered === demoEmailOTP) {
-    status.className = 'verify-status ok';
-    status.textContent = '✓ Email verified';
-    emailVerified = true;
-    document.getElementById('email-verified-badge').classList.add('show');
-    document.getElementById('email-otp-row').classList.remove('visible');
-    const btn = document.getElementById('btn-step1-next');
-    btn.style.opacity = '1'; btn.style.pointerEvents = 'auto';
-    showToast('📧 Email verified!','You can now continue. Note: phone verification provides stronger protection.');
-  } else if (entered.length === 6) {
-    status.className = 'verify-status err';
-    status.textContent = '✗ Incorrect code — try again';
-    ['eotp1','eotp2','eotp3','eotp4','eotp5','eotp6'].forEach(id => { document.getElementById(id).value = ''; });
-    document.getElementById('eotp1').focus();
-  }
-}
+// Email OTP — see sendEmailOTP() and checkEmailOTP() above
 
 
 // ── Profile completeness ──
