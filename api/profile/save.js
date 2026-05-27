@@ -1,19 +1,17 @@
 // api/profile/save.js
-// Receives profile builder data from index.html and upserts into Supabase profiles table.
+// Receives profile builder data from any city page and upserts into Supabase profiles table.
 // Called via POST /api/profile/save
 // Auth: uses SUPABASE_SERVICE_ROLE_KEY (server-side only — never exposed to client)
 
 export default async function handler(req, res) {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey   = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceKey) {
     return res.status(500).json({ error: 'Supabase not configured' });
@@ -22,20 +20,22 @@ export default async function handler(req, res) {
   try {
     const body = req.body;
 
-    // Require at minimum an email or profile id to upsert against
     if (!body.email && !body.id) {
       return res.status(400).json({ error: 'email or id required' });
     }
 
-    // Build the upsert payload — only include fields that were sent
+    // Validate city — only accept known cities, default to melbourne
+    const VALID_CITIES = ['melbourne', 'sydney', 'brisbane'];
+    const city = VALID_CITIES.includes(body.city) ? body.city : 'melbourne';
+
     const payload = {
       updated_at:       new Date().toISOString(),
       last_seen:        new Date().toISOString(),
       profile_complete: body.profile_complete ?? 0,
       is_active:        true,
+      city,
     };
 
-    // Map every profile builder field — skip undefined values
     const fields = [
       'email', 'phone', 'display_name', 'photo_url',
       'university', 'student_status', 'field_of_study', 'year_of_study',
@@ -44,7 +44,6 @@ export default async function handler(req, res) {
       'suburb_preferences', 'budget_min', 'budget_max',
       'sleep_schedule', 'cleanliness', 'study_location',
       'guests', 'substances', 'dietary', 'pets',
-      'city',
     ];
 
     for (const f of fields) {
@@ -53,7 +52,6 @@ export default async function handler(req, res) {
       }
     }
 
-    // Upsert — match on email if provided, otherwise id
     const matchCol = body.email ? 'email' : 'id';
     const matchVal = body.email || body.id;
 
@@ -73,7 +71,7 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // If PATCH found no row, INSERT a new one
+    // No existing row — insert
     if (Array.isArray(data) && data.length === 0) {
       const insertPayload = { ...payload };
       if (body.email) insertPayload.email = body.email;
