@@ -3,7 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UniRenter Melbourne — Find Your Perfect Housemate</title>
+
+<!-- ── Primary SEO ── -->
+<title>UniRenter Melbourne — Student Accommodation Matching & Housemate Finder</title>
+<meta name="description" content="Find your perfect student housemate in Melbourne. Match by sleep schedule, budget, lifestyle and uni. Free for students — no Facebook lottery, no scams.">
+<meta name="keywords" content="student accommodation Melbourne, housemate finder Melbourne, student housing Melbourne, share house Melbourne, UniMelb housing, RMIT accommodation, Monash student housing, international student accommodation Australia">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://unirenter.vercel.app/">
+
+<!-- ── Open Graph (Facebook, LinkedIn sharing) ── -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://unirenter.vercel.app/">
+<meta property="og:title" content="UniRenter — Find Your Perfect Student Housemate in Melbourne">
+<meta property="og:description" content="Match with compatible housemates by sleep schedule, budget, cleanliness and lifestyle. Free for students. No scams, no Facebook lottery.">
+<meta property="og:image" content="https://unirenter.vercel.app/samo_icon_transparent.png">
+<meta property="og:site_name" content="UniRenter">
+<meta property="og:locale" content="en_AU">
+
+<!-- ── Twitter/X Card ── -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="UniRenter — Student Housemate Matching Melbourne">
+<meta name="twitter:description" content="Find compatible student housemates by lifestyle, budget and location. Free. No scams.">
+<meta name="twitter:image" content="https://unirenter.vercel.app/samo_icon_transparent.png">
+
+<!-- ── Schema.org structured data ── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "UniRenter",
+  "url": "https://unirenter.vercel.app",
+  "description": "Student accommodation matching and settlement platform for Melbourne, Sydney and Brisbane.",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD" },
+  "areaServed": ["Melbourne", "Sydney", "Brisbane"],
+  "audience": { "@type": "Audience", "audienceType": "University Students" }
+}
+</script>
+
+<!-- ── Favicon ── -->
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -526,6 +568,29 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
 .btn-wake{background:var(--brand-yellow);color:#1a1000;font-family:var(--font-body);font-weight:600;font-size:12px;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;transition:all 0.2s;white-space:nowrap}
 .btn-wake:hover{background:#e0a800}
 
+
+/* ── Referral banner ── */
+.referral-banner { background: linear-gradient(135deg, rgba(245,184,0,0.1), rgba(75,191,224,0.08)); border: 1px solid rgba(245,184,0,0.25); border-radius: 16px; padding: 20px 24px; margin: 28px 0; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.referral-banner .rb-icon { font-size: 32px; flex-shrink: 0; }
+.referral-banner .rb-body { flex: 1; min-width: 200px; }
+.referral-banner .rb-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.referral-banner .rb-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+.referral-banner .rb-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.btn-share { background: var(--brand-yellow); color: #1a1000; font-family: var(--font-body); font-weight: 700; font-size: 13px; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+.btn-share:hover { background: #e0a800; }
+.btn-copy-link { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--text-muted); font-family: var(--font-body); font-size: 13px; padding: 10px 16px; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+.btn-copy-link:hover { border-color: rgba(75,191,224,0.3); color: var(--brand-blue); }
+
+/* ── Coming soon card ── */
+.coming-soon-card { background: rgba(75,191,224,0.05); border: 1px dashed rgba(75,191,224,0.25); border-radius: 16px; padding: 32px 24px; text-align: center; margin: 12px 0 28px; }
+.coming-soon-card .cs-icon { font-size: 40px; margin-bottom: 12px; }
+.coming-soon-card .cs-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.coming-soon-card .cs-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; max-width: 420px; margin: 0 auto 20px; }
+.coming-soon-card .cs-email-row { display: flex; gap: 8px; max-width: 360px; margin: 0 auto; }
+.coming-soon-card .cs-email-row input { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--text); font-family: var(--font-body); font-size: 14px; padding: 11px 16px; border-radius: 10px; outline: none; }
+.coming-soon-card .cs-email-row input:focus { border-color: var(--brand-blue); }
+.coming-soon-card .cs-btn { background: var(--brand-blue); color: var(--navy); font-family: var(--font-body); font-weight: 700; font-size: 14px; border: none; padding: 11px 20px; border-radius: 10px; cursor: pointer; white-space: nowrap; }
+.coming-soon-card .cs-note { font-size: 11px; color: var(--text-muted); margin-top: 10px; }
 
 /* ── City switcher (footer) ── */
 .city-switcher{display:flex;justify-content:center;gap:8px;padding:16px 20px 0;position:relative;z-index:1;flex-wrap:wrap}
@@ -1106,6 +1171,19 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
   </div>
   <div class="match-grid" id="match-grid"></div>
 
+  <!-- Referral banner — shown after matches load -->
+  <div class="referral-banner" id="referral-banner" style="display:none;">
+    <div class="rb-icon">🏠</div>
+    <div class="rb-body">
+      <div class="rb-title">Know another student looking for a place?</div>
+      <div class="rb-desc">The more students who join, the better your matches get. Share UniRenter with your uni friends.</div>
+      <div class="rb-actions">
+        <button class="btn-share" onclick="shareUniRenter()">📤 Share UniRenter</button>
+        <button class="btn-copy-link" onclick="copyReferralLink()">🔗 Copy link</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Housemate agreement download -->
   <div class="agreement-banner">
     <div class="ab-icon">📋</div>
@@ -1262,47 +1340,109 @@ async function checkEmailOTP() {
   }
 }
 
-const profiles = [
-  { initials:'PR', bg:'#1a3a4a', fg:'#4BBFE0', flag:'🇮🇳', name:'Priya R.', sub:'UniMelb · Commerce/Law · 2nd year', accom:'Private room · Women only · Carlton', score:96, tags:['Early bird','Very tidy','Halal kitchen','$320/wk','Verified ✓'], photo: null, reasons:[['mr-sleep','🌅 Same sleep'],['mr-clean','🧹 Both tidy'],['mr-budget','💰 Budget match'],['mr-location','📍 Carlton']] },
-  { initials:'JS', bg:'#2a1a3a', fg:'#c87dff', flag:'🇦🇺', name:'Jake S.', sub:'RMIT · Engineering · 3rd year', accom:'Share apartment · Mixed · Footscray', score:88, tags:['Night owl','Avg tidy','Library studier','$280/wk'], photo: null, reasons:[['mr-sleep','🌙 Night owls'],['mr-budget','💰 Budget match'],['mr-location','📍 Footscray']] },
-  { initials:'AM', bg:'#1a3a2a', fg:'#47d4a0', flag:'🇸🇬', name:'Anika M.', sub:'Monash · Psychology · 1st year', accom:'Private room · Mixed · St Kilda', score:84, tags:['Flexible sleep','Neat','Occasional host','$320/wk','Verified ✓'], photo: SAMO, reasons:[['mr-clean','🧹 Both neat'],['mr-budget','💰 Budget match'],['mr-social','🎉 Social match']] },
-  { initials:'TO', bg:'#3a2a1a', fg:'#ffb347', flag:'🇦🇺', name:'Tom O.', sub:'La Trobe · IT · 3rd year', accom:'Shared house · Mixed · Brunswick', score:79, tags:['Flexible','Tidy','WFH some days','$250/wk'], photo: null, reasons:[['mr-budget','💰 Budget match'],['mr-clean','🧹 Tidy match'],['mr-location','📍 Brunswick']] },
-  { initials:'SC', bg:'#2a1a1a', fg:'#ff8a8a', flag:'🇻🇳', name:'Sara C.', sub:'Swinburne · Design · Graduate', accom:'Share apartment · Women only · Hawthorn', score:74, tags:['Night owl','Creative mess','Late nights','$300/wk'], photo: null, reasons:[['mr-sleep','🌙 Night owls'],['mr-budget','💰 Budget match']] },
-  { initials:'RK', bg:'#1a2a3a', fg:'#47b4d4', flag:'🇮🇳', name:'Rahul K.', sub:'UniMelb · Science · PhD', accom:'Private room · Mixed · Parkville', score:71, tags:['Early bird','Very tidy','Quiet house','$340/wk','Verified ✓'], photo: null, reasons:[['mr-sleep','🌅 Early birds'],['mr-clean','🧹 Very tidy'],['mr-location','📍 Parkville']] },
-];
-
-function generateMatches() {
-  const grid = document.getElementById('match-grid');
-  grid.innerHTML = '';
-  profiles.forEach(p => {
-    const photoHtml = p.photo
-      ? `<img class="card-photo" src="${p.photo}" alt="${p.name}" />`
-      : `<div class="card-photo-initials" style="background:${p.bg};color:${p.fg}">${p.initials}</div>`;
-    const card = document.createElement('div');
-    card.className = 'match-card';
-    card.innerHTML = `
-      <div class="card-header">
-        <div class="card-photo-wrap">${photoHtml}<span class="avatar-flag">${p.flag}</span></div>
-        <div class="score-badge">${p.score}% match</div>
-      </div>
-      <div class="card-name">${p.name}</div>
-      <div class="card-sub">${p.sub}</div>
-      <div class="card-accom-type">🏠 ${p.accom}</div>
-      <div class="match-reason">${(p.reasons||[]).map(([cls,label])=>`<span class="match-reason-pill ${cls}">${label}</span>`).join('')}</div>
-      <div class="card-compat"><div class="compat-bar" style="width:${p.score}%"></div></div>
-      <div class="card-tags">${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
-      <div class="card-footer">
-        <button class="btn-connect" onclick="connect('${p.name}')">Connect</button>
-        <button class="btn-skip" onclick="skip(this)">Skip</button>
-      </div>
-      <div class="card-footer-row">
-        <button class="report-btn" onclick="openModal('report-modal')">⚑ Report profile</button>
-        <button class="report-btn" onclick="showToast('🚫 Blocked','This profile has been blocked and removed from your matches.')" style="color:var(--text-muted)">✕ Block</button>
-      </div>`;
-    grid.appendChild(card);
-  });
+// ── Match card renderer ─────────────────────────────────────────────────────
+function renderMatchCard(p) {
+  const initials = p.display_name
+    ? p.display_name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
+    : '??';
+  const bgColors = ['#1a3a4a','#2a1a3a','#1a3a2a','#3a2a1a','#2a1a1a','#1a2a3a'];
+  const fgColors = ['#4BBFE0','#c87dff','#47d4a0','#ffb347','#ff8a8a','#47b4d4'];
+  const idx = Math.abs((p.display_name||'').charCodeAt(0) || 0) % 6;
+  const photoHtml = `<div class="card-photo-initials" style="background:${bgColors[idx]};color:${fgColors[idx]}">${initials}</div>`;
+  const subParts = [p.university, p.field_of_study, p.year_of_study].filter(Boolean);
+  const sub = subParts.join(' · ') || 'Student';
+  const accomParts = [p.seeking, p.household_type, (p.suburb_preferences||[])[0]].filter(Boolean);
+  const accom = accomParts.join(' · ') || 'Looking for accommodation';
+  const tags = [];
+  if (p.sleep_schedule) tags.push(p.sleep_schedule.replace('_',' '));
+  if (p.cleanliness) tags.push(p.cleanliness.replace('_',' '));
+  if (p.budget_max) tags.push(`$${p.budget_max}/wk`);
+  if (p.email_verified) tags.push('Verified ✓');
+  const reasonMap = {
+    budget:      ['mr-budget','💰 Budget match'],
+    sleep:       ['mr-sleep','🌅 Sleep match'],
+    cleanliness: ['mr-clean','🧹 Tidy match'],
+    location:    ['mr-location','📍 Suburb match'],
+    social:      ['mr-social','🎉 Social match'],
+  };
+  const reasons = (p.match_reasons||[]).map(r => reasonMap[r]).filter(Boolean);
+  const card = document.createElement('div');
+  card.className = 'match-card';
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-photo-wrap">${photoHtml}</div>
+      <div class="score-badge">${p.match_score || 0}% match</div>
+    </div>
+    <div class="card-name">${p.display_name || 'Student'}</div>
+    <div class="card-sub">${sub}</div>
+    <div class="card-accom-type">🏠 ${accom}</div>
+    <div class="match-reason">${reasons.map(([cls,label])=>`<span class="match-reason-pill ${cls}">${label}</span>`).join('')}</div>
+    <div class="card-compat"><div class="compat-bar" style="width:${p.match_score||0}%"></div></div>
+    <div class="card-tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    <div class="card-footer">
+      <button class="btn-connect" onclick="connect('${(p.display_name||'Student').replace(/'/g,"\'")}')">Connect</button>
+      <button class="btn-skip" onclick="skip(this)">Skip</button>
+    </div>
+    <div class="card-footer-row">
+      <button class="report-btn" onclick="openModal('report-modal')">⚑ Report profile</button>
+      <button class="report-btn" onclick="showToast('🚫 Blocked','This profile has been blocked and removed from your matches.')" style="color:var(--text-muted)">✕ Block</button>
+    </div>`;
+  return card;
 }
 
+// ── Dummy fallback profiles ───────────────────────────────────────────────────
+const dummyProfiles = [
+  { display_name:'Priya R.', university:'UniMelb', field_of_study:'Commerce/Law', year_of_study:'2nd year', seeking:'Private room', household_type:'Women only', suburb_preferences:['Carlton'], sleep_schedule:'early_bird', cleanliness:'very_tidy', budget_max:320, email_verified:true, match_score:96, match_reasons:['sleep','cleanliness','budget','location'] },
+  { display_name:'Jake S.', university:'RMIT', field_of_study:'Engineering', year_of_study:'3rd year', seeking:'Share apartment', household_type:'Mixed', suburb_preferences:['Footscray'], sleep_schedule:'night_owl', cleanliness:'average', budget_max:280, email_verified:false, match_score:88, match_reasons:['sleep','budget','location'] },
+  { display_name:'Anika M.', university:'Monash', field_of_study:'Psychology', year_of_study:'1st year', seeking:'Private room', household_type:'Mixed', suburb_preferences:['St Kilda'], sleep_schedule:'flexible', cleanliness:'tidy', budget_max:320, email_verified:true, match_score:84, match_reasons:['cleanliness','budget','social'] },
+  { display_name:'Tom O.', university:'La Trobe', field_of_study:'IT', year_of_study:'3rd year', seeking:'Shared house', household_type:'Mixed', suburb_preferences:['Brunswick'], sleep_schedule:'flexible', cleanliness:'tidy', budget_max:250, email_verified:false, match_score:79, match_reasons:['budget','cleanliness','location'] },
+  { display_name:'Sara C.', university:'Swinburne', field_of_study:'Design', year_of_study:'Graduate', seeking:'Share apartment', household_type:'Women only', suburb_preferences:['Hawthorn'], sleep_schedule:'night_owl', cleanliness:'relaxed', budget_max:300, email_verified:false, match_score:74, match_reasons:['sleep','budget'] },
+  { display_name:'Rahul K.', university:'UniMelb', field_of_study:'Science', year_of_study:'PhD', seeking:'Private room', household_type:'Mixed', suburb_preferences:['Parkville'], sleep_schedule:'early_bird', cleanliness:'very_tidy', budget_max:340, email_verified:true, match_score:71, match_reasons:['sleep','cleanliness','location'] },
+];
+
+// ── generateMatches — real API with smart fallback ────────────────────────────
+async function generateMatches() {
+  const grid = document.getElementById('match-grid');
+  grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">Finding your matches…</div>';
+  const email = localStorage.getItem('unirenter_email');
+  try {
+    const res = await fetch('/api/matches', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email, city: 'melbourne' }),
+    });
+    const data = await res.json();
+    if (res.ok && data.matches && data.matches.length > 0) {
+      grid.innerHTML = '';
+      data.matches.forEach(p => grid.appendChild(renderMatchCard(p)));
+      const rb = document.getElementById('referral-banner');
+      if (rb) rb.style.display = 'flex';
+      return;
+    }
+  } catch (err) {
+    console.warn('Real matches unavailable, showing examples:', err.message);
+  }
+  // Fallback — coming soon card + dummy examples
+  grid.innerHTML = '';
+  const verifiedEmail = localStorage.getItem('unirenter_email');
+  if (verifiedEmail) {
+    const csCard = document.createElement('div');
+    csCard.className = 'coming-soon-card';
+    csCard.innerHTML = `
+      <div class="cs-icon">🔍</div>
+      <div class="cs-title">You\'re one of the first — nice work!</div>
+      <div class="cs-desc">We\'re building your match pool right now. We\'ll email you at <strong>${verifiedEmail}</strong> as soon as compatible students join.</div>
+      <div class="cs-note">Example profiles below show how your matches will look.</div>`;
+    grid.appendChild(csCard);
+  }
+  dummyProfiles.forEach(p => grid.appendChild(renderMatchCard(p)));
+  const note = document.createElement('div');
+  note.style.cssText = 'text-align:center;padding:8px 16px 24px;font-size:12px;color:var(--text-muted);';
+  note.textContent = 'Example profiles — real matches appear as students join.';
+  grid.appendChild(note);
+  const rb = document.getElementById('referral-banner');
+  if (rb) rb.style.display = 'flex';
+}
 function showMatches() {
   saveProfileToSupabase();
   generateMatches();
@@ -1520,6 +1660,31 @@ function updateCompleteness(step) {
 function saveProgress() {
   saveProfileToSupabase();
   showToast("💾 Progress saved", "You can return and continue from step " + currentStep + " — we'll remember your answers.");
+}
+
+// ── Referral & sharing ──────────────────────────────────────────────────────
+function shareUniRenter() {
+  const shareData = {
+    title: 'UniRenter — Find your perfect student housemate',
+    text: 'Match with compatible housemates by sleep schedule, budget and lifestyle. Free for students in Melbourne, Sydney and Brisbane.',
+    url: 'https://unirenter.vercel.app',
+  };
+  if (navigator.share) {
+    navigator.share(shareData).catch(() => copyReferralLink());
+  } else {
+    copyReferralLink();
+  }
+}
+
+function copyReferralLink() {
+  const email = localStorage.getItem('unirenter_email') || '';
+  const ref = email ? `?ref=${encodeURIComponent(email)}` : '';
+  const url = `https://unirenter.vercel.app${ref}`;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('🔗 Link copied!', 'Share it with your uni friends — the more who join, the better your matches.');
+  }).catch(() => {
+    showToast('🔗 Link', 'https://unirenter.vercel.app — share with your uni friends!');
+  });
 }
 
 // ── Save profile to Supabase ──
