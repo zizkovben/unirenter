@@ -634,7 +634,6 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
     padding: 8px 12px;
     gap: 6px;
     flex-wrap: nowrap;
-    overflow: hidden;
   }
   /* Logo — shrink on mobile */
   .nav-logo img {
@@ -676,22 +675,38 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
 /* Extra narrow — Galaxy Z Fold single panel and similar (~360px) */
 @media (max-width: 400px) {
   nav {
-    padding: 8px 10px;
+    padding: 8px 6px;
+    overflow: visible;
   }
   .nav-logo img {
-    height: 28px;
+    height: 26px;
+  }
+  .nav-logo {
+    flex-shrink: 1;
+    min-width: 0;
   }
   .nav-cta {
     font-size: 10px;
-    padding: 6px 8px;
+    padding: 6px 7px;
   }
   .nav-dropdown-btn {
     font-size: 10px;
-    padding: 5px 7px;
+    padding: 5px 6px;
+    gap: 3px;
   }
-  /* Hide explore label, keep just the chevron icon */
+  /* On very narrow screens, hide "Explore" text, keep just the chevron */
+  .nav-dropdown-btn-label {
+    display: none;
+  }
   .nav-dropdown-btn .chevron {
-    font-size: 12px;
+    font-size: 14px;
+  }
+  .btn-theme {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-right: 0;
   }
 }
 
@@ -838,7 +853,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
   <div style="display:flex;gap:6px;align-items:center;margin-left:auto;">
     <button class="nav-cta" style="font-size:12px;" onclick="scrollToSetup()">Find a housemate</button>
     <div class="nav-dropdown" id="nav-dropdown">
-      <button class="nav-dropdown-btn" onclick="toggleNavDropdown()">Explore <span class="chevron">▾</span></button>
+      <button class="nav-dropdown-btn" onclick="toggleNavDropdown()"><span class="nav-dropdown-btn-label">Explore </span><span class="chevron">▾</span></button>
       <div class="nav-dropdown-menu">
         <button class="nav-dropdown-item" onclick="window.location='/lease';closeNavDropdown()">
           <span class="item-icon">🔄</span>
