@@ -663,6 +663,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
     height: 30px;
     font-size: 14px;
     flex-shrink: 0;
+    margin-right: 2px;
   }
   /* Dropdown menu — full width on mobile */
   .nav-dropdown-menu {
@@ -693,6 +694,83 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
     font-size: 12px;
   }
 }
+
+/* ── Cob floating assistant ───────────────────────────────────────────────── */
+#cob-fab {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  right: 20px;
+  z-index: 900;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+#cob-fab.show { display: flex; }
+#cob-fab-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--brand-yellow); border: none; cursor: pointer;
+  font-size: 24px; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(245,184,0,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+#cob-fab-btn:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(245,184,0,0.5); }
+#cob-nudge {
+  background: var(--card-bg); border: 1px solid rgba(75,191,224,0.25);
+  border-radius: 14px; padding: 10px 14px; max-width: 220px;
+  font-size: 13px; color: var(--text); line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  animation: cob-pop 0.3s ease;
+  cursor: pointer;
+}
+#cob-nudge strong { color: var(--brand-yellow); }
+@keyframes cob-pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* Cob panel */
+#cob-panel {
+  display: none; position: fixed; bottom: 88px; right: 20px; z-index: 901;
+  width: 320px; max-width: calc(100vw - 32px);
+  background: var(--card-bg); border: 1px solid rgba(75,191,224,0.2);
+  border-radius: 18px; box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  flex-direction: column; overflow: hidden;
+  animation: cob-slide 0.3s ease;
+}
+#cob-panel.open { display: flex; }
+@keyframes cob-slide {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+#cob-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: rgba(245,184,0,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+#cob-panel-header .cob-title { font-size: 14px; font-weight: 700; color: var(--brand-yellow); }
+#cob-panel-header .cob-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+#cob-panel-close { background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1; }
+#cob-messages {
+  flex: 1; overflow-y: auto; padding: 14px 14px 8px;
+  display: flex; flex-direction: column; gap: 10px;
+  max-height: 260px; min-height: 100px;
+}
+.cob-msg { display: flex; gap: 8px; align-items: flex-start; }
+.cob-msg.user { flex-direction: row-reverse; }
+.cob-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--brand-yellow); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.cob-bubble { background: rgba(255,255,255,0.06); border-radius: 12px; padding: 8px 12px; font-size: 13px; color: var(--text); line-height: 1.45; max-width: 210px; }
+.cob-msg.user .cob-bubble { background: rgba(75,191,224,0.15); color: var(--text); border-radius: 12px 12px 2px 12px; }
+.cob-typing { display: flex; gap: 4px; align-items: center; padding: 10px 12px; }
+.cob-typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); animation: cob-dot 1.2s infinite; }
+.cob-typing span:nth-child(2) { animation-delay: 0.2s; }
+.cob-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes cob-dot { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+#cob-input-row { display: flex; gap: 8px; padding: 10px 12px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+#cob-input { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 8px 14px; font-size: 13px; color: var(--text); outline: none; font-family: var(--font-body); }
+#cob-input::placeholder { color: var(--text-muted); }
+#cob-input:focus { border-color: rgba(75,191,224,0.4); }
+#cob-send { background: var(--brand-yellow); border: none; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s; }
+#cob-send:hover { transform: scale(1.1); }
 
 /* Hero — fix top padding so headline isn't cropped */
 @media (max-width: 600px) {
@@ -2039,6 +2117,157 @@ function wakeUp() {
   showToast('☀️ Welcome back!', 'Your profile is active again. Checking for new matches…');
 }
 
+// ── Cob — floating assistant ───────────────────────────────────────────────
+// Cob appears after email verification and stays through all steps
+
+const cobNudges = {
+  1: null, // fires after OTP verify success instead
+  2: "A real photo gets you 3× more connections 📸 — international students especially, it shows you're genuine and builds trust.",
+  3: "Just arriving in Australia? Most international students find their first housemate within 2 weeks here. You're doing great — keep going! 🙌",
+  4: "Not sure what to pick? A private room in a share house is the most popular choice for students — your own space, shared costs.",
+  5: "Be honest here — mismatched sleep schedules cause more housemate friction than almost anything else. Pick what's actually true for you.",
+  6: "Pick suburbs close to your uni first. A short commute saves 1–2 hours a day — that really adds up during exam season. 📚",
+  7: "Melbourne rooms average $220–280/wk for students. If your budget is under $200, options get very tight — worth knowing now."
+};
+
+let cobPanelOpen = false;
+let cobMessages = []; // conversation history for the API
+let cobFabShown = false;
+let cobNudgeTimer = null;
+
+function showCobFab() {
+  if (cobFabShown) return;
+  cobFabShown = true;
+  document.getElementById('cob-fab').classList.add('show');
+}
+
+function showCobNudge(text) {
+  const nudge = document.getElementById('cob-nudge');
+  nudge.innerHTML = '<strong>🤠 Cob:</strong> ' + text;
+  nudge.style.display = 'block';
+  // auto-hide after 7s
+  clearTimeout(cobNudgeTimer);
+  cobNudgeTimer = setTimeout(() => { nudge.style.display = 'none'; }, 7000);
+}
+
+function openCobPanel() {
+  document.getElementById('cob-nudge').style.display = 'none';
+  clearTimeout(cobNudgeTimer);
+  document.getElementById('cob-panel').classList.add('open');
+  cobPanelOpen = true;
+  if (cobMessages.length === 0) {
+    // First open — greeting
+    appendCobMessage('assistant', "G'day! I'm Cob — your UniRenter housing mate 🤠 I'll help you through every step and answer any questions about renting in Australia. What's on your mind?");
+  }
+  setTimeout(() => document.getElementById('cob-input').focus(), 100);
+}
+
+function closeCobPanel() {
+  document.getElementById('cob-panel').classList.remove('open');
+  cobPanelOpen = false;
+}
+
+function appendCobMessage(role, text) {
+  const msgs = document.getElementById('cob-messages');
+  const div = document.createElement('div');
+  div.className = 'cob-msg' + (role === 'user' ? ' user' : '');
+  if (role === 'assistant') {
+    div.innerHTML = '<div class="cob-avatar">🤠</div><div class="cob-bubble">' + text + '</div>';
+  } else {
+    div.innerHTML = '<div class="cob-bubble">' + text + '</div><div class="cob-avatar" style="background:var(--brand-blue);font-size:12px;color:#fff;">You</div>';
+  }
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  // Keep history for API
+  cobMessages.push({ role, content: text });
+}
+
+function showCobTyping() {
+  const msgs = document.getElementById('cob-messages');
+  const div = document.createElement('div');
+  div.className = 'cob-msg'; div.id = 'cob-typing-indicator';
+  div.innerHTML = '<div class="cob-avatar">🤠</div><div class="cob-bubble cob-typing"><span></span><span></span><span></span></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeCobTyping() {
+  const t = document.getElementById('cob-typing-indicator');
+  if (t) t.remove();
+}
+
+async function sendCobMessage() {
+  const input = document.getElementById('cob-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  appendCobMessage('user', text);
+  showCobTyping();
+  try {
+    const res = await fetch('/api/cob', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: cobMessages,
+        context: 'profile_builder',
+        city: 'melbourne'
+      })
+    });
+    const data = await res.json();
+    removeCobTyping();
+    if (res.ok && data.reply) {
+      appendCobMessage('assistant', data.reply);
+    } else {
+      appendCobMessage('assistant', "Sorry, I hit a snag — try again in a moment.");
+    }
+  } catch (err) {
+    removeCobTyping();
+    appendCobMessage('assistant', "Connection issue — try again in a sec.");
+  }
+}
+
+// Hook into goStep to fire contextual nudges
+const _origGoStep = goStep;
+goStep = function(n) {
+  _origGoStep(n);
+  if (!cobFabShown) return; // only nudge after verification
+  const msg = cobNudges[n];
+  if (msg) {
+    setTimeout(() => showCobNudge(msg), 800);
+  }
+  // Budget low nudge on step 7
+  if (n === 7) {
+    setTimeout(() => {
+      const rentVal = document.getElementById('rent-val');
+      if (rentVal) {
+        const budget = parseInt(rentVal.textContent.replace(/[^0-9]/g,''));
+        if (budget < 200) {
+          showCobNudge("That budget is very tight for Melbourne 😬 — Cob found more matches at $220–260/wk. Consider widening it slightly.");
+        }
+      }
+    }, 1500);
+  }
+};
+
+// Hook into OTP verification success — show Cob after verify
+const _origVerifyCheck = window.checkEmailOTP;
+// We patch the success path inside verifyEmailOTP instead via a MutationObserver
+// watching for verified-badge.show class being added
+(function() {
+  const badge = document.getElementById('verified-badge');
+  if (!badge) return;
+  const observer = new MutationObserver(() => {
+    if (badge.classList.contains('show')) {
+      showCobFab();
+      setTimeout(() => {
+        showCobNudge("Welcome to UniRenter! I'm Cob — I'll be with you every step 🤠 Tap me any time you have a question.");
+      }, 1200);
+      observer.disconnect();
+    }
+  });
+  observer.observe(badge, { attributes: true, attributeFilter: ['class'] });
+})();
+
 </script>
 
 <!-- REPORT MODAL -->
@@ -2196,6 +2425,27 @@ function wakeUp() {
     <div class="redflag-item"><div class="redflag-icon">📄</div><div class="redflag-text"><h5>Can't provide a lease or condition report</h5><p>For a lease transfer, the current tenant must have these documents. If they can't or won't produce them, walk away.</p></div></div>
     <div class="redflag-item"><div class="redflag-icon">🏦</div><div class="redflag-text"><h5>Bond not going through RTBA</h5><p>In Victoria, all bonds must be lodged with the RTBA — never paid directly to a landlord or outgoing tenant. Verify this before any money moves.</p></div></div>
     <button class="redflag-close" onclick="closeRedflag()">I've reviewed these — continue safely</button>
+  </div>
+</div>
+
+<!-- ── Cob floating assistant ─────────────────────────────────────────── -->
+<div id="cob-fab">
+  <div id="cob-nudge" onclick="openCobPanel()" style="display:none"></div>
+  <button id="cob-fab-btn" onclick="openCobPanel()" title="Ask Cob">🤠</button>
+</div>
+
+<div id="cob-panel">
+  <div id="cob-panel-header">
+    <div>
+      <div class="cob-title">🤠 Oi Cob!</div>
+      <div class="cob-sub">Your UniRenter housing mate</div>
+    </div>
+    <button id="cob-panel-close" onclick="closeCobPanel()">✕</button>
+  </div>
+  <div id="cob-messages"></div>
+  <div id="cob-input-row">
+    <input id="cob-input" type="text" placeholder="Ask me anything about housing…" onkeydown="if(event.key==='Enter')sendCobMessage()" />
+    <button id="cob-send" onclick="sendCobMessage()">↑</button>
   </div>
 </div>
 
