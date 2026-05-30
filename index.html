@@ -621,6 +621,135 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
 .city-sw-btn{display:flex;align-items:center;gap:6px;padding:9px 18px;border-radius:20px;font-size:13px;font-weight:500;border:1px solid rgba(255,255,255,0.12);color:var(--text-muted);cursor:pointer;background:none;font-family:var(--font-body);transition:all 0.2s;text-decoration:none}
 .city-sw-btn:hover{border-color:rgba(245,184,0,0.4);color:var(--brand-yellow)}
 .city-sw-btn.active{background:rgba(245,184,0,0.1);border-color:var(--brand-yellow);color:var(--brand-yellow)}
+
+/* ══════════════════════════════════════════
+   MOBILE RESPONSIVE — Session 12 fix
+   Targets Galaxy Z Fold single panel (~360px)
+   and all phones ≤480px
+   ══════════════════════════════════════════ */
+
+/* Nav — base tightening for all small screens */
+@media (max-width: 600px) {
+  nav {
+    padding: 8px 12px;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+  /* Logo — shrink on mobile */
+  .nav-logo img {
+    height: 34px;
+  }
+  /* City badge — hide on very small screens, show as tooltip instead */
+  .city-badge {
+    display: none;
+  }
+  /* CTA button — shorter label, smaller padding */
+  .nav-cta {
+    font-size: 11px;
+    padding: 7px 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  /* Explore dropdown button — shorten */
+  .nav-dropdown-btn {
+    font-size: 11px;
+    padding: 6px 9px;
+    white-space: nowrap;
+  }
+  /* Theme toggle — keep but shrink */
+  .btn-theme {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  /* Dropdown menu — full width on mobile */
+  .nav-dropdown-menu {
+    right: -12px;
+    min-width: 180px;
+    left: auto;
+  }
+}
+
+/* Extra narrow — Galaxy Z Fold single panel and similar (~360px) */
+@media (max-width: 400px) {
+  nav {
+    padding: 8px 10px;
+  }
+  .nav-logo img {
+    height: 28px;
+  }
+  .nav-cta {
+    font-size: 10px;
+    padding: 6px 8px;
+  }
+  .nav-dropdown-btn {
+    font-size: 10px;
+    padding: 5px 7px;
+  }
+  /* Hide explore label, keep just the chevron icon */
+  .nav-dropdown-btn .chevron {
+    font-size: 12px;
+  }
+}
+
+/* Hero — fix top padding so headline isn't cropped */
+@media (max-width: 600px) {
+  .hero {
+    padding: 88px 20px 48px;
+    min-height: auto;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 10vw, 52px);
+    letter-spacing: -1px;
+    margin-bottom: 18px;
+  }
+  .hero p {
+    font-size: 15px;
+    margin-bottom: 28px;
+  }
+  .hero-eyebrow {
+    font-size: 10px;
+    margin-bottom: 16px;
+  }
+  .hero-stats {
+    gap: 28px;
+    margin-top: 36px;
+  }
+  .stat-num {
+    font-size: 26px;
+  }
+  /* CTA buttons — stack on very small screens */
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 400px) {
+  .hero {
+    padding: 80px 16px 40px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 9vw, 44px);
+  }
+}
+
+/* Sections — reduce padding on mobile */
+@media (max-width: 600px) {
+  section {
+    padding: 56px 16px;
+  }
+  .section-title {
+    font-size: clamp(22px, 6vw, 32px);
+  }
+}
 </style>
 </head>
 <body>
