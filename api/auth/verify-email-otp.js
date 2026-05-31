@@ -21,9 +21,9 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // Look up the OTP record
+    // Look up the most recent OTP record for this email
     const lookupRes = await fetch(
-      `${supabaseUrl}/rest/v1/email_verifications?email=eq.${encodeURIComponent(email)}&select=otp,expires_at`,
+      `${supabaseUrl}/rest/v1/email_verifications?email=eq.${encodeURIComponent(email)}&select=otp,expires_at&order=created_at.desc&limit=1`,
       {
         headers: {
           'apikey':        serviceKey,
@@ -49,7 +49,7 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Incorrect code' });
     }
 
-    // OTP valid — delete it (one-time use)
+    // OTP valid — delete ALL records for this email (clean up duplicates too)
     await fetch(
       `${supabaseUrl}/rest/v1/email_verifications?email=eq.${encodeURIComponent(email)}`,
       {
