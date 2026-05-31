@@ -2285,7 +2285,14 @@ async function sendCobMessage() {
 const _origGoStep = goStep;
 goStep = function(n) {
   _origGoStep(n);
-  if (!cobFabShown) return; // only nudge after verification
+  // Show Cob as soon as user moves past Step 1 (email entered)
+  if (n >= 2 && !cobFabShown) {
+    showCobFab();
+    setTimeout(() => {
+      showCobNudge("Welcome to UniRenter! I'm Cob — I'll be with you every step 🤠 Tap me any time you have a question.");
+    }, 800);
+  }
+  if (!cobFabShown) return; // only nudge after FAB is shown
   const msg = cobNudges[n];
   if (msg) {
     setTimeout(() => showCobNudge(msg), 800);
@@ -2318,8 +2325,9 @@ goStep = function(n) {
     }
   });
   observer.observe(badge, { attributes: true, attributeFilter: ['class'] });
-  // Also fire if already verified from a previous session
-  if (localStorage.getItem('unirenter_email_verified') === '1') {
+  // Also fire if already verified, or if returning with a saved email
+  if (localStorage.getItem('unirenter_email_verified') === '1' ||
+      localStorage.getItem('unirenter_email')) {
     showCobFab();
   }
 })();
