@@ -1,9 +1,8 @@
-
 // api/auth/verify-email-otp.js
 // Verifies the 6-digit OTP against Supabase email_verifications table.
 // On success: marks email as verified, creates/updates profile row.
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -17,7 +16,6 @@ export default async function handler(req, res) {
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
   if (!supabaseUrl || !serviceKey) {
     return res.status(500).json({ error: 'Server not configured' });
   }
@@ -33,7 +31,6 @@ export default async function handler(req, res) {
         },
       }
     );
-
     const records = await lookupRes.json();
 
     if (!Array.isArray(records) || records.length === 0) {
@@ -64,7 +61,7 @@ export default async function handler(req, res) {
       }
     );
 
-    // Upsert profile — create if not exists, mark email_verified = true
+    // Upsert profile — patch if exists
     const patchRes = await fetch(
       `${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email)}`,
       {
@@ -83,7 +80,6 @@ export default async function handler(req, res) {
         }),
       }
     );
-
     const patched = await patchRes.json();
 
     // If no existing profile, insert one
@@ -117,4 +113,4 @@ export default async function handler(req, res) {
     console.error('verify-email-otp error:', err);
     return res.status(500).json({ error: 'Server error', detail: err.message });
   }
-}
+};
