@@ -32,7 +32,15 @@
       "destination": "/unirenter-guide-sydney.html"
     },
     {
+      "source": "/sydney/guide",
+      "destination": "/unirenter-guide-sydney.html"
+    },
+    {
       "source": "/guide/brisbane",
+      "destination": "/unirenter-guide-brisbane.html"
+    },
+    {
+      "source": "/brisbane/guide",
       "destination": "/unirenter-guide-brisbane.html"
     },
     {
@@ -44,7 +52,15 @@
       "destination": "/unirenter-lease-sydney.html"
     },
     {
+      "source": "/sydney/lease",
+      "destination": "/unirenter-lease-sydney.html"
+    },
+    {
       "source": "/lease/brisbane",
+      "destination": "/unirenter-lease-brisbane.html"
+    },
+    {
+      "source": "/brisbane/lease",
       "destination": "/unirenter-lease-brisbane.html"
     },
     {
@@ -56,7 +72,15 @@
       "destination": "/unirenter-settled-sydney.html"
     },
     {
+      "source": "/sydney/settled",
+      "destination": "/unirenter-settled-sydney.html"
+    },
+    {
       "source": "/settled/brisbane",
+      "destination": "/unirenter-settled-brisbane.html"
+    },
+    {
+      "source": "/brisbane/settled",
       "destination": "/unirenter-settled-brisbane.html"
     },
     {
