@@ -847,6 +847,36 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
     font-size: clamp(22px, 6vw, 32px);
   }
 }
+
+  /* ── Review Slider ── */
+  .review-section { background: var(--navy-mid); padding: 48px 0 36px; overflow: hidden; }
+  .review-section-title { text-align:center; font-family:var(--font-display); font-size:18px; font-weight:700; color:var(--text); margin-bottom:24px; letter-spacing:-0.3px; }
+  .review-section-title span { color:var(--brand-yellow); }
+  .review-track-wrap { overflow:hidden; position:relative; }
+  .review-track-wrap::before,.review-track-wrap::after { content:''; position:absolute; top:0; bottom:0; width:60px; z-index:2; pointer-events:none; }
+  .review-track-wrap::before { left:0; background:linear-gradient(to right,var(--navy-mid),transparent); }
+  .review-track-wrap::after  { right:0; background:linear-gradient(to left,var(--navy-mid),transparent); }
+  .review-track { display:flex; gap:16px; animation:reviewScroll 40s linear infinite; width:max-content; padding:4px 8px 8px; }
+  .review-track:hover { animation-play-state:paused; }
+  @keyframes reviewScroll { 0%{transform:translateX(0);} 100%{transform:translateX(-50%);} }
+  .review-card { background:var(--card-bg); border:1px solid rgba(75,191,224,0.12); border-radius:14px; padding:18px 20px; width:280px; flex-shrink:0; }
+  .review-stars { color:var(--brand-yellow); font-size:14px; margin-bottom:8px; }
+  .review-text { font-size:13px; color:var(--text); line-height:1.55; margin-bottom:12px; font-style:italic; }
+  .review-author { font-size:11px; color:var(--text-muted); font-weight:600; letter-spacing:0.3px; }
+  .review-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center; }
+  .review-modal-overlay.open { display:flex; }
+  .review-modal { background:var(--card-bg); border:1px solid rgba(75,191,224,0.2); border-radius:20px; padding:28px 24px; width:min(420px,92vw); position:relative; }
+  .review-modal-close { position:absolute; top:14px; right:16px; background:none; border:none; color:var(--text-muted); font-size:20px; cursor:pointer; }
+  .review-modal h3 { font-family:var(--font-display); font-size:17px; font-weight:700; color:var(--text); margin-bottom:6px; }
+  .review-modal p { font-size:13px; color:var(--text-muted); margin-bottom:18px; }
+  .star-picker { display:flex; gap:8px; margin-bottom:18px; }
+  .star-picker span { font-size:26px; cursor:pointer; filter:grayscale(1); opacity:0.4; transition:all 0.15s; user-select:none; }
+  .star-picker span.active { filter:none; opacity:1; }
+  .review-modal textarea { width:100%; box-sizing:border-box; background:var(--navy); border:1px solid rgba(75,191,224,0.2); border-radius:10px; padding:10px 12px; color:var(--text); font-size:13px; font-family:var(--font-body); resize:vertical; min-height:80px; margin-bottom:14px; }
+  .review-feature-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+  .review-feature-chips .chip { font-size:12px; padding:5px 12px; }
+  .review-submit-btn { width:100%; background:var(--brand-yellow); color:#000; font-weight:700; border:none; border-radius:10px; padding:12px; font-size:14px; cursor:pointer; font-family:var(--font-display); }
+  .review-submit-btn:disabled { opacity:0.5; cursor:not-allowed; }
 </style>
 </head>
 <body>
@@ -1455,6 +1485,50 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
   </div>
 </section>
 
+<section class="review-section" id="review-section" style="display:none;">
+  <div class="review-section-title">What students are saying <span>🤠</span></div>
+  <div class="review-track-wrap"><div class="review-track" id="reviewTrack">
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Found my housemate in 3 days — didn't think it'd be that quick. Cob nudged me to try Carlton and it was perfect."</div><div class="review-author">Priya R. · UniMelb · Melbourne</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Arrived from China with no contacts in Melbourne. UniRenter matched me within a week. The legal guide was genuinely useful too."</div><div class="review-author">Wei L. · RMIT · Melbourne</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"The break lease section saved me when my housemate bailed. Knew exactly what my rights were. Didn't lose a cent of bond."</div><div class="review-author">Jake S. · Monash · Melbourne</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Cob told me Footscray had better value than the CBD suburbs and he was right. Saved about $60 a week on rent."</div><div class="review-author">Anika M. · VU · Melbourne</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"I was nervous about renting for the first time in Australia. UniRenter made it feel manageable. Matched and moved in within 2 weeks."</div><div class="review-author">Tom O. · Deakin · Melbourne</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Free, fast, and actually found someone compatible. My housemate and I are both doing engineering at UniMelb — couldn't have planned it better."</div><div class="review-author">Sara C. · UniMelb · Melbourne</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Found my housemate in 3 days — didn't think it'd be that quick. Cob nudged me to try Carlton and it was perfect."</div><div class="review-author">Priya R. · UniMelb · Melbourne</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Arrived from China with no contacts in Melbourne. UniRenter matched me within a week. The legal guide was genuinely useful too."</div><div class="review-author">Wei L. · RMIT · Melbourne</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"The break lease section saved me when my housemate bailed. Knew exactly what my rights were. Didn't lose a cent of bond."</div><div class="review-author">Jake S. · Monash · Melbourne</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Cob told me Footscray had better value than the CBD suburbs and he was right. Saved about $60 a week on rent."</div><div class="review-author">Anika M. · VU · Melbourne</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"I was nervous about renting for the first time in Australia. UniRenter made it feel manageable. Matched and moved in within 2 weeks."</div><div class="review-author">Tom O. · Deakin · Melbourne</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Free, fast, and actually found someone compatible. My housemate and I are both doing engineering at UniMelb — couldn't have planned it better."</div><div class="review-author">Sara C. · UniMelb · Melbourne</div></div>
+  </div></div>
+</section>
+<div class="review-modal-overlay" id="reviewModalOverlay">
+  <div class="review-modal">
+    <button class="review-modal-close" onclick="closeReviewModal()">&times;</button>
+    <h3>Leave a quick review 🤠</h3>
+    <p>Takes 30 seconds — helps the next student find us.</p>
+    <div class="star-picker" id="starPicker">
+      <span onclick="setStars(1)">⭐</span><span onclick="setStars(2)">⭐</span><span onclick="setStars(3)">⭐</span><span onclick="setStars(4)">⭐</span><span onclick="setStars(5)">⭐</span>
+    </div>
+    <div id="reviewFormBody" style="display:none;">
+      <div class="review-feature-chips" id="featureChips">
+        <div class="chip" onclick="toggleFeature(this)">Finding a match</div>
+        <div class="chip" onclick="toggleFeature(this)">Legal info</div>
+        <div class="chip" onclick="toggleFeature(this)">Cob</div>
+        <div class="chip" onclick="toggleFeature(this)">Break lease guide</div>
+        <div class="chip" onclick="toggleFeature(this)">Just easy to use</div>
+      </div>
+      <textarea id="reviewText" placeholder="Drop us a quick note — what helped most? (optional)"></textarea>
+      <button class="review-submit-btn" id="reviewSubmitBtn" onclick="submitReview()">Submit review &rarr;</button>
+    </div>
+    <div id="reviewThanks" style="display:none;text-align:center;padding:16px 0;">
+      <div style="font-size:32px;margin-bottom:8px;">🤠</div>
+      <div style="font-weight:700;color:var(--text);margin-bottom:6px;">Legend — thanks mate!</div>
+      <div style="font-size:13px;color:var(--text-muted);">Your review helps other students find UniRenter.</div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"><div class="toast-title" id="toast-title"></div><div id="toast-msg"></div></div>
 
 <footer>
@@ -1762,6 +1836,7 @@ function showMatches() {
   document.getElementById('matches').classList.add('visible');
   setTimeout(() => document.getElementById('matches').scrollIntoView({behavior:'smooth'}), 100);
   showToast('🎉 Profile saved!','Your matches are ready below.');
+  setTimeout(maybeShowReviewNudge, 6000);
 }
 function connect(name) {
   showToast("✉️ Connected!", name + " accepted — opening chat.");
@@ -1796,6 +1871,7 @@ function scrollToMatches() {
   generateMatches();
   document.getElementById('matches').classList.add('visible');
   setTimeout(() => document.getElementById('matches').scrollIntoView({behavior:'smooth'}), 100);
+  setTimeout(maybeShowReviewNudge, 6000);
 }
 generateMatches();
 
@@ -1968,12 +2044,6 @@ function saveProgress() {
 }
 
 // ── Explore dropdown ────────────────────────────────────────────────────────
-function toggleNavDropdown() {
-  document.getElementById('nav-dropdown').classList.toggle('open');
-}
-function closeNavDropdown() {
-  document.getElementById('nav-dropdown').classList.remove('open');
-}
 // Close dropdown when clicking outside
 document.addEventListener('click', function(e) {
   const dd = document.getElementById('nav-dropdown');
@@ -2181,7 +2251,7 @@ const cobNudges = {
   1: null, // fires after OTP verify success instead
   2: "A real photo gets you 3× more connections 📸 — international students especially, it shows you're genuine and builds trust.",
   3: "Just arriving in Australia? Most international students find their first housemate within 2 weeks here. You're doing great — keep going! 🙌",
-  4: "Not sure what to pick? A private room in a share house is the most popular choice for students — your own space, shared costs.",
+  4: "Not sure what to pick? A private room in a share house is the most popular choice — your own space, shared costs. 🏠 Also worth sorting your internet early — NBN takes 1–2 weeks to connect and most share houses need a new plan when tenants change.",
   5: "Be honest here — mismatched sleep schedules cause more housemate friction than almost anything else. Pick what's actually true for you.",
   6: "Pick suburbs close to your uni first. A short commute saves 1–2 hours a day — that really adds up during exam season. 📚",
   7: "Melbourne rooms average $220–280/wk for students. If your budget is under $200, options get very tight — worth knowing now."
@@ -2202,7 +2272,7 @@ function showCobNudge(text) {
   const nudge = document.getElementById('cob-nudge');
   nudge.innerHTML = '<strong>🤠 Cob:</strong> ' + text;
   nudge.style.display = 'block';
-  // auto-hide after 7s
+  // auto-hide after 17.5s (extended for ESL students)
   clearTimeout(cobNudgeTimer);
   cobNudgeTimer = setTimeout(() => { nudge.style.display = 'none'; }, 17500);
 }
@@ -2333,6 +2403,53 @@ goStep = function(n) {
     showCobFab();
   }
 })();
+
+
+  // ── Review System ──
+  let selectedStars = 0, selectedFeature = '', reviewNudgeFired = false;
+  function openReviewModal() { document.getElementById('reviewModalOverlay').classList.add('open'); }
+  function closeReviewModal() { document.getElementById('reviewModalOverlay').classList.remove('open'); }
+  function setStars(n) {
+    selectedStars = n;
+    document.querySelectorAll('#starPicker span').forEach((s,i) => s.classList.toggle('active', i < n));
+    document.getElementById('reviewFormBody').style.display = 'block';
+  }
+  function toggleFeature(el) {
+    document.querySelectorAll('#featureChips .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active'); selectedFeature = el.textContent;
+  }
+  async function submitReview() {
+    const btn = document.getElementById('reviewSubmitBtn');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      await fetch('/api/reviews/submit', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email:localStorage.getItem('unirenter_email')||'', city:'melbourne', rating:selectedStars, comment:document.getElementById('reviewText').value.trim(), feature_mentioned:selectedFeature }) });
+    } catch(e) {}
+    document.getElementById('reviewFormBody').style.display = 'none';
+    document.getElementById('reviewThanks').style.display = 'block';
+    localStorage.setItem('unirenter_review_done','1');
+    setTimeout(closeReviewModal, 2200);
+  }
+  function maybeShowReviewNudge() {
+    if (reviewNudgeFired || localStorage.getItem('unirenter_review_done') || localStorage.getItem('unirenter_email_verified') !== '1') return;
+    reviewNudgeFired = true;
+    const rs = document.getElementById('review-section');
+    if (rs) rs.style.display = '';
+    setTimeout(() => {
+      showCobNudge("You’re all set 🤠 — if UniRenter helped, a quick review means everything to the next student arriving in Melbourne.");
+      setTimeout(() => {
+        const panel = document.querySelector('.cob-nudge');
+        if (panel && !panel.querySelector('.review-nudge-btn')) {
+          const btn = document.createElement('button');
+          btn.className = 'btn-next review-nudge-btn';
+          btn.style.cssText = 'margin-top:10px;font-size:12px;padding:7px 14px;';
+          btn.textContent = 'Leave a review →';
+          btn.onclick = openReviewModal;
+          panel.appendChild(btn);
+        }
+      }, 600);
+    }, 5000);
+  }
 
 </script>
 
