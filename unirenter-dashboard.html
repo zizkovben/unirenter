@@ -561,6 +561,16 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
   .profile-layout, .settings-layout { grid-template-columns: 1fr; }
   .match-grid { grid-template-columns: 1fr; }
 }
+
+  /* ── Explore Dropdown ── */
+  .nav-explore-btn{background:none;border:1px solid var(--navy-border,rgba(255,255,255,0.15));color:var(--text-muted,#7a96aa);font-size:13px;font-weight:500;padding:6px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .nav-explore-btn:hover{border-color:rgba(75,191,224,0.4);color:#4BBFE0}
+  .nav-dropdown-wrap{position:relative}
+  .nav-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#162535;border:1px solid rgba(75,191,224,0.15);border-radius:12px;padding:6px;min-width:220px;z-index:200;display:none;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+  .nav-dropdown.open{display:block}
+  .nav-dd-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--text,#e8f0f5);font-size:13px;text-decoration:none;cursor:pointer;background:none;border:none;width:100%;text-align:left}
+  .nav-dd-item:hover{background:rgba(75,191,224,0.08);color:#4BBFE0}
+  .nav-dd-divider{height:1px;background:rgba(255,255,255,0.07);margin:4px 6px}
 </style>
 </head>
 <body>
@@ -570,6 +580,17 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
   <a class="nav-logo" href="/">UniRenter</a>
   <div class="nav-spacer"></div>
   <div class="nav-actions">
+    <div class="nav-dropdown-wrap">
+    <button class="nav-explore-btn" onclick="toggleNavDropdown()">Explore &#9662;</button>
+    <div class="nav-dropdown" id="nav-dropdown">
+      <a class="nav-dd-item" href="/lease">&#128260; Break lease</a>
+      <a class="nav-dd-item" href="/landlords">&#127968; List your property</a>
+      <div class="nav-dd-divider"></div>
+      <a class="nav-dd-item" href="/guide">&#128218; Renter's Guide</a>
+      <a class="nav-dd-item" href="/settled">&#127462;&#127482; Getting Settled</a>
+      <a class="nav-dd-item" href="/cob">&#129344; Ask Cob</a>
+    </div>
+  </div>
     <a class="nav-btn" href="/">← Home</a>
     <button class="mode-toggle" id="mode-toggle" onclick="toggleMode()">🌙</button>
   </div>
@@ -1036,7 +1057,7 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 function toggleMode() {
   const isLight = document.body.classList.toggle('light-mode');
   document.getElementById('mode-toggle').textContent = isLight ? '☀️' : '🌙';
-  localStorage.setItem('unirenter-mode', isLight ? 'light' : 'dark');
+  localStorage.setItem('unirenter_theme', isLight ? 'light' : 'dark');
   const sel = document.getElementById('theme-select');
   if (sel) sel.value = isLight ? 'light' : 'dark';
 }
@@ -1044,10 +1065,10 @@ function applyTheme(val) {
   const isLight = val === 'light';
   document.body.classList.toggle('light-mode', isLight);
   document.getElementById('mode-toggle').textContent = isLight ? '☀️' : '🌙';
-  localStorage.setItem('unirenter-mode', val);
+  localStorage.setItem('unirenter_theme', val);
 }
 (function() {
-  const saved = localStorage.getItem('unirenter-mode');
+  const saved = localStorage.getItem('unirenter_theme');
   if (saved === 'light') {
     document.body.classList.add('light-mode');
     document.getElementById('mode-toggle').textContent = '☀️';
@@ -1426,6 +1447,17 @@ function submitReport() {
 // ── Init ──────────────────────────────────────────────────────────────────────
 loadProfile();
 renderMatches();
+
+  // ── Explore dropdown ──
+  function toggleNavDropdown() {
+    document.getElementById('nav-dropdown').classList.toggle('open');
+  }
+  document.addEventListener('click', function(e) {
+    const dd = document.getElementById('nav-dropdown');
+    const wrap = dd && dd.closest('.nav-dropdown-wrap');
+    if (dd && wrap && !wrap.contains(e.target)) dd.classList.remove('open');
+  });
+
 </script>
 
 </body>
