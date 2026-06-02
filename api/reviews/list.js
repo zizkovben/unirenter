@@ -1,43 +1,59 @@
-const { createClient } = require('@supabase/supabase-js');
+// api/reviews/list.js
+// Returns approved reviews for a given city.
+// GET ?city=melbourne[&limit=20][&offset=0]
+// Returns { reviews: [...], total: N }
+ 
+import { createClient } from '@supabase/supabase-js';
  
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY  // anon key — only reads approved rows
 );
  
-module.exports = async (req, res) => {
+const ALLOWED_CITIES = ['melbourne', 'sydney', 'brisbane', 'adelaide', 'perth', 'canberra'];
+const MAX_LIMIT = 50;
+const DEFAULT_LIMIT = 20;
+ 
+export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
  
-  const { city } = req.query;
- 
-  if (!city) {
-    return res.status(400).json({ error: 'city is required' });
-  }
- 
   try {
-    const { data, error } = await supabase
+    const { city, limit: limitRaw, offset: offsetRaw } = req.query;
+ 
+    // --- Validate city ---
+    if (!city || !ALLOWED_CITIES.includes(city)) {
+      return res.status(400).json({ error: 'Invalid or missing city' });
+    }
+ 
+    // --- Parse pagination ---
+    const limit = Math.min(parseInt(limitRaw, 10) || DEFAULT_LIMIT, MAX_LIMIT);
+    const offset = Math.max(parseInt(offsetRaw, 10) || 0, 0);
+ 
+    // --- Query Supabase (only approved reviews) ---
+    const { data, error, count } = await supabase
       .from('reviews')
-      .select('id, city, rating, comment, feature_mentioned, created_at')
-      .eq('city', city)
-      .eq('approved', true)
-      .eq('rating', 5)
-      .not('comment', 'is', null)
+      .select('id, city, reviewer_name, reviewer_uni, rating, text, suburb, created_at', { count: 'exact' })
+      .eq('city', city.toLowerCase())
+      .eq('status', 'approved')
       .order('created_at', { ascending: false })
-      .limit(20);
+      .range(offset, offset + limit - 1);
  
-    if (error) throw error;
+    if (error) {
+      console.error('[reviews/list] Supabase error:', error);
+      return res.status(500).json({ error: 'Failed to fetch reviews' });
+    }
  
-    // Only return reviews with a meaningful comment (10+ words)
-    const filtered = (data || []).filter(r => {
-      const words = (r.comment || '').trim().split(/\s+/);
-      return words.length >= 10;
+    return res.status(200).json({
+      reviews: data || [],
+      total: count || 0,
+      limit,
+      offset,
     });
  
-    return res.status(200).json({ reviews: filtered });
   } catch (err) {
-    console.error('Review list error:', err);
-    return res.status(500).json({ error: 'Failed to fetch reviews' });
+    console.error('[reviews/list] Unexpected error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
   }
-};
+}
