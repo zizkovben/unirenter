@@ -106,6 +106,10 @@
     {
       "source": "/legal",
       "destination": "/unirenter-legal.html"
+    },
+    {
+      "source": "/landlords",
+      "destination": "/unirenter-landlords.html"
     }
   ]
 }
