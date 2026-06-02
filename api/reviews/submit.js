@@ -1,59 +1,73 @@
-const { createClient } = require('@supabase/supabase-js');
-const { Resend } = require('resend');
+// api/reviews/submit.js
+// Saves a student review to Supabase reviews table.
+// POST body: { city, reviewer_name, reviewer_uni, rating, text, suburb (optional) }
+// Validates input, saves to Supabase, returns { ok: true, id } on success.
+ 
+import { createClient } from '@supabase/supabase-js';
  
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
  
-const resend = new Resend(process.env.RESEND_API_KEY);
+const ALLOWED_CITIES = ['melbourne', 'sydney', 'brisbane', 'adelaide', 'perth', 'canberra'];
  
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
  
-  const { email, city, rating, comment, feature_mentioned } = req.body;
- 
-  // Basic validation
-  if (!city || !rating || rating < 1 || rating > 5) {
-    return res.status(400).json({ error: 'Invalid review data' });
-  }
- 
   try {
-    // Insert review — approved defaults to false, requires manual approval in Supabase
-    const { error } = await supabase
-      .from('reviews')
-      .insert({
-        email: email || null,
-        city,
-        rating,
-        comment: comment || null,
-        feature_mentioned: feature_mentioned || null,
-        approved: false,
-      });
+    const { city, reviewer_name, reviewer_uni, rating, text, suburb } = req.body;
  
-    if (error) throw error;
- 
-    // Notify via email (only for 5-star reviews worth approving quickly)
-    if (rating === 5 && process.env.RESEND_API_KEY) {
-      await resend.emails.send({
-        from: 'noreply@unirenter.com.au',
-        to: 'benjcarey75@gmail.com',
-        subject: `⭐⭐⭐⭐⭐ New review — ${city}`,
-        html: `
-          <p><strong>New 5-star review from ${city}</strong></p>
-          <p><strong>Email:</strong> ${email || 'not provided'}</p>
-          <p><strong>Feature mentioned:</strong> ${feature_mentioned || 'none'}</p>
-          <p><strong>Comment:</strong> ${comment || '(no comment)'}</p>
-          <p><a href="https://supabase.com/dashboard">Approve in Supabase →</a></p>
-        `,
-      }).catch(() => {}); // fail silently — don't block the response
+    // --- Validation ---
+    if (!city || !ALLOWED_CITIES.includes(city)) {
+      return res.status(400).json({ error: 'Invalid or missing city' });
+    }
+    if (!reviewer_name || typeof reviewer_name !== 'string' || reviewer_name.trim().length < 2) {
+      return res.status(400).json({ error: 'reviewer_name must be at least 2 characters' });
+    }
+    if (!reviewer_uni || typeof reviewer_uni !== 'string' || reviewer_uni.trim().length < 2) {
+      return res.status(400).json({ error: 'reviewer_uni must be at least 2 characters' });
+    }
+    if (!rating || typeof rating !== 'number' || rating < 1 || rating > 5 || !Number.isInteger(rating)) {
+      return res.status(400).json({ error: 'rating must be an integer 1–5' });
+    }
+    if (!text || typeof text !== 'string' || text.trim().length < 10) {
+      return res.status(400).json({ error: 'Review text must be at least 10 characters' });
+    }
+    if (text.trim().length > 1000) {
+      return res.status(400).json({ error: 'Review text must be 1000 characters or fewer' });
     }
  
-    return res.status(200).json({ success: true });
+    // --- Sanitise ---
+    const payload = {
+      city: city.toLowerCase().trim(),
+      reviewer_name: reviewer_name.trim().slice(0, 80),
+      reviewer_uni: reviewer_uni.trim().slice(0, 120),
+      rating,
+      text: text.trim().slice(0, 1000),
+      suburb: suburb ? suburb.trim().slice(0, 80) : null,
+      status: 'pending',   // reviews need moderation before showing
+      created_at: new Date().toISOString(),
+    };
+ 
+    // --- Insert ---
+    const { data, error } = await supabase
+      .from('reviews')
+      .insert([payload])
+      .select('id')
+      .single();
+ 
+    if (error) {
+      console.error('[reviews/submit] Supabase error:', error);
+      return res.status(500).json({ error: 'Failed to save review' });
+    }
+ 
+    return res.status(200).json({ ok: true, id: data.id });
+ 
   } catch (err) {
-    console.error('Review submit error:', err);
-    return res.status(500).json({ error: 'Failed to save review' });
+    console.error('[reviews/submit] Unexpected error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
   }
-};
+}
