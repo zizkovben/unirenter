@@ -165,7 +165,7 @@ textarea.modal-ta:focus{border-color:rgba(75,191,224,0.5)}
   <div class="dash-body">
     <div class="dash-header">
       <div class="dash-title">Student leads dashboard</div>
-      <div class="dash-sub">All students who opted in to housing assistance · benjcarey75@gmail.com notified on each new lead</div>
+      <div class="dash-sub">All students who opted in to housing assistance · Stored in Supabase <code style="font-family:monospace;font-size:.85em">agent_leads</code> table · benjcarey75@gmail.com notified on each new lead</div>
     </div>
 
     <!-- Stats -->
@@ -244,6 +244,12 @@ textarea.modal-ta:focus{border-color:rgba(75,191,224,0.5)}
         <button onclick="exportCSV()" style="background:rgba(61,170,92,0.1);border:1px solid rgba(61,170,92,0.25);color:var(--green);font-family:var(--fb);font-size:13px;font-weight:500;padding:10px 20px;border-radius:10px;cursor:pointer;">⬇ Export leads CSV</button>
         <button onclick="showToast('📊 Report','Monthly report emailed to benjcarey75@gmail.com')" style="background:rgba(75,191,224,0.1);border:1px solid rgba(75,191,224,0.25);color:var(--blue);font-family:var(--fb);font-size:13px;font-weight:500;padding:10px 20px;border-radius:10px;cursor:pointer;">📧 Email monthly report</button>
       </div>
+    </div>
+
+    <!-- Privacy disclosure (agent opt-in) -->
+    <div style="margin-top:32px;padding:20px 24px;background:rgba(75,191,224,0.05);border:1px solid rgba(75,191,224,0.18);border-radius:14px;font-size:13px;color:var(--muted);line-height:1.65">
+      <strong style="color:var(--text)">🔒 Privacy Act 1988 (Cth) · Australian Privacy Principles compliance</strong><br><br>
+      Student data displayed here is collected under a two-stage process: (1) a student voluntarily completes a housing profile on UniRenter and explicitly opts in to agent assistance, and (2) the opt-in is recorded in the Supabase <code style="font-family:monospace">agent_leads</code> table with timestamp and full consent flag. UniRenter acts as a lead generation platform only and holds no real estate licence. Data displayed (name, university, budget, suburb preferences, contact preference, email, phone) is used solely to facilitate the student's request for housing assistance. This data must not be shared with third parties, used for unsolicited marketing, or retained beyond the student's tenancy search. By accessing this dashboard, you confirm you are an authorised Remoters agent operating under the UniRenter–Remoters partnership agreement. For data access requests, write to <a href="mailto:hello@unirenter.com.au" style="color:var(--blue)">hello@unirenter.com.au</a>.
     </div>
   </div>
 </div>
