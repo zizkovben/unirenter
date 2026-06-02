@@ -904,14 +904,15 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
           <span class="item-icon">🇦🇺</span>
           <div><div class="item-label">Getting Settled</div><div class="item-desc">Life in Sydney for students</div></div>
         </button>
-        <button class="nav-dropdown-item" onclick="window.location='/cob';closeNavDropdown()">
-          <span class="item-icon">🤠</span>
-          <div><div class="item-label">Ask Cob</div><div class="item-desc">AI housing assistant</div></div>
-        </button>
         <div class="nav-dropdown-divider"></div>
         <button class="nav-dropdown-item" onclick="openSleepModal();closeNavDropdown()">
           <span class="item-icon">💤</span>
           <div><div class="item-label">Sleep Mode</div><div class="item-desc">Pause or update your profile</div></div>
+        </button>
+        <div class="nav-dropdown-divider"></div>
+        <button class="nav-dropdown-item" id="nav-dd-dashboard" style="display:none;" onclick="window.location='/dashboard';closeNavDropdown()">
+          <span class="item-icon">&#128101;</span>
+          <div><div class="item-label">My Dashboard</div><div class="item-desc">Track your search &amp; profile</div></div>
         </button>
       </div>
     </div>
@@ -1459,6 +1460,13 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
     <div><div class="section-label">Your matches</div><div class="section-title">Top matches in Sydney.</div></div>
     <div style="font-size:12px;color:var(--text-muted);">Sorted by compatibility</div>
   </div>
+  <div id="dashboard-prompt" style="display:none;background:rgba(75,191,224,0.07);border:1px solid rgba(75,191,224,0.18);border-radius:12px;padding:12px 16px;margin-bottom:16px;">
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Your profile is saved ✅</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <span style="font-size:14px;font-weight:600;color:var(--text);">Track your search &amp; update preferences</span>
+      <a href="/dashboard" style="background:var(--brand-yellow);color:#000;font-weight:700;font-size:12px;padding:7px 14px;border-radius:8px;text-decoration:none;white-space:nowrap;">View Dashboard →</a>
+    </div>
+  </div>
   <div class="match-grid" id="match-grid"></div>
 
   <!-- Referral banner — shown after matches load -->
@@ -1837,6 +1845,8 @@ function showMatches() {
   setTimeout(() => document.getElementById('matches').scrollIntoView({behavior:'smooth'}), 100);
   showToast('🎉 Profile saved!','Your matches are ready below.');
   setTimeout(maybeShowReviewNudge, 6000);
+  const dp = document.getElementById('dashboard-prompt'); if (dp) dp.style.display = 'block';
+  const dd = document.getElementById('nav-dd-dashboard'); if (dd) dd.style.display = '';
 }
 function connect(name) {
   showToast("✉️ Connected!", name + " accepted — opening chat.");
@@ -1872,6 +1882,8 @@ function scrollToMatches() {
   document.getElementById('matches').classList.add('visible');
   setTimeout(() => document.getElementById('matches').scrollIntoView({behavior:'smooth'}), 100);
   setTimeout(maybeShowReviewNudge, 6000);
+  const dp2 = document.getElementById('dashboard-prompt'); if (dp2) dp2.style.display = 'block';
+  const dd2 = document.getElementById('nav-dd-dashboard'); if (dd2) dd2.style.display = '';
 }
 generateMatches();
 
@@ -2436,7 +2448,7 @@ goStep = function(n) {
     const rs = document.getElementById('review-section');
     if (rs) rs.style.display = '';
     setTimeout(() => {
-      showCobNudge("You’re all set 🤠 — if UniRenter helped, a quick review means everything to the next student arriving in Sydney.");
+      showCobNudge("You’re all set 🤠 — your profile is saved and your matches are ready. Check your dashboard to track your search, or leave a quick review if UniRenter helped.");;
       setTimeout(() => {
         const panel = document.querySelector('.cob-nudge');
         if (panel && !panel.querySelector('.review-nudge-btn')) {
@@ -2450,6 +2462,15 @@ goStep = function(n) {
       }, 600);
     }, 5000);
   }
+
+
+  // ── Show dashboard link if verified ──
+  (function() {
+    if (localStorage.getItem('unirenter_email_verified') === '1') {
+      const el = document.getElementById('nav-dd-dashboard');
+      if (el) el.style.display = '';
+    }
+  })();
 
 </script>
 

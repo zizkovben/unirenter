@@ -66,7 +66,8 @@ body.light-mode .btn-theme{border-color:rgba(255,255,255,0.15);color:#7a96aa}
       <div class="nav-dd-divider"></div>
       <a class="nav-dd-item" href="/guide">&#128218; Renter's Guide</a>
       <a class="nav-dd-item" href="/settled">&#127462;&#127482; Getting Settled</a>
-      <a class="nav-dd-item" href="/cob">&#129344; Ask Cob</a>
+      <div class="nav-dd-divider"></div>
+      <a class="nav-dd-item" href="/dashboard" id="nav-dd-dashboard" style="display:none;">&#128101; My Dashboard</a>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
@@ -322,6 +323,15 @@ function toggleTheme() {
     const wrap = dd && dd.closest('.nav-dropdown-wrap');
     if (dd && wrap && !wrap.contains(e.target)) dd.classList.remove('open');
   });
+
+
+  // ── Show dashboard link if verified ──
+  (function() {
+    if (localStorage.getItem('unirenter_email_verified') === '1') {
+      const el = document.getElementById('nav-dd-dashboard');
+      if (el) el.style.display = '';
+    }
+  })();
 
 </script>
 </body>

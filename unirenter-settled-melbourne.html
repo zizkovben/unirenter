@@ -179,7 +179,8 @@ body.light-mode .nav-cta{background:#F5B800;color:#1a1000}
       <div class="nav-dd-divider"></div>
       <a class="nav-dd-item" href="//guide">📖 Renter's Guide</a>
       <a class="nav-dd-item" href="//settled">🇦🇺 Getting Settled</a>
-      <a class="nav-dd-item" href="/cob">🤠 Ask Cob</a>
+      <div class="nav-dd-divider"></div>
+      <a class="nav-dd-item" href="/dashboard" id="nav-dd-dashboard" style="display:none;">👥 My Dashboard</a>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
@@ -880,6 +881,15 @@ function toggleTheme() {
     if (btn) btn.textContent = '☀️';
   }
 })();
+
+  // ── Show dashboard link if verified ──
+  (function() {
+    if (localStorage.getItem('unirenter_email_verified') === '1') {
+      const el = document.getElementById('nav-dd-dashboard');
+      if (el) el.style.display = '';
+    }
+  })();
+
 </script>
 </body>
 </html>
