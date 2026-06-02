@@ -1,7 +1,11 @@
 User-agent: *
 Allow: /
-Disallow: /api/
-Disallow: /dashboard
-Disallow: /auth
 
-Sitemap: https://unirenter.vercel.app/sitemap.xml
+# Private/auth pages — no indexing
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /agent
+Disallow: /api/
+Disallow: /lease-companion
+
+Sitemap: https://unirenter.com.au/sitemap.xml

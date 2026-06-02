@@ -1,16 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://unirenter.vercel.app/</loc><priority>1.0</priority><changefreq>weekly</changefreq></url>
-  <url><loc>https://unirenter.vercel.app/sydney</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
-  <url><loc>https://unirenter.vercel.app/brisbane</loc><priority>0.9</priority><changefreq>weekly</changefreq></url>
-  <url><loc>https://unirenter.vercel.app/guide</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://unirenter.vercel.app/guide/sydney</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://unirenter.vercel.app/guide/brisbane</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://unirenter.vercel.app/cob</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://unirenter.vercel.app/lease</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://unirenter.vercel.app/lease/sydney</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://unirenter.vercel.app/lease/brisbane</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://unirenter.vercel.app/settled</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://unirenter.vercel.app/settled/sydney</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://unirenter.vercel.app/settled/brisbane</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+
+  <!-- Melbourne (root) -->
+  <url>
+    <loc>https://unirenter.com.au/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/guide</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/settled</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/lease</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Sydney -->
+  <url>
+    <loc>https://unirenter.com.au/sydney</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/sydney/guide</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/sydney/settled</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/sydney/lease</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Brisbane -->
+  <url>
+    <loc>https://unirenter.com.au/brisbane</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/brisbane/guide</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/brisbane/settled</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/brisbane/lease</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Platform pages -->
+  <url>
+    <loc>https://unirenter.com.au/cob</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/legal</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
 </urlset>
