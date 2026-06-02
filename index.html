@@ -1297,22 +1297,45 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
         <div class="step-sub">The most important matching step — be honest, no wrong answers. We've kept this tight so it's fast to fill in.</div>
 
         <div class="form-group">
-          <label>🌙 Sleep & social schedule</label>
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Combines when you sleep with how you live after hours</div>
+          <label>🌙 Sleep &amp; home hours</label>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">When and how you use the home at night</div>
           <div class="chips">
             <div class="chip" onclick="toggle(this)">🌅 Early bird — bed by 10pm, up early</div>
-            <div class="chip" onclick="toggle(this)">🎉 Party animal — big nights out, late home</div>
-            <div class="chip" onclick="toggle(this)">🍻 Social but sensible — out sometimes, quiet mostly</div>
-            <div class="chip" onclick="toggle(this)">🌙 Night owl — awake late but at home quietly</div>
-            <div class="chip" onclick="toggle(this)">🌓 Flexible — depends on the week</div>
+            <div class="chip" onclick="toggle(this)">🌤️ Usually in by midnight</div>
+            <div class="chip" onclick="toggle(this)">🌙 Night owl — awake late, home quietly</div>
+            <div class="chip" onclick="toggle(this)">😴 Irregular — shifts / varies a lot</div>
+            <div class="chip" onclick="toggle(this)">🔄 Flexible — depends on the week</div>
           </div>
         </div>
 
         <div class="form-group">
-          <label>📚 Study & work from home</label>
+          <label>🎉 Party &amp; social life at home</label>
+          <div class="chips">
+            <div class="chip" onclick="toggle(this)">🎉 Party animal — regular late nights, people over often</div>
+            <div class="chip" onclick="toggle(this)">🥂 Social house — gatherings occasionally, nothing too wild</div>
+            <div class="chip" onclick="toggle(this)">🛋️ Chilled — friends over sometimes, quiet mostly</div>
+            <div class="chip" onclick="toggle(this)">🏠 Homebody — quiet, private, home a lot</div>
+            <div class="chip" onclick="toggle(this)">🚀 Out a lot — rarely home, come and go</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>👥 Guests &amp; visitors</label>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Select all that apply</div>
+          <div class="chips">
+            <div class="chip" onclick="toggle(this)">👨‍👩‍👧 Family visits regularly</div>
+            <div class="chip" onclick="toggle(this)">💑 Partner stays over regularly</div>
+            <div class="chip" onclick="toggle(this)">👋 Friends over occasionally</div>
+            <div class="chip" onclick="toggle(this)">🔔 Guests fine — just give notice</div>
+            <div class="chip" onclick="toggle(this)">🚪 Prefer no overnight guests</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>📚 Study habits</label>
           <div class="chips">
             <div class="chip" onclick="toggle(this)">📚 Study at home — need genuine quiet</div>
-            <div class="chip" onclick="toggle(this)">☕ I go out to study (library / café)</div>
+            <div class="chip" onclick="toggle(this)">🏫 Go out to study (library / café)</div>
             <div class="chip" onclick="toggle(this)">🎧 Background noise fine when studying</div>
             <div class="chip" onclick="toggle(this)">💻 Work from home some days</div>
           </div>
@@ -1321,59 +1344,51 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
         <div class="form-group">
           <label>🧹 Cleanliness — be honest!</label>
           <div class="chips">
-            <div class="chip" onclick="toggle(this)">🧹 Very tidy — clean as you go</div>
+            <div class="chip" onclick="toggle(this)">✨ Very tidy — clean as you go</div>
             <div class="chip" onclick="toggle(this)">🙂 Pretty neat overall</div>
-            <div class="chip" onclick="toggle(this)">😅 Average — some mess is fine</div>
-            <div class="chip" onclick="toggle(this)">🤷 Pretty relaxed about it</div>
+            <div class="chip" onclick="toggle(this)">😐 Average — some mess is fine</div>
+            <div class="chip" onclick="toggle(this)">😌 Pretty relaxed about it</div>
           </div>
         </div>
 
         <div class="form-group">
-          <label>🏠 Home social vibe & guests</label>
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">How do you use the shared house?</div>
+          <label>🍳 Kitchen habits</label>
           <div class="chips">
-            <div class="chip" onclick="toggle(this)">🎉 Love having people over regularly</div>
-            <div class="chip" onclick="toggle(this)">🙌 Occasional visitors, mainly quiet</div>
-            <div class="chip" onclick="toggle(this)">🤫 Prefer a quiet, private household</div>
-            <div class="chip" onclick="toggle(this)">💑 Partner stays over regularly</div>
-            <div class="chip" onclick="toggle(this)">👨‍👩‍👧 Family / friends visit occasionally</div>
-            <div class="chip" onclick="toggle(this)">😊 Guests fine — just give notice</div>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>👨‍🍳 Cooking & kitchen</label>
-          <div class="chips">
-            <div class="chip" onclick="toggle(this)">👨‍🍳 Cook most nights</div>
-            <div class="chip" onclick="toggle(this)">🍜 Cook occasionally</div>
+            <div class="chip" onclick="toggle(this)">🍳 Cook most nights — clean as I go</div>
+            <div class="chip" onclick="toggle(this)">🥗 Cook occasionally</div>
             <div class="chip" onclick="toggle(this)">🥡 Mostly takeaway / meal prep</div>
           </div>
         </div>
 
-        <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div class="form-group" style="margin-bottom:0">
-            <label>🚬 Smoking & vaping</label>
-            <div class="chips" style="flex-direction:column;gap:6px;">
-              <div class="chip" onclick="toggle(this)">🚭 Non-smoker / non-vaper</div>
-              <div class="chip" onclick="toggle(this)">🚬 Smoke or vape — outside only</div>
-              <div class="chip" onclick="toggle(this)">🚫 Strictly smoke-free household</div>
-            </div>
-          </div>
-          <div class="form-group" style="margin-bottom:0">
-            <label>🐾 Pets</label>
-            <div class="chips" style="flex-direction:column;gap:6px;">
-              <div class="chip" onclick="toggle(this)">🐕 I have / want a dog</div>
-              <div class="chip" onclick="toggle(this)">🐈 I have / want a cat</div>
-              <div class="chip" onclick="toggle(this)">🐾 Other pet</div>
-              <div class="chip" onclick="toggle(this)">❤️ Love pets — all welcome</div>
-              <div class="chip" onclick="toggle(this)">😿 Allergic to cats or dogs</div>
-              <div class="chip" onclick="toggle(this)">🚫 Pet-free home please</div>
-            </div>
+        <div class="form-group">
+          <label>🌡️ Temperature &amp; bills</label>
+          <div class="chips">
+            <div class="chip" onclick="toggle(this)">❄️ Keep it cool — AC on when needed</div>
+            <div class="chip" onclick="toggle(this)">🪟 Open windows person</div>
+            <div class="chip" onclick="toggle(this)">💡 Mindful of power bills</div>
           </div>
         </div>
-        <div class="info-note" style="margin-top:10px;">🐾 <strong>Victorian pet law:</strong> Since 2020 landlords cannot unreasonably refuse a pet. Strata buildings require separate Owners Corporation approval. <a href="/guide" target="_blank" style="color:var(--brand-blue)">See our Pets & Rentals guide →</a></div>
 
-        <div class="form-group" style="margin-top:18px;"><label>Anything else we should know?</label><textarea placeholder="e.g. I play guitar occasionally, work part-time weekends, observing Ramadan next semester, or anything else relevant…"></textarea></div>
+        <div class="form-group">
+          <label>🚬 Smoking &amp; vaping</label>
+          <div class="chips">
+            <div class="chip" onclick="toggle(this)">🚭 Non-smoker / non-vaper</div>
+            <div class="chip" onclick="toggle(this)">🚬 Smoke or vape — outside only</div>
+            <div class="chip" onclick="toggle(this)">🏠 Strictly smoke-free household</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>🐾 Pets</label>
+          <div class="chips">
+            <div class="chip" onclick="toggle(this)">🐾 Have / want a pet</div>
+            <div class="chip" onclick="toggle(this)">🚫 No pets please</div>
+            <div class="chip" onclick="toggle(this)">🤧 Allergic to cats or dogs</div>
+          </div>
+          <div class="info-note" style="margin-top:10px;">🐾 <strong>Victorian pet law:</strong> Since 2020 landlords cannot unreasonably refuse a pet. Strata buildings require separate Owners Corporation approval. <a href="/guide" target="_blank" style="color:var(--brand-blue);">See our Pets &amp; Rentals guide →</a></div>
+        </div>
+
+        <div class="form-group" style="margin-top:18px;"><label>Anything else we should know?</label><textarea placeholder="e.g. I play guitar occasionally, work part-time weekends, or anything else relevant…"></textarea></div>
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(4)">← Back</button>
           <button class="btn-next" onclick="goStep(6)">Next: Location →</button>
