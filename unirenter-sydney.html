@@ -614,11 +614,14 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
 .coming-soon-card .cs-icon { font-size: 40px; margin-bottom: 12px; }
 .coming-soon-card .cs-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 8px; }
 .coming-soon-card .cs-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; max-width: 420px; margin: 0 auto 20px; }
+.coming-soon-card .cs-count { font-size: 13px; color: var(--brand-blue); font-weight: 600; margin-bottom: 16px; }
 .coming-soon-card .cs-email-row { display: flex; gap: 8px; max-width: 360px; margin: 0 auto; }
 .coming-soon-card .cs-email-row input { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--text); font-family: var(--font-body); font-size: 14px; padding: 11px 16px; border-radius: 10px; outline: none; }
 .coming-soon-card .cs-email-row input:focus { border-color: var(--brand-blue); }
-.coming-soon-card .cs-btn { background: var(--brand-blue); color: var(--navy); font-family: var(--font-body); font-weight: 700; font-size: 14px; border: none; padding: 11px 20px; border-radius: 10px; cursor: pointer; white-space: nowrap; }
+.coming-soon-card .cs-btn { background: var(--brand-blue); color: var(--navy); font-family: var(--font-body); font-weight: 700; font-size: 14px; border: none; padding: 11px 20px; border-radius: 10px; cursor: pointer; white-space: nowrap; transition: opacity 0.2s; }
+.coming-soon-card .cs-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .coming-soon-card .cs-note { font-size: 11px; color: var(--text-muted); margin-top: 10px; }
+.coming-soon-card .cs-notify-sent { font-size: 14px; color: var(--brand-green); font-weight: 600; margin-top: 12px; display: none; }
 
 /* ── City switcher (footer) ── */
 .city-switcher{display:flex;justify-content:center;gap:8px;padding:16px 20px 0;position:relative;z-index:1;flex-wrap:wrap}
@@ -1810,7 +1813,8 @@ const dummyProfiles = [
   { display_name:'Rahul K.', university:'University of Sydney', field_of_study:'Science', year_of_study:'PhD', seeking:'Private room', household_type:'Mixed', suburb_preferences:['Camperdown'], sleep_schedule:'early_bird', cleanliness:'very_tidy', budget_max:390, email_verified:true, match_score:71, match_reasons:['sleep','cleanliness','location'] },
 ];
 
-// ── generateMatches — real API with smart fallback ────────────────────────────
+// ── generateMatches — real API with near_misses + Coming Soon card ─────────────
+// Session 18: added near_misses (Cob Phase 2), upgraded Coming Soon card
 async function generateMatches() {
   const grid = document.getElementById('match-grid');
   grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">Finding your matches…</div>';
@@ -1822,9 +1826,30 @@ async function generateMatches() {
       body:    JSON.stringify({ email, city: 'sydney' }),
     });
     const data = await res.json();
-    if (res.ok && data.matches && data.matches.length > 0) {
+    if (res.ok && data.matches) {
       grid.innerHTML = '';
+      const matchCount = data.matches.length;
+
+      if (matchCount < 4) {
+        grid.appendChild(buildComingSoonCard(email, 'sydney', matchCount));
+      }
+
       data.matches.forEach(p => grid.appendChild(renderMatchCard(p)));
+
+      if (matchCount === 0) {
+        dummyProfiles.forEach(p => grid.appendChild(renderMatchCard(p)));
+        const note = document.createElement('div');
+        note.style.cssText = 'text-align:center;padding:8px 16px 24px;font-size:12px;color:var(--text-muted);';
+        note.textContent = 'Example profiles — real matches appear as students join.';
+        grid.appendChild(note);
+      }
+
+      if (matchCount < 4 && data.near_misses && data.near_misses.length > 0) {
+        window._cobNearMisses = data.near_misses;
+        window._cobNearMissIndex = 0;
+        setTimeout(() => fireCobPhase2Nudge(), 4000);
+      }
+
       const rb = document.getElementById('referral-banner');
       if (rb) rb.style.display = 'flex';
       return;
@@ -1832,19 +1857,8 @@ async function generateMatches() {
   } catch (err) {
     console.warn('Real matches unavailable, showing examples:', err.message);
   }
-  // Fallback — coming soon card + dummy examples
   grid.innerHTML = '';
-  const verifiedEmail = localStorage.getItem('unirenter_email');
-  if (verifiedEmail) {
-    const csCard = document.createElement('div');
-    csCard.className = 'coming-soon-card';
-    csCard.innerHTML = `
-      <div class="cs-icon">🔍</div>
-      <div class="cs-title">You\'re one of the first — nice work!</div>
-      <div class="cs-desc">We\'re building your match pool right now. We\'ll email you at <strong>${verifiedEmail}</strong> as soon as compatible students join.</div>
-      <div class="cs-note">Example profiles below show how your matches will look.</div>`;
-    grid.appendChild(csCard);
-  }
+  grid.appendChild(buildComingSoonCard(email, 'sydney', 0));
   dummyProfiles.forEach(p => grid.appendChild(renderMatchCard(p)));
   const note = document.createElement('div');
   note.style.cssText = 'text-align:center;padding:8px 16px 24px;font-size:12px;color:var(--text-muted);';
@@ -1852,6 +1866,64 @@ async function generateMatches() {
   grid.appendChild(note);
   const rb = document.getElementById('referral-banner');
   if (rb) rb.style.display = 'flex';
+}
+
+function buildComingSoonCard(email, city, matchCount) {
+  const csCard = document.createElement('div');
+  csCard.className = 'coming-soon-card';
+  const savedEmail = email || localStorage.getItem('unirenter_email') || '';
+  const alreadyNotified = localStorage.getItem('unirenter_notify_' + city) === '1';
+  const cityDisplay = city.charAt(0).toUpperCase() + city.slice(1);
+
+  if (matchCount === 0) {
+    csCard.innerHTML = `
+      <div class="cs-icon">🔍</div>
+      <div class="cs-title">You're one of the first — nice work!</div>
+      <div class="cs-desc">We're building your match pool right now. We'll email you as soon as compatible students join ${cityDisplay}.</div>`;
+  } else {
+    csCard.innerHTML = `
+      <div class="cs-icon">🔍</div>
+      <div class="cs-title">More matches on the way</div>
+      <div class="cs-desc">You have ${matchCount} match${matchCount === 1 ? '' : 'es'} so far. We'll email you as more compatible students join ${cityDisplay}.</div>`;
+  }
+
+  if (alreadyNotified) {
+    csCard.innerHTML += `<div class="cs-notify-sent" style="display:block">✅ You're on the notify list — we'll email you!</div>`;
+  } else {
+    csCard.innerHTML += `
+      <div class="cs-email-row">
+        <input type="email" id="cs-email-input" placeholder="your@email.com" value="${savedEmail}">
+        <button class="cs-btn" onclick="registerComingSoonNotify('${city}', this)">Notify me</button>
+      </div>
+      <div class="cs-notify-sent" id="cs-notify-sent-${city}">✅ You're on the list — we'll email you when your matches are ready!</div>
+      <div class="cs-note">Free · No spam · Unsubscribe any time</div>`;
+  }
+  return csCard;
+}
+
+async function registerComingSoonNotify(city, btn) {
+  const input = document.getElementById('cs-email-input');
+  const email = input ? input.value.trim() : (localStorage.getItem('unirenter_email') || '');
+  if (!email || !email.includes('@')) {
+    input && (input.style.borderColor = 'var(--brand-coral)');
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    await fetch('/api/notify/register', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email, city }),
+    });
+    localStorage.setItem('unirenter_notify_' + city, '1');
+    if (input) input.closest('.cs-email-row').style.display = 'none';
+    const sent = document.getElementById('cs-notify-sent-' + city);
+    if (sent) sent.style.display = 'block';
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Notify me';
+  }
 }
 function showMatches() {
   saveProfileToSupabase();
@@ -2409,6 +2481,53 @@ goStep = function(n) {
     }, 1500);
   }
 };
+
+// ── Cob Phase 2 — dynamic near_miss nudges ────────────────────────────────────
+window._cobNearMisses = [];
+window._cobNearMissIndex = 0;
+
+function fireCobPhase2Nudge() {
+  const misses = window._cobNearMisses;
+  const idx    = window._cobNearMissIndex;
+  if (!misses || idx >= misses.length) return;
+
+  const miss = misses[idx];
+  let nudgeText = '';
+
+  switch (miss.constraint) {
+    case 'suburb':
+      nudgeText = miss.suburbs && miss.suburbs.length > 0
+        ? `I found ${miss.unlock} more students near ${miss.suburbs.slice(0,2).join(' and ')} 📍 — worth adding those suburbs to your search?`
+        : `Adding a few more suburbs could unlock ${miss.unlock} more matches for you 📍`;
+      break;
+    case 'budget':
+      nudgeText = `Widening your budget by just $30/wk could unlock ${miss.unlock} more compatible students 💰 — want to give it a try?`;
+      break;
+    case 'accommodation_type':
+      nudgeText = `I found ${miss.unlock} more matches if you open up your accommodation type a little 🏠 — worth considering?`;
+      break;
+    default:
+      nudgeText = `I found ${miss.unlock} more potential matches — tap me to explore your options 🤠`;
+  }
+
+  const nudge = document.getElementById('cob-nudge');
+  if (!nudge) return;
+  nudge.innerHTML = '<strong>🤠 Cob:</strong> ' + nudgeText;
+
+  const btn = document.createElement('button');
+  btn.className = 'btn-next';
+  btn.style.cssText = 'margin-top:10px;font-size:12px;padding:7px 14px;';
+  btn.textContent = 'Good to know 👍';
+  btn.onclick = () => {
+    nudge.style.display = 'none';
+    window._cobNearMissIndex++;
+  };
+  nudge.appendChild(btn);
+
+  nudge.style.display = 'block';
+  clearTimeout(cobNudgeTimer);
+  cobNudgeTimer = setTimeout(() => { nudge.style.display = 'none'; }, 22000);
+}
 
 // Hook into OTP verification success — show Cob after verify-modal-badge gets .show
 (function() {
