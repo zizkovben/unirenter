@@ -271,6 +271,23 @@
     box-shadow: 0 4px 20px rgba(0,0,0,.3);
   }
   #toast.show { opacity: 1; }
+
+  /* ── Responsive nav fix — Session 17 ── */
+  @media (max-width: 600px) {
+    nav {
+      padding: 8px 12px;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+    .nav-logo img { height: 34px; }
+    .nav-right, #nav-right { gap: 6px; }
+    .nav-cta, .btn-find { font-size: .78rem; padding: .38rem .7rem; }
+    #btn-theme, .btn-theme { font-size: 1rem; padding: .2rem .35rem; }
+  }
+  @media (max-width: 400px) {
+    nav { padding: 8px 6px; overflow: visible; }
+    .nav-logo img { height: 26px; }
+  }
 </style>
 </head>
 <body>

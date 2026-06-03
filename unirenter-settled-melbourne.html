@@ -163,6 +163,23 @@ body.light-mode .nav-cta{background:#F5B800;color:#1a1000}
   .nav-dd-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--text,#e8f0f5);font-size:13px;text-decoration:none;cursor:pointer;background:none;border:none;width:100%;text-align:left}
   .nav-dd-item:hover{background:rgba(75,191,224,0.08);color:#4BBFE0}
   .nav-dd-divider{height:1px;background:rgba(255,255,255,0.07);margin:4px 6px}
+
+  /* ── Responsive nav fix — Session 17 ── */
+  @media (max-width: 600px) {
+    nav {
+      padding: 8px 12px;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+    .nav-logo img { height: 34px; }
+    .nav-right, #nav-right { gap: 6px; }
+    .nav-cta, .btn-find { font-size: .78rem; padding: .38rem .7rem; }
+    #btn-theme, .btn-theme { font-size: 1rem; padding: .2rem .35rem; }
+  }
+  @media (max-width: 400px) {
+    nav { padding: 8px 6px; overflow: visible; }
+    .nav-logo img { height: 26px; }
+  }
 </style>
 </head>
 <body>
