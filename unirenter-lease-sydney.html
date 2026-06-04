@@ -35,8 +35,7 @@ body::before {
 
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 32px; background: rgba(13,31,45,0.92); backdrop-filter: blur(12px);
+  display: flex; align-items: center; padding: 10px 32px; background: rgba(13,31,45,0.92); backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(75,191,224,0.12);
 }
 .nav-logo img { height: 48px; width: auto; display: block; }
@@ -186,7 +185,7 @@ input[type="range"] { flex: 1; accent-color: var(--brand-yellow); cursor: pointe
 
 /* Religion toggle */
 .religion-section { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; margin-top: 4px; }
-.religion-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+.religion-toggle { display: flex; align-items: center; cursor: pointer; user-select: none; }
 .religion-toggle-label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
 .religion-toggle-label span { font-size: 11px; display: block; font-weight: 300; margin-top: 2px; opacity: 0.7; }
 .toggle-switch { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
@@ -203,7 +202,7 @@ input[type="range"] { flex: 1; accent-color: var(--brand-yellow); cursor: pointe
 .info-note { font-size: 12px; color: var(--text-muted); background: rgba(75,191,224,0.05); border: 1px solid rgba(75,191,224,0.12); border-radius: 8px; padding: 10px 14px; margin-top: 10px; line-height: 1.6; }
 .divider { height: 1px; background: rgba(255,255,255,0.07); margin: 22px 0; }
 
-.step-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,0.07); }
+.step-nav { display: flex; align-items: center; margin-top: 32px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,0.07); }
 .btn-back { background: none; border: 1px solid rgba(255,255,255,0.12); color: var(--text-muted); font-family: var(--font-body); font-size: 13px; padding: 9px 18px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
 .btn-back:hover { border-color: rgba(255,255,255,0.3); color: var(--text); }
 .btn-next { background: var(--brand-blue); color: var(--navy); font-family: var(--font-body); font-weight: 600; font-size: 14px; border: none; padding: 11px 26px; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
@@ -212,11 +211,11 @@ input[type="range"] { flex: 1; accent-color: var(--brand-yellow); cursor: pointe
 /* ── Match cards ── */
 #matches { padding-top: 20px; display: none; }
 #matches.visible { display: block; }
-.matches-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+.matches-header { display: flex; align-items: flex-end; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
 .match-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
 .match-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
 .match-card:hover { transform: translateY(-3px); box-shadow: 0 10px 36px rgba(0,0,0,0.3); }
-.card-header { padding: 20px 20px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.card-header { padding: 20px 20px 0; display: flex; align-items: flex-start; gap: 10px; }
 .card-photo-wrap { position: relative; flex-shrink: 0; }
 .card-photo { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(75,191,224,0.25); }
 .card-photo-initials { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; font-family: var(--font-display); border: 2px solid rgba(75,191,224,0.2); }
@@ -266,7 +265,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
   opacity: 0.5;
 }
 .report-btn:hover { opacity: 1; color: #ff7b7b; background: rgba(255,80,80,0.08); }
-.card-footer-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 20px 4px; }
+.card-footer-row { display: flex; align-items: center; padding: 8px 20px 4px; }
 
 /* ── Report modal ── */
 .modal-overlay {
@@ -355,7 +354,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
   border-radius: 16px; padding: 22px; transition: all 0.2s;
 }
 .lease-card:hover { border-color: rgba(232,98,58,0.3); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
-.lease-card-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.lease-card-top { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
 .lease-card-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; margin-bottom: 4px; }
 .lease-card-sub { font-size: 12px; color: var(--text-muted); }
 .lease-badge { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; white-space: nowrap; }
@@ -410,7 +409,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
 .chat-contact-preview { font-size:11px; color:var(--text-muted); margin-top:1px; }
 .chat-contact-flag { font-size:12px; }
 .chat-main { display:flex; flex-direction:column; }
-.chat-main-header { padding:14px 18px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:space-between; }
+.chat-main-header { padding:14px 18px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; align-items:center; }
 .chat-main-header-name { font-family:var(--font-display); font-size:15px; font-weight:700; }
 .chat-main-header-sub { font-size:11px; color:var(--text-muted); margin-top:1px; }
 .chat-header-actions { display:flex; gap:8px; }
@@ -442,7 +441,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
 /* ── Profile completeness ── */
 .completeness-bar-wrap { background: rgba(0,0,0,0.2); border-radius: 4px; height: 6px; margin: 8px 0 4px; overflow: hidden; }
 .completeness-bar { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--brand-yellow), var(--brand-coral)); transition: width 0.5s ease; }
-.completeness-label { font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.completeness-label { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; margin-bottom: 16px; }
 .completeness-label strong { color: var(--brand-yellow); }
 .completeness-tip { font-size: 11px; color: var(--brand-blue); }
 
@@ -491,7 +490,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
 .read-more-btn { font-size:11px; color:var(--brand-blue); background:none; border:none; cursor:pointer; padding:0; font-family:var(--font-body); text-decoration:underline; margin-top:4px; display:block; }
 
 /* ── Save progress ── */
-.save-progress-bar { background:rgba(0,0,0,0.15); border-top:1px solid rgba(255,255,255,0.06); padding:10px 40px; display:flex; justify-content:space-between; align-items:center; }
+.save-progress-bar { background:rgba(0,0,0,0.15); border-top:1px solid rgba(255,255,255,0.06); padding:10px 40px; display:flex; align-items:center; }
 .save-btn { background:none; border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); font-family:var(--font-body); font-size:12px; padding:7px 14px; border-radius:8px; cursor:pointer; transition:all 0.2s; }
 .save-btn:hover { border-color:rgba(75,191,224,0.3); color:var(--brand-blue); }
 
@@ -567,7 +566,6 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
   nav {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     padding: 0 16px;
     height: 56px;
     background: var(--navy, #0d1f2d);
@@ -639,6 +637,11 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
     nav { padding: 8px 6px; overflow: visible; }
     .nav-logo img { height: 26px; }
   }
+
+.translate-bar{background:rgba(75,191,224,0.05);border:1px solid rgba(75,191,224,0.15);border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.translate-bar select{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text,#e8f0f5);font-family:inherit;font-size:13px;padding:5px 10px;border-radius:8px;cursor:pointer;outline:none}
+.translate-bar label{font-size:12px;color:var(--muted,#7a96aa);font-weight:500}
+body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0,31,45,0.12)}
 </style>
 </head>
 <body>
@@ -650,18 +653,18 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
   <div class="city-badge">📍 Sydney</div>
   <div class="nav-right-group">
     <button class="nav-cta" style="font-size:13px;" onclick="window.location='/sydney'">🏠 Find housing</button>
-      <div class="nav-dropdown-wrap">
-    <button class="nav-explore-btn" onclick="toggleNavDropdown()">Explore &#9662;</button>
-    <div class="nav-dropdown" id="nav-dropdown">
-      <a class="nav-dd-item" href="/sydney/lease">&#128260; Break lease</a>
-      <a class="nav-dd-item" href="/landlords">&#127968; List your property</a>
-      <div class="nav-dd-divider"></div>
-      <a class="nav-dd-item" href="/sydney/guide">&#128218; Renter's Guide</a>
-      <a class="nav-dd-item" href="/sydney/settled">&#127462;&#127482; Getting Settled</a>
-      <div class="nav-dd-divider"></div>
-      <a class="nav-dd-item" href="/dashboard" id="nav-dd-dashboard" style="display:none;">&#128101; My Dashboard</a>
+    <div class="nav-dropdown-wrap">
+      <button class="nav-explore-btn" onclick="toggleNavDropdown()">Explore &#9662;</button>
+      <div class="nav-dropdown" id="nav-dropdown">
+        <a class="nav-dd-item" href="/sydney/lease">&#128260; Break lease</a>
+        <a class="nav-dd-item" href="/landlords">&#127968; List your property</a>
+        <div class="nav-dd-divider"></div>
+        <a class="nav-dd-item" href="/sydney/guide">&#128218; Renter's Guide</a>
+        <a class="nav-dd-item" href="/sydney/settled">&#127462;&#127482; Getting Settled</a>
+        <div class="nav-dd-divider"></div>
+        <a class="nav-dd-item" href="/dashboard" id="nav-dd-dashboard" style="display:none;">&#128101; My Dashboard</a>
+      </div>
     </div>
-  </div>
     <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Toggle day/night mode">🌙</button>
   </div>
 </nav>
@@ -834,7 +837,7 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
 
   <!-- Browse leases (hidden until gate passed) -->
   <div id="lease-browse" style="display:none;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
       <div style="font-size:13px;color:var(--text-muted);">Showing <strong style="color:var(--text)">6 available leases</strong> in Sydney</div>
       <div class="chips">
         <div class="chip selected" onclick="toggle(this)">All areas</div>
@@ -1548,6 +1551,14 @@ function toggleTheme() {
     }
   })();
 
+
+function translatePage(lang) {
+  const status = document.getElementById('translate-status');
+  if (!lang) { if(status) status.textContent = ''; return; }
+  const url = `https://translate.google.com/translate?sl=en&tl=${lang}&u=${encodeURIComponent(window.location.href)}`;
+  if(status) status.textContent = 'Translating…';
+  setTimeout(() => { window.location.href = url; }, 400);
+}
 </script>
 
 <!-- REPORT MODAL -->
