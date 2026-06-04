@@ -338,26 +338,26 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 </div>
 <div class="tabs-wrap">
   <div class="tabs">
-    <button class="tab-btn active" onclick="showTab('essentials',this)">🏥 Health & doctors</button>
+    <button class="tab-btn active" onclick="showTab('emergency',this)">🚨 Emergency</button>
+    <button class="tab-btn" onclick="showTab('essentials',this)">🏥 Health & doctors</button>
     <button class="tab-btn" onclick="showTab('transport',this)">🚌 Transport</button>
     <button class="tab-btn" onclick="showTab('money',this)">💰 Money & banking</button>
     <button class="tab-btn" onclick="showTab('work',this)">💼 Work & jobs</button>
     <button class="tab-btn" onclick="showTab('safety',this)">🏖️ Beach & outdoor</button>
-    <button class="tab-btn" onclick="showTab('emergency',this)">🚨 Emergency</button>
     <button class="tab-btn" onclick="showTab('laws',this)">⚖️ Drinking & smoking</button>
-    <button class="tab-btn" onclick="showTab('culture',this)">🇦🇺 Aussie culture</button>
     <button class="tab-btn" onclick="showTab('wildlife',this)">🐍 Wildlife</button>
     <button class="tab-btn" onclick="showTab('yourhome',this)">🏠 Your Home</button>
     <button class="tab-btn" onclick="showTab('phone',this)">📱 Phone & SIM</button>
     <button class="tab-btn" onclick="showTab('wellbeing',this)">💙 Wellbeing & study</button>
     <button class="tab-btn" onclick="showTab('internet',this)">📶 Internet & NBN</button>
+    <button class="tab-btn" onclick="showTab('culture',this)">🇦🇺 Aussie culture</button>
   </div>
 </div>
 
 <div class="content">
 
   <!-- HEALTH -->
-  <div class="tab-section active" id="tab-essentials">
+  <div class="tab-section" id="tab-essentials">
     <div class="section-label">Getting started</div>
     <div class="section-title">Health & doctors</div>
     <div class="section-sub">Finding a GP and understanding your health cover is one of the first things to sort — before you need it.</div>
@@ -598,7 +598,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
   
 <!-- EMERGENCY -->
-<div class="tab-section" id="tab-emergency">
+<div class="tab-section active" id="tab-emergency">
   <div class="section-label">Stay safe</div>
   <div class="section-title">Emergency contacts &amp;<br>getting help fast.</div>
   <div class="section-sub">Save these in your phone before you need them. Australia's emergency services are excellent — use them without hesitation.</div>
@@ -802,23 +802,8 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 <!-- YOUR HOME -->
   <div class="tab-section" id="tab-yourhome">
     <div class="section-label">Where you live</div>
-    <div class="section-title">Your home — pests & mould</div>
+    <div class="section-title">Your home — mould &amp; shared living</div>
     <div class="section-sub">Practical tips for keeping your share house clean, pest-free, and protected from mould — so you don't lose your bond over something preventable.</div>
-
-    <div class="good-box"><div>💡</div><div><strong>The golden rule:</strong> Most common household pests — ants, cockroaches, flies, mosquitoes — are attracted to food, moisture, and rubbish. Keep the place clean, take rubbish out regularly, and store food in sealed containers. This single habit prevents the majority of pest problems before they start.</div></div>
-
-    <div class="info-card" style="border-top:3px solid var(--green)">
-      <div class="info-card-header"><div class="info-card-icon">🐜</div><div><div class="info-card-title">Common household pests — and what to do</div></div></div>
-      <div class="tip-list">
-        <div class="tip"><div class="tip-icon">🐜</div><div class="tip-body"><h5>Ants</h5><p>Ants are seeking food. Keep benches wiped, wash dishes promptly, and store food (especially sugar and cereals) in sealed containers. Ant bait traps like Ant-Rid (available at supermarkets for a few dollars) are very effective — place them along the trail and let the workers carry bait back to the nest. Don't spray the trail with surface spray first, as this breaks the trail and reduces the bait's effectiveness.</p></div></div>
-        <div class="tip"><div class="tip-icon">🪳</div><div class="tip-body"><h5>Cockroaches</h5><p>Cockroaches thrive in warm, dark, moist places and come out at night. Prevention: don't leave food out, empty the bin regularly, fix leaky taps. Cockroach gel bait (Maxforce, Combat) placed in corners and under sinks is more effective than spray. If you see cockroaches in daylight, the infestation is significant — tell your landlord or agent.</p></div></div>
-        <div class="tip"><div class="tip-icon">🕷️</div><div class="tip-body"><h5>Spiders</h5><p>Regular cobwebbing with a broom around ceiling edges, doorframes, and outdoor areas discourages spiders from settling. Most house spiders in urban Australia are harmless huntsmen — large and fast, but not dangerous. Redbacks and funnel-webs are the ones to watch for (see Wildlife tab for identification).</p></div></div>
-        <div class="tip"><div class="tip-icon">🐝</div><div class="tip-body"><h5>Wasps</h5><p>Wasps build nests under eaves, in roof cavities, and in garden areas. If you find a nest, do not disturb it — contact your landlord or a pest control service. Small early-stage nests can be treated with wasp freeze spray at dusk when wasps are inactive. Never block a nest entrance — this makes them aggressive.</p></div></div>
-        <div class="tip"><div class="tip-icon">🐦</div><div class="tip-body"><h5>Crows, ibis & cockatoos</h5><p>Urban birds go after outdoor rubbish. Keep bin lids closed — ibis are persistent and clever about getting into unsecured bins. Cockatoos can destroy outdoor furniture, door frames, and window seals. They're protected wildlife, so you can't harm them, but removing food sources and using reflective deterrents helps discourage them.</p></div></div>
-        <div class="tip"><div class="tip-icon">🦟</div><div class="tip-body"><h5>Mosquitoes & flies</h5><p>Unlike ants and cockroaches, mozzies and flies are airborne — cleanliness helps but doesn't fully prevent them. Key habits: keep windows and doors closed or screened at dawn and dusk (peak mozzie activity). Empty any standing water around the property (pot plant saucers, buckets) — this is where mozzies breed. Fly screens on windows are worth requesting from your landlord if they're missing.</p></div></div>
-      </div>
-    </div>
-
     <div class="info-card" style="border-top:3px solid var(--blue)">
       <div class="info-card-header"><div class="info-card-icon">💧</div><div><div class="info-card-title">Mould — prevent it before it starts</div></div></div>
       <p>Mould is one of the most common and frustrating issues in Australian share houses, particularly in humid climates and poorly ventilated bathrooms. Once mould spores spread through a property they're genuinely difficult to deal with — and responsibility under a lease is often a grey area that leads to bond disputes.</p>

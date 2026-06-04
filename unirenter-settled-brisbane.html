@@ -353,25 +353,26 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 </div>
 <div class="tabs-wrap">
   <div class="tabs">
-    <button class="tab-btn active" onclick="showTab('essentials',this)">🏥 Health & doctors</button>
+    <button class="tab-btn active" onclick="showTab('emergency',this)">🚨 Emergency</button>
+    <button class="tab-btn" onclick="showTab('essentials',this)">🏥 Health & doctors</button>
     <button class="tab-btn" onclick="showTab('transport',this)">🚌 Transport</button>
     <button class="tab-btn" onclick="showTab('money',this)">💰 Money & banking</button>
     <button class="tab-btn" onclick="showTab('work',this)">💼 Work & jobs</button>
-    <button class="tab-btn" onclick="showTab('safety',this)">🦺 Beach & safety</button>
+    <button class="tab-btn" onclick="showTab('safety',this)">🏖️ Beach & outdoor</button>
     <button class="tab-btn" onclick="showTab('laws',this)">⚖️ Drinking & smoking</button>
-    <button class="tab-btn" onclick="showTab('culture',this)">🇦🇺 Aussie culture</button>
     <button class="tab-btn" onclick="showTab('wildlife',this)">🐍 Wildlife</button>
     <button class="tab-btn" onclick="showTab('yourhome',this)">🏠 Your Home</button>
     <button class="tab-btn" onclick="showTab('phone',this)">📱 Phone & SIM</button>
     <button class="tab-btn" onclick="showTab('wellbeing',this)">💙 Wellbeing & study</button>
     <button class="tab-btn" onclick="showTab('internet',this)">📶 Internet & NBN</button>
+    <button class="tab-btn" onclick="showTab('culture',this)">🇦🇺 Aussie culture</button>
   </div>
 </div>
 
 <div class="content">
 
   <!-- HEALTH -->
-  <div class="tab-section active" id="tab-essentials">
+  <div class="tab-section" id="tab-essentials">
     <div class="section-label">Getting started</div>
     <div class="section-title">Health & doctors</div>
     <div class="section-sub">Finding a GP and understanding your health cover is one of the first things to sort — before you need it.</div>
@@ -593,14 +594,8 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
       <div class="good-box"><div>🆘</div><div>If someone is in danger in the water: <strong>call 000 immediately</strong>, alert the nearest lifesaver, and throw a flotation device if one is available. Do not enter the water unless you are trained.</div></div>
     </div>
 
-    <div class="info-card">
-      <div class="info-card-header"><div class="info-card-icon">🚨</div><div><div class="info-card-title">Emergency contacts</div></div></div>
-      <div class="tip-list">
-        <div class="tip"><div class="tip-icon">🚑</div><div class="tip-body"><h5>000 — Police, Fire, Ambulance</h5><p>Australia's triple zero — use for all genuine emergencies. Ambulances are not free in most states — check your OSHC for coverage. In Victoria, ambulance cover is included in some OSHC policies.</p></div></div>
-        <div class="tip"><div class="tip-icon">👮</div><div class="tip-body"><h5>131 444 — Police non-emergency</h5><p>For reporting crimes or incidents that don't require an immediate response.</p></div></div>
-        <div class="tip"><div class="tip-icon">🏥</div><div class="tip-body"><h5>1800 022 222 — Healthdirect 24/7 nurse line</h5><p>Speak to a registered nurse for free health advice any time of day or night — helpful for deciding whether to go to hospital.</p></div></div>
-        <div class="tip"><div class="tip-icon">🧠</div><div class="tip-body"><h5>13 11 14 — Lifeline (24/7 crisis support)</h5><p>If you're struggling emotionally or in mental health crisis — call anytime, completely confidential.</p></div></div>
-      </div>
+    <div class="good-box" style="cursor:pointer;" onclick="showTab('emergency',document.querySelector('[onclick*=emergency]'))">
+      <div>🚨</div><div><strong>Emergency contacts →</strong> See the Emergency tab for all numbers, mental health lines, and urgent help.</div>
     </div>
 
     <a href="https://sls.com.au/beach-safety/" target="_blank" class="resource-link"><div class="rl-icon">🏄</div><div class="rl-body"><h4>Surf Life Saving Australia — Beach safety guide</h4></div><div class="rl-arrow">→</div></a>
@@ -616,6 +611,45 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
     </div>
   </div>
 
+  <!-- EMERGENCY -->
+  <div class="tab-section active" id="tab-emergency">
+    <div class="section-label">Stay safe</div>
+    <div class="section-title">Emergency contacts &amp;<br>getting help fast.</div>
+    <div class="section-sub">Save these in your phone before you need them.</div>
+    <div class="warn-box" style="border-color:rgba(232,98,58,0.4);background:rgba(232,98,58,0.08);"><div>🚨</div><div><strong>If it's a genuine emergency — call 000.</strong> Police, Fire, Ambulance. Free from any phone, even with no credit.</div></div>
+    <div class="info-card" style="border-top:3px solid var(--coral)">
+      <div class="info-card-header"><div class="info-card-icon">🚨</div><div><div class="info-card-title">Emergency numbers — save these now</div></div></div>
+      <div class="tip-list">
+        <div class="tip"><div class="tip-icon">🚑</div><div class="tip-body"><h5>000 — Police, Fire, Ambulance</h5><p>Australia's triple zero. In QLD, ambulance is subsidised — check your OSHC covers any gaps.</p></div></div>
+        <div class="tip"><div class="tip-icon">👮</div><div class="tip-body"><h5>131 444 — Police non-emergency</h5><p>For reporting crimes that don't require an immediate response.</p></div></div>
+        <div class="tip"><div class="tip-icon">🏥</div><div class="tip-body"><h5>1800 022 222 — Healthdirect (24/7 nurse line)</h5><p>Speak to a registered nurse any time. Helps decide hospital, GP, or home care.</p></div></div>
+        <div class="tip"><div class="tip-icon">🌧️</div><div class="tip-body"><h5>132 500 — SES (storm &amp; flood)</h5><p>Queensland floods. Never drive through floodwater. 24/7. Call 000 if life is at risk.</p></div></div>
+      </div>
+    </div>
+    <div class="info-card" style="border-top:3px solid var(--blue)">
+      <div class="info-card-header"><div class="info-card-icon">🧠</div><div><div class="info-card-title">Mental health &amp; crisis support</div></div></div>
+      <div class="tip-list">
+        <div class="tip"><div class="tip-icon">💙</div><div class="tip-body"><h5>13 11 14 — Lifeline (24/7)</h5><p>Free, confidential. You don't need to be in crisis to call.</p></div></div>
+        <div class="tip"><div class="tip-icon">💬</div><div class="tip-body"><h5>1300 22 4636 — Beyond Blue (24/7)</h5><p>Mental health support for anxiety and depression.</p></div></div>
+        <div class="tip"><div class="tip-icon">🌏</div><div class="tip-body"><h5>Queensland Mental Health Commission — 1800 64 2255</h5><p>QLD's dedicated mental health line. 24/7 access to support and referral.</p></div></div>
+        <div class="tip"><div class="tip-icon">🎓</div><div class="tip-body"><h5>University counselling</h5><p>QUT, UQ and Griffith all have free student counselling. Find yours on your uni's website.</p></div></div>
+      </div>
+    </div>
+    <div class="info-card" style="border-top:3px solid var(--green)">
+      <div class="info-card-header"><div class="info-card-icon">🏥</div><div><div class="info-card-title">Hospitals in Brisbane</div></div></div>
+      <div class="tip-list">
+        <div class="tip"><div class="tip-icon">🏥</div><div class="tip-body"><h5>Major hospitals</h5><p>Royal Brisbane &amp; Women's Hospital (Herston — near QUT Kelvin Grove), Princess Alexandra (Woolloongabba — near UQ). Both are excellent teaching hospitals.</p></div></div>
+      </div>
+    </div>
+    <div class="info-card" style="border-top:3px solid var(--yellow)">
+      <div class="info-card-header"><div class="info-card-icon">🆘</div><div><div class="info-card-title">If you feel unsafe at home</div></div></div>
+      <div class="tip-list">
+        <div class="tip"><div class="tip-icon">🏠</div><div class="tip-body"><h5>DVConnect Womensline — 1800 811 811</h5><p>QLD domestic violence line. 24/7. Free, confidential.</p></div></div>
+        <div class="tip"><div class="tip-icon">📞</div><div class="tip-body"><h5>1800 RESPECT — 1800 737 732</h5><p>National sexual assault and domestic violence support. 24/7.</p></div></div>
+      </div>
+    </div>
+    <a href="https://www.lifeline.org.au/" target="_blank" class="resource-link"><div class="rl-icon">💙</div><div class="rl-body"><h4>Lifeline — 13 11 14</h4><p>Crisis support</p></div><div class="rl-arrow">→</div></a>
+  </div>
   <!-- LAWS -->
   <div class="tab-section" id="tab-laws">
     <div class="section-label">Know the rules</div>
@@ -749,26 +783,24 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
     <a href="https://www.poison.org.au/" target="_blank" class="resource-link"><div class="rl-icon">☎️</div><div class="rl-body"><h4>Poisons Information Centre — 13 11 26 (24/7)</h4><p>Call for advice on any suspected poisoning including bites and stings</p></div><div class="rl-arrow">→</div></a>
   </div>
 
-  <!-- YOUR HOME -->
+  
+  <div class="info-card" style="border-top:3px solid var(--yellow)">
+    <div class="info-card-header"><div class="info-card-icon">🦟</div><div><div class="info-card-title">Insects & bugs</div></div></div>
+    <p>Australia has some insects worth knowing about — and Brisbane's subtropical climate means more of them year-round than southern cities.</p>
+    <div class="tip-list">
+      <div class="tip"><div class="tip-icon">🦟</div><div class="tip-body"><h5>Mosquitoes</h5><p>Brisbane's warm, humid climate makes mosquitoes a year-round issue. Ross River Fever is present in QLD. Use DEET-based repellent at dawn and dusk, especially near rivers, parks, and the bay.</p></div></div>
+      <div class="tip"><div class="tip-icon">🐜</div><div class="tip-body"><h5>Green ants &amp; bull ants</h5><p>Green ants (weaver ants) are common in Queensland and can sting. Bull ants are large, aggressive, and painful. Wear shoes in gardens.</p></div></div>
+      <div class="tip"><div class="tip-icon">🐝</div><div class="tip-body"><h5>Wasps &amp; paper wasps</h5><p>Paper wasps build nests under eaves — common in Brisbane. Don't swat European wasps. Report nests to your landlord or council for removal.</p></div></div>
+      <div class="tip"><div class="tip-icon">🪲</div><div class="tip-body"><h5>Cockroaches</h5><p>Brisbane's climate is ideal year-round. Native species are large but harmless. German cockroaches (small) are the pest species — landlord's responsibility to treat.</p></div></div>
+      <div class="tip"><div class="tip-icon">🦗</div><div class="tip-body"><h5>Cane toads</h5><p>Not an insect, but worth knowing — cane toads are common in Brisbane gardens after rain. Toxic to pets. Harmless to humans unless you touch eyes after handling.</p></div></div>
+    </div>
+    <div class="info-box"><div>💡</div><div>If stung by a bee or wasp and you experience difficulty breathing, swelling of face/throat, or dizziness — <strong>call 000 immediately</strong>. This is anaphylaxis.</div></div>
+  </div>
+<!-- YOUR HOME -->
   <div class="tab-section" id="tab-yourhome">
     <div class="section-label">Where you live</div>
-    <div class="section-title">Your home — pests & mould</div>
+    <div class="section-title">Your home — mould &amp; shared living</div>
     <div class="section-sub">Practical tips for keeping your share house clean, pest-free, and protected from mould — so you don't lose your bond over something preventable.</div>
-
-    <div class="good-box"><div>💡</div><div><strong>The golden rule:</strong> Most common household pests — ants, cockroaches, flies, mosquitoes — are attracted to food, moisture, and rubbish. Keep the place clean, take rubbish out regularly, and store food in sealed containers. This single habit prevents the majority of pest problems before they start.</div></div>
-
-    <div class="info-card" style="border-top:3px solid var(--green)">
-      <div class="info-card-header"><div class="info-card-icon">🐜</div><div><div class="info-card-title">Common household pests — and what to do</div></div></div>
-      <div class="tip-list">
-        <div class="tip"><div class="tip-icon">🐜</div><div class="tip-body"><h5>Ants</h5><p>Ants are seeking food. Keep benches wiped, wash dishes promptly, and store food (especially sugar and cereals) in sealed containers. Ant bait traps like Ant-Rid (available at supermarkets for a few dollars) are very effective — place them along the trail and let the workers carry bait back to the nest. Don't spray the trail with surface spray first, as this breaks the trail and reduces the bait's effectiveness.</p></div></div>
-        <div class="tip"><div class="tip-icon">🪳</div><div class="tip-body"><h5>Cockroaches</h5><p>Cockroaches thrive in warm, dark, moist places and come out at night. Prevention: don't leave food out, empty the bin regularly, fix leaky taps. Cockroach gel bait (Maxforce, Combat) placed in corners and under sinks is more effective than spray. If you see cockroaches in daylight, the infestation is significant — tell your landlord or agent.</p></div></div>
-        <div class="tip"><div class="tip-icon">🕷️</div><div class="tip-body"><h5>Spiders</h5><p>Regular cobwebbing with a broom around ceiling edges, doorframes, and outdoor areas discourages spiders from settling. Most house spiders in urban Australia are harmless huntsmen — large and fast, but not dangerous. Redbacks and funnel-webs are the ones to watch for (see Wildlife tab for identification).</p></div></div>
-        <div class="tip"><div class="tip-icon">🐝</div><div class="tip-body"><h5>Wasps</h5><p>Wasps build nests under eaves, in roof cavities, and in garden areas. If you find a nest, do not disturb it — contact your landlord or a pest control service. Small early-stage nests can be treated with wasp freeze spray at dusk when wasps are inactive. Never block a nest entrance — this makes them aggressive.</p></div></div>
-        <div class="tip"><div class="tip-icon">🐦</div><div class="tip-body"><h5>Crows, ibis & cockatoos</h5><p>Urban birds go after outdoor rubbish. Keep bin lids closed — ibis are persistent and clever about getting into unsecured bins. Cockatoos can destroy outdoor furniture, door frames, and window seals. They're protected wildlife, so you can't harm them, but removing food sources and using reflective deterrents helps discourage them.</p></div></div>
-        <div class="tip"><div class="tip-icon">🦟</div><div class="tip-body"><h5>Mosquitoes & flies</h5><p>Unlike ants and cockroaches, mozzies and flies are airborne — cleanliness helps but doesn't fully prevent them. Key habits: keep windows and doors closed or screened at dawn and dusk (peak mozzie activity). Empty any standing water around the property (pot plant saucers, buckets) — this is where mozzies breed. Fly screens on windows are worth requesting from your landlord if they're missing.</p></div></div>
-      </div>
-    </div>
-
     <div class="info-card" style="border-top:3px solid var(--blue)">
       <div class="info-card-header"><div class="info-card-icon">💧</div><div><div class="info-card-title">Mould — prevent it before it starts</div></div></div>
       <p>Mould is one of the most common and frustrating issues in Australian share houses, particularly in humid climates and poorly ventilated bathrooms. Once mould spores spread through a property they're genuinely difficult to deal with — and responsibility under a lease is often a grey area that leads to bond disputes.</p>
