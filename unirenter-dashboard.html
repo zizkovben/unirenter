@@ -558,6 +558,24 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
   .user-header { flex-wrap: wrap; }
   .user-header-actions { flex-direction: row; }
   .tab-btn { font-size: 12px; padding: 8px 10px; min-width: 80px; }
+  @media (max-width: 480px) {
+    .tab-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      padding: 6px;
+    }
+    .tab-btn {
+      font-size: 13px;
+      padding: 10px 8px;
+      min-width: 0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+  }
   .profile-layout, .settings-layout { grid-template-columns: 1fr; }
   .match-grid { grid-template-columns: 1fr; }
 }
@@ -581,6 +599,11 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
     }
     .nav-logo img { height: 34px; }
     .nav-right, #nav-right { gap: 6px; }
+  nav { display:flex; align-items:center; padding:0 16px; height:56px; gap:8px; min-width:0; }
+  @media (max-width:400px) {
+    nav { padding:0 10px; }
+    .nav-explore-btn { font-size:12px; padding:6px 8px; }
+  }
     .nav-cta, .btn-find { font-size: .78rem; padding: .38rem .7rem; }
     #btn-theme, .btn-theme { font-size: 1rem; padding: .2rem .35rem; }
   }
@@ -595,22 +618,21 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
 <!-- NAV -->
 <nav>
   <a class="nav-logo" href="/">UniRenter</a>
-  <div class="nav-spacer"></div>
-  <div class="nav-actions">
+  <div class="nav-right-group" style="display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0;">
     <div class="nav-dropdown-wrap">
-    <button class="nav-explore-btn" onclick="toggleNavDropdown()">Explore &#9662;</button>
-    <div class="nav-dropdown" id="nav-dropdown">
-      <a class="nav-dd-item" href="/lease">&#128260; Break lease</a>
-      <a class="nav-dd-item" href="/landlords">&#127968; List your property</a>
-      <div class="nav-dd-divider"></div>
-      <a class="nav-dd-item" href="/guide">&#128218; Renter's Guide</a>
-      <a class="nav-dd-item" href="/settled">&#127462;&#127482; Getting Settled</a>
-      <div class="nav-dd-divider"></div>
-      <a class="nav-dd-item" href="/dashboard" id="nav-dd-dashboard" style="display:none;">&#128101; My Dashboard</a>
+      <button class="nav-explore-btn" onclick="toggleNavDropdown()">Explore &#9662;</button>
+      <div class="nav-dropdown" id="nav-dropdown">
+        <a class="nav-dd-item" href="/lease">&#128260; Break lease</a>
+        <a class="nav-dd-item" href="/landlords">&#127968; List your property</a>
+        <div class="nav-dd-divider"></div>
+        <a class="nav-dd-item" href="/guide">&#128218; Renter's Guide</a>
+        <a class="nav-dd-item" href="/settled">&#127462;&#127482; Getting Settled</a>
+        <div class="nav-dd-divider"></div>
+        <a class="nav-dd-item" href="/dashboard" id="nav-dd-dashboard" style="display:none;">&#128101; My Dashboard</a>
+      </div>
     </div>
-  </div>
-    <a class="nav-btn" href="/">← Home</a>
-    <button class="mode-toggle" id="mode-toggle" onclick="toggleMode()">🌙</button>
+    <a class="nav-btn" href="/" style="background:none;border:1px solid rgba(255,255,255,0.15);color:#e8f0f5;padding:7px 12px;border-radius:8px;font-size:13px;text-decoration:none;white-space:nowrap;">&#8592; Home</a>
+    <button class="mode-toggle" id="mode-toggle" onclick="toggleMode()" style="background:none;border:1px solid rgba(255,255,255,0.15);color:#e8f0f5;width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;">🌙</button>
   </div>
 </nav>
 

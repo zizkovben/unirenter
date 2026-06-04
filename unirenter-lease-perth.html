@@ -563,6 +563,65 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
   .nav-dd-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--text,#e8f0f5);font-size:13px;text-decoration:none;cursor:pointer;background:none;border:none;width:100%;text-align:left}
   .nav-dd-item:hover{background:rgba(75,191,224,0.08);color:#4BBFE0}
   .nav-dd-divider{height:1px;background:rgba(255,255,255,0.07);margin:4px 6px}
+/* ── Nav responsive — mobile-first (Session 19 fix) ── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    height: 56px;
+    background: var(--navy, #0d1f2d);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 8px;
+    min-width: 0;
+  }
+  nav .nav-logo-link, nav .nav-logo { flex-shrink: 0; }
+  nav .nav-logo img { height: 36px; width: auto; }
+  .nav-right-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+  .nav-explore-btn {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.18);
+    color: var(--text, #e8f0f5);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .nav-explore-btn:hover { border-color: rgba(75,191,224,0.4); color: #4BBFE0; }
+  .nav-cta {
+    background: var(--brand-yellow, #F5B800);
+    color: #1a1000;
+    font-weight: 600;
+    font-size: 13px;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .nav-cta:hover { background: #e0a800; }
+  @media (max-width: 400px) {
+    nav { padding: 0 10px; gap: 5px; }
+    nav .nav-logo img { height: 28px; }
+    .nav-explore-btn { font-size: 12px; padding: 6px 8px; }
+    .nav-cta { font-size: 12px; padding: 6px 10px; }
+  }
 
   /* ── Responsive nav fix — Session 17 ── */
   @media (max-width: 600px) {

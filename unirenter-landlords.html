@@ -51,7 +51,16 @@
     box-shadow: 0 2px 12px rgba(0,0,0,.35);
   }
   .nav-logo { display: flex; align-items: center; }
-  .nav-logo img { height: 38px; width: auto; }
+  .nav-logo img { height: 36px; width: auto; }
+  nav { display:flex; align-items:center; justify-content:space-between; padding:0 16px; height:56px; gap:8px; min-width:0; }
+  .nav-logo { flex-shrink:0; }
+  .nav-right-group { display:flex; align-items:center; gap:6px; flex-shrink:0; margin-left:auto; }
+  @media (max-width:400px) {
+    nav { padding:0 10px; }
+    .nav-logo img { height:28px; }
+    .btn-find { font-size:12px; padding:6px 10px; }
+    #btn-theme { font-size:.9rem; }
+  }
   .nav-right { display: flex; align-items: center; gap: .75rem; }
   .btn-find {
     background: var(--brand-yellow); color: #0d1f2d;
