@@ -924,60 +924,161 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
 
   <!-- Post a lease form (hidden until gate passed) -->
   <div class="post-lease-form" id="post-lease-form">
-    <div class="step-title" style="margin-bottom:6px;">Post your lease</div>
-    <div class="step-sub">Fill in your details and upload any available documents. The more information you provide, the faster you'll find a match.</div>
+    <div class="step-title" style="margin-bottom:6px;">Post your break lease</div>
+    <div class="step-sub">Tell us about the property — no personal details needed here. We only exchange an inspection address and contact method once a genuine match is confirmed.</div>
 
-    <div class="form-row">
-      <div class="form-group"><label>Property type</label><select><option>Private room in share house</option><option>Whole house</option><option>Apartment / unit</option><option>Studio / self-contained</option><option>Shared room</option></select></div>
-      <div class="form-group"><label>Suburb</label><input type="text" placeholder="e.g. Carlton" /></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Weekly rent ($)</label><input type="text" placeholder="e.g. 320" /></div>
-      <div class="form-group"><label>Bond amount ($)</label><input type="text" placeholder="e.g. 1280" /></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Lease end date</label><input type="text" placeholder="e.g. December 2025" /></div>
-      <div class="form-group"><label>Landlord consent status</label><select><option>Not yet asked</option><option>Awaiting landlord response</option><option>Approved in writing</option></select></div>
-    </div>
-    <div class="form-group"><label>Description</label><textarea placeholder="Describe the property, location, housemates, nearby transport, and reason for leaving…"></textarea></div>
-
-    <div class="divider"></div>
-    <div style="font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:6px;">Document uploads</div>
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">Documents are only shared with matched, verified users who have also passed the legal acknowledgement. They are never public.</div>
-
-    <div class="form-group">
-      <label>Entry condition report <span style="color:var(--brand-green);font-weight:400">(strongly recommended)</span></label>
-      <div class="doc-upload-zone" onclick="triggerDocUpload('ecr')">
-        <div class="dz-icon">📋</div>
-        <div class="dz-text">Upload entry condition report</div>
-        <div class="dz-sub">PDF, JPG or PNG · max 10MB</div>
+    <!-- Email display (pre-filled from localStorage if verified) -->
+    <div id="lease-email-row" style="margin-bottom:20px;">
+      <div id="lease-verified-banner" style="display:none;background:rgba(61,170,92,0.12);border:1px solid rgba(61,170,92,0.3);border-radius:10px;padding:12px 16px;align-items:center;gap:10px;font-size:13px;">
+        <span style="color:var(--brand-green);font-size:16px;">✓</span>
+        <span>Posting as <strong id="lease-verified-email"></strong></span>
       </div>
-      <div class="doc-list" id="docs-ecr"></div>
-    </div>
-    <div class="form-group">
-      <label>Lease agreement <span style="color:var(--text-muted);font-weight:400">(redact personal details before uploading)</span></label>
-      <div class="doc-upload-zone" onclick="triggerDocUpload('lease')">
-        <div class="dz-icon">📄</div>
-        <div class="dz-text">Upload lease agreement</div>
-        <div class="dz-sub">PDF only · max 20MB</div>
+      <div id="lease-email-entry">
+        <div class="form-group">
+          <label>Your email <span style="color:var(--brand-coral);font-size:11px;">* Required — we'll verify before posting</span></label>
+          <input type="email" id="lease-email-input" placeholder="you@student.uni.edu.au" style="width:100%;" />
+        </div>
+        <div id="lease-otp-row" style="display:none;margin-top:12px;">
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">Enter the 6-digit code we sent to your email</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <input class="otp-box" id="lotp1" maxlength="1" oninput="lotpNext(this,'lotp2')" style="width:44px;height:48px;text-align:center;font-size:20px;font-weight:700;border-radius:8px;border:1.5px solid rgba(255,255,255,0.15);background:var(--navy-mid);color:var(--text);">
+            <input class="otp-box" id="lotp2" maxlength="1" oninput="lotpNext(this,'lotp3')" style="width:44px;height:48px;text-align:center;font-size:20px;font-weight:700;border-radius:8px;border:1.5px solid rgba(255,255,255,0.15);background:var(--navy-mid);color:var(--text);">
+            <input class="otp-box" id="lotp3" maxlength="1" oninput="lotpNext(this,'lotp4')" style="width:44px;height:48px;text-align:center;font-size:20px;font-weight:700;border-radius:8px;border:1.5px solid rgba(255,255,255,0.15);background:var(--navy-mid);color:var(--text);">
+            <input class="otp-box" id="lotp4" maxlength="1" oninput="lotpNext(this,'lotp5')" style="width:44px;height:48px;text-align:center;font-size:20px;font-weight:700;border-radius:8px;border:1.5px solid rgba(255,255,255,0.15);background:var(--navy-mid);color:var(--text);">
+            <input class="otp-box" id="lotp5" maxlength="1" oninput="lotpNext(this,'lotp6')" style="width:44px;height:48px;text-align:center;font-size:20px;font-weight:700;border-radius:8px;border:1.5px solid rgba(255,255,255,0.15);background:var(--navy-mid);color:var(--text);">
+            <input class="otp-box" id="lotp6" maxlength="1" oninput="lotpNext(this,null)" style="width:44px;height:48px;text-align:center;font-size:20px;font-weight:700;border-radius:8px;border:1.5px solid rgba(255,255,255,0.15);background:var(--navy-mid);color:var(--text);">
+          </div>
+          <div id="lease-otp-status" style="font-size:13px;min-height:20px;"></div>
+        </div>
+        <button id="lease-send-otp-btn" class="btn-next" style="margin-top:10px;padding:10px 20px;font-size:14px;" onclick="leaseSendOTP()">Send verification code →</button>
       </div>
-      <div class="doc-list" id="docs-lease"></div>
     </div>
-    <div class="form-group">
-      <label>Landlord written consent <span style="color:var(--text-muted);font-weight:400">(if obtained)</span></label>
-      <div class="doc-upload-zone" onclick="triggerDocUpload('consent')">
-        <div class="dz-icon">✅</div>
-        <div class="dz-text">Upload landlord consent letter or email</div>
-        <div class="dz-sub">PDF, JPG or PNG · max 10MB</div>
+
+    <!-- Property details (shown after email verified) -->
+    <div id="lease-form-fields" style="display:none;">
+      <div class="form-row">
+        <div class="form-group">
+          <label>City</label>
+          <select id="lease-city">
+            <option value="melbourne">Melbourne</option>
+            <option value="sydney">Sydney</option>
+            <option value="brisbane">Brisbane</option>
+            <option value="adelaide">Adelaide</option>
+            <option value="perth">Perth</option>
+            <option value="canberra">Canberra</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Suburb</label>
+          <input type="text" id="lease-suburb" placeholder="e.g. Carlton" style="width:100%;" />
+        </div>
       </div>
-      <div class="doc-list" id="docs-consent"></div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Property type</label>
+          <select id="lease-property-type">
+            <option value="">Select type…</option>
+            <option value="private_room_share_house">Private room — share house</option>
+            <option value="private_room_share_apartment">Private room — share apartment</option>
+            <option value="share_room">Share room (2 people, 1 room)</option>
+            <option value="studio">Studio apartment</option>
+            <option value="1br_apartment">1-bedroom apartment</option>
+            <option value="2br_apartment">2-bedroom apartment</option>
+            <option value="3br_plus">3+ bedroom house</option>
+            <option value="whole_property">Whole property</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Bedrooms in property</label>
+          <select id="lease-bedrooms">
+            <option value="">Select…</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5+</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Weekly rent ($)</label>
+          <input type="number" id="lease-rent" placeholder="e.g. 320" min="80" max="2000" style="width:100%;" oninput="updateBondEstimate()" />
+        </div>
+        <div class="form-group">
+          <label>Bond <span style="color:var(--text-muted);font-size:11px;font-weight:400">(informational)</span></label>
+          <div id="lease-bond-display" style="background:var(--navy);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:11px 14px;font-size:13px;color:var(--text-muted);min-height:44px;line-height:1.5;">
+            Enter rent above to estimate
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Available from</label>
+          <input type="date" id="lease-available-from" style="width:100%;" />
+        </div>
+        <div class="form-group">
+          <label>Lease ends</label>
+          <input type="date" id="lease-ends" style="width:100%;" />
+        </div>
+      </div>
+
+      <div style="display:flex;gap:24px;margin-bottom:20px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:400;">
+          <input type="checkbox" id="lease-furnished" style="width:16px;height:16px;cursor:pointer;">
+          Furnished
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:400;">
+          <input type="checkbox" id="lease-pets" style="width:16px;height:16px;cursor:pointer;">
+          Pets allowed / negotiable
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label>Listing title <span style="color:var(--text-muted);font-size:11px;font-weight:400">max 80 characters</span></label>
+        <input type="text" id="lease-title" placeholder="e.g. Sunny private room near QUT, available Feb" maxlength="80" style="width:100%;" oninput="document.getElementById('lease-title-count').textContent=this.value.length+' / 80'" />
+        <div id="lease-title-count" style="font-size:11px;color:var(--text-muted);margin-top:4px;text-align:right;">0 / 80</div>
+      </div>
+
+      <div class="form-group">
+        <label>Description <span style="color:var(--text-muted);font-size:11px;font-weight:400">max 500 characters — no phone numbers, no links</span></label>
+        <textarea id="lease-description" rows="4" maxlength="500" oninput="document.getElementById('lease-desc-count').textContent=this.value.length+' / 500'" placeholder="Describe the property and why you're leaving. Don't include personal contact details — those are exchanged safely after a match is confirmed." style="width:100%;resize:vertical;"></textarea>
+        <div id="lease-desc-count" style="font-size:11px;color:var(--text-muted);margin-top:4px;text-align:right;">0 / 500</div>
+      </div>
+
+      <!-- Cob safety note -->
+      <div style="background:rgba(245,184,0,0.08);border:1px solid rgba(245,184,0,0.25);border-radius:10px;padding:14px 16px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-size:20px;line-height:1.4;">🤠</span>
+        <div style="font-size:13px;line-height:1.6;">
+          <strong style="color:var(--brand-yellow);">Cob's reminder</strong><br>
+          <span style="color:var(--text-muted);">Don't include your phone number, WhatsApp, or any payment details in your listing. Interested renters contact you through UniRenter — we keep your details private until you're both ready to inspect.</span>
+        </div>
+      </div>
+
+      <div id="lease-submit-error" style="display:none;background:rgba(232,98,58,0.12);border:1px solid rgba(232,98,58,0.3);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--brand-coral);margin-bottom:16px;"></div>
+
+      <button id="lease-submit-btn" class="btn-next" style="width:100%;padding:14px;" onclick="submitLeaseListing()">
+        Post my lease listing →
+      </button>
+      <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:10px;">Free until January 2027 · Your email is never shown publicly</div>
     </div>
 
-    <input type="file" id="doc-file-input" style="display:none" accept=".pdf,.jpg,.jpeg,.png" onchange="handleDocUpload(this)" />
-
-    <div class="info-note" style="margin-bottom:20px;">🔒 Uploaded documents are encrypted and only accessible to matched users. UniRenter staff may review documents to verify authenticity and protect users from fraud.</div>
-
-    <button class="btn-next" style="width:100%;padding:14px;" onclick="showToast2('✅ Lease posted!','Your listing is under review and will be live within 2 hours.')">Post my lease listing</button>
+    <!-- Success state -->
+    <div id="lease-submit-success" style="display:none;text-align:center;padding:40px 20px;">
+      <div style="font-size:48px;margin-bottom:16px;">🎉</div>
+      <div style="font-family:var(--font-display);font-size:22px;font-weight:800;margin-bottom:8px;">Listing posted!</div>
+      <div id="lease-success-ref" style="font-size:13px;color:var(--text-muted);margin-bottom:20px;"></div>
+      <div style="font-size:14px;color:var(--text-muted);line-height:1.7;max-width:380px;margin:0 auto 24px;">We'll email you when someone is interested. All contact happens through UniRenter — no personal details shared until you're both ready to inspect.</div>
+      <div style="background:rgba(245,184,0,0.08);border:1px solid rgba(245,184,0,0.25);border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;text-align:left;max-width:400px;margin:0 auto;">
+        <span style="font-size:20px;">🤠</span>
+        <div style="font-size:13px;color:var(--text-muted);line-height:1.6;">
+          <strong style="color:var(--brand-yellow);">Cob says:</strong> If anyone contacts you outside UniRenter asking for a deposit — that's a scam. <strong>NEVER send money</strong> before an in-person inspection. Flag it to us and we'll investigate.
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Know your rights tab -->
@@ -1289,6 +1390,197 @@ let currentDocTarget = null;
 let ackCount = 0;
 const totalAcks = 7;
 
+// ── Lease listing form ──
+let leaseEmailVerified = false;
+let leaseVerifiedEmail = '';
+
+function leaseInitEmail() {
+  const stored = localStorage.getItem('unirenter_email');
+  const isVerified = localStorage.getItem('unirenter_email_verified') === '1';
+  if (stored && isVerified) {
+    // Already verified — skip OTP, show fields directly
+    leaseEmailVerified = true;
+    leaseVerifiedEmail = stored;
+    const banner = document.getElementById('lease-verified-banner');
+    const entry = document.getElementById('lease-email-entry');
+    const fields = document.getElementById('lease-form-fields');
+    if (banner) { banner.style.display = 'flex'; document.getElementById('lease-verified-email').textContent = stored; }
+    if (entry) entry.style.display = 'none';
+    if (fields) fields.style.display = 'block';
+  } else {
+    // Need email + OTP
+    const entry = document.getElementById('lease-email-entry');
+    if (entry) entry.style.display = 'block';
+    if (stored) {
+      const inp = document.getElementById('lease-email-input');
+      if (inp) inp.value = stored;
+    }
+  }
+}
+
+async function leaseSendOTP() {
+  const emailInp = document.getElementById('lease-email-input');
+  const email = emailInp ? emailInp.value.trim() : '';
+  if (!email || !email.includes('@') || !email.includes('.')) {
+    showToast('⚠️ Email required', 'Please enter a valid email address.');
+    return;
+  }
+  const btn = document.getElementById('lease-send-otp-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  try {
+    const r = await fetch('/api/auth/send-email-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const d = await r.json();
+    if (d.success || d.message) {
+      leaseVerifiedEmail = email;
+      localStorage.setItem('unirenter_email', email);
+      const otpRow = document.getElementById('lease-otp-row');
+      if (otpRow) otpRow.style.display = 'block';
+      if (btn) { btn.textContent = 'Resend code'; btn.disabled = false; }
+      document.getElementById('lotp1').focus();
+      showToast('📧 Code sent!', 'Check your email for the 6-digit code.');
+    } else {
+      showToast('⚠️ Error', d.error || 'Could not send code. Try again.');
+      if (btn) { btn.disabled = false; btn.textContent = 'Send verification code →'; }
+    }
+  } catch(e) {
+    showToast('⚠️ Error', 'Network error. Please try again.');
+    if (btn) { btn.disabled = false; btn.textContent = 'Send verification code →'; }
+  }
+}
+
+function lotpNext(input, nextId) {
+  input.value = input.value.replace(/[^0-9]/g, '');
+  if (input.value.length === 1) {
+    if (nextId) document.getElementById(nextId).focus();
+    checkLeaseOTP();
+  }
+}
+
+async function checkLeaseOTP() {
+  const code = ['lotp1','lotp2','lotp3','lotp4','lotp5','lotp6']
+    .map(id => { const el = document.getElementById(id); return el ? el.value : ''; }).join('');
+  if (code.length < 6) return;
+  const status = document.getElementById('lease-otp-status');
+  try {
+    const r = await fetch('/api/auth/verify-email-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: leaseVerifiedEmail, code }),
+    });
+    const d = await r.json();
+    if (d.success || d.verified) {
+      leaseEmailVerified = true;
+      localStorage.setItem('unirenter_email_verified', '1');
+      if (status) { status.style.color = 'var(--brand-green)'; status.textContent = '✓ Email verified'; }
+      setTimeout(() => {
+        const entry = document.getElementById('lease-email-entry');
+        const banner = document.getElementById('lease-verified-banner');
+        const fields = document.getElementById('lease-form-fields');
+        if (entry) entry.style.display = 'none';
+        if (banner) { banner.style.display = 'flex'; document.getElementById('lease-verified-email').textContent = leaseVerifiedEmail; }
+        if (fields) fields.style.display = 'block';
+      }, 700);
+    } else {
+      if (status) { status.style.color = 'var(--brand-coral)'; status.textContent = '✗ Incorrect code — try again'; }
+      ['lotp1','lotp2','lotp3','lotp4','lotp5','lotp6'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+      document.getElementById('lotp1').focus();
+    }
+  } catch(e) {
+    if (status) { status.style.color = 'var(--brand-coral)'; status.textContent = 'Network error — try again'; }
+  }
+}
+
+function updateBondEstimate() {
+  const rent = parseInt(document.getElementById('lease-rent').value, 10);
+  const display = document.getElementById('lease-bond-display');
+  if (!display) return;
+  if (!rent || rent < 80) { display.textContent = 'Enter rent above to estimate'; return; }
+  const lo = (rent * 2).toFixed(0);
+  const hi = (rent * 4).toFixed(0);
+  display.innerHTML = `<span style="color:var(--text);">$${lo} – $${hi}</span> <span style="font-size:11px;">(typical 2–4 weeks + rent in advance)</span>`;
+}
+
+async function submitLeaseListing() {
+  if (!leaseEmailVerified) {
+    showToast('⚠️ Verify email first', 'Please verify your email before posting.');
+    return;
+  }
+  const city = document.getElementById('lease-city').value;
+  const suburb = (document.getElementById('lease-suburb').value || '').trim();
+  const property_type = document.getElementById('lease-property-type').value;
+  const bedrooms = document.getElementById('lease-bedrooms').value;
+  const weekly_rent = document.getElementById('lease-rent').value;
+  const available_from = document.getElementById('lease-available-from').value;
+  const lease_ends = document.getElementById('lease-ends').value;
+  const furnished = document.getElementById('lease-furnished').checked;
+  const pets_allowed = document.getElementById('lease-pets').checked;
+  const title = (document.getElementById('lease-title').value || '').trim();
+  const description = (document.getElementById('lease-description').value || '').trim();
+  const errorDiv = document.getElementById('lease-submit-error');
+
+  // Client-side validation
+  const missing = [];
+  if (!suburb) missing.push('suburb');
+  if (!property_type) missing.push('property type');
+  if (!weekly_rent) missing.push('weekly rent');
+  if (!available_from) missing.push('available from date');
+  if (!lease_ends) missing.push('lease end date');
+  if (!title) missing.push('listing title');
+  if (missing.length) {
+    if (errorDiv) { errorDiv.style.display = 'block'; errorDiv.textContent = 'Please fill in: ' + missing.join(', ') + '.'; }
+    return;
+  }
+  if (errorDiv) errorDiv.style.display = 'none';
+
+  const btn = document.getElementById('lease-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Posting…'; }
+
+  try {
+    const r = await fetch('/api/lease/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: leaseVerifiedEmail,
+        city, suburb, property_type, bedrooms,
+        weekly_rent: parseInt(weekly_rent, 10),
+        available_from, lease_ends, furnished, pets_allowed,
+        title, description,
+      }),
+    });
+    const d = await r.json();
+    if (d.success) {
+      // Write to localStorage for dashboard display
+      localStorage.setItem('unirenter_lease_listed', '1');
+      localStorage.setItem('unirenter_lease_ref', d.listing_ref);
+      localStorage.setItem('unirenter_lease_city', city);
+      localStorage.setItem('unirenter_lease_status', d.status);
+      // Show success state
+      const fields = document.getElementById('lease-form-fields');
+      const success = document.getElementById('lease-submit-success');
+      const ref = document.getElementById('lease-success-ref');
+      if (fields) fields.style.display = 'none';
+      if (ref) ref.textContent = 'Reference: ' + d.listing_ref + (d.status === 'pending_review' ? ' · Under review — live within 24hrs' : ' · Live now');
+      if (success) success.style.display = 'block';
+    } else if (d.rejected) {
+      if (errorDiv) {
+        errorDiv.style.display = 'block';
+        errorDiv.innerHTML = '⚠️ ' + (d.message || 'Listing could not be posted. Please review our community guidelines.');
+      }
+      if (btn) { btn.disabled = false; btn.textContent = 'Post my lease listing →'; }
+    } else {
+      if (errorDiv) { errorDiv.style.display = 'block'; errorDiv.textContent = d.error || 'Something went wrong. Please try again.'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Post my lease listing →'; }
+    }
+  } catch(e) {
+    if (errorDiv) { errorDiv.style.display = 'block'; errorDiv.textContent = 'Network error. Please check your connection and try again.'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Post my lease listing →'; }
+  }
+}
+
 function leaseTab(tab, btn) {
   document.querySelectorAll('.lease-tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -1313,8 +1605,12 @@ function leaseTab(tab, btn) {
 function showLeaseContent(tab) {
   document.getElementById('legal-gate').style.display = 'none';
   document.getElementById('lease-browse').style.display = tab === 'browse' ? 'block' : 'none';
-  if (tab === 'post') document.getElementById('post-lease-form').classList.add('visible');
-  else document.getElementById('post-lease-form').classList.remove('visible');
+  if (tab === 'post') {
+    document.getElementById('post-lease-form').classList.add('visible');
+    leaseInitEmail();
+  } else {
+    document.getElementById('post-lease-form').classList.remove('visible');
+  }
 }
 
 function ackCard(card) {
