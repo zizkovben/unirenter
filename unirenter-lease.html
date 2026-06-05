@@ -1387,14 +1387,16 @@ function submitReport() {
 let legalGatePassed = false;
 
 function heroTab(tab) {
-  // Find the matching tab button and call leaseTab with it
+  // Make lease-board visible first (it starts hidden)
+  const board = document.getElementById('lease-board');
+  if (board) board.classList.add('visible');
   const btns = document.querySelectorAll('.lease-tab-btn');
   const tabIndex = tab === 'browse' ? 0 : tab === 'post' ? 1 : 2;
   const btn = btns[tabIndex];
   if (!btn) return;
   document.querySelectorAll('.lease-tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('lease-board').scrollIntoView({behavior:'smooth', block:'start'});
+  if (board) board.scrollIntoView({behavior:'smooth', block:'start'});
   setTimeout(() => {
     if (tab === 'legal') {
       document.getElementById('legal-gate').style.display = 'none';
