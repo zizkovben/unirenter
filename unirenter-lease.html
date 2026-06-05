@@ -677,8 +677,8 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
   <h1>Find or transfer a lease<br><span style="color:var(--brand-coral);">safely.</span></h1>
   <p>Take over an existing Melbourne lease, or find a verified student to take yours. Full legal guidance, mandatory acknowledgements, and document upload built in.</p>
   <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-    <button class="btn-primary" onclick="document.querySelector('.lease-tab-btn').click();document.getElementById('lease-board').scrollIntoView({behavior:'smooth'})">🔍 Browse leases</button>
-    <button class="btn-secondary" onclick="document.querySelectorAll('.lease-tab-btn')[1].click();document.getElementById('lease-board').scrollIntoView({behavior:'smooth'})">➕ Post my lease</button>
+    <button class="btn-primary" onclick="heroTab('browse')">🔍 Browse leases</button>
+    <button class="btn-secondary" onclick="heroTab('post')">➕ Post my lease</button>
   </div>
   <div class="lease-hero-stats">
     <div><div class="lease-stat-num" style="color:var(--brand-coral);">3</div><div class="lease-stat-label">active listings</div></div>
@@ -1385,6 +1385,36 @@ function submitReport() {
 
 // ── Lease board ──
 let legalGatePassed = false;
+
+function heroTab(tab) {
+  // Find the matching tab button and call leaseTab with it
+  const btns = document.querySelectorAll('.lease-tab-btn');
+  const tabIndex = tab === 'browse' ? 0 : tab === 'post' ? 1 : 2;
+  const btn = btns[tabIndex];
+  if (!btn) return;
+  document.querySelectorAll('.lease-tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('lease-board').scrollIntoView({behavior:'smooth', block:'start'});
+  setTimeout(() => {
+    if (tab === 'legal') {
+      document.getElementById('legal-gate').style.display = 'none';
+      document.getElementById('lease-browse').style.display = 'none';
+      document.getElementById('post-lease-form').classList.remove('visible');
+      document.getElementById('lease-rights').style.display = 'block';
+      return;
+    }
+    document.getElementById('lease-rights').style.display = 'none';
+    if (!legalGatePassed) {
+      pendingLeaseTab = tab;
+      document.getElementById('legal-gate').style.display = 'block';
+      document.getElementById('lease-browse').style.display = 'none';
+      document.getElementById('post-lease-form').classList.remove('visible');
+      setTimeout(() => document.getElementById('legal-gate').scrollIntoView({behavior:'smooth', block:'start'}), 200);
+    } else {
+      showLeaseContent(tab);
+    }
+  }, 400);
+}
 let pendingLeaseTab = null;
 let currentDocTarget = null;
 let ackCount = 0;
