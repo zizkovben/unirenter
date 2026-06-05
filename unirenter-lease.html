@@ -926,84 +926,10 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
   <!-- Browse leases (shown after incoming gate) -->
   <div id="lease-browse" style="display:none;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-      <div style="font-size:13px;color:var(--text-muted);">Showing <strong style="color:var(--text)">6 available leases</strong> in Melbourne</div>
-      <div class="chips">
-        <div class="chip selected" onclick="toggle(this)">All areas</div>
-        <div class="chip" onclick="toggle(this)">Inner city</div>
-        <div class="chip" onclick="toggle(this)">Inner north</div>
-        <div class="chip" onclick="toggle(this)">Inner south</div>
-      </div>
+      <div id="browse-count" style="font-size:13px;color:var(--text-muted);">Loading listings…</div>
     </div>
-    <div class="lease-list">
-      <div class="lease-card">
-        <div class="lease-card-top">
-          <div>
-            <div class="lease-card-title">2BR apartment — Carlton, near UniMelb</div>
-            <div class="lease-card-sub">Posted by Mei L. · Verified student · 2 days ago</div>
-          </div>
-          <span class="lease-badge badge-urgent">⚡ Urgent</span>
-        </div>
-        <div class="lease-details">
-          <span class="lease-detail-pill">📅 Lease ends Dec 2025</span>
-          <span class="lease-detail-pill">💰 $320/wk</span>
-          <span class="lease-detail-pill">🛏️ Private room</span>
-          <span class="lease-detail-pill">📋 Docs available</span>
-          <span class="lease-detail-pill">🏦 Bond $1,280</span>
-        </div>
-        <div class="lease-card-desc">Leaving Melbourne earlier than expected due to family reasons. Beautiful apartment, well maintained. Housemates are friendly international students.</div>
-        <div class="lease-card-footer">
-          <button class="btn-lease-contact" onclick="showToast2('✉️ Interest sent','The poster will be notified. They'll contact you through UniRenter to arrange an inspection.')">I'm interested</button>
-          <button class="btn-lease-docs" onclick="showDocsModal()">📄 View documents</button>
-          <button class="report-btn" onclick="openModal('report-modal')">⚑ Report</button>
-        </div>
-        <div class="lease-warning">⚠️ Always inspect in person and obtain written landlord consent before transferring any money.</div>
-      </div>
-      <div class="lease-card">
-        <div class="lease-card-top">
-          <div>
-            <div class="lease-card-title">Room in share house — Brunswick</div>
-            <div class="lease-card-sub">Posted by Tom K. · Verified student · 5 days ago</div>
-          </div>
-          <span class="lease-badge badge-flexible">🕐 Flexible</span>
-        </div>
-        <div class="lease-details">
-          <span class="lease-detail-pill">📅 Lease ends Mar 2026</span>
-          <span class="lease-detail-pill">💰 $240/wk</span>
-          <span class="lease-detail-pill">🛏️ Private room</span>
-          <span class="lease-detail-pill">👥 3 remaining housemates</span>
-          <span class="lease-detail-pill">🏦 Bond $960</span>
-        </div>
-        <div class="lease-card-desc">Heading overseas for a semester exchange. Great share house with 3 friendly housemates. Close to trams and Brunswick cafes.</div>
-        <div class="lease-card-footer">
-          <button class="btn-lease-contact" onclick="showToast2('✉️ Interest sent','The poster will be notified. They'll contact you through UniRenter to arrange an inspection.')">I'm interested</button>
-          <button class="btn-lease-docs" onclick="showDocsModal()">📄 View documents</button>
-          <button class="report-btn" onclick="openModal('report-modal')">⚑ Report</button>
-        </div>
-        <div class="lease-warning">⚠️ Landlord approval is pending. Do not transfer any bond or fees until written consent is confirmed.</div>
-      </div>
-      <div class="lease-card">
-        <div class="lease-card-top">
-          <div>
-            <div class="lease-card-title">Studio apartment — Fitzroy</div>
-            <div class="lease-card-sub">Posted by Priya S. · Verified student · 1 week ago</div>
-          </div>
-          <span class="lease-badge badge-new">✅ Landlord approved</span>
-        </div>
-        <div class="lease-details">
-          <span class="lease-detail-pill">📅 Lease ends Jun 2026</span>
-          <span class="lease-detail-pill">💰 $380/wk</span>
-          <span class="lease-detail-pill">🏨 Self-contained studio</span>
-          <span class="lease-detail-pill">📋 Full docs uploaded</span>
-          <span class="lease-detail-pill">🏦 Bond $1,520</span>
-        </div>
-        <div class="lease-card-desc">Landlord has approved assignment in writing — paperwork ready to go. Cute studio in the heart of Fitzroy, walking distance to cafes and trams.</div>
-        <div class="lease-card-footer">
-          <button class="btn-lease-contact" onclick="showToast2('✉️ Interest sent','The poster will be notified. They'll contact you through UniRenter to arrange an inspection.')">I'm interested</button>
-          <button class="btn-lease-docs" onclick="showDocsModal()">📄 View documents</button>
-          <button class="report-btn" onclick="openModal('report-modal')">⚑ Report</button>
-        </div>
-        <div class="lease-warning">⚠️ Even with landlord approval, always inspect before signing. Verify the condition report carefully.</div>
-      </div>
+    <div id="lease-list-grid" class="lease-list">
+      <!-- Populated by loadLeaseListings() -->
     </div>
   </div>
 
@@ -1463,11 +1389,25 @@ function selectReport(el, type) {
   document.querySelectorAll('.report-cat').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected'); selectedReport = type;
 }
-function submitReport() {
+async function submitReport() {
   if (!selectedReport) { showToast('⚠️ Select a reason','Please select a report category first.'); return; }
+  const detail = (document.getElementById('report-detail') || {}).value || '';
   closeModal('report-modal');
-  showToast('✅ Report submitted','Thank you — our team will review within 24 hours. The profile has been flagged.');
+  try {
+    await fetch('/api/lease/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        listing_ref:    window._reportTargetRef || null,
+        report_type:    selectedReport,
+        detail:         detail.trim(),
+        reporter_email: localStorage.getItem('unirenter_email') || null,
+      }),
+    });
+  } catch(e) { /* silent — UI feedback already shown */ }
+  showToast('✅ Report submitted', 'Thank you — flagged listings are reviewed automatically. Your identity is never revealed.');
   selectedReport = null;
+  window._reportTargetRef = null;
 }
 
 // ── Lease board — two-path flow ──
@@ -1545,6 +1485,7 @@ function passIncomingGate() {
   document.getElementById('legal-gate-incoming').style.display = 'none';
   document.getElementById('lease-browse').style.display = 'block';
   setTimeout(() => document.getElementById('lease-browse').scrollIntoView({behavior:'smooth', block:'start'}), 80);
+  loadLeaseListings();
 }
 
 // ── Lease listing form ──
@@ -1951,6 +1892,264 @@ function goStep(n) {
 
 
 
+// ── Lease browse — real Supabase data ───────────────────────────────────────
+
+// Detect city from URL path: /lease/sydney → sydney, /lease → melbourne
+function detectLeaseCity() {
+  const parts = window.location.pathname.split('/').filter(Boolean);
+  // parts: ['lease'] or ['lease','sydney']
+  return parts.length > 1 ? parts[1] : 'melbourne';
+}
+
+function leaseAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return 'today';
+  if (days === 1) return '1 day ago';
+  if (days < 7)  return days + ' days ago';
+  const wks = Math.floor(days / 7);
+  return wks === 1 ? '1 week ago' : wks + ' weeks ago';
+}
+
+function propertyLabel(type) {
+  const map = {
+    private_room_share_house:      'Private room — share house',
+    private_room_share_apartment:  'Private room — share apartment',
+    share_room:                    'Share room (2 people)',
+    studio:                        'Studio apartment',
+    '1br_apartment':               '1-bedroom apartment',
+    '2br_apartment':               '2-bedroom apartment',
+    '3br_plus':                    '3+ bedroom house',
+    whole_property:                'Whole property',
+  };
+  return map[type] || type;
+}
+
+function buildLeaseCard(listing) {
+  const interestKey = 'ur_interested_' + listing.listing_ref;
+  const alreadyInterested = localStorage.getItem(interestKey) === '1';
+  const bond = listing.weekly_rent ? Math.round(listing.weekly_rent * 4) : null;
+  const availDate = listing.available_from ? new Date(listing.available_from).toLocaleDateString('en-AU', { month: 'short', year: 'numeric' }) : null;
+  const leaseEnd  = listing.lease_ends    ? new Date(listing.lease_ends).toLocaleDateString('en-AU', { month: 'short', year: 'numeric' }) : null;
+
+  const card = document.createElement('div');
+  card.className = 'lease-card';
+  card.dataset.suburb = (listing.suburb || '').toLowerCase();
+
+  card.innerHTML = `
+    <div class="lease-card-top">
+      <div>
+        <div class="lease-card-title">${listing.title || propertyLabel(listing.property_type) + ' — ' + listing.suburb}</div>
+        <div class="lease-card-sub">Verified student · ${leaseAgo(listing.created_at)}</div>
+      </div>
+    </div>
+    <div class="lease-details">
+      ${availDate  ? `<span class="lease-detail-pill">📅 Available ${availDate}</span>` : ''}
+      ${leaseEnd   ? `<span class="lease-detail-pill">🗓️ Lease ends ${leaseEnd}</span>`  : ''}
+      ${listing.weekly_rent ? `<span class="lease-detail-pill">💰 $${listing.weekly_rent}/wk</span>` : ''}
+      <span class="lease-detail-pill">${propertyLabel(listing.property_type)}</span>
+      ${listing.furnished ? '<span class="lease-detail-pill">🛋️ Furnished</span>' : ''}
+      ${listing.pets_allowed ? '<span class="lease-detail-pill">🐾 Pets OK</span>' : ''}
+      ${bond ? `<span class="lease-detail-pill">🏦 Bond ~$${bond}</span>` : ''}
+    </div>
+    ${listing.description ? `<div class="lease-card-desc">${listing.description}</div>` : ''}
+    <div class="lease-card-footer">
+      <button class="btn-lease-contact" id="interest-btn-${listing.listing_ref}"
+        onclick="expressInterest('${listing.listing_ref}', this)"
+        ${alreadyInterested ? 'disabled style="opacity:0.6;cursor:default;"' : ''}>
+        ${alreadyInterested ? '✅ Interest sent' : "I'm interested"}
+      </button>
+      <button class="report-btn" onclick="openReportForListing('${listing.listing_ref}')">⚑ Report</button>
+    </div>
+    <div class="lease-warning">⚠️ Always inspect in person and get written landlord consent before transferring any money.</div>
+  `;
+  return card;
+}
+
+async function loadLeaseListings() {
+  const city    = detectLeaseCity();
+  const grid    = document.getElementById('lease-list-grid');
+  const countEl = document.getElementById('browse-count');
+  if (!grid) return;
+
+  grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">Loading listings…</div>';
+
+  try {
+    const res  = await fetch(`/api/lease/list?city=${city}`);
+    const data = await res.json();
+
+    if (!res.ok || !data.listings) throw new Error(data.error || 'API error');
+
+    const listings = data.listings;
+    grid.innerHTML = '';
+
+    if (listings.length === 0) {
+      grid.innerHTML = `
+        <div style="text-align:center;padding:48px 24px;color:var(--text-muted);">
+          <div style="font-size:36px;margin-bottom:12px;">🏠</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px;">No active listings yet</div>
+          <div style="font-size:13px;line-height:1.7;">Be the first to post a break lease in ${city.charAt(0).toUpperCase()+city.slice(1)}, or check back soon.</div>
+        </div>
+      `;
+      if (countEl) countEl.textContent = 'No active listings in ' + city.charAt(0).toUpperCase() + city.slice(1);
+      return;
+    }
+
+    listings.forEach(l => grid.appendChild(buildLeaseCard(l)));
+    if (countEl) countEl.innerHTML = `Showing <strong style="color:var(--text)">${listings.length} available ${listings.length === 1 ? 'lease' : 'leases'}</strong> in ${city.charAt(0).toUpperCase()+city.slice(1)}`;
+
+  } catch (err) {
+    console.warn('Lease listings unavailable:', err.message);
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">Listings temporarily unavailable — try again shortly.</div>';
+    if (countEl) countEl.textContent = '';
+  }
+}
+
+// ── Express interest — fully automatic ───────────────────────────────────────
+async function expressInterest(listingRef, btn) {
+  const email = localStorage.getItem('unirenter_email');
+  if (!email) {
+    showToast('⚠️ Sign in first', 'Complete your profile on the main page to express interest in listings.');
+    return;
+  }
+
+  // Lock button immediately — no double-clicking
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  // One-time Cob safety briefing (localStorage-gated)
+  if (!localStorage.getItem('ur_cob_lease_safety_shown')) {
+    localStorage.setItem('ur_cob_lease_safety_shown', '1');
+    setTimeout(() => {
+      showCobNudge("Before you connect — inspect in person, get written landlord consent, and never transfer money until both parties have signed. Cob will guide you through every step 🤠");
+    }, 600);
+  }
+
+  try {
+    const res  = await fetch('/api/lease/interest', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        listing_ref:   listingRef,
+        incoming_email: email,
+        incoming_name:  localStorage.getItem('ur_display_name') || null,
+        incoming_uni:   localStorage.getItem('ur_university')   || null,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok || res.status === 200) {
+      btn.textContent = '✅ Interest sent';
+      btn.style.opacity = '0.6';
+      btn.style.cursor  = 'default';
+      localStorage.setItem('ur_interested_' + listingRef, '1');
+      showToast('✉️ Interest sent', "The poster has been notified — they'll be in touch through UniRenter to arrange an inspection.");
+    } else if (res.status === 410) {
+      btn.textContent = 'No longer available';
+      showToast('⚠️ Listing gone', 'This listing is no longer active. Try another one.');
+    } else {
+      btn.disabled = false;
+      btn.textContent = "I'm interested";
+      showToast('⚠️ Try again', data.error || 'Something went wrong — please try again.');
+    }
+
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = "I'm interested";
+    showToast('⚠️ Connection issue', 'Check your connection and try again.');
+  }
+}
+
+// ── Report a listing — wires modal to listing_ref ────────────────────────────
+function openReportForListing(listingRef) {
+  window._reportTargetRef = listingRef;
+  openModal('report-modal');
+}
+
+// ── Cob FAB ──────────────────────────────────────────────────────────────────
+function showCobFab() {
+  const fab = document.getElementById('cob-fab');
+  if (fab) fab.style.display = 'flex';
+}
+function showCobNudge(text) {
+  const nudge = document.getElementById('cob-nudge');
+  if (!nudge) return;
+  nudge.innerHTML = '<strong>🤠 <span class="notranslate">Cob</span>:</strong> ' + text;
+  nudge.style.display = 'block';
+  nudge.onclick = openCobPanel;
+  setTimeout(() => { nudge.style.display = 'none'; }, 17500);
+}
+function openCobPanel() {
+  const panel = document.getElementById('cob-panel');
+  if (panel) panel.classList.add('open');
+  const nudge = document.getElementById('cob-nudge');
+  if (nudge) nudge.style.display = 'none';
+  const msgs = document.getElementById('cob-messages');
+  if (msgs && msgs.children.length === 0) {
+    appendCobMessage('assistant', "G'day! I'm Cob — your UniRenter housing mate 🤠 On the break lease board? I can help you understand your rights, what to check before signing, and how the process works. What's on your mind?");
+  }
+}
+function closeCobPanel() {
+  const panel = document.getElementById('cob-panel');
+  if (panel) panel.classList.remove('open');
+}
+function appendCobMessage(role, text) {
+  const msgs = document.getElementById('cob-messages');
+  if (!msgs) return;
+  const div = document.createElement('div');
+  div.className = 'cob-msg cob-msg-' + role;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function showCobTyping() {
+  const msgs = document.getElementById('cob-messages');
+  if (!msgs) return;
+  const t = document.createElement('div');
+  t.className = 'cob-msg cob-msg-assistant cob-typing';
+  t.id = 'cob-typing-indicator';
+  t.innerHTML = '<span></span><span></span><span></span>';
+  msgs.appendChild(t);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function removeCobTyping() {
+  const t = document.getElementById('cob-typing-indicator');
+  if (t) t.remove();
+}
+async function sendCobMessage() {
+  const input = document.getElementById('cob-input');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  appendCobMessage('user', text);
+  showCobTyping();
+  try {
+    const r = await fetch('/api/cob', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, context: 'break_lease_board', city: detectLeaseCity() }),
+    });
+    removeCobTyping();
+    if (r.ok) {
+      const d = await r.json();
+      appendCobMessage('assistant', d.reply || 'Hmm, try again in a moment.');
+    } else {
+      appendCobMessage('assistant', 'Sorry, hit a snag — try again in a moment.');
+    }
+  } catch(e) {
+    removeCobTyping();
+    appendCobMessage('assistant', 'Connection issue — try again in a sec.');
+  }
+}
+
+// Show Cob immediately on the lease page (context is already housing-specific)
+(function() {
+  setTimeout(showCobFab, 1000);
+  setTimeout(() => showCobNudge("On the break lease board? I can walk you through what to check before signing, landlord consent, and your rights as an incoming tenant 🤠"), 4000);
+})();
+
 // Auto-scroll to lease board on load if hash present
 if (window.location.hash === '#browse') {
   document.querySelector('.lease-tab-btn').click();
@@ -2013,6 +2212,33 @@ function toggleTheme() {
     </div>
   </div>
 </div>
+
+<!-- ── Cob floating assistant ──────────────────────────────────────── -->
+<div id="cob-fab" style="display:none;position:fixed;bottom:24px;right:24px;z-index:900;flex-direction:column;align-items:flex-end;gap:10px;">
+  <div id="cob-nudge" style="display:none;max-width:260px;background:var(--card-bg);border:1px solid rgba(245,184,0,0.4);border-radius:12px;padding:12px 16px;font-size:13px;line-height:1.55;color:var(--text);box-shadow:0 4px 20px rgba(0,0,0,0.3);cursor:pointer;"></div>
+  <button id="cob-fab-btn" onclick="openCobPanel()" title="Ask Cob" style="width:52px;height:52px;border-radius:50%;background:var(--brand-yellow);border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(245,184,0,0.4);display:flex;align-items:center;justify-content:center;">🤠</button>
+</div>
+<div id="cob-panel" style="display:none;position:fixed;bottom:90px;right:24px;width:320px;max-height:480px;background:var(--card-bg);border:1px solid rgba(255,255,255,0.1);border-radius:16px;z-index:901;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.4);">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.08);">
+    <div style="font-weight:700;font-size:14px;">🤠 <span class="notranslate">Cob</span></div>
+    <button onclick="closeCobPanel()" style="background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;line-height:1;">✕</button>
+  </div>
+  <div id="cob-messages" style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;max-height:320px;"></div>
+  <div style="padding:10px 12px;border-top:1px solid rgba(255,255,255,0.08);display:flex;gap:8px;">
+    <input id="cob-input" type="text" placeholder="Ask about break leases…" onkeydown="if(event.key==='Enter')sendCobMessage()" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;" />
+    <button onclick="sendCobMessage()" style="background:var(--brand-yellow);color:#000;border:none;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer;font-size:14px;">↑</button>
+  </div>
+</div>
+<style>
+#cob-panel.open { display:flex; }
+.cob-msg { font-size:13px; line-height:1.6; padding:10px 13px; border-radius:10px; max-width:88%; }
+.cob-msg-user { background:rgba(245,184,0,0.15); align-self:flex-end; }
+.cob-msg-assistant { background:rgba(255,255,255,0.06); align-self:flex-start; }
+.cob-typing span { display:inline-block; width:6px; height:6px; background:var(--text-muted); border-radius:50%; margin:0 2px; animation:cob-dot 1.2s infinite; }
+.cob-typing span:nth-child(2) { animation-delay:0.2s; }
+.cob-typing span:nth-child(3) { animation-delay:0.4s; }
+@keyframes cob-dot { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+</style>
 
 </body>
 </html>
