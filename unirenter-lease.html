@@ -728,113 +728,202 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
 <section id="lease-board">
   <div class="section-label">Broken lease board</div>
   <div class="section-title">Find or transfer a lease<br>in Melbourne.</div>
-  <div class="section-sub">Take over someone's existing lease, or find someone to take over yours — with full legal guidance built in.</div>
+  <div class="section-sub">Whether you need out of a lease, or you're looking for one to take over — UniRenter guides you through the process safely and legally.</div>
 
-  <div class="lease-tabs" style="margin-top:32px;">
-    <button class="lease-tab-btn active" onclick="leaseTab('browse',this)">🔍 Browse leases</button>
-    <button class="lease-tab-btn" onclick="leaseTab('post',this)">➕ Post my lease</button>
-    <button class="lease-tab-btn" onclick="leaseTab('legal',this)">⚖️ Know your rights</button>
+  <!-- ── Path selector ── -->
+  <div id="lease-path-selector" style="margin-top:40px;">
+    <div style="font-family:var(--font-display);font-size:18px;font-weight:700;text-align:center;margin-bottom:8px;">What brings you here today?</div>
+    <div style="font-size:14px;color:var(--text-muted);text-align:center;margin-bottom:28px;">Choose your path — each has its own legal guidance and Cob support.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:680px;margin:0 auto;">
+
+      <!-- Outgoing tenant -->
+      <div onclick="choosePath('outgoing')" style="cursor:pointer;background:var(--card-bg);border:2px solid rgba(232,98,58,0.3);border-radius:16px;padding:28px 22px;text-align:center;transition:all 0.2s ease;" onmouseover="this.style.borderColor='var(--brand-coral)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(232,98,58,0.3)';this.style.transform='translateY(0)'">
+        <div style="font-size:40px;margin-bottom:14px;">🔄</div>
+        <div style="font-family:var(--font-display);font-size:17px;font-weight:700;margin-bottom:8px;">I need to transfer my lease</div>
+        <div style="font-size:13px;color:var(--text-muted);line-height:1.6;">I'm the current tenant and need someone to take over my lease so I can move out early.</div>
+        <div style="margin-top:16px;background:rgba(232,98,58,0.1);border:1px solid rgba(232,98,58,0.3);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--brand-coral);font-weight:500;">Post my lease →</div>
+      </div>
+
+      <!-- Incoming tenant -->
+      <div onclick="choosePath('incoming')" style="cursor:pointer;background:var(--card-bg);border:2px solid rgba(75,191,224,0.3);border-radius:16px;padding:28px 22px;text-align:center;transition:all 0.2s ease;" onmouseover="this.style.borderColor='var(--brand-blue)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(75,191,224,0.3)';this.style.transform='translateY(0)'">
+        <div style="font-size:40px;margin-bottom:14px;">🔍</div>
+        <div style="font-family:var(--font-display);font-size:17px;font-weight:700;margin-bottom:8px;">I want to take over a lease</div>
+        <div style="font-size:13px;color:var(--text-muted);line-height:1.6;">I'm looking for an existing lease to take over — shorter wait time, move in sooner.</div>
+        <div style="margin-top:16px;background:rgba(75,191,224,0.1);border:1px solid rgba(75,191,224,0.3);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--brand-blue);font-weight:500;">Browse leases →</div>
+      </div>
+    </div>
+
+    <!-- Cob intro nudge -->
+    <div style="max-width:680px;margin:24px auto 0;background:rgba(245,184,0,0.06);border:1px solid rgba(245,184,0,0.2);border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
+      <span style="font-size:20px;line-height:1.4;">🤠</span>
+      <div style="font-size:13px;color:var(--text-muted);line-height:1.6;">
+        <strong style="color:var(--brand-yellow);">Cob here.</strong> Break lease transfers involve real legal obligations for both sides. I'll walk you through what you need to know before anything else — takes 2 minutes and could save you thousands.
+      </div>
+    </div>
   </div>
 
-  <!-- Legal gate (shown before Browse or Post) -->
-  <div class="legal-gate" id="legal-gate">
+  <!-- ── OUTGOING: Legal gate ── -->
+  <div id="legal-gate-outgoing" style="display:none;margin-top:32px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+      <button onclick="resetPath()" style="background:none;border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--text-muted);cursor:pointer;">← Back</button>
+      <div style="font-size:11px;color:var(--brand-coral);font-weight:500;letter-spacing:1.5px;text-transform:uppercase;">Transferring your lease</div>
+    </div>
     <div class="legal-gate-header">
       <div class="legal-gate-icon">⚖️</div>
       <div>
-        <div class="legal-gate-title">Before you continue</div>
-        <div class="legal-gate-sub">Taking over a lease is a legal commitment. Please read and acknowledge each of the following — tap each card to confirm you understand.</div>
+        <div class="legal-gate-title">Before you post your lease</div>
+        <div class="legal-gate-sub">You remain legally responsible for this lease until the transfer is complete. Read and acknowledge each of the following — this protects you.</div>
       </div>
     </div>
-    <div class="legal-cards">
-      <div class="legal-card" onclick="ackCard(this)">
+    <div class="legal-cards" id="outgoing-cards">
+      <div class="legal-card" onclick="ackCardOut(this)">
         <div class="legal-card-icon">📋</div>
         <div class="legal-card-body">
-          <div class="legal-card-title">Lease assignment requires landlord consent</div>
-          <div class="legal-card-desc">You cannot simply take over a lease without the landlord's written approval. Both parties must agree in writing and the landlord must authorise the transfer before you move in or make any payment.</div>
-          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/during-a-lease-or-tenancy/assignment-and-subletting" target="_blank" onclick="event.stopPropagation()">Consumer Affairs Victoria — Assignment & subletting →</a>
+          <div class="legal-card-title">You remain liable for rent until transfer is complete</div>
+          <div class="legal-card-desc">Until the landlord approves a new tenant and the lease is formally assigned, you are still responsible for paying rent. Stopping payments before this is done can result in debt, bad references, and tribunal orders against you.</div>
+          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/during-a-lease-or-tenancy/assignment-and-subletting" target="_blank" onclick="event.stopPropagation()">Consumer Affairs Victoria — Lease assignment →</a>
         </div>
         <div class="legal-card-check"></div>
       </div>
-      <div class="legal-card" onclick="ackCard(this)">
-        <div class="legal-card-icon">🏠</div>
+      <div class="legal-card" onclick="ackCardOut(this)">
+        <div class="legal-card-icon">✍️</div>
         <div class="legal-card-body">
-          <div class="legal-card-title">Always inspect the property first</div>
-          <div class="legal-card-desc">Never pay a bond, deposit, or any money without physically inspecting the property in person. Scammers often create urgency to pressure payment before inspection. If you cannot inspect in person, arrange a trusted representative.</div>
-          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/before-you-start-renting/inspecting-a-rental-property" target="_blank" onclick="event.stopPropagation()">CAV — Inspecting a rental property →</a>
+          <div class="legal-card-title">Landlord must give written consent</div>
+          <div class="legal-card-desc">Your landlord cannot unreasonably refuse an assignment, but they must approve the incoming tenant in writing. A verbal agreement is not enough — get it in writing before the incoming tenant pays anything or moves in.</div>
+          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/during-a-lease-or-tenancy/assignment-and-subletting" target="_blank" onclick="event.stopPropagation()">Assignment requirements →</a>
         </div>
         <div class="legal-card-check"></div>
       </div>
-      <div class="legal-card" onclick="ackCard(this)">
-        <div class="legal-card-icon">📄</div>
+      <div class="legal-card" onclick="ackCardOut(this)">
+        <div class="legal-card-icon">📸</div>
         <div class="legal-card-body">
-          <div class="legal-card-title">Entry condition report is mandatory</div>
-          <div class="legal-card-desc">Within 3 business days of moving in, you must complete and return a signed entry condition report documenting the property's condition. This protects your bond when you leave. Under the Residential Tenancies Act 1997 (Vic) this is a legal requirement.</div>
-          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/moving-in/condition-reports" target="_blank" onclick="event.stopPropagation()">CAV — Condition reports →</a>
+          <div class="legal-card-title">Document the property condition NOW — before anyone else moves in</div>
+          <div class="legal-card-desc">Your bond is at risk if the incoming tenant causes damage and the landlord can't distinguish it from yours. Photograph and video every room thoroughly before the handover. UniRenter's condition walkthrough (Session 27+) will guide both of you through this.</div>
         </div>
         <div class="legal-card-check"></div>
       </div>
-      <div class="legal-card" onclick="ackCard(this)">
-        <div class="legal-card-icon">💰</div>
+      <div class="legal-card" onclick="ackCardOut(this)">
+        <div class="legal-card-icon">💸</div>
         <div class="legal-card-body">
-          <div class="legal-card-title">Bond must be lodged with the RTBA</div>
-          <div class="legal-card-desc">In Victoria, bonds must be lodged with the Residential Tenancies Bond Authority (RTBA) — not kept by the landlord. If anyone asks you to pay bond directly to them and not through the RTBA, this is illegal.</div>
-          <a class="legal-card-link" href="https://www.rtba.vic.gov.au/" target="_blank" onclick="event.stopPropagation()">RTBA Victoria — Bond lodgement →</a>
+          <div class="legal-card-title">You may owe a lease break fee — check your agreement</div>
+          <div class="legal-card-desc">Some leases include a break fee (typically 1–6 weeks rent depending on how far into the lease you are). Check your lease agreement now. If you're unsure, Tenants Victoria offers free advice.</div>
+          <a class="legal-card-link" href="https://www.tenantsvic.org.au/" target="_blank" onclick="event.stopPropagation()">Tenants Victoria — free legal advice →</a>
         </div>
         <div class="legal-card-check"></div>
       </div>
-      <div class="legal-card" onclick="ackCard(this)">
-        <div class="legal-card-icon">📜</div>
+      <div class="legal-card" onclick="ackCardOut(this)">
+        <div class="legal-card-icon">🚫</div>
         <div class="legal-card-body">
-          <div class="legal-card-title">Read the full lease before signing</div>
-          <div class="legal-card-desc">You are taking on all existing lease terms and conditions. Understand the break lease fees, notice periods, rent review clauses, and pet/modification policies before committing. Request a full copy of the lease from the current tenant.</div>
-          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/rental-agreements" target="_blank" onclick="event.stopPropagation()">CAV — Rental agreements explained →</a>
+          <div class="legal-card-title">Never accept payment outside UniRenter at this stage</div>
+          <div class="legal-card-desc">Do not accept a deposit, bond transfer, or any money from an incoming tenant before landlord consent is obtained and both parties have completed the condition walkthrough. Accepting money prematurely exposes both of you legally.</div>
         </div>
         <div class="legal-card-check"></div>
       </div>
-      <div class="legal-card" onclick="ackCard(this)">
-        <div class="legal-card-icon">⚖️</div>
+      <div class="legal-card" onclick="ackCardOut(this)">
+        <div class="legal-card-icon">🤠</div>
         <div class="legal-card-body">
-          <div class="legal-card-title">Know your renter rights under Victorian law</div>
-          <div class="legal-card-desc">Victoria's Residential Tenancies Act 1997 gives renters strong protections — including minimum standards, repairs, privacy, and anti-discrimination rights. VCAT (Victorian Civil and Administrative Tribunal) handles disputes.</div>
-          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/renters-rights-and-responsibilities" target="_blank" onclick="event.stopPropagation()">CAV — Renters rights & responsibilities →</a>
-        </div>
-        <div class="legal-card-check"></div>
-      </div>
-      <div class="legal-card" onclick="ackCard(this)">
-        <div class="legal-card-icon">⚠️</div>
-        <div class="legal-card-body">
-          <div class="legal-card-title">Critical: You may be inheriting an existing bond & condition report — and all the risk that comes with it</div>
-          <div class="legal-card-desc">
-            <strong style="color:#ffcc60;">This is one of the most common ways students lose their entire bond.</strong><br><br>
-            When you take over an existing lease, the property's entry condition report was completed at the start of the <em>original</em> tenancy — not when you moved in. At the end of the tenancy, the property must be returned to the condition described in that <em>original</em> report, regardless of what it looked like when you arrived.<br><br>
-            <strong>The risk:</strong> If the vacating tenant left damage, excessive wear, or uncleanliness that isn't in the original report, you may be held liable for it on exit — even though it wasn't your fault.<br><br>
-            <strong>Protect yourself — before any money changes hands:</strong>
-            <ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:4px;">
-              <li style="font-size:12px;color:var(--text-muted);">→ Sit down with the vacating tenant and review the original entry condition report together, room by room</li>
-              <li style="font-size:12px;color:var(--text-muted);">→ Photograph and video every room, every wall, every appliance — before you sign anything</li>
-              <li style="font-size:12px;color:var(--text-muted);">→ Note any differences between the original report and the current condition in writing</li>
-              <li style="font-size:12px;color:var(--text-muted);">→ Request the vacating tenant arranges a professional clean at <em>their</em> cost before handover</li>
-              <li style="font-size:12px;color:var(--text-muted);">→ Do not trust a stranger's word — get everything documented and signed</li>
-              <li style="font-size:12px;color:var(--text-muted);">→ Never transfer bond money until you are completely satisfied with the property's documented condition</li>
-            </ul>
-          </div>
-          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/moving-in/condition-reports" target="_blank" onclick="event.stopPropagation()">CAV — Understanding condition reports →</a>
+          <div class="legal-card-title">Cob will support you through every step</div>
+          <div class="legal-card-desc">Once your listing is live, Cob will guide both you and the incoming tenant through the contact, inspection, landlord consent, condition walkthrough, and key handover stages. You don't need to figure this out alone.</div>
         </div>
         <div class="legal-card-check"></div>
       </div>
     </div>
     <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.7;">
-      <strong style="color:var(--text)">International students:</strong> UniRenter strongly recommends reviewing the 
-      <a href="https://www.consumer.vic.gov.au/housing/renting" target="_blank" style="color:var(--brand-blue)">Consumer Affairs Victoria renting guide</a>, 
-      contacting <a href="https://www.tenantsvic.org.au/" target="_blank" style="color:var(--brand-blue)">Tenants Victoria</a> for free legal advice, 
-      and checking <a href="https://www.vcat.vic.gov.au/" target="_blank" style="color:var(--brand-blue)">VCAT</a> if you have a dispute.
+      <strong style="color:var(--text);">International students:</strong> If English is not your first language, Tenants Victoria can connect you with an interpreter.
+      <a href="https://www.tenantsvic.org.au/" target="_blank" style="color:var(--brand-blue);">tenantsvic.org.au</a>
     </div>
-    <button class="legal-gate-proceed" id="legal-gate-btn" onclick="passLegalGate()">
-      I've read and understood all of the above — continue →
+    <button class="legal-gate-proceed" id="legal-gate-outgoing-btn" onclick="passOutgoingGate()">
+      I understand my obligations — post my lease →
     </button>
   </div>
 
-  <!-- Browse leases (hidden until gate passed) -->
+  <!-- ── INCOMING: Legal gate ── -->
+  <div id="legal-gate-incoming" style="display:none;margin-top:32px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+      <button onclick="resetPath()" style="background:none;border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--text-muted);cursor:pointer;">← Back</button>
+      <div style="font-size:11px;color:var(--brand-blue);font-weight:500;letter-spacing:1.5px;text-transform:uppercase;">Taking over a lease</div>
+    </div>
+    <div class="legal-gate-header">
+      <div class="legal-gate-icon">⚖️</div>
+      <div>
+        <div class="legal-gate-title">Before you browse listings</div>
+        <div class="legal-gate-sub">Taking over a lease is a legal commitment with unique risks. Read and acknowledge each of the following — this could save your entire bond.</div>
+      </div>
+    </div>
+    <div class="legal-cards" id="incoming-cards">
+      <div class="legal-card" onclick="ackCardIn(this)">
+        <div class="legal-card-icon">📋</div>
+        <div class="legal-card-body">
+          <div class="legal-card-title">Landlord must approve you in writing</div>
+          <div class="legal-card-desc">You cannot take over a lease without the landlord's written consent. Both you and the current tenant must get this before any money or keys change hands. A verbal agreement from the outgoing tenant is not enough.</div>
+          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/during-a-lease-or-tenancy/assignment-and-subletting" target="_blank" onclick="event.stopPropagation()">Consumer Affairs Victoria →</a>
+        </div>
+        <div class="legal-card-check"></div>
+      </div>
+      <div class="legal-card" onclick="ackCardIn(this)">
+        <div class="legal-card-icon">🏠</div>
+        <div class="legal-card-body">
+          <div class="legal-card-title">Always inspect the property in person first</div>
+          <div class="legal-card-desc">Never pay a bond, deposit, or any money without physically inspecting the property first. Anyone asking for payment before an inspection is a scam. UniRenter arranges inspection contact only — we never facilitate payment.</div>
+        </div>
+        <div class="legal-card-check"></div>
+      </div>
+      <div class="legal-card" onclick="ackCardIn(this)">
+        <div class="legal-card-icon">⚠️</div>
+        <div class="legal-card-body">
+          <div class="legal-card-title">Critical: you may be inheriting someone else's wear and tear</div>
+          <div class="legal-card-desc">
+            <strong style="color:#ffcc60;">This is how students lose their entire bond.</strong> When you take over a lease, the entry condition report was completed at the <em>start of the original tenancy</em> — not when you move in. When you eventually leave, you'll be judged against that original report.
+            <br><br><strong>Before you sign anything:</strong>
+            <ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:4px;">
+              <li style="font-size:12px;color:var(--text-muted);">→ Walk through every room with the outgoing tenant</li>
+              <li style="font-size:12px;color:var(--text-muted);">→ Photograph and video every wall, floor, fixture</li>
+              <li style="font-size:12px;color:var(--text-muted);">→ Compare what you see against the original condition report</li>
+              <li style="font-size:12px;color:var(--text-muted);">→ Never transfer bond money until the condition is documented and agreed</li>
+            </ul>
+          </div>
+          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/moving-in/condition-reports" target="_blank" onclick="event.stopPropagation()">Entry condition reports →</a>
+        </div>
+        <div class="legal-card-check"></div>
+      </div>
+      <div class="legal-card" onclick="ackCardIn(this)">
+        <div class="legal-card-icon">💰</div>
+        <div class="legal-card-body">
+          <div class="legal-card-title">Bond must go through the RTBA — not to the outgoing tenant</div>
+          <div class="legal-card-desc">In Victoria, bonds must be lodged with the Residential Tenancies Bond Authority (RTBA) — not handed to a landlord or outgoing tenant. If anyone asks you to transfer bond money directly to them, that is a scam.</div>
+          <a class="legal-card-link" href="https://www.rtba.vic.gov.au/" target="_blank" onclick="event.stopPropagation()">RTBA — lodge and transfer bonds →</a>
+        </div>
+        <div class="legal-card-check"></div>
+      </div>
+      <div class="legal-card" onclick="ackCardIn(this)">
+        <div class="legal-card-icon">📜</div>
+        <div class="legal-card-body">
+          <div class="legal-card-title">You are taking on the remaining lease term as-is</div>
+          <div class="legal-card-desc">Read the full lease agreement before agreeing to anything. You're inheriting all existing terms — including any obligations the previous tenant had. Understand the lease end date, rent amount, and any special conditions.</div>
+          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/rental-agreements" target="_blank" onclick="event.stopPropagation()">Understanding rental agreements →</a>
+        </div>
+        <div class="legal-card-check"></div>
+      </div>
+      <div class="legal-card" onclick="ackCardIn(this)">
+        <div class="legal-card-icon">🤠</div>
+        <div class="legal-card-body">
+          <div class="legal-card-title">Cob will guide you through every step safely</div>
+          <div class="legal-card-desc">Once you connect with a listing, Cob walks both parties through the inspection, condition documentation, landlord consent process, and key handover. The platform keeps your contact details private until you're both ready to inspect.</div>
+        </div>
+        <div class="legal-card-check"></div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.7;">
+      <strong style="color:var(--text);">International students:</strong> Review your rights at
+      <a href="https://www.consumer.vic.gov.au/housing/renting" target="_blank" style="color:var(--brand-blue);">Consumer Affairs Victoria</a> or call
+      <a href="https://www.tenantsvic.org.au/" target="_blank" style="color:var(--brand-blue);">Tenants Victoria</a> for free advice.
+    </div>
+    <button class="legal-gate-proceed" id="legal-gate-incoming-btn" onclick="passIncomingGate()">
+      I understand the risks — show me available leases →
+    </button>
+  </div>
+
+  <!-- Browse leases (shown after incoming gate) -->
   <div id="lease-browse" style="display:none;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
       <div style="font-size:13px;color:var(--text-muted);">Showing <strong style="color:var(--text)">6 available leases</strong> in Melbourne</div>
@@ -846,7 +935,6 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
       </div>
     </div>
     <div class="lease-list">
-
       <div class="lease-card">
         <div class="lease-card-top">
           <div>
@@ -862,15 +950,14 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
           <span class="lease-detail-pill">📋 Docs available</span>
           <span class="lease-detail-pill">🏦 Bond $1,280</span>
         </div>
-        <div class="lease-card-desc">Leaving Melbourne earlier than expected due to family reasons. Beautiful 2BR apartment, fully furnished, 5 min walk to UniMelb. Landlord has already indicated willingness to approve assignment. Entry condition report available.</div>
+        <div class="lease-card-desc">Leaving Melbourne earlier than expected due to family reasons. Beautiful apartment, well maintained. Housemates are friendly international students.</div>
         <div class="lease-card-footer">
-          <button class="btn-lease-contact" onclick="showToast2('✉️ Message sent','Your interest has been sent to Mei. She will respond within 24hrs.')">Express interest</button>
+          <button class="btn-lease-contact" onclick="showToast2('✉️ Interest sent','The poster will be notified. They'll contact you through UniRenter to arrange an inspection.')">I'm interested</button>
           <button class="btn-lease-docs" onclick="showDocsModal()">📄 View documents</button>
           <button class="report-btn" onclick="openModal('report-modal')">⚑ Report</button>
         </div>
-        <div class="lease-warning">⚠️ Always inspect in person and obtain written landlord consent before transferring any money or signing any agreement.</div>
+        <div class="lease-warning">⚠️ Always inspect in person and obtain written landlord consent before transferring any money.</div>
       </div>
-
       <div class="lease-card">
         <div class="lease-card-top">
           <div>
@@ -886,15 +973,14 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
           <span class="lease-detail-pill">👥 3 remaining housemates</span>
           <span class="lease-detail-pill">🏦 Bond $960</span>
         </div>
-        <div class="lease-card-desc">Heading overseas for a semester exchange. Great share house with 3 friendly housemates, all postgrad students. Large private room, off-street parking. Landlord approval process underway — will confirm within the week.</div>
+        <div class="lease-card-desc">Heading overseas for a semester exchange. Great share house with 3 friendly housemates. Close to trams and Brunswick cafes.</div>
         <div class="lease-card-footer">
-          <button class="btn-lease-contact" onclick="showToast2('✉️ Message sent','Your interest has been sent to Tom.')">Express interest</button>
+          <button class="btn-lease-contact" onclick="showToast2('✉️ Interest sent','The poster will be notified. They'll contact you through UniRenter to arrange an inspection.')">I'm interested</button>
           <button class="btn-lease-docs" onclick="showDocsModal()">📄 View documents</button>
           <button class="report-btn" onclick="openModal('report-modal')">⚑ Report</button>
         </div>
         <div class="lease-warning">⚠️ Landlord approval is pending. Do not transfer any bond or fees until written consent is confirmed.</div>
       </div>
-
       <div class="lease-card">
         <div class="lease-card-top">
           <div>
@@ -910,19 +996,18 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
           <span class="lease-detail-pill">📋 Full docs uploaded</span>
           <span class="lease-detail-pill">🏦 Bond $1,520</span>
         </div>
-        <div class="lease-card-desc">Landlord has approved assignment in writing — paperwork ready to go. Cute self-contained studio with its own entrance, kitchenette, and garden access. Condition report complete and uploaded. Ready for quick settlement.</div>
+        <div class="lease-card-desc">Landlord has approved assignment in writing — paperwork ready to go. Cute studio in the heart of Fitzroy, walking distance to cafes and trams.</div>
         <div class="lease-card-footer">
-          <button class="btn-lease-contact" onclick="showToast2('✉️ Message sent','Your interest has been sent to Priya.')">Express interest</button>
+          <button class="btn-lease-contact" onclick="showToast2('✉️ Interest sent','The poster will be notified. They'll contact you through UniRenter to arrange an inspection.')">I'm interested</button>
           <button class="btn-lease-docs" onclick="showDocsModal()">📄 View documents</button>
           <button class="report-btn" onclick="openModal('report-modal')">⚑ Report</button>
         </div>
-        <div class="lease-warning">⚠️ Even with landlord approval, always inspect before signing. Verify the condition report against what you see in person.</div>
+        <div class="lease-warning">⚠️ Even with landlord approval, always inspect before signing. Verify the condition report carefully.</div>
       </div>
-
     </div>
   </div>
 
-  <!-- Post a lease form (hidden until gate passed) -->
+  <!-- Post a lease form (shown after outgoing gate) -->
   <div class="post-lease-form" id="post-lease-form">
     <div class="step-title" style="margin-bottom:6px;">Post your break lease</div>
     <div class="step-sub">Tell us about the property — no personal details needed here. We only exchange an inspection address and contact method once a genuine match is confirmed.</div>
@@ -1080,6 +1165,8 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
       </div>
     </div>
   </div>
+
+  <!-- Know your rights tab -->
 
   <!-- Know your rights tab -->
   <div id="lease-rights" style="display:none;">
@@ -1383,44 +1470,82 @@ function submitReport() {
   selectedReport = null;
 }
 
-// ── Lease board ──
+// ── Lease board — two-path flow ──
 let legalGatePassed = false;
+let currentDocTarget = null;
+let ackCountOut = 0;
+let ackCountIn = 0;
+const totalAcksOut = 6;
+const totalAcksIn = 6;
 
 function heroTab(tab) {
-  // Make lease-board visible first (it starts hidden)
   const board = document.getElementById('lease-board');
   if (board) board.classList.add('visible');
-  const btns = document.querySelectorAll('.lease-tab-btn');
-  const tabIndex = tab === 'browse' ? 0 : tab === 'post' ? 1 : 2;
-  const btn = btns[tabIndex];
-  if (!btn) return;
-  document.querySelectorAll('.lease-tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
   if (board) board.scrollIntoView({behavior:'smooth', block:'start'});
   setTimeout(() => {
-    if (tab === 'legal') {
-      document.getElementById('legal-gate').style.display = 'none';
-      document.getElementById('lease-browse').style.display = 'none';
-      document.getElementById('post-lease-form').classList.remove('visible');
-      document.getElementById('lease-rights').style.display = 'block';
-      return;
-    }
-    document.getElementById('lease-rights').style.display = 'none';
-    if (!legalGatePassed) {
-      pendingLeaseTab = tab;
-      document.getElementById('legal-gate').style.display = 'block';
-      document.getElementById('lease-browse').style.display = 'none';
-      document.getElementById('post-lease-form').classList.remove('visible');
-      setTimeout(() => document.getElementById('legal-gate').scrollIntoView({behavior:'smooth', block:'start'}), 200);
-    } else {
-      showLeaseContent(tab);
-    }
-  }, 400);
+    if (tab === 'post') choosePath('outgoing');
+    else choosePath('incoming');
+  }, 450);
 }
-let pendingLeaseTab = null;
-let currentDocTarget = null;
-let ackCount = 0;
-const totalAcks = 7;
+
+function choosePath(path) {
+  document.getElementById('lease-path-selector').style.display = 'none';
+  if (path === 'outgoing') {
+    document.getElementById('legal-gate-outgoing').style.display = 'block';
+    setTimeout(() => document.getElementById('legal-gate-outgoing').scrollIntoView({behavior:'smooth', block:'start'}), 80);
+  } else {
+    document.getElementById('legal-gate-incoming').style.display = 'block';
+    setTimeout(() => document.getElementById('legal-gate-incoming').scrollIntoView({behavior:'smooth', block:'start'}), 80);
+  }
+}
+
+function resetPath() {
+  document.getElementById('lease-path-selector').style.display = 'block';
+  document.getElementById('legal-gate-outgoing').style.display = 'none';
+  document.getElementById('legal-gate-incoming').style.display = 'none';
+  document.getElementById('lease-browse').style.display = 'none';
+  document.getElementById('post-lease-form').classList.remove('visible');
+  ackCountOut = 0; ackCountIn = 0;
+  document.querySelectorAll('.legal-card').forEach(c => {
+    c.classList.remove('ack');
+    c.querySelector('.legal-card-check').textContent = '';
+  });
+  const btnOut = document.getElementById('legal-gate-outgoing-btn');
+  const btnIn = document.getElementById('legal-gate-incoming-btn');
+  if (btnOut) btnOut.classList.remove('ready');
+  if (btnIn) btnIn.classList.remove('ready');
+  document.getElementById('lease-board').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function ackCardOut(card) {
+  if (card.classList.contains('ack')) return;
+  card.classList.add('ack');
+  card.querySelector('.legal-card-check').textContent = '✓';
+  ackCountOut++;
+  if (ackCountOut >= totalAcksOut) document.getElementById('legal-gate-outgoing-btn').classList.add('ready');
+}
+
+function ackCardIn(card) {
+  if (card.classList.contains('ack')) return;
+  card.classList.add('ack');
+  card.querySelector('.legal-card-check').textContent = '✓';
+  ackCountIn++;
+  if (ackCountIn >= totalAcksIn) document.getElementById('legal-gate-incoming-btn').classList.add('ready');
+}
+
+function passOutgoingGate() {
+  legalGatePassed = true;
+  document.getElementById('legal-gate-outgoing').style.display = 'none';
+  document.getElementById('post-lease-form').classList.add('visible');
+  leaseInitEmail();
+  setTimeout(() => document.getElementById('post-lease-form').scrollIntoView({behavior:'smooth', block:'start'}), 80);
+}
+
+function passIncomingGate() {
+  document.getElementById('legal-gate-incoming').style.display = 'none';
+  document.getElementById('lease-browse').style.display = 'block';
+  setTimeout(() => document.getElementById('lease-browse').scrollIntoView({behavior:'smooth', block:'start'}), 80);
+}
 
 // ── Lease listing form ──
 let leaseEmailVerified = false;
@@ -1647,21 +1772,7 @@ function showLeaseContent(tab) {
   }
 }
 
-function ackCard(card) {
-  if (card.classList.contains('ack')) return;
-  card.classList.add('ack');
-  card.querySelector('.legal-card-check').textContent = '✓';
-  ackCount++;
-  if (ackCount >= totalAcks) {
-    document.getElementById('legal-gate-btn').classList.add('ready');
-  }
-}
-
-function passLegalGate() {
-  legalGatePassed = true;
-  showLeaseContent(pendingLeaseTab || 'browse');
-  setTimeout(() => document.getElementById('lease-board').scrollIntoView({behavior:'smooth', block:'start'}), 80);
-}
+// ackCard and passLegalGate replaced by ackCardOut/ackCardIn/passOutgoingGate/passIncomingGate
 
 function showDocsModal() {
   showToast('📄 Documents','In production: verified documents shared securely between matched, verified users only.');
