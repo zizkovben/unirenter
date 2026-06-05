@@ -880,6 +880,13 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
   .review-feature-chips .chip { font-size:12px; padding:5px 12px; }
   .review-submit-btn { width:100%; background:var(--brand-yellow); color:#000; font-weight:700; border:none; border-radius:10px; padding:12px; font-size:14px; cursor:pointer; font-family:var(--font-display); }
   .review-submit-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+/* ── Translate bar ── */
+.translate-bar{background:rgba(75,191,224,0.05);border:1px solid rgba(75,191,224,0.15);border-radius:12px;padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;max-width:860px;margin:0 auto 32px;}
+.translate-bar select{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text);font-family:var(--font-body,'Inter',sans-serif);font-size:13px;padding:8px 12px;border-radius:8px;outline:none;cursor:pointer;}
+.translate-bar label{font-size:12px;color:var(--text-muted);font-weight:500;}
+body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0,31,45,0.12);}
+.notranslate{translate:no;}
 </style>
 </head>
 <body>
@@ -960,6 +967,35 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
     <div class="how-card"><div class="how-num">04</div><div class="how-icon">🔄</div><div class="how-title">Broken lease board</div><div class="how-desc">Taking over or transferring a Perth lease? Dedicated board with legal guidance, document upload, and mandatory safety checks. <span style="color:var(--brand-coral);">Open board →</span></div></div>
   </div>
 </section>
+
+<!-- ── Translate bar ── -->
+<div style="position:relative;z-index:1;padding:0 24px;">
+  <div class="translate-bar">
+    <span style="font-size:18px;">🌏</span>
+    <label>Translate this page:</label>
+    <select onchange="translatePage(this.value)">
+      <option value="">English (default)</option>
+      <option value="zh-CN">🇨🇳 中文 (Chinese Simplified)</option>
+      <option value="zh-TW">🇹🇼 中文 (Chinese Traditional)</option>
+      <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
+      <option value="vi">🇻🇳 Tiếng Việt (Vietnamese)</option>
+      <option value="ne">🇳🇵 नेपाली (Nepali)</option>
+      <option value="tl">🇵🇭 Filipino (Tagalog)</option>
+      <option value="id">🇮🇩 Bahasa Indonesia</option>
+      <option value="ms">🇲🇾 Bahasa Melayu</option>
+      <option value="ko">🇰🇷 한국어 (Korean)</option>
+      <option value="ja">🇯🇵 日本語 (Japanese)</option>
+      <option value="ur">🇵🇰 اردو (Urdu)</option>
+      <option value="si">🇱🇰 සිංහල (Sinhala)</option>
+      <option value="bn">🇧🇩 বাংলা (Bengali)</option>
+      <option value="th">🇹🇭 ภาษาไทย (Thai)</option>
+      <option value="ar">🇸🇦 العربية (Arabic)</option>
+      <option value="es">🇪🇸 Español (Spanish)</option>
+      <option value="fr">🇫🇷 Français (French)</option>
+    </select>
+    <span id="translate-status" style="font-size:12px;color:var(--text-muted);"></span>
+  </div>
+</div>
 
 <section id="setup">
   <div class="section-label">Your profile</div>
@@ -1541,7 +1577,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
       <div class="review-feature-chips" id="featureChips">
         <div class="chip" onclick="toggleFeature(this)">Finding a match</div>
         <div class="chip" onclick="toggleFeature(this)">Legal info</div>
-        <div class="chip" onclick="toggleFeature(this)">Cob</div>
+        <div class="chip" onclick="toggleFeature(this)"><span class="notranslate">Cob</span></div>
         <div class="chip" onclick="toggleFeature(this)">Break lease guide</div>
         <div class="chip" onclick="toggleFeature(this)">Just easy to use</div>
       </div>
@@ -1564,10 +1600,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
   <div class="city-switcher" style="margin-top:10px;">
     <a href="/" class="city-sw-btn">📍 Melbourne</a>
     <a href="/sydney" class="city-sw-btn">📍 Sydney</a>
-    <a href="/brisbane" class="city-sw-btn">📍 Brisbane</a>
-    <a href="/adelaide" class="city-sw-btn">📍 Adelaide</a>
     <a href="/perth" class="city-sw-btn active">📍 Perth</a>
-    <a href="/canberra" class="city-sw-btn">📍 Canberra</a>
   </div>
 <div style="margin-top:12px;font-size:11px;opacity:0.5;">© 2025 UniRenter · All rights reserved · <a href="/legal" style="color:var(--brand-blue)">Terms & Privacy</a></div>
 </footer>
@@ -2610,6 +2643,14 @@ function fireCobPhase2Nudge() {
     }
   })();
 
+
+function translatePage(lang) {
+  const status = document.getElementById('translate-status');
+  if (!lang) { if(status) status.textContent = ''; return; }
+  const url = `https://translate.google.com/translate?sl=en&tl=${lang}&u=${encodeURIComponent(window.location.href)}`;
+  if(status) status.textContent = 'Opening translation…';
+  setTimeout(() => { window.location.href = url; }, 400);
+}
 </script>
 
 <!-- EMAIL VERIFY MODAL — triggered by "Show my matches" -->
@@ -2823,7 +2864,7 @@ function fireCobPhase2Nudge() {
 <div id="cob-panel">
   <div id="cob-panel-header">
     <div>
-      <div class="cob-title">🤠 Oi Cob!</div>
+      <div class="cob-title">🤠 Oi <span class="notranslate">Cob</span>!</div>
       <div class="cob-sub">Your UniRenter housing mate</div>
     </div>
     <button id="cob-panel-close" onclick="closeCobPanel()">✕</button>
