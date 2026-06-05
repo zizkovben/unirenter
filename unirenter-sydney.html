@@ -1553,13 +1553,13 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Found a housemate near UNSW in under a week. Cob suggested Kensington and it was perfect — 5 min walk to campus."</div><div class="review-author">Priya R. · UNSW · Sydney</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Flew in from Vietnam with nowhere lined up. UniRenter matched me before I'd even unpacked. The settled guide helped me open a bank account same week."</div><div class="review-author">Minh T. · UTS · Sydney</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"My landlord tried to keep my bond for damage I didn't cause. The lease guide explained exactly what to do. Got it all back."</div><div class="review-author">Jake S. · USyd · Sydney</div></div>
-    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Cob told me Newtown had better value than the CBD for my budget. He was right — saved $80 a week and still close to everything."</div><div class="review-author">Anika M. · USyd · Sydney</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"<span class="notranslate">Cob</span> told me Newtown had better value than the CBD for my budget. He was right — saved $80 a week and still close to everything."</div><div class="review-author">Anika M. · USyd · Sydney</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Sydney rents are brutal. UniRenter helped me find someone to split costs with quickly. Couldn't have managed the first semester without it."</div><div class="review-author">Tom O. · Macquarie · Sydney</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Free platform that actually works. Matched with a housemate who studies the same degree. We basically share notes now too."</div><div class="review-author">Sara C. · UNSW · Sydney</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Found a housemate near UNSW in under a week. Cob suggested Kensington and it was perfect — 5 min walk to campus."</div><div class="review-author">Priya R. · UNSW · Sydney</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Flew in from Vietnam with nowhere lined up. UniRenter matched me before I'd even unpacked. The settled guide helped me open a bank account same week."</div><div class="review-author">Minh T. · UTS · Sydney</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"My landlord tried to keep my bond for damage I didn't cause. The lease guide explained exactly what to do. Got it all back."</div><div class="review-author">Jake S. · USyd · Sydney</div></div>
-    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Cob told me Newtown had better value than the CBD for my budget. He was right — saved $80 a week and still close to everything."</div><div class="review-author">Anika M. · USyd · Sydney</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"<span class="notranslate">Cob</span> told me Newtown had better value than the CBD for my budget. He was right — saved $80 a week and still close to everything."</div><div class="review-author">Anika M. · USyd · Sydney</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Sydney rents are brutal. UniRenter helped me find someone to split costs with quickly. Couldn't have managed the first semester without it."</div><div class="review-author">Tom O. · Macquarie · Sydney</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Free platform that actually works. Matched with a housemate who studies the same degree. We basically share notes now too."</div><div class="review-author">Sara C. · UNSW · Sydney</div></div>
   </div></div>
@@ -1600,6 +1600,10 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
     <a href="/" class="city-sw-btn">📍 Melbourne</a>
     <a href="/sydney" class="city-sw-btn active">📍 Sydney</a>
     <a href="/brisbane" class="city-sw-btn">📍 Brisbane</a>
+    <a href="/adelaide" class="city-sw-btn">📍 Adelaide</a>
+    <a href="/perth" class="city-sw-btn">📍 Perth</a>
+    <a href="/canberra" class="city-sw-btn">📍 Canberra</a>
+  </div>
   </div>
 <div style="margin-top:12px;font-size:11px;opacity:0.5;">© 2025 UniRenter · All rights reserved · <a href="/legal" style="color:var(--brand-blue)">Terms & Privacy</a></div>
 </footer>
@@ -2405,7 +2409,7 @@ function showCobFab() {
 
 function showCobNudge(text) {
   const nudge = document.getElementById('cob-nudge');
-  nudge.innerHTML = '<strong>🤠 Cob:</strong> ' + text;
+  nudge.innerHTML = '<strong>🤠 <span class="notranslate">Cob</span>:</strong> ' + text;
   nudge.style.display = 'block';
   // auto-hide after 17.5s (extended for ESL students)
   clearTimeout(cobNudgeTimer);
@@ -2419,7 +2423,7 @@ function openCobPanel() {
   cobPanelOpen = true;
   if (cobMessages.length === 0) {
     // First open — greeting
-    appendCobMessage('assistant', "G'day! I'm Cob — your UniRenter housing mate 🤠 I'll help you through every step and answer any questions about renting in Australia. What's on your mind?");
+    appendCobMessage('assistant', "G'day! I'm <span class='notranslate'>Cob</span> — your UniRenter housing mate 🤠 I'll help you through every step and answer any questions about renting in Australia. What's on your mind?");
   }
   setTimeout(() => document.getElementById('cob-input').focus(), 100);
 }
@@ -2496,7 +2500,7 @@ goStep = function(n) {
   if (n >= 2 && !cobFabShown) {
     showCobFab();
     setTimeout(() => {
-      showCobNudge("Welcome to UniRenter! I'm Cob — I'll be with you every step 🤠 Tap me any time you have a question.");
+      showCobNudge("Welcome to UniRenter! I'm <span class='notranslate'>Cob</span> — I'll be with you every step 🤠 Tap me any time you have a question.");
     }, 800);
   }
   if (!cobFabShown) return; // only nudge after FAB is shown
@@ -2511,7 +2515,7 @@ goStep = function(n) {
       if (rentVal) {
         const budget = parseInt(rentVal.textContent.replace(/[^0-9]/g,''));
         if (budget < 250) {
-          showCobNudge("That budget is very tight for Sydney 😬 — Cob found more matches at $280–320/wk. Consider widening it slightly.");
+          showCobNudge("That budget is very tight for Sydney 😬 — <span class='notranslate'>Cob</span> found more matches at $280–320/wk. Consider widening it slightly.");
         }
       }
     }, 1500);
@@ -2548,7 +2552,7 @@ function fireCobPhase2Nudge() {
 
   const nudge = document.getElementById('cob-nudge');
   if (!nudge) return;
-  nudge.innerHTML = '<strong>🤠 Cob:</strong> ' + nudgeText;
+  nudge.innerHTML = '<strong>🤠 <span class="notranslate">Cob</span>:</strong> ' + nudgeText;
 
   const btn = document.createElement('button');
   btn.className = 'btn-next';
@@ -2573,7 +2577,7 @@ function fireCobPhase2Nudge() {
     if (badge.classList.contains('show')) {
       showCobFab();
       setTimeout(() => {
-        showCobNudge("Welcome to UniRenter! I'm Cob — I'll be with you every step 🤠 Tap me any time you have a question.");
+        showCobNudge("Welcome to UniRenter! I'm <span class='notranslate'>Cob</span> — I'll be with you every step 🤠 Tap me any time you have a question.");
       }, 1500);
       observer.disconnect();
     }
@@ -2857,7 +2861,7 @@ function translatePage(lang) {
 
 <div id="cob-fab">
   <div id="cob-nudge" onclick="openCobPanel()" style="display:none"></div>
-  <button id="cob-fab-btn" onclick="openCobPanel()" title="Ask Cob">🤠</button>
+  <button id="cob-fab-btn" onclick="openCobPanel()" title="Ask Cob"><span class="notranslate" style="font-size:0">Cob</span>🤠</button>
 </div>
 
 <div id="cob-panel">

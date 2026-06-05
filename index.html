@@ -1550,13 +1550,13 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 <section class="review-section" id="review-section" style="display:none;">
   <div class="review-section-title">What students are saying <span>🤠</span></div>
   <div class="review-track-wrap"><div class="review-track" id="reviewTrack">
-    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Found my housemate in 3 days — didn't think it'd be that quick. Cob nudged me to try Carlton and it was perfect."</div><div class="review-author">Priya R. · UniMelb · Melbourne</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Found my housemate in 3 days — didn't think it'd be that quick. <span class="notranslate">Cob</span> nudged me to try Carlton and it was perfect."</div><div class="review-author">Priya R. · UniMelb · Melbourne</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Arrived from China with no contacts in Melbourne. UniRenter matched me within a week. The legal guide was genuinely useful too."</div><div class="review-author">Wei L. · RMIT · Melbourne</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"The break lease section saved me when my housemate bailed. Knew exactly what my rights were. Didn't lose a cent of bond."</div><div class="review-author">Jake S. · Monash · Melbourne</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"<span class="notranslate">Cob</span> told me Footscray had better value than the CBD suburbs and he was right. Saved about $60 a week on rent."</div><div class="review-author">Anika M. · VU · Melbourne</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"I was nervous about renting for the first time in Australia. UniRenter made it feel manageable. Matched and moved in within 2 weeks."</div><div class="review-author">Tom O. · Deakin · Melbourne</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Free, fast, and actually found someone compatible. My housemate and I are both doing engineering at UniMelb — couldn't have planned it better."</div><div class="review-author">Sara C. · UniMelb · Melbourne</div></div>
-    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Found my housemate in 3 days — didn't think it'd be that quick. Cob nudged me to try Carlton and it was perfect."</div><div class="review-author">Priya R. · UniMelb · Melbourne</div></div>
+    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Found my housemate in 3 days — didn't think it'd be that quick. <span class="notranslate">Cob</span> nudged me to try Carlton and it was perfect."</div><div class="review-author">Priya R. · UniMelb · Melbourne</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Arrived from China with no contacts in Melbourne. UniRenter matched me within a week. The legal guide was genuinely useful too."</div><div class="review-author">Wei L. · RMIT · Melbourne</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"The break lease section saved me when my housemate bailed. Knew exactly what my rights were. Didn't lose a cent of bond."</div><div class="review-author">Jake S. · Monash · Melbourne</div></div>
     <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"<span class="notranslate">Cob</span> told me Footscray had better value than the CBD suburbs and he was right. Saved about $60 a week on rent."</div><div class="review-author">Anika M. · VU · Melbourne</div></div>
@@ -1600,6 +1600,9 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
     <a href="/melbourne" class="city-sw-btn active">📍 Melbourne</a>
     <a href="/sydney" class="city-sw-btn">📍 Sydney</a>
     <a href="/brisbane" class="city-sw-btn">📍 Brisbane</a>
+    <a href="/adelaide" class="city-sw-btn">📍 Adelaide</a>
+    <a href="/perth" class="city-sw-btn">📍 Perth</a>
+    <a href="/canberra" class="city-sw-btn">📍 Canberra</a>
   </div>
 <div style="margin-top:12px;font-size:11px;opacity:0.5;">© 2025 UniRenter · All rights reserved · <a href="/legal" style="color:var(--brand-blue)">Terms & Privacy</a></div>
 </footer>
@@ -2412,7 +2415,7 @@ function showCobFab() {
 
 function showCobNudge(text) {
   const nudge = document.getElementById('cob-nudge');
-  nudge.innerHTML = '<strong>🤠 Cob:</strong> ' + text;
+  nudge.innerHTML = '<strong>🤠 <span class="notranslate">Cob</span>:</strong> ' + text;
   nudge.style.display = 'block';
   // auto-hide after 17.5s (extended for ESL students)
   clearTimeout(cobNudgeTimer);
@@ -2426,7 +2429,7 @@ function openCobPanel() {
   cobPanelOpen = true;
   if (cobMessages.length === 0) {
     // First open — greeting
-    appendCobMessage('assistant', "G'day! I'm Cob — your UniRenter housing mate 🤠 I'll help you through every step and answer any questions about renting in Australia. What's on your mind?");
+    appendCobMessage('assistant', "G'day! I'm <span class='notranslate'>Cob</span> — your UniRenter housing mate 🤠 I'll help you through every step and answer any questions about renting in Australia. What's on your mind?");
   }
   setTimeout(() => document.getElementById('cob-input').focus(), 100);
 }
@@ -2503,7 +2506,7 @@ goStep = function(n) {
   if (n >= 2 && !cobFabShown) {
     showCobFab();
     setTimeout(() => {
-      showCobNudge("Welcome to UniRenter! I'm Cob — I'll be with you every step 🤠 Tap me any time you have a question.");
+      showCobNudge("Welcome to UniRenter! I'm <span class='notranslate'>Cob</span> — I'll be with you every step 🤠 Tap me any time you have a question.");
     }, 800);
   }
   if (!cobFabShown) return; // only nudge after FAB is shown
@@ -2518,7 +2521,7 @@ goStep = function(n) {
       if (rentVal) {
         const budget = parseInt(rentVal.textContent.replace(/[^0-9]/g,''));
         if (budget < 200) {
-          showCobNudge("That budget is very tight for Melbourne 😬 — Cob found more matches at $220–260/wk. Consider widening it slightly.");
+          showCobNudge("That budget is very tight for Melbourne 😬 — <span class='notranslate'>Cob</span> found more matches at $220–260/wk. Consider widening it slightly.");
         }
       }
     }, 1500);
@@ -2559,7 +2562,7 @@ function fireCobPhase2Nudge() {
   // Add a "Show me" button to the nudge
   const nudge = document.getElementById('cob-nudge');
   if (!nudge) return;
-  nudge.innerHTML = '<strong>🤠 Cob:</strong> ' + nudgeText;
+  nudge.innerHTML = '<strong>🤠 <span class="notranslate">Cob</span>:</strong> ' + nudgeText;
 
   // Append "Show me" button
   const btn = document.createElement('button');
@@ -2586,7 +2589,7 @@ function fireCobPhase2Nudge() {
     if (badge.classList.contains('show')) {
       showCobFab();
       setTimeout(() => {
-        showCobNudge("Welcome to UniRenter! I'm Cob — I'll be with you every step 🤠 Tap me any time you have a question.");
+        showCobNudge("Welcome to UniRenter! I'm <span class='notranslate'>Cob</span> — I'll be with you every step 🤠 Tap me any time you have a question.");
       }, 1500);
       observer.disconnect();
     }
@@ -2870,7 +2873,7 @@ function translatePage(lang) {
 
 <div id="cob-fab">
   <div id="cob-nudge" onclick="openCobPanel()" style="display:none"></div>
-  <button id="cob-fab-btn" onclick="openCobPanel()" title="Ask Cob">🤠</button>
+  <button id="cob-fab-btn" onclick="openCobPanel()" title="Ask Cob"><span class="notranslate" style="font-size:0">Cob</span>🤠</button>
 </div>
 
 <div id="cob-panel">
