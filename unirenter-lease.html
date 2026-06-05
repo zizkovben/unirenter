@@ -1597,8 +1597,10 @@ function leaseTab(tab, btn) {
     document.getElementById('legal-gate').style.display = 'block';
     document.getElementById('lease-browse').style.display = 'none';
     document.getElementById('post-lease-form').classList.remove('visible');
+    setTimeout(() => document.getElementById('legal-gate').scrollIntoView({behavior:'smooth', block:'start'}), 80);
   } else {
     showLeaseContent(tab);
+    setTimeout(() => document.getElementById('lease-board').scrollIntoView({behavior:'smooth', block:'start'}), 80);
   }
 }
 
@@ -1626,6 +1628,7 @@ function ackCard(card) {
 function passLegalGate() {
   legalGatePassed = true;
   showLeaseContent(pendingLeaseTab || 'browse');
+  setTimeout(() => document.getElementById('lease-board').scrollIntoView({behavior:'smooth', block:'start'}), 80);
 }
 
 function showDocsModal() {
