@@ -320,6 +320,41 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
 .chat-msg.them .chat-bubble { background: rgba(255,255,255,0.07); border-radius: 14px 14px 14px 2px; }
 .chat-msg.me .chat-bubble { background: rgba(75,191,224,0.15); border-radius: 14px 14px 2px 14px; }
 .chat-meta { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+
+/* ── Profile completion banner ── */
+.profile-completion-banner {
+  background: linear-gradient(135deg, rgba(75,191,224,0.12), rgba(61,170,92,0.10));
+  border: 1px solid rgba(75,191,224,0.25);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.pcb-icon { font-size: 22px; flex-shrink: 0; }
+.pcb-body { flex: 1; }
+.pcb-title { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 3px; }
+.pcb-sub { font-size: 12px; color: var(--text-muted); }
+.pcb-bar-wrap { background: rgba(255,255,255,0.08); border-radius: 99px; height: 5px; margin-top: 6px; overflow: hidden; }
+.pcb-bar { background: var(--brand-blue); height: 5px; border-radius: 99px; transition: width 0.6s ease; }
+.pcb-btn { background: var(--brand-yellow); color: #0d1f2d; border: none; border-radius: 8px; padding: 8px 16px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.pcb-btn:hover { opacity: 0.9; }
+
+/* ── Cob-refined indicator ── */
+.cob-refined-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  color: var(--brand-yellow);
+  background: rgba(245,184,0,0.12);
+  border-radius: 99px;
+  padding: 2px 7px;
+  margin-left: 6px;
+  vertical-align: middle;
+  font-weight: 600;
+}
 .chat-msg.me .chat-meta { text-align: right; }
 .msg-safety-bar {
   padding: 8px 18px;
@@ -783,7 +818,17 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
         <div class="section-title">My Profile</div>
         <div class="section-sub">What other students see when they match with you</div>
       </div>
-      <button class="section-action" onclick="window.location.href='/'">✏️ Edit profile</button>
+      <button class="section-action" onclick="window.location.href=''">✏️ Edit profile</button>
+    </div>
+    <!-- Completion banner — shown when profile < 80% -->
+    <div class="profile-completion-banner" id="completion-banner" style="display:none;">
+      <div class="pcb-icon">🤠</div>
+      <div class="pcb-body">
+        <div class="pcb-title" id="pcb-title">Your profile is 0% complete</div>
+        <div class="pcb-sub">Stronger profiles get 3× more matches. Finish your profile to unlock more connections.</div>
+        <div class="pcb-bar-wrap"><div class="pcb-bar" id="pcb-bar" style="width:0%"></div></div>
+      </div>
+      <button class="pcb-btn" id="pcb-btn" onclick="window.location.href='/'">Finish profile →</button>
     </div>
     <div class="profile-layout">
       <!-- Sidebar -->
@@ -1130,12 +1175,123 @@ function switchTab(name) {
   }
 }
 
-// ── Load profile from localStorage ───────────────────────────────────────────
+// ── Profile helpers ───────────────────────────────────────────────────────────
+
+// Apply a profile data object (from Supabase or localStorage) to the UI.
+// cobRefinedFields: array of field keys Cob has updated (shows 🤠 badge).
+function applyProfileData(p, cobRefinedFields) {
+  const refined = cobRefinedFields || JSON.parse(localStorage.getItem('ur_cob_refined') || '[]');
+
+  function setRow(elId, val, fieldKey) {
+    if (!val) return;
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.textContent = val;
+    if (refined.includes(fieldKey)) {
+      if (!el.querySelector('.cob-refined-badge')) {
+        el.insertAdjacentHTML('beforeend', '<span class="cob-refined-badge">🤠 Cob</span>');
+      }
+    }
+  }
+
+  const seeking   = p.seeking        || localStorage.getItem('ur_seeking');
+  const budgetMin = p.budget_min     || localStorage.getItem('ur_budget_min');
+  const budgetMax = p.budget_max     || localStorage.getItem('ur_budget_max');
+  const household = p.household_type || localStorage.getItem('ur_household');
+  const sleep     = p.sleep_schedule || localStorage.getItem('ur_sleep');
+  const clean     = p.cleanliness    || localStorage.getItem('ur_cleanliness');
+  const guests    = p.guests         || localStorage.getItem('ur_guests');
+  const pets      = p.pets           || localStorage.getItem('ur_pets');
+  const uni       = p.university     || localStorage.getItem('ur_university');
+  const status    = p.student_status || localStorage.getItem('ur_student_status');
+  const studyloc  = p.study_location || localStorage.getItem('ur_study_location');
+  const suburbs   = p.suburb_preferences || null;
+
+  setRow('prow-seeking',   seeking,   'seeking');
+  if (budgetMin && budgetMax) {
+    setRow('prow-budget', `$${budgetMin}–$${budgetMax}/wk`, 'budget');
+  } else if (budgetMax) {
+    setRow('prow-budget', `Up to $${budgetMax}/wk`, 'budget');
+  }
+  setRow('prow-household', household,              'household_type');
+  setRow('prow-sleep',     sleep   ? sleep.replace(/_/g, ' ')  : null, 'sleep_schedule');
+  setRow('prow-clean',     clean   ? clean.replace(/_/g, ' ')  : null, 'cleanliness');
+  setRow('prow-guests',    guests,                 'guests');
+  setRow('prow-pets',      pets,                   'pets');
+  setRow('prow-status',    status,                 'student_status');
+  setRow('prow-studyloc',  studyloc,               'study_location');
+
+  if (uni) {
+    setRow('prow-uni', uni, 'university');
+    const uniEl = document.getElementById('profile-big-uni');
+    if (uniEl) uniEl.textContent = uni;
+    document.getElementById('header-name').textContent = 'Welcome back 👋';
+    document.getElementById('header-badges').innerHTML =
+      `<span class="badge badge-verified">✓ Email verified</span><span class="badge badge-uni">${uni}</span>`;
+  }
+
+  if (suburbs && Array.isArray(suburbs) && suburbs.length) {
+    const el = document.getElementById('prow-suburbs');
+    if (el) {
+      el.innerHTML = suburbs.map(s =>
+        `<span class="profile-chip">${s}${refined.includes('suburb_preferences') ? ' <span class="cob-refined-badge">🤠 Cob</span>' : ''}</span>`
+      ).join('');
+    }
+  }
+
+  // Cache to localStorage for next load
+  if (uni)       localStorage.setItem('ur_university',     uni);
+  if (sleep)     localStorage.setItem('ur_sleep',          sleep);
+  if (clean)     localStorage.setItem('ur_cleanliness',    clean);
+  if (seeking)   localStorage.setItem('ur_seeking',        String(seeking));
+  if (budgetMin) localStorage.setItem('ur_budget_min',     String(budgetMin));
+  if (budgetMax) localStorage.setItem('ur_budget_max',     String(budgetMax));
+  if (household) localStorage.setItem('ur_household',      household);
+  if (guests)    localStorage.setItem('ur_guests',         guests);
+  if (pets)      localStorage.setItem('ur_pets',           pets);
+  if (status)    localStorage.setItem('ur_student_status', status);
+  if (studyloc)  localStorage.setItem('ur_study_location', studyloc);
+
+  // City select
+  const city = p.city || localStorage.getItem('ur_city') || 'melbourne';
+  localStorage.setItem('ur_city', city);
+  const cs = document.getElementById('city-select');
+  if (cs) cs.value = city;
+
+  // Completion banner
+  const pct = p.profile_complete || parseInt(localStorage.getItem('unirenter_profile_complete') || '0', 10);
+  const cityRoots = { melbourne: '/', sydney: '/sydney', brisbane: '/brisbane', adelaide: '/adelaide', perth: '/perth', canberra: '/canberra' };
+  const cityRoot = cityRoots[city] || '/';
+  const banner = document.getElementById('completion-banner');
+  if (banner && pct < 80) {
+    banner.style.display = 'flex';
+    const pcbTitle = document.getElementById('pcb-title');
+    const pcbBar   = document.getElementById('pcb-bar');
+    const pcbBtn   = document.getElementById('pcb-btn');
+    if (pcbTitle) pcbTitle.textContent = `Your profile is ${pct}% complete`;
+    if (pcbBar)   pcbBar.style.width = pct + '%';
+    if (pcbBtn)   pcbBtn.setAttribute('onclick', `window.location.href='${cityRoot}'`);
+  }
+}
+
+// ── Fetch profile from Supabase (primary source) ──────────────────────────────
+async function loadProfileFromSupabase(email) {
+  try {
+    const res = await fetch('/api/profile/get?email=' + encodeURIComponent(email));
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.profile || null;
+  } catch (err) {
+    return null;
+  }
+}
+
+// ── Load profile — localStorage fast path, Supabase authoritative ─────────────
 function loadProfile() {
   const email = localStorage.getItem('unirenter_email') || '';
-  const pct = parseInt(localStorage.getItem('unirenter_profile_complete') || '0', 10);
+  const pct   = parseInt(localStorage.getItem('unirenter_profile_complete') || '0', 10);
 
-  // Header
+  // Header — immediate paint from localStorage
   if (email) {
     document.getElementById('header-email').textContent = email;
     document.getElementById('acct-email').textContent = email;
@@ -1143,7 +1299,7 @@ function loadProfile() {
     document.getElementById('header-email').textContent = 'Not signed in';
     document.getElementById('acct-email').textContent = 'Not verified';
   }
-  document.getElementById('header-pct-bar').style.width = pct + '%';
+  document.getElementById('header-pct-bar').style.width  = pct + '%';
   document.getElementById('profile-pct-bar').style.width = pct + '%';
   document.getElementById('profile-pct-label').textContent = pct + '% complete';
   document.getElementById('acct-pct').textContent = pct + '% complete';
@@ -1153,41 +1309,71 @@ function loadProfile() {
     badgesEl.innerHTML += `<span class="badge badge-pct">${pct}% profile</span>`;
   }
 
-  // Profile tab rows — read from localStorage keys set by index.html steps
-  const seeking = localStorage.getItem('ur_seeking');
-  const budgetMax = localStorage.getItem('ur_budget_max');
-  const budgetMin = localStorage.getItem('ur_budget_min');
-  const household = localStorage.getItem('ur_household');
-  const sleep = localStorage.getItem('ur_sleep');
-  const clean = localStorage.getItem('ur_cleanliness');
-  const guests = localStorage.getItem('ur_guests');
-  const pets = localStorage.getItem('ur_pets');
-  const uni = localStorage.getItem('ur_university');
-  const status = localStorage.getItem('ur_student_status');
-  const studyloc = localStorage.getItem('ur_study_location');
+  // Fast path — paint immediately from cached localStorage values
+  applyProfileData({}, []);
 
-  if (seeking) document.getElementById('prow-seeking').textContent = seeking;
-  if (budgetMin && budgetMax) document.getElementById('prow-budget').textContent = `$${budgetMin}–$${budgetMax}/wk`;
-  else if (budgetMax) document.getElementById('prow-budget').textContent = `Up to $${budgetMax}/wk`;
-  if (household) document.getElementById('prow-household').textContent = household;
-  if (sleep) document.getElementById('prow-sleep').textContent = sleep.replace('_', ' ');
-  if (clean) document.getElementById('prow-clean').textContent = clean.replace('_', ' ');
-  if (guests) document.getElementById('prow-guests').textContent = guests;
-  if (pets) document.getElementById('prow-pets').textContent = pets;
-  if (uni) {
-    document.getElementById('prow-uni').textContent = uni;
-    document.getElementById('profile-big-uni').textContent = uni;
-    document.getElementById('header-name').textContent = 'Welcome back 👋';
-    document.getElementById('header-badges').innerHTML =
-      `<span class="badge badge-verified">✓ Email verified</span><span class="badge badge-uni">${uni}</span>`;
+  // Authoritative path — fetch from Supabase and repaint with richer data
+  if (email) {
+    loadProfileFromSupabase(email).then(profile => {
+      if (profile) {
+        const sbPct = profile.profile_complete || pct;
+        document.getElementById('header-pct-bar').style.width  = sbPct + '%';
+        document.getElementById('profile-pct-bar').style.width = sbPct + '%';
+        document.getElementById('profile-pct-label').textContent = sbPct + '% complete';
+        document.getElementById('acct-pct').textContent = sbPct + '% complete';
+        localStorage.setItem('unirenter_profile_complete', String(sbPct));
+
+        const cobRefined = profile.cob_refined_fields || [];
+        applyProfileData(profile, cobRefined);
+      }
+    });
   }
-  if (status) document.getElementById('prow-status').textContent = status;
-  if (studyloc) document.getElementById('prow-studyloc').textContent = studyloc;
+}
 
-  // City select
-  const city = localStorage.getItem('ur_city') || 'melbourne';
-  const cs = document.getElementById('city-select');
-  if (cs) cs.value = city;
+// ── Apply Cob profile signals to Supabase + localStorage ─────────────────────
+// Called by city page Cob panel after each reply containing profile_signals.
+async function applyCobSignals(signals, email) {
+  if (!signals || !signals.has_signals || !email) return;
+
+  const payload = { email, city: localStorage.getItem('ur_city') || 'melbourne' };
+  const refinedFields = JSON.parse(localStorage.getItem('ur_cob_refined') || '[]');
+
+  const fieldMap = {
+    university:         'university',
+    suburb_preferences: 'suburb_preferences',
+    budget_max:         'budget_max',
+    sleep_schedule:     'sleep_schedule',
+    cleanliness:        'cleanliness',
+    pets:               'pets',
+    student_status:     'student_status',
+    household_type:     'household_type',
+  };
+
+  let hasUpdate = false;
+  for (const [sigKey, profileKey] of Object.entries(fieldMap)) {
+    if (signals[sigKey] !== null && signals[sigKey] !== undefined) {
+      payload[profileKey] = signals[sigKey];
+      if (!refinedFields.includes(profileKey)) refinedFields.push(profileKey);
+      hasUpdate = true;
+    }
+  }
+
+  if (!hasUpdate) return;
+
+  localStorage.setItem('ur_cob_refined', JSON.stringify(refinedFields));
+
+  try {
+    await fetch('/api/profile/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (err) {
+    console.warn('Cob signal save failed (non-fatal):', err.message);
+  }
+
+  applyProfileData(payload, refinedFields);
+  showToast('🤠 Cob updated your profile', 'Preferences saved from your conversation.');
 }
 
 // ── Matches ───────────────────────────────────────────────────────────────────

@@ -67,9 +67,80 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- Adelaide -->
+  <url>
+    <loc>https://unirenter.com.au/adelaide</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/adelaide/guide</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/adelaide/settled</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/adelaide/lease</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Perth -->
+  <url>
+    <loc>https://unirenter.com.au/perth</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/perth/guide</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/perth/settled</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/perth/lease</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Canberra -->
+  <url>
+    <loc>https://unirenter.com.au/canberra</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/canberra/guide</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/canberra/settled</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/canberra/lease</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- Platform pages -->
   <url>
     <loc>https://unirenter.com.au/cob</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/landlords</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

@@ -683,12 +683,14 @@ async function cobSend(preset) {
   scrollCob();
 
   try {
+    const email = localStorage.getItem('unirenter_email') || null;
     const res = await fetch('/api/cob', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: cobHistory,
-        city: 'Melbourne'
+        city: 'Melbourne',
+        extract_signals: !!email   // only extract if we have an email to save against
       })
     });
 
@@ -699,6 +701,11 @@ async function cobSend(preset) {
       const reply = data.reply || "No worries — something went sideways. Give it another crack!";
       cobHistory.push({ role: "assistant", content: reply });
       addCobMsg(reply, "oi");
+
+      // If Cob detected profile signals, save them to Supabase + localStorage
+      if (data.profile_signals && email) {
+        await saveCobSignals(data.profile_signals, email);
+      }
     } else {
       const fallback = getCobFallback(msg);
       addCobMsg(fallback, "oi");
@@ -707,6 +714,57 @@ async function cobSend(preset) {
     typing.classList.remove("vis");
     const fallback = getCobFallback(msg);
     addCobMsg(fallback, "oi");
+  }
+}
+
+// ── Save Cob-extracted profile signals to Supabase ────────────────────────────
+async function saveCobSignals(signals, email) {
+  if (!signals || !signals.has_signals || !email) return;
+
+  const payload = { email, city: localStorage.getItem('ur_city') || 'melbourne' };
+  const refinedFields = JSON.parse(localStorage.getItem('ur_cob_refined') || '[]');
+
+  const fieldMap = {
+    university:         'university',
+    suburb_preferences: 'suburb_preferences',
+    budget_max:         'budget_max',
+    sleep_schedule:     'sleep_schedule',
+    cleanliness:        'cleanliness',
+    pets:               'pets',
+    student_status:     'student_status',
+    household_type:     'household_type',
+  };
+
+  let hasUpdate = false;
+  for (const [sigKey, profileKey] of Object.entries(fieldMap)) {
+    if (signals[sigKey] !== null && signals[sigKey] !== undefined) {
+      payload[profileKey] = signals[sigKey];
+      if (!refinedFields.includes(profileKey)) refinedFields.push(profileKey);
+      hasUpdate = true;
+    }
+  }
+
+  if (!hasUpdate) return;
+
+  localStorage.setItem('ur_cob_refined', JSON.stringify(refinedFields));
+
+  // Also write ur_* cache keys so dashboard gets them immediately
+  if (payload.university)      localStorage.setItem('ur_university',     payload.university);
+  if (payload.sleep_schedule)  localStorage.setItem('ur_sleep',          payload.sleep_schedule);
+  if (payload.cleanliness)     localStorage.setItem('ur_cleanliness',    payload.cleanliness);
+  if (payload.budget_max)      localStorage.setItem('ur_budget_max',     String(payload.budget_max));
+  if (payload.household_type)  localStorage.setItem('ur_household',      payload.household_type);
+  if (payload.pets)            localStorage.setItem('ur_pets',           payload.pets);
+  if (payload.student_status)  localStorage.setItem('ur_student_status', payload.student_status);
+
+  try {
+    await fetch('/api/profile/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (err) {
+    console.warn('Cob signal save failed (non-fatal):', err.message);
   }
 }
 
