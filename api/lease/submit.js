@@ -208,12 +208,32 @@ export default async function handler(req, res) {
               <strong>📍 ${suburb}, ${city.charAt(0).toUpperCase() + city.slice(1)}</strong><br>
               ${property_type.replace(/_/g, ' ')} · $${rent}/wk · Available ${available_from}
             </div>
-            <div style="background:#fff8e1;border:1px solid #F5B800;border-radius:8px;padding:14px 18px;font-size:13px;color:#7a5c00;line-height:1.6;">
-              🤠 <strong>Cob's reminder:</strong> Never share personal contact details outside UniRenter. 
-              Inspections are arranged through the platform — we'll notify you when someone is interested.
+            <div style="background:#0d2a1a;border:1px solid #3DAA5C;border-radius:8px;padding:16px 18px;margin-bottom:16px;">
+              <div style="font-size:13px;font-weight:700;color:#3DAA5C;margin-bottom:10px;">🤠 Cob says &mdash; get your documents ready now</div>
+              <p style="margin:0 0 10px;font-size:13px;color:#c8e8d0;line-height:1.7;">
+                The faster you upload your documents, the faster your handover moves. Incoming tenants need to see your condition report and landlord consent <em>before</em> they'll commit to an inspection.
+              </p>
+              <p style="margin:0 0 10px;font-size:13px;color:#c8e8d0;line-height:1.7;">
+                Getting written landlord consent typically takes 5&ndash;7 business days &mdash; start this now, before you have an interested tenant waiting.
+              </p>
+              <div style="font-size:13px;color:#c8e8d0;margin-bottom:8px;font-weight:600;">Documents to prepare:</div>
+              <table cellpadding="0" cellspacing="0" width="100%">
+                <tr><td style="padding:4px 0;font-size:13px;color:#c8e8d0;">📋 Condition report <span style="color:#E8623A;font-size:11px;font-weight:700;">MOST CRITICAL</span></td></tr>
+                <tr><td style="padding:4px 0;font-size:13px;color:#c8e8d0;">✉️ Written landlord consent</td></tr>
+                <tr><td style="padding:4px 0;font-size:13px;color:#c8e8d0;">🏦 Bond lodgement form</td></tr>
+                <tr><td style="padding:4px 0;font-size:13px;color:#c8e8d0;">📄 Tenancy agreement</td></tr>
+                <tr><td style="padding:4px 0;font-size:13px;color:#c8e8d0;">🏢 Body corp bylaws (if applicable)</td></tr>
+              </table>
+              <p style="margin:12px 0 0;font-size:12px;color:#7a9a80;line-height:1.5;">
+                Documents are stored securely for the transaction only and permanently deleted 48 hours after handover is complete.
+              </p>
             </div>
-            <div style="margin-top:20px;font-size:12px;color:#999;border-top:1px solid #eee;padding-top:16px;">
-              Your listing expires in 60 days. UniRenter · <a href="https://unirenter.com.au/legal" style="color:#4BBFE0;">Terms & Privacy</a>
+            <div style="background:#fff8e1;border:1px solid #F5B800;border-radius:8px;padding:14px 18px;font-size:13px;color:#7a5c00;line-height:1.6;margin-bottom:16px;">
+              🤠 <strong>Safety reminder:</strong> Never share personal contact details outside UniRenter.
+              Inspections are arranged through the platform &mdash; we'll email you when someone is interested.
+            </div>
+            <div style="margin-top:4px;font-size:12px;color:#999;border-top:1px solid #eee;padding-top:16px;">
+              Your listing expires in 60 days. UniRenter &middot; <a href="https://unirenter.com.au/legal" style="color:#4BBFE0;">Terms &amp; Privacy</a>
             </div>
           </div>
         </div>
