@@ -255,6 +255,30 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 .city-sw-btn{display:flex;align-items:center;gap:6px;padding:9px 18px;border-radius:20px;font-size:13px;font-weight:500;border:1px solid rgba(255,255,255,0.1);color:var(--muted,#7a96aa);text-decoration:none;transition:all 0.2s}
 .city-sw-btn:hover{border-color:rgba(245,184,0,0.4);color:var(--brand-yellow,#F5B800)}
 .city-sw-btn.active{background:rgba(245,184,0,0.1);border-color:var(--brand-yellow,#F5B800);color:var(--brand-yellow,#F5B800)}
+
+/* ── Rights & Responsibilities tab ─────────────────────────────────────────── */
+.rr-list {
+  margin: 10px 0 0 0;
+  padding: 0;
+  list-style: none;
+}
+.rr-list li {
+  padding: 9px 0 9px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 13px;
+  color: var(--text, #e8f0f5);
+  line-height: 1.65;
+  position: relative;
+}
+body.light-mode .rr-list li { border-bottom-color: rgba(0,0,0,0.07); color: #1a2a35; }
+.rr-list li:last-child { border-bottom: none; }
+.rr-list li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--blue, #4BBFE0);
+  font-weight: 700;
+}
 </style>
 </head>
 <body>
@@ -326,6 +350,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
   <button class="gtab" onclick="showGuide('legal',this)">⚖️ Legal resources</button>
   <button class="gtab" onclick="showGuide('translate',this)">🌏 Communication tips</button>
   <button class="gtab" onclick="showGuide('repairs',this)">🔧 Maintenance</button>
+  <button class="gtab" onclick="showGuide('rights',this)">⚖️ Rights &amp; responsibilities</button>
 </div>
 
 <!-- ── GOOD HOUSEMATE ── -->
@@ -578,6 +603,84 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
   <!-- State legislation -->
   <a href="https://www.rta.qld.gov.au/during-a-tenancy/repairs/emergency-repairs" target="_blank" class="resource-link"><div class="rl-icon">🔧</div><div class="rl-body"><h4>Residential Tenancies Authority (RTA) — repairs &amp; maintenance</h4><p>Full guide including emergency repairs, timeframes, and how to make a complaint</p></div><div class="rl-arrow">→</div></a>
   <a href="https://www.rta.qld.gov.au/" target="_blank" class="resource-link"><div class="rl-icon">📖</div><div class="rl-body"><h4>Residential Tenancies and Rooming Accommodation Act 2008 (QLD)</h4><p>Primary legislation governing all rental rights and obligations in Queensland</p></div><div class="rl-arrow">→</div></a>
+</div>
+
+<!-- ── RIGHTS & RESPONSIBILITIES ── -->
+<div class="guide-section" id="guide-rights">
+  <div class="section-label">Know where you stand</div>
+  <div class="section-title">Rights &amp; responsibilities —<br>Queensland.</div>
+  <div class="section-sub">Renting in Queensland is governed by the <strong>Residential Tenancies and Rooming Accommodation Act 2008 (Qld)</strong>, administered by <strong>Residential Tenancies Authority (RTA)</strong>. Both tenants and landlords have specific rights and responsibilities under this law. Understanding yours protects you.<br><br><em>This information is for general guidance only. For your specific situation, contact a tenancy support service or your state authority directly.</em></div>
+
+  <!-- Quick facts strip -->
+  <div class="info-card" style="border-top:3px solid var(--blue);margin-bottom:20px;">
+    <div class="info-card-header"><div class="info-card-icon">📋</div><div><div class="info-card-title">Key facts at a glance — Queensland</div></div></div>
+    <div class="tip-list">
+      <div class="tip"><div class="tip-icon">💰</div><div class="tip-body"><h5>Rent increases</h5><p>Limited to once per 12-month period.</p></div></div>
+      <div class="tip"><div class="tip-icon">🚪</div><div class="tip-body"><h5>Entry notice</h5><p>Entry Notice must be given at least 24 hours and no more than 14 days before the proposed entry.</p></div></div>
+      <div class="tip"><div class="tip-icon">🐾</div><div class="tip-body"><h5>Pets</h5><p>Since 2023, landlords cannot unreasonably refuse a request to keep a pet. They must respond in writing within 14 days or consent is taken to be given.</p></div></div>
+      <div class="tip"><div class="tip-icon">📜</div><div class="tip-body"><h5>Eviction</h5><p>Landlords must provide a valid reason and comply with prescribed notice periods</p></div></div>
+    </div>
+    <div class="warn-box" style="margin-top:14px;"><div>ℹ️</div><div>Queensland's tenancy laws are governed by the RTA. Since 2023, landlords cannot unreasonably refuse a tenant's request to keep a pet.</div></div>
+  </div>
+
+  <!-- Tenant Rights -->
+  <div class="info-card" style="border-top:3px solid var(--green);">
+    <div class="info-card-header"><div class="info-card-icon">👤</div><div><div class="info-card-title">Your rights as a tenant</div></div></div>
+    <ul class="rr-list">
+          <li><strong>Quiet enjoyment</strong> — You have the right to reasonable peace, comfort, and privacy in the property.</li>
+          <li><strong>Safe and secure property</strong> — The property must be fit to live in, comply with health and safety laws, and have functioning locks and security.</li>
+          <li><strong>Repairs</strong> — Emergency repairs must be actioned urgently; routine repairs must be addressed within a reasonable time after written notice.</li>
+          <li><strong>Entry notice</strong> — Landlord must give at least 24 hours' written notice before any routine entry. Maximum 1 routine inspection per 3 months.</li>
+          <li><strong>Pets</strong> — Since 2023, landlords cannot unreasonably refuse a pet request. If no written response within 14 days, consent is deemed given.</li>
+          <li><strong>Rent increase limit</strong> — Rent cannot be increased more than once every 12 months.</li>
+          <li><strong>Bond protection</strong> — Bond is held by the RTA, not your landlord. Max 4 weeks rent.</li>
+    </ul>
+  </div>
+
+  <!-- Tenant Responsibilities -->
+  <div class="info-card" style="border-top:3px solid var(--yellow,#F5B800);">
+    <div class="info-card-header"><div class="info-card-icon">✅</div><div><div class="info-card-title">Your responsibilities as a tenant</div></div></div>
+    <ul class="rr-list">
+          <li><strong>Pay rent on time</strong> — Rent must be paid on or before the date in your agreement.</li>
+          <li><strong>Keep the property clean</strong> — Maintain reasonable cleanliness and report damage promptly.</li>
+          <li><strong>Avoid damage</strong> — You are responsible for damage beyond fair wear and tear caused by you, your household, or your guests.</li>
+          <li><strong>Respect neighbours</strong> — Do not cause a nuisance or interfere with neighbours' peace and comfort.</li>
+          <li><strong>Get written permission</strong> — Written consent required for pets, additional occupants, or modifications.</li>
+          <li><strong>Allow access</strong> — After proper Entry Notice, provide access for inspections and repairs.</li>
+    </ul>
+  </div>
+
+  <!-- Landlord Rights -->
+  <div class="info-card" style="border-top:3px solid var(--coral);">
+    <div class="info-card-header"><div class="info-card-icon">🏢</div><div><div class="info-card-title">Landlord / property manager rights</div></div></div>
+    <ul class="rr-list">
+          <li><strong>Collect bond and rent</strong> — Up to 4 weeks rent as bond; rent on the agreed day.</li>
+          <li><strong>Routine inspections</strong> — Up to 1 per 3 months with at least 24 hours' Entry Notice; not in the first 3 weeks.</li>
+          <li><strong>End the tenancy</strong> — With a valid reason and prescribed notice period. QCAT can make orders if disputes arise.</li>
+          <li><strong>Claim compensation</strong> — For damage or unpaid rent, via QCAT.</li>
+    </ul>
+  </div>
+
+  <!-- Landlord Responsibilities -->
+  <div class="info-card" style="border-top:3px solid rgba(75,191,224,0.5);">
+    <div class="info-card-header"><div class="info-card-icon">📋</div><div><div class="info-card-title">Landlord / property manager responsibilities</div></div></div>
+    <ul class="rr-list">
+          <li><strong>Property must be habitable</strong> — Must be fit to live in, secure, and comply with health and safety laws at the start and throughout the tenancy.</li>
+          <li><strong>Lodge bond with the RTA</strong> — Legally required to lodge the bond with the RTA within 10 days of receiving it.</li>
+          <li><strong>Carry out repairs</strong> — Emergency repairs urgently; routine repairs within a reasonable time.</li>
+          <li><strong>Respect privacy</strong> — Must comply strictly with Entry Notice requirements before entering the property.</li>
+          <li><strong>Condition report</strong> — Must provide a completed Entry Condition Report at the start of the tenancy.</li>
+          <li><strong>Cannot unreasonably refuse pets</strong> — Must respond to pet requests within 14 days with written reasons if refusing.</li>
+    </ul>
+  </div>
+
+  <!-- Where to get help -->
+  <div class="section-label" style="margin-top:28px;">Free support in Queensland</div>
+  <a href="https://www.rta.qld.gov.au" target="_blank" class="resource-link"><div class="rl-icon">🏛️</div><div class="rl-body"><h4>Residential Tenancies Authority (RTA)</h4><p>Official Queensland tenancy regulator — rights, forms, complaints, and dispute resolution</p></div><div class="rl-arrow">→</div></a>
+  <a href="https://tenantsqld.org.au" target="_blank" class="resource-link"><div class="rl-icon">📞</div><div class="rl-body"><h4>Tenants Queensland — 1300 744 263</h4><p>Free, independent tenancy advice and advocacy for renters in Queensland</p></div><div class="rl-arrow">→</div></a>
+  <a href="https://www.qcat.qld.gov.au" target="_blank" class="resource-link"><div class="rl-icon">⚖️</div><div class="rl-body"><h4>QCAT</h4><p>The tribunal that hears tenancy disputes in Queensland. If your landlord is not meeting their obligations and negotiation has failed, this is where disputes are resolved.</p></div><div class="rl-arrow">→</div></a>
+
+  <div class="warn-box" style="margin-top:20px;"><div>💬</div><div><strong>Ask Cob</strong> — Not sure about your rights in a specific situation? Cob can help you understand what the law says and point you to the right authority. Open the chat panel any time.</div></div>
 </div>
 
 <!-- Bug report button -->

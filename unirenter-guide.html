@@ -189,6 +189,30 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 .city-sw-btn{display:flex;align-items:center;gap:6px;padding:9px 18px;border-radius:20px;font-size:13px;font-weight:500;border:1px solid rgba(255,255,255,0.1);color:var(--muted,#7a96aa);text-decoration:none;transition:all 0.2s}
 .city-sw-btn:hover{border-color:rgba(245,184,0,0.4);color:var(--brand-yellow,#F5B800)}
 .city-sw-btn.active{background:rgba(245,184,0,0.1);border-color:var(--brand-yellow,#F5B800);color:var(--brand-yellow,#F5B800)}
+
+/* ── Rights & Responsibilities tab ─────────────────────────────────────────── */
+.rr-list {
+  margin: 10px 0 0 0;
+  padding: 0;
+  list-style: none;
+}
+.rr-list li {
+  padding: 9px 0 9px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 13px;
+  color: var(--text, #e8f0f5);
+  line-height: 1.65;
+  position: relative;
+}
+body.light-mode .rr-list li { border-bottom-color: rgba(0,0,0,0.07); color: #1a2a35; }
+.rr-list li:last-child { border-bottom: none; }
+.rr-list li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--blue, #4BBFE0);
+  font-weight: 700;
+}
 </style>
 </head>
 <body>
@@ -260,6 +284,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
   <button class="gtab" onclick="showGuide('legal',this)">⚖️ Legal resources</button>
   <button class="gtab" onclick="showGuide('translate',this)">🌏 Communication tips</button>
   <button class="gtab" onclick="showGuide('repairs',this)">🔧 Maintenance</button>
+  <button class="gtab" onclick="showGuide('rights',this)">⚖️ Rights &amp; responsibilities</button>
 </div>
 
 <!-- ── GOOD HOUSEMATE ── -->
@@ -531,6 +556,86 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
   <!-- State legislation -->
   <a href="https://www.consumer.vic.gov.au/housing/renting/during-a-lease-or-tenancy/repairs-and-maintenance" target="_blank" class="resource-link"><div class="rl-icon">🔧</div><div class="rl-body"><h4>Consumer Affairs Victoria (CAV) — repairs &amp; maintenance</h4><p>Full guide including emergency repairs, timeframes, and how to make a complaint</p></div><div class="rl-arrow">→</div></a>
   <a href="https://www.consumer.vic.gov.au/housing/renting" target="_blank" class="resource-link"><div class="rl-icon">📖</div><div class="rl-body"><h4>Residential Tenancies Act 1997 (VIC)</h4><p>Primary legislation governing all rental rights and obligations in Victoria</p></div><div class="rl-arrow">→</div></a>
+</div>
+
+<!-- ── RIGHTS & RESPONSIBILITIES ── -->
+<div class="guide-section" id="guide-rights">
+  <div class="section-label">Know where you stand</div>
+  <div class="section-title">Rights &amp; responsibilities —<br>Victoria.</div>
+  <div class="section-sub">Renting in Victoria is governed by the <strong>Residential Tenancies Act 1997 (Vic)</strong>, administered by <strong>Consumer Affairs Victoria (CAV)</strong>. Both tenants and landlords have specific rights and responsibilities under this law. Understanding yours protects you.<br><br><em>This information is for general guidance only. For your specific situation, contact a tenancy support service or your state authority directly.</em></div>
+
+  <!-- Quick facts strip -->
+  <div class="info-card" style="border-top:3px solid var(--blue);margin-bottom:20px;">
+    <div class="info-card-header"><div class="info-card-icon">📋</div><div><div class="info-card-title">Key facts at a glance — Victoria</div></div></div>
+    <div class="tip-list">
+      <div class="tip"><div class="tip-icon">💰</div><div class="tip-body"><h5>Rent increases</h5><p>Limited to once per 12-month period.</p></div></div>
+      <div class="tip"><div class="tip-icon">🚪</div><div class="tip-body"><h5>Entry notice</h5><p>24 hours (routine inspections); immediate in emergencies.</p></div></div>
+      <div class="tip"><div class="tip-icon">🐾</div><div class="tip-body"><h5>Pets</h5><p>Tenants can keep pets with written approval. Landlords can only refuse on specific grounds set out in the Act.</p></div></div>
+      <div class="tip"><div class="tip-icon">📜</div><div class="tip-body"><h5>Eviction</h5><p>Abolished — landlords must provide a valid reason to end a tenancy</p></div></div>
+    </div>
+    <div class="warn-box" style="margin-top:14px;"><div>ℹ️</div><div>Victoria's rental laws were significantly updated in 2018 and continue to evolve. New minimum energy efficiency standards begin rolling out from March 2027.</div></div>
+  </div>
+
+  <!-- Tenant Rights -->
+  <div class="info-card" style="border-top:3px solid var(--green);">
+    <div class="info-card-header"><div class="info-card-icon">👤</div><div><div class="info-card-title">Your rights as a tenant</div></div></div>
+    <ul class="rr-list">
+          <li><strong>Quiet enjoyment</strong> — You have the right to reasonable peace, comfort, and privacy in your home.</li>
+          <li><strong>Safe and habitable property</strong> — The property must meet minimum standards including working locks, adequate ventilation, structural soundness, and functioning utilities.</li>
+          <li><strong>Repairs</strong> — Emergency repairs within 24 hours; routine repairs within 14 days of written request.</li>
+          <li><strong>Entry notice</strong> — Landlord must give at least 24 hours written notice for most entry. Maximum 4 routine inspections per year.</li>
+          <li><strong>No unfair eviction</strong> — Since 2018, landlords cannot end a tenancy without a valid, legally recognised reason.</li>
+          <li><strong>Pets</strong> — You can request to keep a pet. Landlords may only refuse on specific grounds listed in the Act.</li>
+          <li><strong>Rent increase limit</strong> — Rent cannot be increased more than once every 12 months.</li>
+          <li><strong>Bond protection</strong> — Bond is held by Residential Bonds Victoria, not your landlord. Max 4 weeks rent.</li>
+    </ul>
+  </div>
+
+  <!-- Tenant Responsibilities -->
+  <div class="info-card" style="border-top:3px solid var(--yellow,#F5B800);">
+    <div class="info-card-header"><div class="info-card-icon">✅</div><div><div class="info-card-title">Your responsibilities as a tenant</div></div></div>
+    <ul class="rr-list">
+          <li><strong>Pay rent on time</strong> — Rent must be paid on or before the date stated in your agreement.</li>
+          <li><strong>Keep the property clean</strong> — Maintain reasonable cleanliness and report damage promptly. "Fair wear and tear" is excluded from your liability.</li>
+          <li><strong>Avoid damage</strong> — You are responsible for damage beyond fair wear and tear caused by you or your guests.</li>
+          <li><strong>Respect neighbours</strong> — Do not cause a nuisance or interfere with neighbours' peaceful enjoyment.</li>
+          <li><strong>Get permission for modifications</strong> — Written consent required for any changes to the property.</li>
+          <li><strong>Allow access</strong> — After proper notice, you must provide access for inspections and repairs.</li>
+          <li><strong>Notify of extended absence</strong> — If leaving for more than 2 weeks, notify your landlord.</li>
+    </ul>
+  </div>
+
+  <!-- Landlord Rights -->
+  <div class="info-card" style="border-top:3px solid var(--coral);">
+    <div class="info-card-header"><div class="info-card-icon">🏢</div><div><div class="info-card-title">Landlord / property manager rights</div></div></div>
+    <ul class="rr-list">
+          <li><strong>Collect bond and rent</strong> — Up to 4 weeks rent as bond; rent on the agreed day.</li>
+          <li><strong>Routine inspections</strong> — Up to 4 per year with at least 24 hours written notice; not in the first 3 months.</li>
+          <li><strong>End the tenancy</strong> — With a valid, legally recognised reason and the correct notice period.</li>
+          <li><strong>Claim compensation</strong> — For damage beyond fair wear and tear or unpaid rent, via VCAT.</li>
+    </ul>
+  </div>
+
+  <!-- Landlord Responsibilities -->
+  <div class="info-card" style="border-top:3px solid rgba(75,191,224,0.5);">
+    <div class="info-card-header"><div class="info-card-icon">📋</div><div><div class="info-card-title">Landlord / property manager responsibilities</div></div></div>
+    <ul class="rr-list">
+          <li><strong>Provide habitable premises</strong> — Property must meet minimum rental standards at the start and throughout the tenancy.</li>
+          <li><strong>Lodge bond correctly</strong> — Must lodge bond with Residential Bonds Victoria promptly.</li>
+          <li><strong>Carry out repairs</strong> — Emergency repairs within 24 hours; routine repairs within 14 days.</li>
+          <li><strong>Respect privacy</strong> — Must provide proper written notice before entry.</li>
+          <li><strong>Provide condition report</strong> — Must provide a complete condition report at the start of the tenancy.</li>
+          <li><strong>Maintain locks and security</strong> — Must ensure all locks and security devices are in working order.</li>
+    </ul>
+  </div>
+
+  <!-- Where to get help -->
+  <div class="section-label" style="margin-top:28px;">Free support in Victoria</div>
+  <a href="https://www.consumer.vic.gov.au" target="_blank" class="resource-link"><div class="rl-icon">🏛️</div><div class="rl-body"><h4>Consumer Affairs Victoria</h4><p>Official Victoria tenancy regulator — rights, forms, complaints, and dispute resolution</p></div><div class="rl-arrow">→</div></a>
+  <a href="https://www.tenantsvic.org.au" target="_blank" class="resource-link"><div class="rl-icon">📞</div><div class="rl-body"><h4>Tenants Victoria — 03 9416 2577</h4><p>Free, independent tenancy advice and advocacy for renters in Victoria</p></div><div class="rl-arrow">→</div></a>
+  <a href="https://www.vcat.vic.gov.au" target="_blank" class="resource-link"><div class="rl-icon">⚖️</div><div class="rl-body"><h4>VCAT</h4><p>The tribunal that hears tenancy disputes in Victoria. If your landlord is not meeting their obligations and negotiation has failed, this is where disputes are resolved.</p></div><div class="rl-arrow">→</div></a>
+
+  <div class="warn-box" style="margin-top:20px;"><div>💬</div><div><strong>Ask Cob</strong> — Not sure about your rights in a specific situation? Cob can help you understand what the law says and point you to the right authority. Open the chat panel any time.</div></div>
 </div>
 
 <!-- Bug report button -->

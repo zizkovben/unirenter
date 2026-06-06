@@ -237,6 +237,30 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 .city-sw-btn{display:flex;align-items:center;gap:6px;padding:9px 18px;border-radius:20px;font-size:13px;font-weight:500;border:1px solid rgba(255,255,255,0.1);color:var(--muted,#7a96aa);text-decoration:none;transition:all 0.2s}
 .city-sw-btn:hover{border-color:rgba(245,184,0,0.4);color:var(--brand-yellow,#F5B800)}
 .city-sw-btn.active{background:rgba(245,184,0,0.1);border-color:var(--brand-yellow,#F5B800);color:var(--brand-yellow,#F5B800)}
+
+/* ── Rights & Responsibilities tab ─────────────────────────────────────────── */
+.rr-list {
+  margin: 10px 0 0 0;
+  padding: 0;
+  list-style: none;
+}
+.rr-list li {
+  padding: 9px 0 9px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 13px;
+  color: var(--text, #e8f0f5);
+  line-height: 1.65;
+  position: relative;
+}
+body.light-mode .rr-list li { border-bottom-color: rgba(0,0,0,0.07); color: #1a2a35; }
+.rr-list li:last-child { border-bottom: none; }
+.rr-list li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--blue, #4BBFE0);
+  font-weight: 700;
+}
 </style>
 </head>
 <body>
@@ -308,6 +332,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
   <button class="gtab" onclick="showGuide('legal',this)">⚖️ Legal resources</button>
   <button class="gtab" onclick="showGuide('translate',this)">🌏 Communication tips</button>
   <button class="gtab" onclick="showGuide('repairs',this)">🔧 Maintenance</button>
+  <button class="gtab" onclick="showGuide('rights',this)">⚖️ Rights &amp; responsibilities</button>
 </div>
 
 <!-- ── GOOD HOUSEMATE ── -->
@@ -579,6 +604,83 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
   <!-- State legislation -->
   <a href="https://www.accesscanberra.act.gov.au/renting" target="_blank" class="resource-link"><div class="rl-icon">🔧</div><div class="rl-body"><h4>Access Canberra — repairs &amp; maintenance</h4><p>Full guide including emergency repairs, timeframes, and how to make a complaint</p></div><div class="rl-arrow">→</div></a>
   <a href="https://www.accesscanberra.act.gov.au/renting" target="_blank" class="resource-link"><div class="rl-icon">📖</div><div class="rl-body"><h4>Residential Tenancies Act 1997 (ACT)</h4><p>Primary legislation governing all rental rights and obligations in Australian Capital Territory</p></div><div class="rl-arrow">→</div></a>
+</div>
+
+<!-- ── RIGHTS & RESPONSIBILITIES ── -->
+<div class="guide-section" id="guide-rights">
+  <div class="section-label">Know where you stand</div>
+  <div class="section-title">Rights &amp; responsibilities —<br>Australian Capital Territory.</div>
+  <div class="section-sub">Renting in Australian Capital Territory is governed by the <strong>Residential Tenancies Act 1997 (ACT)</strong>, administered by <strong>Access Canberra</strong>. Both tenants and landlords have specific rights and responsibilities under this law. Understanding yours protects you.<br><br><em>This information is for general guidance only. For your specific situation, contact a tenancy support service or your state authority directly.</em></div>
+
+  <!-- Quick facts strip -->
+  <div class="info-card" style="border-top:3px solid var(--blue);margin-bottom:20px;">
+    <div class="info-card-header"><div class="info-card-icon">📋</div><div><div class="info-card-title">Key facts at a glance — Australian Capital Territory</div></div></div>
+    <div class="tip-list">
+      <div class="tip"><div class="tip-icon">💰</div><div class="tip-body"><h5>Rent increases</h5><p>Limited to once per 12-month period.</p></div></div>
+      <div class="tip"><div class="tip-icon">🚪</div><div class="tip-body"><h5>Entry notice</h5><p>At least 1 week written notice for routine inspections.</p></div></div>
+      <div class="tip"><div class="tip-icon">🐾</div><div class="tip-body"><h5>Pets</h5><p>Tenants can request to keep a pet. Landlords can only refuse by applying to ACAT within 14 days, on specific grounds listed in the Act.</p></div></div>
+      <div class="tip"><div class="tip-icon">📜</div><div class="tip-body"><h5>Eviction</h5><p>The ACT has strong protections against no-grounds evictions. Landlords must have a valid reason and provide proper notice.</p></div></div>
+    </div>
+    <div class="warn-box" style="margin-top:14px;"><div>ℹ️</div><div>ACT rental laws were updated by the Housing and Consumer Affairs Legislation Amendment Act 2024, with key changes commencing from December 2024 and January 2025. The ACT has some of the strongest renter protections in Australia.</div></div>
+  </div>
+
+  <!-- Tenant Rights -->
+  <div class="info-card" style="border-top:3px solid var(--green);">
+    <div class="info-card-header"><div class="info-card-icon">👤</div><div><div class="info-card-title">Your rights as a tenant</div></div></div>
+    <ul class="rr-list">
+          <li><strong>Quiet enjoyment</strong> — Right to peaceful occupation without interference.</li>
+          <li><strong>Safe and habitable property</strong> — Property must be in a reasonable state of repair and fit to live in at the start and throughout the tenancy.</li>
+          <li><strong>Repairs</strong> — Urgent repairs must be carried out as soon as possible. All non-urgent repairs must be addressed within a reasonable time after written request.</li>
+          <li><strong>Entry notice</strong> — At least 1 week written notice required for routine inspections. Landlord cannot conduct more than 2 routine inspections per year (plus first and last month).</li>
+          <li><strong>Pets</strong> — You can request to keep a pet. A landlord can only refuse by applying to ACAT within 14 days, on specific grounds.</li>
+          <li><strong>Rent increase limit</strong> — Rent cannot be increased more than once every 12 months.</li>
+          <li><strong>Bond protection</strong> — Bond held by the ACT Revenue Office. Max 4 weeks rent.</li>
+    </ul>
+  </div>
+
+  <!-- Tenant Responsibilities -->
+  <div class="info-card" style="border-top:3px solid var(--yellow,#F5B800);">
+    <div class="info-card-header"><div class="info-card-icon">✅</div><div><div class="info-card-title">Your responsibilities as a tenant</div></div></div>
+    <ul class="rr-list">
+          <li><strong>Pay rent on time</strong> — Must be paid on the date in your agreement.</li>
+          <li><strong>Keep the property clean</strong> — Maintain reasonable cleanliness and promptly report any damage.</li>
+          <li><strong>Avoid damage</strong> — Responsible for damage beyond fair wear and tear caused by you or your guests.</li>
+          <li><strong>Respect neighbours</strong> — Do not cause nuisance or interfere with others' quiet enjoyment.</li>
+          <li><strong>Written permission for modifications</strong> — Required for any changes to the property.</li>
+          <li><strong>Allow access</strong> — After proper notice, provide access for inspections and repairs.</li>
+    </ul>
+  </div>
+
+  <!-- Landlord Rights -->
+  <div class="info-card" style="border-top:3px solid var(--coral);">
+    <div class="info-card-header"><div class="info-card-icon">🏢</div><div><div class="info-card-title">Landlord / property manager rights</div></div></div>
+    <ul class="rr-list">
+          <li><strong>Collect bond and rent</strong> — Up to 4 weeks rent as bond; rent on the agreed day.</li>
+          <li><strong>Routine inspections</strong> — Up to 2 per year (plus first and last month) with at least 1 week written notice.</li>
+          <li><strong>End the tenancy</strong> — With a valid reason and the correct notice period.</li>
+          <li><strong>Claim compensation</strong> — For damage or unpaid rent, via ACAT.</li>
+    </ul>
+  </div>
+
+  <!-- Landlord Responsibilities -->
+  <div class="info-card" style="border-top:3px solid rgba(75,191,224,0.5);">
+    <div class="info-card-header"><div class="info-card-icon">📋</div><div><div class="info-card-title">Landlord / property manager responsibilities</div></div></div>
+    <ul class="rr-list">
+          <li><strong>Provide habitable premises</strong> — Property must be in reasonable repair and fit to live in at the start and throughout the tenancy.</li>
+          <li><strong>Lodge bond with ACT Revenue Office</strong> — Must lodge bond in the Rental Bond Trust Account.</li>
+          <li><strong>Carry out repairs</strong> — Urgent repairs as soon as possible; all other repairs within a reasonable time.</li>
+          <li><strong>Respect privacy</strong> — Must comply with entry notice requirements.</li>
+          <li><strong>Condition report</strong> — Must provide a completed condition report at the start of the tenancy.</li>
+    </ul>
+  </div>
+
+  <!-- Where to get help -->
+  <div class="section-label" style="margin-top:28px;">Free support in Australian Capital Territory</div>
+  <a href="https://www.accesscanberra.act.gov.au" target="_blank" class="resource-link"><div class="rl-icon">🏛️</div><div class="rl-body"><h4>Access Canberra</h4><p>Official Australian Capital Territory tenancy regulator — rights, forms, complaints, and dispute resolution</p></div><div class="rl-arrow">→</div></a>
+  <a href="https://www.tenantsact.org.au" target="_blank" class="resource-link"><div class="rl-icon">📞</div><div class="rl-body"><h4>Tenants' Union ACT — 02 6247 2011</h4><p>Free, independent tenancy advice and advocacy for renters in Australian Capital Territory</p></div><div class="rl-arrow">→</div></a>
+  <a href="https://www.acat.act.gov.au" target="_blank" class="resource-link"><div class="rl-icon">⚖️</div><div class="rl-body"><h4>ACAT</h4><p>The tribunal that hears tenancy disputes in Australian Capital Territory. If your landlord is not meeting their obligations and negotiation has failed, this is where disputes are resolved.</p></div><div class="rl-arrow">→</div></a>
+
+  <div class="warn-box" style="margin-top:20px;"><div>💬</div><div><strong>Ask Cob</strong> — Not sure about your rights in a specific situation? Cob can help you understand what the law says and point you to the right authority. Open the chat panel any time.</div></div>
 </div>
 
 <!-- Bug report button -->
