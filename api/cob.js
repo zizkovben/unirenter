@@ -80,16 +80,19 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'API key not configured' });
   }
  
-  const { messages, city, extract_signals } = req.body;
+  const { messages, city, extract_signals, systemPrompt: systemPromptOverride } = req.body;
  
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'messages array required' });
   }
  
-  // Inject city context into system prompt if provided
-  const systemPrompt = city
-    ? `${COB_SYSTEM}\n\nCURRENT CONTEXT: The user is on the ${city} page of UniRenter, so they are likely asking about renting in ${city}.`
-    : COB_SYSTEM;
+  // Use caller-supplied system prompt if provided (e.g. landlords page, handover mode)
+  // Otherwise inject city context into the default student-facing system prompt
+  const systemPrompt = systemPromptOverride
+    ? systemPromptOverride
+    : city
+      ? `${COB_SYSTEM}\n\nCURRENT CONTEXT: The user is on the ${city} page of UniRenter, so they are likely asking about renting in ${city}.`
+      : COB_SYSTEM;
  
   const anthropicHeaders = {
     'Content-Type': 'application/json',
