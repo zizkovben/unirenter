@@ -858,6 +858,25 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
 }
 .handover-complete-badge .badge-sub { font-size: 14px; color: var(--text-muted, #7a96aa); }
 
+/* ── S28 Document upload UI ── */
+.hd-upload-panel { margin: 12px 0; }
+.hd-doc-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.hd-doc-row:last-child { border-bottom: none; }
+.hd-doc-label { font-size: 13px; color: var(--text, #e8f0f5); flex: 1; }
+.hd-doc-upload-btn { font-size: 12px; font-weight: 600; color: #4BBFE0; background: rgba(75,191,224,0.1); border: 1px solid rgba(75,191,224,0.3); border-radius: 6px; padding: 5px 12px; cursor: pointer; white-space: nowrap; margin-left: 12px; }
+.hd-doc-upload-btn:hover { background: rgba(75,191,224,0.2); }
+.hd-doc-view-btn { font-size: 12px; font-weight: 600; color: #3DAA5C; background: rgba(61,170,92,0.1); border: 1px solid rgba(61,170,92,0.3); border-radius: 6px; padding: 5px 12px; text-decoration: none; white-space: nowrap; margin-left: 12px; }
+.hd-doc-view-btn:hover { background: rgba(61,170,92,0.2); }
+.hd-cr-viewer { margin: 12px 0; background: rgba(0,0,0,0.2); border-radius: 8px; overflow: hidden; }
+.hd-cr-iframe { width: 100%; height: 420px; border: none; background: #fff; }
+.hd-request-docs-btn { margin-top: 14px; width: 100%; padding: 11px 16px; background: rgba(75,191,224,0.12); border: 1px solid rgba(75,191,224,0.4); border-radius: 8px; color: #4BBFE0; font-size: 13px; font-weight: 600; cursor: pointer; }
+.hd-request-docs-btn:hover:not(:disabled) { background: rgba(75,191,224,0.22); }
+.hd-request-docs-btn.sent, .hd-request-docs-btn:disabled { opacity: 0.55; cursor: not-allowed; color: var(--text-muted,#7a96aa); border-color: rgba(255,255,255,0.1); }
+.hd-doc-share-btn { font-size: 12px; font-weight: 600; color: #F5B800; background: rgba(245,184,0,0.1); border: 1px solid rgba(245,184,0,0.35); border-radius: 6px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+.hd-doc-share-btn:hover { background: rgba(245,184,0,0.2); }
+.hd-share-all-btn { margin-top: 14px; width: 100%; padding: 12px 16px; background: rgba(245,184,0,0.12); border: 1px solid rgba(245,184,0,0.4); border-radius: 8px; color: #F5B800; font-size: 13px; font-weight: 700; cursor: pointer; }
+.hd-share-all-btn:hover { background: rgba(245,184,0,0.22); }
+
 /* Perspective badge on step header */
 .handover-perspective-tag {
   position: absolute;
@@ -2330,7 +2349,7 @@ function getHandoverSteps(role) {
       title: OUT ? 'Upload condition report & tenancy agreement' : 'Review condition report & tenancy agreement',
       desc:  OUT ? 'Upload your original condition report and current lease agreement so the incoming tenant can review them before the inspection. This protects you if there\'s any dispute about property condition.' : 'Review the condition report and tenancy agreement the outgoing tenant has shared. Check what you\'re taking on — rent amount, lease end date, any existing damage noted.',
       cob:  OUT ? 'The condition report is your protection — it documents what the property looked like when you moved in. Upload it now so the incoming tenant can review it before inspection. The lease agreement shows them the full terms they\'re inheriting. 🤠' : 'Read the condition report carefully. Any damage already listed is the outgoing tenant\'s responsibility, not yours. If anything isn\'t listed and you discover it later, you could be held liable. Ask about anything that\'s unclear before the inspection. 🤠',
-      uploadNote: OUT ? 'Upload documents (condition report + lease agreement). File storage coming in the next update — for now, share these directly at inspection.' : null,
+      hasUpload: true,
       action: {
         label: OUT ? "✅ Documents shared with incoming tenant" : "✅ Documents reviewed",
         key: 's2_documents'
@@ -2405,7 +2424,8 @@ function openHandoverPanel(listingRef, role, city) {
   // Persist role so returning visitors get the right perspective
   localStorage.setItem(hdRoleKey(), window._handoverRole);
 
-  renderHandoverPanel();
+  // Poll server for doc status before rendering
+  pollHandoverStatus().then(() => renderHandoverPanel());
   document.getElementById('handover-panel').classList.add('active');
   document.body.style.overflow = 'hidden';
   window.scrollTo(0, 0);
@@ -2492,14 +2512,102 @@ function renderHandoverPanel() {
       html += `<div style="font-size:12px;color:#4BBFE0;margin-bottom:12px;">📅 ${step.calendarNote} <em>(Dashboard calendar integration — coming S31)</em></div>`;
     }
 
-    // Upload area (step 2, outgoing only)
-    if (step.uploadNote) {
-      html += `
-        <div class="handover-upload-area" onclick="handleoverUploadClick('${step.id}')">
-          📎 ${OUT ? 'Tap to attach documents' : 'Documents will appear here once the outgoing tenant uploads them'}
-          <div class="handover-upload-note">${step.uploadNote}</div>
-        </div>
-      `;
+    // Upload area (step 2)
+    if (step.hasUpload) {
+      if (OUT) {
+        // Outgoing tenant: upload panel (5 doc types)
+        const docTypes = [
+          { key: 'condition_report',  label: '📋 Condition report',        critical: true },
+          { key: 'bond_form',         label: '🏦 Bond lodgement form',      critical: false },
+          { key: 'landlord_consent',  label: '✉️ Landlord consent',         critical: false },
+          { key: 'tenancy_agreement', label: '📄 Tenancy agreement',        critical: false },
+          { key: 'body_corp',         label: '🏢 Body corp / house rules',  critical: false }
+        ];
+        const showShareAll = window._hdShowShareAll || false;
+        html += `<div class="hd-upload-panel">`;
+        html += `<div style="font-size:13px;color:var(--text-muted,#7a96aa);margin-bottom:12px;">Upload each document as it becomes available, then share it with the incoming tenant individually. Documents are private until you share them.</div>`;
+        docTypes.forEach(doc => {
+          const docInfo    = window._hdServerDocs && window._hdServerDocs[doc.key];
+          const uploaded   = docInfo && docInfo.uploaded;
+          const released   = docInfo && docInfo.released;
+          const critTag    = doc.critical ? ' <span style="font-size:10px;color:#E8623A;font-weight:700;">MOST CRITICAL</span>' : '';
+          const statusIcon = released ? '🔓' : (uploaded ? '🔒' : '⬜');
+          const statusNote = released ? '<span style="font-size:11px;color:#3DAA5C;margin-left:6px;">Shared</span>' : (uploaded ? '<span style="font-size:11px;color:#F5B800;margin-left:6px;">Uploaded — not yet shared</span>' : '');
+          html += `<div class="hd-doc-row" id="hd-doc-row-${doc.key}">
+            <span class="hd-doc-label">${statusIcon} ${doc.label}${critTag}${statusNote}</span>
+            <div style="display:flex;gap:6px;flex-shrink:0;margin-left:8px;">
+              <label class="hd-doc-upload-btn">
+                ${uploaded ? 'Replace' : 'Upload'}
+                <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="uploadHandoverDoc('${doc.key}', this)">
+              </label>
+              ${uploaded && !released ? `<button class="hd-doc-share-btn" onclick="releaseHandoverDoc('${doc.key}')">Share</button>` : ''}
+            </div>
+          </div>`;
+        });
+        if (showShareAll) {
+          html += `<button class="hd-share-all-btn" onclick="releaseAllHandoverDocs()">🔓 Share all documents with incoming tenant</button>`;
+        }
+        html += `</div>`;
+        html += `<div style="font-size:11px;color:var(--text-muted,#7a96aa);margin-top:8px;">PDF, JPG or PNG · Max 10MB per file · Deleted 48hrs after handover completes</div>`;
+      } else {
+        // Incoming tenant: view uploaded docs + request if missing
+        const hasDocs = window._hdServerDocs && Object.values(window._hdServerDocs).some(d => d.uploaded);
+        const reqSent = window._hdDocReqSent;
+        const reqKey  = 'ur_hd_' + window._handoverRef + '_docs_requested';
+        const docTypes = [
+          { key: 'condition_report',  label: '📋 Condition report' },
+          { key: 'bond_form',         label: '🏦 Bond lodgement form' },
+          { key: 'landlord_consent',  label: '✉️ Landlord consent' },
+          { key: 'tenancy_agreement', label: '📄 Tenancy agreement' },
+          { key: 'body_corp',         label: '🏢 Body corp / house rules' }
+        ];
+        html += `<div class="hd-upload-panel">`;
+        docTypes.forEach(doc => {
+            const docInfo  = window._hdServerDocs && window._hdServerDocs[doc.key];
+            const uploaded = docInfo && docInfo.uploaded;
+            const released = docInfo && docInfo.released;
+            const url      = docInfo && docInfo.url; // only populated if released
+            if (url && released) {
+              html += `<div class="hd-doc-row">
+                <span class="hd-doc-label">🔓 ${doc.label}</span>
+                <a href="${url}" target="_blank" class="hd-doc-view-btn">View</a>
+              </div>`;
+              // Option A: condition report inline viewer
+              if (doc.key === 'condition_report') {
+                const ackKey = 'ur_hd_' + window._handoverRef + '_cr_viewed';
+                const viewed = localStorage.getItem(ackKey);
+                html += `<div class="hd-cr-viewer" id="hd-cr-viewer">
+                  <iframe src="${url}" class="hd-cr-iframe" title="Condition report"></iframe>
+                  <div style="margin-top:10px;">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text,#e8f0f5);">
+                      <input type="checkbox" id="hd-cr-ack" ${viewed ? 'checked' : ''} onchange="ackConditionReport(this)">
+                      I have reviewed this condition report
+                    </label>
+                  </div>
+                </div>`;
+              }
+            } else if (uploaded && !released) {
+              html += `<div class="hd-doc-row">
+                <span class="hd-doc-label">🔒 ${doc.label} <span style="font-size:11px;color:#F5B800;margin-left:4px;">Uploaded — awaiting release</span></span>
+              </div>`;
+            } else {
+              html += `<div class="hd-doc-row">
+                <span class="hd-doc-label" style="color:var(--text-muted,#7a96aa);">⬜ ${doc.label} — not yet uploaded</span>
+              </div>`;
+            }
+          });
+          const anyReleased = window._hdServerDocs && Object.values(window._hdServerDocs).some(d => d.released);
+          const anyUploaded = window._hdServerDocs && Object.values(window._hdServerDocs).some(d => d.uploaded);
+          if (!anyReleased) {
+            html += `<div style="font-size:13px;color:#E8623A;margin-top:12px;margin-bottom:4px;">⚠️ No documents have been shared with you yet.</div>`;
+            html += `<div style="font-size:13px;color:var(--text-muted,#7a96aa);margin-bottom:4px;">We strongly recommend you do not proceed to inspection without seeing the condition report — it protects your bond.</div>`;
+          }
+        const alreadyRequested = reqSent || localStorage.getItem(reqKey);
+        html += `<button class="hd-request-docs-btn${alreadyRequested ? ' sent' : ''}" onclick="requestHandoverDocs()" ${alreadyRequested ? 'disabled' : ''}>
+          ${alreadyRequested ? '📩 Documents requested' : '📩 Request documents from poster'}
+        </button>`;
+        html += `</div>`;
+      }
     }
 
     // Acknowledgement checkbox (step 5, incoming only)
@@ -2531,9 +2639,24 @@ function renderHandoverPanel() {
 }
 
 // ── Mark a step complete ─────────────────────────────────────────────────────
-function markHandoverStep(stepId, idx) {
+async function markHandoverStep(stepId, idx) {
   localStorage.setItem(hdKey(stepId), '1');
   renderHandoverPanel();
+
+  // If step 6 — notify server (marks complete, sends emails, sets file deletion timer)
+  if (stepId === 's6_complete') {
+    const email = localStorage.getItem('unirenter_email') || '';
+    const ref   = window._handoverRef;
+    if (ref && email) {
+      try {
+        await fetch('/api/lease/handover/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ listing_ref: ref, email })
+        });
+      } catch (err) { /* silent — localStorage already updated */ }
+    }
+  }
 
   // Nudge for next step
   const steps     = getHandoverSteps(window._handoverRole);
@@ -2560,9 +2683,156 @@ function toggleHandoverAck(stepId, idx) {
   }
 }
 
-// ── Upload placeholder (document upload coming S28) ──────────────────────────
-function handleoverUploadClick(stepId) {
-  showToast('📎 Coming soon', 'Document upload is coming in the next update. For now, share condition report and tenancy agreement directly at inspection.');
+// ── Document upload (S28) ────────────────────────────────────────────────────
+window._hdServerDocs   = null;   // populated by pollHandoverStatus
+window._hdDocReqSent   = false;  // set after requestHandoverDocs fires
+window._hdShowShareAll = false;  // true when all 5 docs uploaded, none released
+window._hdIsOutgoing   = false;  // true when caller email matches listing poster
+
+async function uploadHandoverDoc(docType, inputEl) {
+  const file = inputEl.files && inputEl.files[0];
+  if (!file) return;
+
+  const email = localStorage.getItem('unirenter_email') || '';
+  const ref   = window._handoverRef;
+  if (!ref || !email) { showToast('⚠️ Error', 'Session data missing — please refresh.'); return; }
+
+  if (file.size > 10 * 1024 * 1024) { showToast('⚠️ Too large', 'Maximum file size is 10MB.'); return; }
+
+  const allowedMimes = ['application/pdf', 'image/jpeg', 'image/png'];
+  if (!allowedMimes.includes(file.type)) { showToast('⚠️ Wrong type', 'PDF, JPG or PNG only.'); return; }
+
+  // Read as base64
+  const base64 = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = e => resolve(e.target.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  // Show uploading state
+  const row = document.getElementById('hd-doc-row-' + docType);
+  if (row) row.style.opacity = '0.5';
+
+  try {
+    const res = await fetch('/api/lease/handover/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ listing_ref: ref, email, doc_type: docType, file_base64: base64, file_mime: file.type })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Uploaded', 'Document saved. The incoming tenant can now view it.');
+      await pollHandoverStatus();
+      renderHandoverPanel();
+    } else {
+      showToast('⚠️ Upload failed', data.error || 'Please try again.');
+    }
+  } catch (err) {
+    showToast('⚠️ Upload failed', 'Network error — please try again.');
+  }
+  if (row) row.style.opacity = '1';
+  inputEl.value = '';
+}
+
+function ackConditionReport(checkbox) {
+  const key = 'ur_hd_' + window._handoverRef + '_cr_viewed';
+  if (checkbox.checked) {
+    localStorage.setItem(key, '1');
+    showToast('✅ Noted', 'You\'ve reviewed the condition report.');
+  } else {
+    localStorage.removeItem(key);
+  }
+}
+
+async function releaseHandoverDoc(docType) {
+  const ref   = window._handoverRef;
+  const email = localStorage.getItem('unirenter_email') || '';
+  if (!ref || !email) { showToast('⚠️ Error', 'Session data missing — please refresh.'); return; }
+  try {
+    const res  = await fetch('/api/lease/handover/release-doc', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ listing_ref: ref, email, doc_type: docType })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('🔓 Document shared', 'The incoming tenant can now view this document.');
+      await pollHandoverStatus();
+      renderHandoverPanel();
+    } else {
+      showToast('⚠️ Error', data.error || 'Could not share document.');
+    }
+  } catch (err) {
+    showToast('⚠️ Error', 'Network error — please try again.');
+  }
+}
+
+async function releaseAllHandoverDocs() {
+  const ref   = window._handoverRef;
+  const email = localStorage.getItem('unirenter_email') || '';
+  if (!ref || !email) { showToast('⚠️ Error', 'Session data missing — please refresh.'); return; }
+  const docTypes = ['condition_report', 'bond_form', 'landlord_consent', 'tenancy_agreement', 'body_corp'];
+  try {
+    await Promise.all(docTypes.map(docType =>
+      fetch('/api/lease/handover/release-doc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listing_ref: ref, email, doc_type: docType })
+      }).then(r => r.json()).catch(() => null)
+    ));
+    showToast('🔓 All documents shared', 'The incoming tenant can now view all your documents.');
+    await pollHandoverStatus();
+    renderHandoverPanel();
+  } catch (err) {
+    showToast('⚠️ Error', 'Network error — please try again.');
+  }
+}
+
+async function requestHandoverDocs() {
+  const ref   = window._handoverRef;
+  const email = localStorage.getItem('unirenter_email') || '';
+  if (!ref) return;
+
+  const reqKey = 'ur_hd_' + ref + '_docs_requested';
+  try {
+    const res = await fetch('/api/lease/handover/request-docs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ listing_ref: ref, incoming_email: email })
+    });
+    const data = await res.json();
+    if (res.status === 409 || data.success) {
+      localStorage.setItem(reqKey, '1');
+      window._hdDocReqSent = true;
+      showToast('📩 Request sent', 'The poster has been notified and asked to upload their documents.');
+      renderHandoverPanel();
+    } else {
+      showToast('⚠️ Error', data.error || 'Could not send request.');
+    }
+  } catch (err) {
+    showToast('⚠️ Error', 'Network error — please try again.');
+  }
+}
+
+// ── Poll /api/lease/handover/status and sync server state ────────────────────
+async function pollHandoverStatus() {
+  const ref   = window._handoverRef;
+  const email = localStorage.getItem('unirenter_email') || '';
+  if (!ref) return;
+  try {
+    const url  = '/api/lease/handover/status?ref=' + encodeURIComponent(ref) + (email ? '&email=' + encodeURIComponent(email) : '');
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.exists) {
+      window._hdServerDocs   = data.docs         || null;
+      window._hdDocReqSent   = data.doc_request_sent || false;
+      window._hdShowShareAll = data.show_share_all   || false;
+      window._hdIsOutgoing   = data.is_outgoing      || false;
+    }
+  } catch (err) {
+    // Silent fail — server state not critical for local step completion
+  }
 }
 
 // ── Check URL for ?handover= param (outgoing tenant returning via email link) ─
