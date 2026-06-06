@@ -2269,7 +2269,11 @@ async function loadLeaseListings() {
       return;
     }
 
-    listings.forEach(l => grid.appendChild(buildLeaseCard(l)));
+    window._listingPropTypes = window._listingPropTypes || {};
+    listings.forEach(l => {
+      window._listingPropTypes[l.listing_ref] = l.property_type || '';
+      grid.appendChild(buildLeaseCard(l));
+    });
     if (countEl) countEl.innerHTML = `Showing <strong style="color:var(--text)">${listings.length} available ${listings.length === 1 ? 'lease' : 'leases'}</strong> in ${city.charAt(0).toUpperCase()+city.slice(1)}`;
 
   } catch (err) {
@@ -2392,7 +2396,7 @@ function getHandoverSteps(role) {
       id:   's4_inspection',
       title: 'In-person inspection completed',
       desc:  OUT ? 'Walk through the property with the incoming tenant. Show them every room, note any existing damage, and confirm the condition matches what\'s in the condition report. Photograph anything that\'s changed since you moved in.' : 'Inspect the property in person — every room, every fixture. Compare what you see against the condition report. If anything doesn\'t match, raise it now before you accept responsibility.',
-      cob:  OUT ? 'During the inspection, be upfront about any damage. If it\'s documented in the condition report — it\'s on you. If it happened during your tenancy and isn\'t documented — it\'s also on you. Better to be transparent now than face a bond dispute later. 🤠' : 'This is your one chance to check the property before you take on responsibility. Bring the condition report and compare it room by room. If anything is in worse condition than documented, that needs to be resolved — in writing — before you sign. 🤠',
+      cob:  OUT ? 'During the inspection, be upfront about any damage. If it\'s documented in the condition report — it\'s on you. If it happened during your tenancy and isn\'t documented — it\'s also on you. Better to be transparent now than face a bond dispute later. 🤠' : 'This is your one chance to check the property before you take on responsibility. Bring the condition report and compare it room by room. If anything is in worse condition than documented, that needs to be resolved — in writing — before you sign. 🤠' + (['private_room_share_house','private_room_share_apartment','share_room'].includes(window._hdPropertyType || '') ? ' And if it\'s a share house or apartment — try to meet the existing housemates during the inspection if you can. A 10-minute chat tells you more than any profile. 🤠' : ''),
       action: {
         label: "✅ Inspection completed",
         key: 's4_inspection'
@@ -2439,9 +2443,10 @@ function getFirstIncompleteIndex(completed) {
 
 // ── Open handover panel ──────────────────────────────────────────────────────
 function openHandoverPanel(listingRef, role, city) {
-  window._handoverRef  = listingRef;
-  window._handoverRole = role || localStorage.getItem(hdRoleKey()) || 'incoming';
-  window._handoverCity = city || '';
+  window._handoverRef      = listingRef;
+  window._handoverRole     = role || localStorage.getItem(hdRoleKey()) || 'incoming';
+  window._handoverCity     = city || '';
+  window._hdPropertyType   = (window._listingPropTypes || {})[listingRef] || '';
 
   // Persist role so returning visitors get the right perspective
   localStorage.setItem(hdRoleKey(), window._handoverRole);
@@ -2538,12 +2543,15 @@ function renderHandoverPanel() {
     if (step.hasUpload) {
       if (OUT) {
         // Outgoing tenant: upload panel (5 doc types)
+        const _strataTypes  = ['private_room_share_apartment','studio','1br_apartment','2br_apartment','3br_plus'];
+        const _isStrata     = _strataTypes.includes(window._hdPropertyType || '');
+        const _bodyCorpLabel = _isStrata ? '🏢 Body corp / strata by-laws' : '🏢 House rules / property manual';
         const docTypes = [
           { key: 'condition_report',  label: '📋 Condition report',        critical: true },
           { key: 'bond_form',         label: '🏦 Bond lodgement form',      critical: false },
           { key: 'landlord_consent',  label: '✉️ Landlord consent',         critical: false },
           { key: 'tenancy_agreement', label: '📄 Tenancy agreement',        critical: false },
-          { key: 'body_corp',         label: '🏢 Body corp / house rules',  critical: false }
+          { key: 'body_corp',         label: _bodyCorpLabel,               critical: false }
         ];
         const showShareAll = window._hdShowShareAll || false;
         html += `<div class="hd-upload-panel">`;
@@ -2581,7 +2589,7 @@ function renderHandoverPanel() {
           { key: 'bond_form',         label: '🏦 Bond lodgement form' },
           { key: 'landlord_consent',  label: '✉️ Landlord consent' },
           { key: 'tenancy_agreement', label: '📄 Tenancy agreement' },
-          { key: 'body_corp',         label: '🏢 Body corp / house rules' }
+          { key: 'body_corp',         label: _bodyCorpLabel }
         ];
         html += `<div class="hd-upload-panel">`;
         docTypes.forEach(doc => {
