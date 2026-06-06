@@ -297,6 +297,82 @@
     nav { padding: 8px 6px; overflow: visible; }
     .nav-logo img { height: 26px; }
   }
+
+  /* ── COB FAB + CHAT PANEL (Landlords) ── */
+  #cob-fab {
+    position: fixed; bottom: 1.5rem; right: 1.5rem;
+    width: 58px; height: 58px; border-radius: 50%;
+    background: var(--brand-yellow); color: #0d1f2d;
+    font-size: 1.6rem; border: none; cursor: pointer;
+    box-shadow: 0 6px 24px rgba(0,0,0,.35);
+    display: none; align-items: center; justify-content: center;
+    z-index: 2000; transition: transform .2s, box-shadow .2s;
+  }
+  #cob-fab:hover { transform: scale(1.08); box-shadow: 0 8px 30px rgba(0,0,0,.45); }
+  #cob-fab.visible { display: flex; }
+
+  #cob-panel {
+    position: fixed; bottom: 5.5rem; right: 1.5rem;
+    width: 340px; max-width: calc(100vw - 2rem);
+    background: var(--card-bg); border-radius: 18px;
+    border: 1px solid rgba(255,255,255,.1);
+    box-shadow: 0 12px 40px rgba(0,0,0,.45);
+    display: none; flex-direction: column;
+    overflow: hidden; z-index: 1999;
+    max-height: 480px;
+  }
+  #cob-panel.open { display: flex; }
+  #cob-panel-header {
+    background: var(--brand-yellow); color: #0d1f2d;
+    padding: .75rem 1rem; font-family: var(--font-display);
+    font-weight: 700; font-size: .95rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  #cob-panel-header button {
+    background: none; border: none; cursor: pointer;
+    font-size: 1.1rem; color: #0d1f2d; padding: 0 .25rem;
+  }
+  #cob-messages {
+    flex: 1; overflow-y: auto; padding: 1rem;
+    display: flex; flex-direction: column; gap: .65rem;
+  }
+  .cob-msg {
+    padding: .55rem .85rem; border-radius: 12px;
+    font-size: .86rem; line-height: 1.55; max-width: 90%;
+  }
+  .cob-msg.cob { background: rgba(245,184,0,.12); color: var(--text); align-self: flex-start; }
+  .cob-msg.user { background: rgba(75,191,224,.15); color: var(--text); align-self: flex-end; }
+  #cob-input-row {
+    display: flex; gap: .5rem; padding: .75rem;
+    border-top: 1px solid rgba(255,255,255,.07);
+  }
+  #cob-input {
+    flex: 1; background: var(--navy-mid); color: var(--text);
+    border: 1.5px solid rgba(255,255,255,.1); border-radius: 8px;
+    padding: .5rem .75rem; font-size: .85rem; font-family: var(--font-body);
+    outline: none;
+  }
+  #cob-input:focus { border-color: var(--brand-yellow); }
+  #cob-send {
+    background: var(--brand-yellow); color: #0d1f2d;
+    border: none; border-radius: 8px; padding: .5rem .85rem;
+    font-weight: 700; cursor: pointer; font-size: .85rem;
+    transition: opacity .2s;
+  }
+  #cob-send:hover { opacity: .88; }
+  #cob-send:disabled { opacity: .45; cursor: not-allowed; }
+
+  .cob-nudge {
+    position: fixed; bottom: 5.5rem; right: 1.5rem;
+    max-width: 280px; background: var(--card-bg);
+    border: 1px solid rgba(245,184,0,.35); border-radius: 14px;
+    padding: .9rem 1.1rem; font-size: .85rem; color: var(--text);
+    line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,.35);
+    z-index: 1998; display: none; cursor: pointer;
+  }
+  .cob-nudge.show { display: block; }
+  .cob-nudge strong { color: var(--brand-yellow); }
+
 </style>
 </head>
 <body>
@@ -580,6 +656,108 @@ document.getElementById('waitlist-form').addEventListener('submit', async (e) =>
     btn.textContent = 'Join the waitlist →';
   }
 });
+
+
+// ── Cob for Landlords ──
+const COB_SYSTEM_LANDLORD = `You are Cob (short for Cobber), UniRenter's AI assistant for landlords and housing providers. You help landlords understand how the UniRenter platform works, guide them through joining the waitlist, and answer questions about listing properties, reaching verified student renters, pricing, and platform policies.
+
+Tone: Professional, warm, and helpful — like a knowledgeable platform guide. Not overly casual. Never give formal legal or financial advice, but be specific and practical about platform features, tenancy obligations, and typical processes.
+
+Key facts you know:
+- UniRenter is a student accommodation matching platform operating in Melbourne, Sydney, and Brisbane (Adelaide, Perth, Canberra launching soon).
+- Landlords join a waitlist now — listings are not yet live. Waitlist members get free early access at launch.
+- After launch, a small flat listing fee will be charged (~$15 AUD). Students pay nothing, ever.
+- UniRenter is NOT a real estate agent and charges no commission. Landlords manage tenancy directly.
+- Every student is OTP-verified by email and completes a detailed housing profile (budget, suburbs, lifestyle, move-in timeline).
+- Cob (the AI) matches students to listings and nudges them to connect. Contact is landlord ↔ student direct — no middlemen.
+- UniRenter holds no bond, escrow, or trust account.
+- Platform covers private rooms in share houses, studios, 1BR apartments, 2BR apartments, 3+ bedroom houses.
+
+Keep replies concise (2–4 sentences). If a landlord asks about joining, guide them to fill in the waitlist form on this page. If they ask about timing, launch is planned for later this year. If unsure, be honest and suggest emailing hello@unirenter.com.au.`;
+
+const cobMessages = [];
+let cobNudgeFired = false;
+
+function addCobMsg(role, text) {
+  cobMessages.push({ role, content: text });
+  const el = document.createElement('div');
+  el.className = 'cob-msg ' + (role === 'assistant' ? 'cob' : 'user');
+  el.textContent = text;
+  document.getElementById('cob-messages').appendChild(el);
+  document.getElementById('cob-messages').scrollTop = 9999;
+}
+
+function openCobPanel() {
+  document.getElementById('cob-nudge').classList.remove('show');
+  document.getElementById('cob-panel').classList.add('open');
+  if (cobMessages.length === 0) {
+    addCobMsg('assistant', "Hi, I'm Cob 🤠 — UniRenter's platform guide for landlords. Got questions about listing your property, how student matching works, or what's in it for you? Fire away!");
+  }
+  setTimeout(() => document.getElementById('cob-input').focus(), 120);
+}
+
+function closeCobPanel() {
+  document.getElementById('cob-panel').classList.remove('open');
+}
+
+async function sendCobMessage() {
+  const input = document.getElementById('cob-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addCobMsg('user', text);
+  const btn = document.getElementById('cob-send');
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    const res = await fetch('/api/cob', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: cobMessages,
+        systemPrompt: COB_SYSTEM_LANDLORD,
+        city: 'landlords'
+      })
+    });
+    const data = await res.json();
+    const reply = data.reply || "Sorry, I couldn't load a response. Try again or email hello@unirenter.com.au.";
+    addCobMsg('assistant', reply);
+  } catch {
+    addCobMsg('assistant', "Something went wrong — please try again.");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send';
+  }
+}
+
+// Fire nudge 4s after page load
+setTimeout(() => {
+  if (cobNudgeFired) return;
+  cobNudgeFired = true;
+  const nudge = document.getElementById('cob-nudge');
+  nudge.innerHTML = '<strong>🤠 Hi, I\'m Cob!</strong> Wondering how UniRenter works for landlords, or what to expect at launch? Ask me anything.';
+  nudge.classList.add('show');
+  setTimeout(() => nudge.classList.remove('show'), 9000);
+}, 4000);
+
 </script>
+
+<!-- COB FAB + PANEL (Landlords) -->
+<div class="cob-nudge" id="cob-nudge" onclick="openCobPanel()"></div>
+
+<button id="cob-fab" class="visible" title="Hi, I'm Cob — your platform guide" onclick="openCobPanel()">🤠</button>
+
+<div id="cob-panel">
+  <div id="cob-panel-header">
+    <span>🤠 Hi, I'm Cob</span>
+    <button onclick="closeCobPanel()" aria-label="Close">✕</button>
+  </div>
+  <div id="cob-messages"></div>
+  <div id="cob-input-row">
+    <input id="cob-input" type="text" placeholder="Ask me anything…" onkeydown="if(event.key==='Enter')sendCobMessage()" />
+    <button id="cob-send" onclick="sendCobMessage()">Send</button>
+  </div>
+</div>
+
 </body>
 </html>
