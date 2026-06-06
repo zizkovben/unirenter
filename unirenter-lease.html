@@ -641,6 +641,239 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
     nav { padding: 8px 6px; overflow: visible; }
     .nav-logo img { height: 26px; }
   }
+
+/* ── HANDOVER PANEL ─────────────────────────────────────────────────────── */
+#handover-panel {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--navy, #0d1f2d);
+  z-index: 9000;
+  overflow-y: auto;
+  padding: 0;
+}
+#handover-panel.active { display: flex; flex-direction: column; }
+
+.handover-nav {
+  background: #0a1a28;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.handover-nav-logo { font-family:'Epilogue',sans-serif; font-size:18px; font-weight:800; color:#F5B800; }
+.handover-nav-back {
+  background: none; border: 1px solid rgba(255,255,255,0.25);
+  color: var(--text, #e8f0f5); padding: 7px 16px; border-radius: 6px;
+  cursor: pointer; font-size: 13px;
+}
+.handover-nav-back:hover { background: rgba(255,255,255,0.07); }
+
+.handover-body {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+  width: 100%;
+}
+
+.handover-heading {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text, #e8f0f5);
+  margin-bottom: 4px;
+}
+.handover-sub {
+  font-size: 13px;
+  color: var(--text-muted, #7a96aa);
+  margin-bottom: 24px;
+}
+
+/* Progress bar */
+.handover-progress-wrap {
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  height: 8px;
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+.handover-progress-bar {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #F5B800, #e8a000);
+  transition: width 0.4s ease;
+}
+
+/* Steps */
+.handover-step {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin-bottom: 14px;
+  transition: border-color 0.2s;
+  position: relative;
+}
+.handover-step.completed {
+  border-color: rgba(61,170,92,0.45);
+  background: rgba(61,170,92,0.05);
+}
+.handover-step.current {
+  border-color: rgba(245,184,0,0.5);
+  background: rgba(245,184,0,0.04);
+}
+.handover-step.locked {
+  opacity: 0.45;
+}
+
+.handover-step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.handover-step-num {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  color: var(--text, #e8f0f5);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.handover-step.completed .handover-step-num {
+  background: #3DAA5C;
+  color: #fff;
+}
+.handover-step.current .handover-step-num {
+  background: #F5B800;
+  color: #0d1f2d;
+}
+
+.handover-step-title {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text, #e8f0f5);
+  margin-bottom: 3px;
+}
+.handover-step-desc {
+  font-size: 13px;
+  color: var(--text-muted, #7a96aa);
+  line-height: 1.6;
+}
+.handover-step-content {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  display: none;
+}
+.handover-step.current .handover-step-content,
+.handover-step.completed .handover-step-content {
+  display: block;
+}
+
+.handover-cob-note {
+  background: rgba(245,184,0,0.08);
+  border: 1px solid rgba(245,184,0,0.2);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text, #e8f0f5);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+.handover-cob-note span.cobname { color: #F5B800; font-weight: 600; }
+
+.handover-upload-area {
+  border: 1.5px dashed rgba(75,191,224,0.4);
+  border-radius: 8px;
+  padding: 18px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted, #7a96aa);
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.handover-upload-area:hover { border-color: rgba(75,191,224,0.7); background: rgba(75,191,224,0.04); }
+.handover-upload-note { font-size: 11px; color: var(--text-muted, #7a96aa); margin-top: 6px; }
+
+.handover-ack-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(232,98,58,0.07);
+  border: 1px solid rgba(232,98,58,0.3);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+.handover-ack-box input[type=checkbox] {
+  flex-shrink: 0;
+  width: 18px; height: 18px;
+  margin-top: 2px;
+  accent-color: #3DAA5C;
+  cursor: pointer;
+}
+.handover-ack-text {
+  font-size: 13px;
+  color: var(--text, #e8f0f5);
+  line-height: 1.6;
+}
+.handover-ack-text strong { color: #E8623A; }
+
+.handover-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.handover-btn:active { transform: scale(0.97); }
+.handover-btn-primary { background: #F5B800; color: #0d1f2d; }
+.handover-btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+.handover-btn-secondary { background: rgba(255,255,255,0.08); color: var(--text, #e8f0f5); border: 1px solid rgba(255,255,255,0.15); }
+
+.handover-complete-badge {
+  text-align: center;
+  padding: 32px 0 16px;
+}
+.handover-complete-badge .badge-icon { font-size: 52px; }
+.handover-complete-badge .badge-title {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 22px; font-weight: 700;
+  color: #3DAA5C;
+  margin: 10px 0 6px;
+}
+.handover-complete-badge .badge-sub { font-size: 14px; color: var(--text-muted, #7a96aa); }
+
+/* Perspective badge on step header */
+.handover-perspective-tag {
+  position: absolute;
+  top: 14px; right: 14px;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: rgba(75,191,224,0.15);
+  color: #4BBFE0;
+}
+.handover-perspective-tag.outgoing {
+  background: rgba(232,98,58,0.15);
+  color: #E8623A;
+}
 </style>
 </head>
 <body>
@@ -908,7 +1141,7 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
         <div class="legal-card-icon">🤠</div>
         <div class="legal-card-body">
           <div class="legal-card-title">Cob will guide you through every step safely</div>
-          <div class="legal-card-desc">Once you connect with a listing, Cob walks both parties through the inspection, condition documentation, landlord consent process, and key handover. The platform keeps your contact details private until you're both ready to inspect.</div>
+          <div class="legal-card-desc">Once you connect with a listing, Cob walks both parties through the inspection, condition documentation, landlord consent process, and key handover. The platform keeps your contact details private until you\'re both ready to inspect.</div>
         </div>
         <div class="legal-card-check"></div>
       </div>
@@ -1065,7 +1298,7 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
         <span style="font-size:20px;line-height:1.4;">🤠</span>
         <div style="font-size:13px;line-height:1.6;">
           <strong style="color:var(--brand-yellow);">Cob's reminder</strong><br>
-          <span style="color:var(--text-muted);">Don't include your phone number, WhatsApp, or any payment details in your listing. Interested renters contact you through UniRenter — we keep your details private until you're both ready to inspect.</span>
+          <span style="color:var(--text-muted);">Don't include your phone number, WhatsApp, or any payment details in your listing. Interested renters contact you through UniRenter — we keep your details private until you\'re both ready to inspect.</span>
         </div>
       </div>
 
@@ -1082,7 +1315,7 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
       <div style="font-size:48px;margin-bottom:16px;">🎉</div>
       <div style="font-family:var(--font-display);font-size:22px;font-weight:800;margin-bottom:8px;">Listing posted!</div>
       <div id="lease-success-ref" style="font-size:13px;color:var(--text-muted);margin-bottom:20px;"></div>
-      <div style="font-size:14px;color:var(--text-muted);line-height:1.7;max-width:380px;margin:0 auto 24px;">We'll email you when someone is interested. All contact happens through UniRenter — no personal details shared until you're both ready to inspect.</div>
+      <div style="font-size:14px;color:var(--text-muted);line-height:1.7;max-width:380px;margin:0 auto 24px;">We'll email you when someone is interested. All contact happens through UniRenter — no personal details shared until you\'re both ready to inspect.</div>
       <div style="background:rgba(245,184,0,0.08);border:1px solid rgba(245,184,0,0.25);border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;text-align:left;max-width:400px;margin:0 auto;">
         <span style="font-size:20px;">🤠</span>
         <div style="font-size:13px;color:var(--text-muted);line-height:1.6;">
@@ -1927,6 +2160,7 @@ function propertyLabel(type) {
 
 function buildLeaseCard(listing) {
   const interestKey = 'ur_interested_' + listing.listing_ref;
+  const handoverKey = 'ur_hd_' + listing.listing_ref + '_s1_contact';
   const alreadyInterested = localStorage.getItem(interestKey) === '1';
   const bond = listing.weekly_rent ? Math.round(listing.weekly_rent * 4) : null;
   const availDate = listing.available_from ? new Date(listing.available_from).toLocaleDateString('en-AU', { month: 'short', year: 'numeric' }) : null;
@@ -1954,12 +2188,11 @@ function buildLeaseCard(listing) {
     </div>
     ${listing.description ? `<div class="lease-card-desc">${listing.description}</div>` : ''}
     <div class="lease-card-footer">
-      <button class="btn-lease-contact" id="interest-btn-${listing.listing_ref}"
-        onclick="expressInterest('${listing.listing_ref}', this)"
-        ${alreadyInterested ? 'disabled style="opacity:0.6;cursor:default;"' : ''}>
-        ${alreadyInterested ? '✅ Interest sent' : "I'm interested"}
-      </button>
-      <button class="report-btn" onclick="openReportForListing('${listing.listing_ref}')">⚑ Report</button>
+      ${alreadyInterested
+        ? `<button class="btn-lease-contact" style="background:#3DAA5C;" onclick="openHandoverPanel('${listing.listing_ref}','incoming','${listing.city || ''}')">📋 Handover checklist</button>`
+        : `<button class="btn-lease-contact" id="interest-btn-${listing.listing_ref}" onclick="expressInterest('${listing.listing_ref}', this)">I'm interested</button>`
+      }
+      <button class="report-btn" onclick="openReportForListing('${listing.listing_ref}')">&#9873; Report</button>
     </div>
     <div class="lease-warning">⚠️ Always inspect in person and get written landlord consent before transferring any money.</div>
   `;
@@ -2044,7 +2277,11 @@ async function expressInterest(listingRef, btn) {
       btn.style.opacity = '0.6';
       btn.style.cursor  = 'default';
       localStorage.setItem('ur_interested_' + listingRef, '1');
-      showToast('✉️ Interest sent', "The poster has been notified — they'll be in touch through UniRenter to arrange an inspection.");
+      showToast('✉️ Interest sent', "The poster has been notified. Start the handover checklist below to stay on track.");
+      // Open handover panel for incoming tenant after a beat
+      setTimeout(() => {
+        openHandoverPanel(listingRef, 'incoming', '');
+      }, 1800);
     } else if (res.status === 410) {
       btn.textContent = 'No longer available';
       showToast('⚠️ Listing gone', 'This listing is no longer active. Try another one.');
@@ -2066,6 +2303,277 @@ function openReportForListing(listingRef) {
   window._reportTargetRef = listingRef;
   openModal('report-modal');
 }
+
+
+// ── HANDOVER PANEL ──────────────────────────────────────────────────────────
+// State
+window._handoverRef   = null;   // listing_ref for this handover
+window._handoverRole  = null;   // 'outgoing' or 'incoming'
+window._handoverCity  = null;   // city name for Cob context
+
+// Step definitions — role-aware labels & Cob notes
+function getHandoverSteps(role) {
+  const OUT = role === 'outgoing';
+  return [
+    {
+      id:   's1_contact',
+      title: OUT ? 'Inspection arranged' : 'Arrange inspection with the poster',
+      desc:  OUT ? 'The incoming tenant has expressed interest. Make contact through UniRenter and arrange an in-person inspection. Never give out your personal phone number at this stage.' : 'Reach out and arrange a time to inspect the property in person. Keep all contact through UniRenter until you\'ve met face-to-face.',
+      cob:  OUT ? 'Once you reply to the incoming tenant\'s interest, agree on an inspection time. Keep all communication through UniRenter at this stage — no WhatsApp, no personal phone numbers. 🤠' : 'Contact the poster using the details UniRenter sent and agree a time to inspect. Never commit or pay anything before you\'ve seen the property. 🤠',
+      action: {
+        label: OUT ? "✅ Inspection arranged" : "✅ Inspection time agreed",
+        key: 's1_contact'
+      }
+    },
+    {
+      id:   's2_documents',
+      title: OUT ? 'Upload condition report & tenancy agreement' : 'Review condition report & tenancy agreement',
+      desc:  OUT ? 'Upload your original condition report and current lease agreement so the incoming tenant can review them before the inspection. This protects you if there\'s any dispute about property condition.' : 'Review the condition report and tenancy agreement the outgoing tenant has shared. Check what you\'re taking on — rent amount, lease end date, any existing damage noted.',
+      cob:  OUT ? 'The condition report is your protection — it documents what the property looked like when you moved in. Upload it now so the incoming tenant can review it before inspection. The lease agreement shows them the full terms they\'re inheriting. 🤠' : 'Read the condition report carefully. Any damage already listed is the outgoing tenant\'s responsibility, not yours. If anything isn\'t listed and you discover it later, you could be held liable. Ask about anything that\'s unclear before the inspection. 🤠',
+      uploadNote: OUT ? 'Upload documents (condition report + lease agreement). File storage coming in the next update — for now, share these directly at inspection.' : null,
+      action: {
+        label: OUT ? "✅ Documents shared with incoming tenant" : "✅ Documents reviewed",
+        key: 's2_documents'
+      }
+    },
+    {
+      id:   's3_landlord',
+      title: 'Written landlord consent received',
+      desc:  OUT ? 'You must get written consent from your landlord or property manager before the transfer can proceed. Verbal agreement is not enough. Add this to your calendar — follow up if you haven\'t heard back within 48 hours.' : 'Confirm that the landlord or property manager has given written approval for the lease transfer. Do not sign anything or pay any money until this is confirmed.',
+      cob:  'Landlord consent is legally required for a valid lease transfer in every Australian state. Written consent — email or letter — is the minimum. A phone call or verbal OK from your landlord does not protect either of you. Follow up in writing if you don\'t hear back within 48 hours. 🤠',
+      calendarNote: 'Add a reminder to follow up with your landlord in 48 hours if you haven\'t received written consent.',
+      action: {
+        label: "✅ Written landlord consent received",
+        key: 's3_landlord'
+      }
+    },
+    {
+      id:   's4_inspection',
+      title: 'In-person inspection completed',
+      desc:  OUT ? 'Walk through the property with the incoming tenant. Show them every room, note any existing damage, and confirm the condition matches what\'s in the condition report. Photograph anything that\'s changed since you moved in.' : 'Inspect the property in person — every room, every fixture. Compare what you see against the condition report. If anything doesn\'t match, raise it now before you accept responsibility.',
+      cob:  OUT ? 'During the inspection, be upfront about any damage. If it\'s documented in the condition report — it\'s on you. If it happened during your tenancy and isn\'t documented — it\'s also on you. Better to be transparent now than face a bond dispute later. 🤠' : 'This is your one chance to check the property before you take on responsibility. Bring the condition report and compare it room by room. If anything is in worse condition than documented, that needs to be resolved — in writing — before you sign. 🤠',
+      action: {
+        label: "✅ Inspection completed",
+        key: 's4_inspection'
+      }
+    },
+    {
+      id:   's5_acknowledgement',
+      title: OUT ? 'Incoming tenant acknowledgement' : 'Acknowledge property condition',
+      desc:  OUT ? 'The incoming tenant confirms the property meets the standard of the original condition report and accepts responsibility for the lease terms going forward.' : 'By ticking below, you confirm the property condition matches the original condition report to a satisfactory standard. You are accepting full responsibility for rent, maintenance, and all other lease obligations from the agreed transfer date.',
+      cob:  OUT ? 'Once the incoming tenant ticks the acknowledgement, responsibility for the property transfers to them. Keep a copy of this for your records. 🤠' : 'This acknowledgement is important — it records that you inspected the property and accepted its condition. Once you tick it, you are taking on full responsibility under the lease. Only tick this if you are genuinely satisfied with the property\'s condition. 🤠',
+      ackRequired: !OUT,   // only incoming tenant ticks
+      ackText: 'I confirm that I have inspected the property in person and that its condition meets the standard documented in the original condition report. I accept full responsibility for rent, maintenance, and all lease obligations from the agreed transfer date.',
+      action: {
+        label: OUT ? "✅ Incoming tenant has acknowledged" : "✅ I acknowledge and accept responsibility",
+        key: 's5_acknowledgement'
+      }
+    },
+    {
+      id:   's6_complete',
+      title: OUT ? 'Lease signed & keys handed over' : 'Lease signed & keys collected',
+      desc:  OUT ? 'Both parties have signed the lease transfer. Hand over the keys. Your obligations under this lease have ended — congratulations!' : 'Both parties have signed the lease transfer. Collect the keys. Welcome to your new home — you\'re responsible from today!',
+      cob:  OUT ? 'Make sure both you and the incoming tenant have signed the lease transfer document — and that the landlord has a copy. Once keys are handed over, your obligations under this lease end. Keep your copy of everything for 12 months. 🤠' : 'Get a copy of every signed document — the lease transfer, the condition report, and the landlord consent letter. These protect you. Store them somewhere safe. 🤠',
+      action: {
+        label: OUT ? "✅ Keys handed over — I'm done!" : "✅ Keys collected — I'm in!",
+        key: 's6_complete'
+      }
+    }
+  ];
+}
+
+// Storage keys
+function hdKey(step)  { return 'ur_hd_' + window._handoverRef + '_' + step; }
+function hdRoleKey()  { return 'ur_hd_' + window._handoverRef + '_role'; }
+
+function getCompletedSteps() {
+  const steps = getHandoverSteps(window._handoverRole);
+  return steps.map(s => localStorage.getItem(hdKey(s.id)) === '1');
+}
+
+function getFirstIncompleteIndex(completed) {
+  const i = completed.indexOf(false);
+  return i === -1 ? completed.length : i;  // if all done, return length (=> show complete screen)
+}
+
+// ── Open handover panel ──────────────────────────────────────────────────────
+function openHandoverPanel(listingRef, role, city) {
+  window._handoverRef  = listingRef;
+  window._handoverRole = role || localStorage.getItem(hdRoleKey()) || 'incoming';
+  window._handoverCity = city || '';
+
+  // Persist role so returning visitors get the right perspective
+  localStorage.setItem(hdRoleKey(), window._handoverRole);
+
+  renderHandoverPanel();
+  document.getElementById('handover-panel').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  window.scrollTo(0, 0);
+
+  // Cob nudge for the current step
+  const completed = getCompletedSteps();
+  const idx       = getFirstIncompleteIndex(completed);
+  const steps     = getHandoverSteps(window._handoverRole);
+  if (idx < steps.length) {
+    setTimeout(() => showCobNudge(steps[idx].cob), 1200);
+  }
+}
+
+// ── Close handover panel ─────────────────────────────────────────────────────
+function closeHandoverPanel(dest) {
+  document.getElementById('handover-panel').classList.remove('active');
+  document.body.style.overflow = '';
+  if (dest === 'board') {
+    // Trigger the board (browse) tab
+    const btns = document.querySelectorAll('.lease-tab-btn');
+    if (btns[0]) btns[0].click();
+  }
+}
+
+// ── Render the handover panel ────────────────────────────────────────────────
+function renderHandoverPanel() {
+  const steps     = getHandoverSteps(window._handoverRole);
+  const completed = getCompletedSteps();
+  const idx       = getFirstIncompleteIndex(completed);
+  const OUT       = window._handoverRole === 'outgoing';
+
+  // Progress
+  const pct = idx >= steps.length ? 100 : Math.round((idx / steps.length) * 100);
+
+  let html = '';
+
+  // Heading
+  html += `
+    <div class="handover-heading">${OUT ? '🔄 Lease Transfer' : '🔍 Lease Takeover'} — ${window._handoverRef}</div>
+    <div class="handover-sub">${OUT ? 'Outgoing tenant' : 'Incoming tenant'} · ${steps.filter((_,i)=>completed[i]).length} of ${steps.length} steps complete</div>
+    <div class="handover-progress-wrap"><div class="handover-progress-bar" style="width:${pct}%"></div></div>
+  `;
+
+  // All done?
+  if (idx >= steps.length) {
+    html += `
+      <div class="handover-complete-badge">
+        <div class="badge-icon">🎉</div>
+        <div class="badge-title">${OUT ? 'Transfer complete!' : 'You\'re in!'}</div>
+        <div class="badge-sub">${OUT ? 'You\'ve successfully handed over the lease. Keep your copies of all documents for 12 months.' : 'Welcome to your new home. Keep copies of all documents somewhere safe.'}</div>
+      </div>
+    `;
+    document.getElementById('handover-content').innerHTML = html;
+    return;
+  }
+
+  // Steps
+  steps.forEach((step, i) => {
+    const isDone    = completed[i];
+    const isCurrent = i === idx;
+    const isLocked  = i > idx && !isDone;
+    let cls = 'handover-step';
+    if (isDone)    cls += ' completed';
+    else if (isCurrent) cls += ' current';
+    else if (isLocked)  cls += ' locked';
+
+    const roleTag = OUT ? '<span class="handover-perspective-tag outgoing">Outgoing</span>' : '<span class="handover-perspective-tag">Incoming</span>';
+
+    html += `<div class="${cls}">
+      ${roleTag}
+      <div class="handover-step-header">
+        <div class="handover-step-num">${isDone ? '✓' : (i+1)}</div>
+        <div>
+          <div class="handover-step-title">${step.title}</div>
+          <div class="handover-step-desc">${step.desc}</div>
+        </div>
+      </div>
+      <div class="handover-step-content">
+        <div class="handover-cob-note"><span class="cobname">🤠 Cob:</span> ${step.cob}</div>
+    `;
+
+    // Calendar note (step 3)
+    if (step.calendarNote) {
+      html += `<div style="font-size:12px;color:#4BBFE0;margin-bottom:12px;">📅 ${step.calendarNote} <em>(Dashboard calendar integration — coming S31)</em></div>`;
+    }
+
+    // Upload area (step 2, outgoing only)
+    if (step.uploadNote) {
+      html += `
+        <div class="handover-upload-area" onclick="handleoverUploadClick('${step.id}')">
+          📎 ${OUT ? 'Tap to attach documents' : 'Documents will appear here once the outgoing tenant uploads them'}
+          <div class="handover-upload-note">${step.uploadNote}</div>
+        </div>
+      `;
+    }
+
+    // Acknowledgement checkbox (step 5, incoming only)
+    if (step.ackRequired) {
+      const ackDone = isDone;
+      html += `
+        <div class="handover-ack-box" onclick="toggleHandoverAck('${step.id}', '${i}')">
+          <input type="checkbox" id="ack-${step.id}" ${ackDone ? 'checked' : ''} onclick="event.stopPropagation();toggleHandoverAck('${step.id}','${i}')">
+          <div class="handover-ack-text"><strong>I acknowledge:</strong> ${step.ackText}</div>
+        </div>
+      `;
+    }
+
+    // Mark complete button (not shown if already done, not shown for ack-gated steps where checkbox is the action)
+    if (!isDone && !step.ackRequired) {
+      html += `<button class="handover-btn handover-btn-primary" onclick="markHandoverStep('${step.id}', ${i})">${step.action.label}</button>`;
+    }
+    if (isDone && !step.ackRequired) {
+      html += `<div style="font-size:13px;color:#3DAA5C;font-weight:600;">✓ ${step.action.label.replace('✅ ','')}</div>`;
+    }
+    if (isDone && step.ackRequired) {
+      html += `<div style="font-size:13px;color:#3DAA5C;font-weight:600;">✓ Acknowledged — responsibility transferred</div>`;
+    }
+
+    html += `</div></div>`;  // close step-content + handover-step
+  });
+
+  document.getElementById('handover-content').innerHTML = html;
+}
+
+// ── Mark a step complete ─────────────────────────────────────────────────────
+function markHandoverStep(stepId, idx) {
+  localStorage.setItem(hdKey(stepId), '1');
+  renderHandoverPanel();
+
+  // Nudge for next step
+  const steps     = getHandoverSteps(window._handoverRole);
+  const completed = getCompletedSteps();
+  const nextIdx   = getFirstIncompleteIndex(completed);
+  if (nextIdx < steps.length) {
+    setTimeout(() => showCobNudge(steps[nextIdx].cob), 800);
+  } else {
+    setTimeout(() => showCobNudge('You\'ve completed all the handover steps! 🎉 Keep copies of every document for at least 12 months. 🤠'), 800);
+  }
+}
+
+// ── Toggle acknowledgement checkbox (step 5, incoming) ───────────────────────
+function toggleHandoverAck(stepId, idx) {
+  const cb  = document.getElementById('ack-' + stepId);
+  const done = cb && cb.checked;
+  if (done) {
+    localStorage.setItem(hdKey(stepId), '1');
+    renderHandoverPanel();
+    setTimeout(() => showCobNudge('Responsibility has been transferred to you. Welcome to your new home! 🏠 Keep all your documents safe. 🤠'), 800);
+  } else {
+    localStorage.removeItem(hdKey(stepId));
+    renderHandoverPanel();
+  }
+}
+
+// ── Upload placeholder (document upload coming S28) ──────────────────────────
+function handleoverUploadClick(stepId) {
+  showToast('📎 Coming soon', 'Document upload is coming in the next update. For now, share condition report and tenancy agreement directly at inspection.');
+}
+
+// ── Check URL for ?handover= param (outgoing tenant returning via email link) ─
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const ref    = params.get('handover');
+  if (ref) {
+    // Small delay so page can load
+    setTimeout(() => openHandoverPanel(ref, 'outgoing', ''), 400);
+  }
+})();
 
 // ── Cob FAB ──────────────────────────────────────────────────────────────────
 function showCobFab() {
@@ -2239,6 +2747,20 @@ function toggleTheme() {
 .cob-typing span:nth-child(3) { animation-delay:0.4s; }
 @keyframes cob-dot { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
 </style>
+
+<!-- ── HANDOVER PANEL ─────────────────────────────────────────────────────── -->
+<div id="handover-panel">
+  <div class="handover-nav">
+    <div class="handover-nav-logo">UniRenter</div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="handover-nav-back" onclick="closeHandoverPanel('board')">← Back to board</button>
+      <button class="handover-nav-back" onclick="window.location.href='/'">🏠 Home</button>
+    </div>
+  </div>
+  <div class="handover-body">
+    <div id="handover-content"><!-- populated by JS --></div>
+  </div>
+</div>
 
 </body>
 </html>
