@@ -871,6 +871,28 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
 .hd-cr-iframe { width: 100%; height: 420px; border: none; background: #fff; }
 .hd-request-docs-btn { margin-top: 14px; width: 100%; padding: 11px 16px; background: rgba(75,191,224,0.12); border: 1px solid rgba(75,191,224,0.4); border-radius: 8px; color: #4BBFE0; font-size: 13px; font-weight: 600; cursor: pointer; }
 .hd-request-docs-btn:hover:not(:disabled) { background: rgba(75,191,224,0.22); }
+.cr-walk-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:3000; align-items:center; justify-content:center; padding:16px; }
+.cr-walk-overlay.open { display:flex; }
+.cr-walk-modal { background:#162535; border-radius:12px; width:100%; max-width:560px; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; border:1px solid rgba(75,191,224,0.2); }
+.cr-walk-header { padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:space-between; }
+.cr-walk-title { font-size:15px; font-weight:700; color:var(--text,#e8f0f5); }
+.cr-walk-close { background:none; border:none; color:var(--text-muted,#7a96aa); font-size:20px; cursor:pointer; padding:0 4px; line-height:1; }
+.cr-walk-body { flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:12px; }
+.cr-walk-msg { padding:10px 14px; border-radius:8px; font-size:13px; line-height:1.6; max-width:88%; }
+.cr-walk-msg-cob { background:rgba(245,184,0,0.1); border:1px solid rgba(245,184,0,0.25); color:var(--text,#e8f0f5); align-self:flex-start; }
+.cr-walk-msg-user { background:rgba(75,191,224,0.12); border:1px solid rgba(75,191,224,0.25); color:var(--text,#e8f0f5); align-self:flex-end; }
+.cr-walk-msg-label { font-size:11px; font-weight:700; color:#F5B800; margin-bottom:4px; }
+.cr-walk-footer { padding:12px 16px; border-top:1px solid rgba(255,255,255,0.08); display:flex; gap:8px; }
+.cr-walk-input { flex:1; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:9px 12px; color:var(--text,#e8f0f5); font-size:13px; resize:none; font-family:inherit; }
+.cr-walk-input:focus { outline:none; border-color:rgba(245,184,0,0.5); }
+.cr-walk-send { background:#F5B800; border:none; border-radius:8px; padding:9px 16px; color:#0d1f2d; font-weight:700; font-size:13px; cursor:pointer; white-space:nowrap; }
+.cr-walk-send:disabled { opacity:0.5; cursor:default; }
+.cr-walk-progress { padding:8px 20px 0; font-size:12px; color:var(--text-muted,#7a96aa); }
+.cr-walk-typing { display:flex; gap:4px; align-items:center; padding:6px 0; }
+.cr-walk-typing span { width:6px; height:6px; background:#F5B800; border-radius:50%; animation:crDot 1.2s infinite; }
+.cr-walk-typing span:nth-child(2) { animation-delay:0.2s; }
+.cr-walk-typing span:nth-child(3) { animation-delay:0.4s; }
+@keyframes crDot { 0%,80%,100%{opacity:0.3;transform:scale(0.8)} 40%{opacity:1;transform:scale(1)} }
 .hd-request-docs-btn.sent, .hd-request-docs-btn:disabled { opacity: 0.55; cursor: not-allowed; color: var(--text-muted,#7a96aa); border-color: rgba(255,255,255,0.1); }
 .hd-doc-share-btn { font-size: 12px; font-weight: 600; color: #F5B800; background: rgba(245,184,0,0.1); border: 1px solid rgba(245,184,0,0.35); border-radius: 6px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
 .hd-doc-share-btn:hover { background: rgba(245,184,0,0.2); }
@@ -2584,6 +2606,11 @@ function renderHandoverPanel() {
                       I have reviewed this condition report
                     </label>
                   </div>
+                  <div style="margin-top:10px;">
+                    <button onclick="openCrWalkthrough()" style="width:100%;padding:10px 16px;background:rgba(245,184,0,0.1);border:1px solid rgba(245,184,0,0.4);border-radius:8px;color:#F5B800;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">
+                      🤠 Walk me through this with Cob
+                    </button>
+                  </div>
                 </div>`;
               }
             } else if (uploaded && !released) {
@@ -2928,6 +2955,199 @@ async function sendCobMessage() {
   setTimeout(() => showCobNudge("On the break lease board? I can walk you through what to check before signing, landlord consent, and your rights as an incoming tenant 🤠"), 4000);
 })();
 
+// ── Cob Condition Report Walkthrough (Option B) ──────────────────────────
+// Room-by-room guided walkthrough. Cob asks questions, answers saved to
+// lease_handover.cr_notes via /api/lease/handover/save-cr-notes.
+
+const CR_ROOMS = [
+  'Entry / Hallway',
+  'Living / Lounge room',
+  'Kitchen',
+  'Main bedroom',
+  'Bedroom 2 (if applicable)',
+  'Bathroom / Ensuite',
+  'Laundry',
+  'Outdoor / Balcony / Garage',
+];
+
+const CR_QUESTIONS = [
+  'Any marks, holes, or stains on the walls or ceiling?',
+  'Condition of the floor (carpet, tiles, floorboards)?',
+  'Do windows and doors open and close properly?',
+  'Any damage to fixtures or fittings (lights, switches, handles)?',
+  'Anything else worth noting in this area?',
+];
+
+let _crWalkState = {
+  ref: null,
+  email: null,
+  roomIdx: 0,
+  qIdx: 0,
+  notes: [],
+  history: [],
+  waitingForAnswer: false,
+  saving: false,
+};
+
+function openCrWalkthrough() {
+  const ref   = window._handoverRef;
+  const email = localStorage.getItem('unirenter_email') || '';
+  if (!ref) { showToast('Error', 'No listing reference found.'); return; }
+  _crWalkState = { ref, email, roomIdx: 0, qIdx: 0, notes: [], history: [], waitingForAnswer: false, saving: false };
+  const body = document.getElementById('cr-walk-body');
+  if (body) body.innerHTML = '';
+  document.getElementById('cr-walk-overlay').classList.add('open');
+  document.getElementById('cr-walk-input').value = '';
+  updateCrWalkProgress();
+  // Kick off with Cob greeting
+  setTimeout(() => {
+    appendCrMsg('cob', "G'day! I'm going to walk you through the condition report room by room. For each area, I'll ask about walls, floors, windows, and fittings — your answers are saved so you have a record of what you found.");
+    setTimeout(() => askNextCrQuestion(), 1200);
+  }, 300);
+}
+
+function closeCrWalkthrough() {
+  document.getElementById('cr-walk-overlay').classList.remove('open');
+}
+
+function appendCrMsg(role, text) {
+  const body = document.getElementById('cr-walk-body');
+  if (!body) return;
+  const wrap = document.createElement('div');
+  if (role === 'cob') {
+    wrap.innerHTML = '<div class="cr-walk-msg-label">🤠 Cob</div><div class="cr-walk-msg cr-walk-msg-cob">' + escapeHtml(text) + '</div>';
+  } else {
+    wrap.innerHTML = '<div class="cr-walk-msg cr-walk-msg-user">' + escapeHtml(text) + '</div>';
+  }
+  wrap.style.display = 'flex';
+  wrap.style.flexDirection = 'column';
+  wrap.style.alignItems = role === 'user' ? 'flex-end' : 'flex-start';
+  body.appendChild(wrap);
+  body.scrollTop = body.scrollHeight;
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showCrTyping() {
+  const body = document.getElementById('cr-walk-body');
+  if (!body) return;
+  const t = document.createElement('div');
+  t.id = 'cr-typing';
+  t.className = 'cr-walk-msg cr-walk-msg-cob';
+  t.style.alignSelf = 'flex-start';
+  t.innerHTML = '<div class="cr-walk-typing"><span></span><span></span><span></span></div>';
+  body.appendChild(t);
+  body.scrollTop = body.scrollHeight;
+}
+
+function removeCrTyping() {
+  const t = document.getElementById('cr-typing');
+  if (t) t.remove();
+}
+
+function updateCrWalkProgress() {
+  const total = CR_ROOMS.length * CR_QUESTIONS.length;
+  const done  = _crWalkState.roomIdx * CR_QUESTIONS.length + _crWalkState.qIdx;
+  const pct   = Math.round((done / total) * 100);
+  const prog  = document.getElementById('cr-walk-progress');
+  if (prog) prog.textContent = 'Progress: ' + pct + '% · ' + (_crWalkState.notes.length) + ' note' + (_crWalkState.notes.length === 1 ? '' : 's') + ' saved';
+}
+
+function askNextCrQuestion() {
+  const { roomIdx, qIdx } = _crWalkState;
+  if (roomIdx >= CR_ROOMS.length) {
+    finishCrWalkthrough();
+    return;
+  }
+  const room = CR_ROOMS[roomIdx];
+  const question = CR_QUESTIONS[qIdx];
+  const isFirstInRoom = qIdx === 0;
+  const msg = isFirstInRoom
+    ? 'Now let\'s look at the **' + room + '**. ' + question
+    : question;
+  _crWalkState.waitingForAnswer = true;
+  const btn = document.getElementById('cr-walk-send');
+  if (btn) btn.disabled = false;
+  appendCrMsg('cob', msg.replace(/\*\*/g, ''));
+  updateCrWalkProgress();
+}
+
+async function sendCrWalkMessage() {
+  if (!_crWalkState.waitingForAnswer || _crWalkState.saving) return;
+  const input = document.getElementById('cr-walk-input');
+  const text  = (input ? input.value : '').trim();
+  if (!text) return;
+  input.value = '';
+  _crWalkState.waitingForAnswer = false;
+  const btn = document.getElementById('cr-walk-send');
+  if (btn) btn.disabled = true;
+  appendCrMsg('user', text);
+
+  // Save this note
+  const room     = CR_ROOMS[_crWalkState.roomIdx];
+  const question = CR_QUESTIONS[_crWalkState.qIdx];
+  _crWalkState.notes.push({ room, question, answer: text });
+
+  // Advance state
+  _crWalkState.qIdx++;
+  if (_crWalkState.qIdx >= CR_QUESTIONS.length) {
+    _crWalkState.qIdx = 0;
+    _crWalkState.roomIdx++;
+  }
+
+  // Persist to server (fire-and-forget, non-blocking)
+  saveCrNotes([{ room, question, answer: text }]);
+
+  // Small delay then next question
+  showCrTyping();
+  setTimeout(() => {
+    removeCrTyping();
+    if (_crWalkState.roomIdx >= CR_ROOMS.length) {
+      finishCrWalkthrough();
+    } else {
+      askNextCrQuestion();
+    }
+  }, 900);
+}
+
+async function saveCrNotes(notes) {
+  const { ref, email } = _crWalkState;
+  if (!ref || !email) return;
+  try {
+    await fetch('/api/lease/handover/save-cr-notes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ listing_ref: ref, email, notes }),
+    });
+  } catch (e) {
+    console.warn('CR notes save failed (non-fatal):', e);
+  }
+}
+
+function finishCrWalkthrough() {
+  appendCrMsg('cob', 'Great work! You\'ve noted ' + _crWalkState.notes.length + ' observations across ' + CR_ROOMS.length + ' areas. These are saved to your handover record. \n\nIf anything looked seriously wrong — major damage, mould, structural issues — raise it with the outgoing tenant before signing anything. You can also contact your state\'s tenancy authority for advice.');
+  const body = document.getElementById('cr-walk-body');
+  if (body) {
+    const doneBtn = document.createElement('button');
+    doneBtn.textContent = '✅ Done — close walkthrough';
+    doneBtn.style.cssText = 'margin-top:12px;padding:10px 20px;background:#3DAA5C;border:none;border-radius:8px;color:#fff;font-weight:700;font-size:13px;cursor:pointer;align-self:center;';
+    doneBtn.onclick = closeCrWalkthrough;
+    const wrap = document.createElement('div');
+    wrap.style.display = 'flex';
+    wrap.style.justifyContent = 'center';
+    wrap.appendChild(doneBtn);
+    body.appendChild(wrap);
+    body.scrollTop = body.scrollHeight;
+  }
+  const input = document.getElementById('cr-walk-input');
+  const btn   = document.getElementById('cr-walk-send');
+  if (input) input.disabled = true;
+  if (btn) btn.disabled = true;
+  updateCrWalkProgress();
+}
+
 // Auto-scroll to lease board on load if hash present
 if (window.location.hash === '#browse') {
   document.querySelector('.lease-tab-btn').click();
@@ -3029,6 +3249,22 @@ function toggleTheme() {
   </div>
   <div class="handover-body">
     <div id="handover-content"><!-- populated by JS --></div>
+  </div>
+</div>
+
+<!-- Cob Condition Report Walkthrough Modal -->
+<div class="cr-walk-overlay" id="cr-walk-overlay" onclick="if(event.target===this)closeCrWalkthrough()">
+  <div class="cr-walk-modal">
+    <div class="cr-walk-header">
+      <span class="cr-walk-title">🤠 Cob — Condition Report Walkthrough</span>
+      <button class="cr-walk-close" onclick="closeCrWalkthrough()">✕</button>
+    </div>
+    <div class="cr-walk-progress" id="cr-walk-progress"></div>
+    <div class="cr-walk-body" id="cr-walk-body"></div>
+    <div class="cr-walk-footer">
+      <textarea class="cr-walk-input" id="cr-walk-input" rows="2" placeholder="Type your answer…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendCrWalkMessage();}"></textarea>
+      <button class="cr-walk-send" id="cr-walk-send" onclick="sendCrWalkMessage()">Send</button>
+    </div>
   </div>
 </div>
 
