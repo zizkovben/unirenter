@@ -19,6 +19,7 @@ const TIER1_REJECT = [
   // Off-platform comms
   { pattern: /whatsapp|whats\s?app|wa\.me\b|chat on wa\b|message me on\b/i, label: 'whatsapp_redirect' },
   { pattern: /\btelegram\b|t\.me\/|signal me\b/i, label: 'telegram_signal' },
+  { pattern: /\bwechat\b|wechat\s?id|add me on wechat/i, label: 'wechat_redirect' },
   // Payment scams
   { pattern: /western\s?union|wire\s?transfer|money\s?gram|moneygram/i, label: 'wire_transfer' },
   { pattern: /send\s?deposit|deposit\s?first|pay\s?deposit\s?before/i, label: 'deposit_first' },
@@ -38,6 +39,7 @@ const TIER1_REJECT = [
 const TIER2_FLAG = [
   { pattern: /\burgent\b|\bmust go\b|\bneed gone\b|\bleaving australia\b|\bvisa expired\b/i, label: 'urgency_language' },
   { pattern: /\bgoing home\b|\bemergency only\b/i, label: 'urgency_language' },
+  { pattern: /first come first served|must decide today|only showing once|viewing once only|won't last long|snapped up quickly/i, label: 'urgency_pressure' },
 ];
  
 const DISPOSABLE_DOMAINS = [
