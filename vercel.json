@@ -28,6 +28,14 @@
       "destination": "/unirenter-guide.html"
     },
     {
+      "source": "/melbourne/guide",
+      "destination": "/unirenter-guide.html"
+    },
+    {
+      "source": "/guide/melbourne",
+      "destination": "/unirenter-guide.html"
+    },
+    {
       "source": "/guide/sydney",
       "destination": "/unirenter-guide-sydney.html"
     },
@@ -48,6 +56,14 @@
       "destination": "/unirenter-lease.html"
     },
     {
+      "source": "/lease/melbourne",
+      "destination": "/unirenter-lease.html"
+    },
+    {
+      "source": "/melbourne/lease",
+      "destination": "/unirenter-lease.html"
+    },
+    {
       "source": "/lease/sydney",
       "destination": "/unirenter-lease-sydney.html"
     },
@@ -65,6 +81,14 @@
     },
     {
       "source": "/settled",
+      "destination": "/unirenter-settled-melbourne.html"
+    },
+    {
+      "source": "/settled/melbourne",
+      "destination": "/unirenter-settled-melbourne.html"
+    },
+    {
+      "source": "/melbourne/settled",
       "destination": "/unirenter-settled-melbourne.html"
     },
     {
