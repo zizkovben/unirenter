@@ -501,19 +501,19 @@ body.light-mode .tl-item{border-color:rgba(0,31,45,0.1)}
       <div class="manual-entry">
         <div class="me-title">✏️ Enter lease details manually</div>
         <div class="form-row">
-          <div class="form-group"><label>Lease start date</label><input type="text" placeholder="e.g. 1 February 2025" /></div>
-          <div class="form-group"><label>Lease end date</label><input type="text" placeholder="e.g. 31 January 2026" /></div>
+          <div class="form-group"><label>Lease start date</label><input id="lc-start" type="text" placeholder="e.g. 2025-02-01 or 1 Feb 2025" /></div>
+          <div class="form-group"><label>Lease end date</label><input id="lc-end" type="text" placeholder="e.g. 2026-01-31 or 31 Jan 2026" /></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Weekly rent</label><input type="text" placeholder="e.g. $320" /></div>
-          <div class="form-group"><label>Bond amount</label><input type="text" placeholder="e.g. $1,280" /></div>
+          <div class="form-group"><label>Weekly rent</label><input id="lc-rent" type="text" placeholder="e.g. $320" /></div>
+          <div class="form-group"><label>Bond amount</label><input id="lc-bond" type="text" placeholder="e.g. $1,280" /></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Notice period required</label><select><option>28 days</option><option>14 days</option><option>21 days</option><option>Other</option></select></div>
-          <div class="form-group"><label>Inspection frequency</label><select><option>Every 3 months</option><option>Every 6 months</option><option>Annually</option></select></div>
+          <div class="form-group"><label>Notice period required</label><select id="lc-notice"><option>28 days</option><option>14 days</option><option>21 days</option><option>Other</option></select></div>
+          <div class="form-group"><label>Inspection frequency</label><select id="lc-inspect"><option>Every 3 months</option><option>Every 6 months</option><option>Annually</option></select></div>
         </div>
-        <div class="form-group"><label>University (for semester dates)</label><select><option>University of Melbourne</option><option>RMIT University</option><option>Monash University</option><option>UNSW Sydney</option><option>University of Sydney</option><option>UTS</option><option>UQ Brisbane</option><option>QUT Brisbane</option><option>Other</option></select></div>
-        <button class="btn-primary" onclick="showToast('✅ Companion set up','Cob has your lease dates. Reminders are active for all critical dates.')">Set up my Lease Companion</button>
+        <div class="form-group"><label>University (for semester dates)</label><select id="lc-uni"><option value="">Select your university</option><option>University of Melbourne</option><option>RMIT University</option><option>Monash University</option><option>UNSW Sydney</option><option>University of Sydney</option><option>UTS</option><option>UQ Brisbane</option><option>QUT Brisbane</option><option>Griffith University</option><option>University of Adelaide</option><option>UniSA</option><option>Flinders University</option><option>University of Western Australia</option><option>Curtin University</option><option>Murdoch University</option><option>Australian National University</option><option>University of Canberra</option><option>Other</option></select></div>
+        <button class="btn-primary" onclick="saveLeaseCompanion()">Set up my Lease Companion</button>
       </div>
     </div>
   </div>
@@ -562,6 +562,122 @@ body.light-mode .tl-item{border-color:rgba(0,31,45,0.1)}
 <div class="toast" id="toast"><div class="toast-title" id="t-title"></div><div id="t-msg"></div></div>
 
 <script>
+// ── Supabase wiring ───────────────────────────────────────────────────────
+
+async function loadLeaseCompanion() {
+  const email = localStorage.getItem('unirenter_email');
+  if (!email) return; // not logged in — show empty state
+  try {
+    const res = await fetch('/api/lease-companion/get?email=' + encodeURIComponent(email));
+    const json = await res.json();
+    if (!json.ok || !json.data) return; // no saved data yet
+    populateLeaseUI(json.data);
+  } catch (e) {
+    console.error('loadLeaseCompanion error:', e);
+  }
+}
+
+function populateLeaseUI(d) {
+  // Populate manual entry form fields so user can see/edit saved data
+  const set = (sel, val) => { const el = document.querySelector(sel); if (el && val) el.value = val; };
+  set('#lc-start', d.lease_start || '');
+  set('#lc-end', d.lease_end || '');
+  set('#lc-rent', d.weekly_rent ? '$' + d.weekly_rent : '');
+  set('#lc-bond', d.bond_amount ? '$' + d.bond_amount : '');
+  set('#lc-notice', String(d.notice_period_days || '28') + ' days');
+  set('#lc-inspect', d.inspection_frequency || 'Every 3 months');
+  set('#lc-uni', d.university || '');
+  // If we have lease dates, show the result panel with saved data
+  if (d.lease_start && d.lease_end) {
+    renderSavedTimeline(d);
+  }
+}
+
+function renderSavedTimeline(d) {
+  // Build a minimal summary from saved data and show result panel
+  const uploadZone = document.getElementById('upload-zone');
+  const result = document.getElementById('lease-result');
+  const summary = result.querySelector('.ls-title');
+  const fields = result.querySelectorAll('.ls-field-value');
+
+  // Hide upload zone, show result
+  if (uploadZone) uploadZone.style.display = 'none';
+
+  // Update summary fields
+  const fmtDate = (s) => {
+    if (!s) return '—';
+    try {
+      return new Date(s).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch(e) { return s; }
+  };
+  if (summary) {
+    summary.innerHTML = '✅ Lease loaded · ' + (d.property_description || 'Your tenancy');
+  }
+  const vals = [
+    fmtDate(d.lease_start),
+    fmtDate(d.lease_end),
+    d.weekly_rent ? '$' + parseFloat(d.weekly_rent).toFixed(0) + '/wk' : '—',
+    d.bond_amount ? '$' + parseFloat(d.bond_amount).toFixed(0) : '—',
+    (d.notice_period_days || '—') + ' days',
+    d.inspection_frequency || '—'
+  ];
+  fields.forEach((el, i) => { if (vals[i]) el.textContent = vals[i]; });
+  result.classList.add('vis');
+}
+
+async function saveLeaseCompanion() {
+  const email = localStorage.getItem('unirenter_email');
+  if (!email) {
+    showToast('⚠️ Not signed in', 'Please sign in to save your Lease Companion.');
+    return;
+  }
+
+  const get = (id) => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+
+  const noticeVal = get('lc-notice');
+  const noticeDays = parseInt(noticeVal.replace(/\D/g,''), 10) || 28;
+
+  const body = {
+    email,
+    lease_start:          get('lc-start'),
+    lease_end:            get('lc-end'),
+    weekly_rent:          get('lc-rent'),
+    bond_amount:          get('lc-bond'),
+    notice_period_days:   noticeDays,
+    inspection_frequency: get('lc-inspect'),
+    university:           get('lc-uni'),
+    source:               'manual',
+    city:                 localStorage.getItem('unirenter_lease_city') || 'melbourne',
+  };
+
+  try {
+    const res = await fetch('/api/lease-companion/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const json = await res.json();
+    if (json.ok) {
+      showToast('✅ Companion saved', 'Cob has your lease dates. Reminders are active for all critical dates.');
+      // Update localStorage for quick access
+      localStorage.setItem('ur_lc_start', body.lease_start);
+      localStorage.setItem('ur_lc_end', body.lease_end);
+      // Refresh display
+      populateLeaseUI({ ...body, weekly_rent: parseFloat(String(body.weekly_rent).replace(/[$,]/g,'')), bond_amount: parseFloat(String(body.bond_amount).replace(/[$,]/g,'')) });
+    } else {
+      showToast('⚠️ Save failed', json.error || 'Please try again.');
+    }
+  } catch (e) {
+    console.error('saveLeaseCompanion error:', e);
+    showToast('⚠️ Save failed', 'Network error — please try again.');
+  }
+}
+
+// Load saved data on page load
+window.addEventListener('DOMContentLoaded', loadLeaseCompanion);
+
+// ── UI helpers ────────────────────────────────────────────────────────────
+
 function showSection(id, btn) {
   document.querySelectorAll('.psection').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.ptab').forEach(b => b.classList.remove('active'));
@@ -624,24 +740,21 @@ function openCob() {
   document.getElementById('cob-input').focus();
 }
 
-const COB_LEASE = {
-  condition: "For your entry condition report, photograph absolutely everything: every wall (all four walls in every room), ceiling stains or marks, carpet condition, all appliances (inside oven, washing machine, dishwasher), all light fittings, windows and flyscreens, bathroom grout and tiles, any chips or scratches on door frames, and the garden or outdoor area. Take video walkthroughs as well as photos. Note every single defect — even tiny ones. The more thorough you are, the more protected your bond is.",
-  inspection: "During a routine inspection your landlord or property manager checks: general cleanliness, condition of carpets and floors, walls and paintwork, appliances and fixtures, garden maintenance, and that there's no damage or unauthorised modifications. They must give you at least 24 hours written notice. You don't have to be home. Tip: give the place a thorough clean a few days before — not just the morning of, so it has time to look lived-in but tidy.",
-  notice: "To vacate at the end of your fixed-term lease in Victoria, you need to give 28 days written notice. Your notice must include: your name and address, the rental property address, the date you intend to vacate, your signature, and the date of the notice. Send it in writing — email with read receipt or registered post. I can draft this letter for you — just confirm your details.",
-  bond: "If your bond isn't returned within 14 days of vacating (in Victoria), you can apply to the RTBA (Residential Tenancies Bond Authority) online at rtba.vic.gov.au to reclaim it. It's free and straightforward. If the landlord is claiming deductions you disagree with, you can dispute at VCAT — also low-cost for renters. Tenants Victoria (03 9416 2577) can help you understand your rights before you file.",
-  rent: "In Victoria your landlord can only increase your rent once per year on a fixed-term lease. They must give 60 days written notice. The increase can be disputed at VCAT if it's unreasonable — there's no fixed cap in Victoria currently, but VCAT considers market rates. If you're on a periodic (month-to-month) lease, the same 60-day notice and once-per-year rule applies.",
-  default: "Good question about your tenancy! In the full version I connect to Claude AI for detailed answers. For now I can help with: entry condition reports, routine inspections, notice to vacate, bond claims, and rent increases. What would you like to know?"
-};
-
-function cobResponse(msg) {
-  const m = msg.toLowerCase();
-  if (m.includes('condition') || m.includes('photograph') || m.includes('photo')) return COB_LEASE.condition;
-  if (m.includes('inspection') || m.includes('check')) return COB_LEASE.inspection;
-  if (m.includes('notice') || m.includes('vacat') || m.includes('leave')) return COB_LEASE.notice;
-  if (m.includes('bond') || m.includes('deposit') || m.includes('return')) return COB_LEASE.bond;
-  if (m.includes('rent') || m.includes('increase') || m.includes('rise')) return COB_LEASE.rent;
-  return COB_LEASE.default;
+// Build context for Cob from stored lease data
+function buildLeaseContext() {
+  const start = localStorage.getItem('ur_lc_start');
+  const end = localStorage.getItem('ur_lc_end');
+  if (!start && !end) return '';
+  const fmt = (s) => { try { return new Date(s).toLocaleDateString('en-AU', {day:'numeric',month:'short',year:'numeric'}); } catch(e){return s;} };
+  return `\n\nUser's current lease: start ${fmt(start)}, end ${fmt(end)}.`;
 }
+
+const COB_LEASE_SYSTEM = `You are Cob (short for Cobber), UniRenter's Australian student housing assistant.
+PERSONALITY: Warm, practical, no-nonsense Aussie mate. Use occasional Australian expressions naturally.
+YOUR EXPERTISE: Australian residential tenancy law (VIC, NSW, QLD, SA, WA, ACT), bond, condition reports, rent, repairs, entry rights, ending tenancies, PBSA.
+CONTEXT: You are helping a student manage their active tenancy via the Lease Companion feature.
+ALWAYS: Be specific to the state when discussing law. Remind users this is general information, not formal legal advice — refer to their state tenants union for formal help. Keep answers focused and scannable.
+NEVER: Give definitive legal advice. Recommend WhatsApp.`;
 
 async function cobSend(preset) {
   const input = document.getElementById('cob-input');
@@ -653,9 +766,29 @@ async function cobSend(preset) {
   const typing = document.getElementById('cob-typing');
   typing.classList.add('vis');
   scrollCob();
-  await new Promise(r => setTimeout(r, 1000 + Math.random() * 600));
-  typing.classList.remove('vis');
-  addMsg(cobResponse(msg), 'cob');
+
+  try {
+    const leaseCtx = buildLeaseContext();
+    const res = await fetch('/api/cob', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: msg + leaseCtx,
+        systemPrompt: COB_LEASE_SYSTEM
+      })
+    });
+    const json = await res.json();
+    typing.classList.remove('vis');
+    if (json.reply) {
+      addMsg(json.reply, 'cob');
+    } else {
+      addMsg("Sorry, I couldn't connect right now. Try again in a moment. 🤠", 'cob');
+    }
+  } catch (e) {
+    typing.classList.remove('vis');
+    console.error('cobSend error:', e);
+    addMsg("Sorry, network error. Try again in a moment. 🤠", 'cob');
+  }
 }
 
 function addMsg(text, who) {
