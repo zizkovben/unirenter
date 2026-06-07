@@ -970,6 +970,17 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
   </div>
 </div>
 
+<!-- S36: Free launch period banner -->
+<div id="free-launch-banner" style="display:none;max-width:900px;margin:0 auto 0;padding:0 24px;">
+  <div style="background:linear-gradient(135deg,rgba(61,170,92,0.10) 0%,rgba(75,191,224,0.08) 100%);border:1px solid rgba(61,170,92,0.3);border-radius:14px;padding:16px 22px;display:flex;align-items:center;gap:14px;">
+    <div style="font-size:22px;flex-shrink:0;">🎉</div>
+    <div style="flex:1;">
+      <div style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--brand-green);margin-bottom:3px;">Free during launch</div>
+      <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">List your break lease and connect with incoming tenants at no cost until <strong style="color:var(--text);">31 January 2027</strong>. Fees apply from February.</div>
+    </div>
+  </div>
+</div>
+
 <!-- How it works for lease -->
 <div style="position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 24px 48px;">
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
@@ -2318,6 +2329,12 @@ async function expressInterest(listingRef, btn) {
     const data = await res.json();
 
     if (res.ok || res.status === 200) {
+      // S36: if Stripe is enabled, API returns a checkout URL — redirect there
+      if (data.stripe_checkout_url) {
+        showToast('💳 Payment required', 'A small connection fee unlocks the handover panel. Redirecting to checkout…');
+        setTimeout(() => { window.location.href = data.stripe_checkout_url; }, 1200);
+        return;
+      }
       btn.textContent = '✅ Interest sent';
       btn.style.opacity = '0.6';
       btn.style.cursor  = 'default';
@@ -2959,6 +2976,10 @@ async function sendCobMessage() {
 
 // Show Cob immediately on the lease page (context is already housing-specific)
 (function() {
+  // S36: show free-launch banner (always shown during free period)
+  const freeBanner = document.getElementById('free-launch-banner');
+  if (freeBanner) freeBanner.style.display = 'block';
+
   setTimeout(showCobFab, 1000);
   setTimeout(() => showCobNudge("On the break lease board? I can walk you through what to check before signing, landlord consent, and your rights as an incoming tenant 🤠"), 4000);
 })();
