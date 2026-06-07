@@ -1,0 +1,10 @@
+{
+  "name": "unirenter",
+  "version": "1.0.0",
+  "description": "UniRenter — Australian student housing platform",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.107.0",
+    "resend": "^6.12.4"
+  }
+}
