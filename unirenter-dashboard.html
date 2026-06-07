@@ -2055,6 +2055,24 @@ function switchTab(name) {
     const badge = document.getElementById('msg-badge');
     if (badge) badge.style.display = 'none';
   }
+  // Calculator — re-render history on open
+  if (name === 'calculator') {
+    calcRenderHistory();
+  }
+  // Calendar — init on first open, re-render on subsequent opens
+  if (name === 'calendar') {
+    if (!calViewYear) {
+      calCurrentView = calLoadView();
+      calToday();
+      calInitFilterUI();
+      calSetView(calCurrentView);
+    } else {
+      calRender();
+    }
+    calMaybeShowNudge();
+  }
+  // Always re-render sticky strip on tab switch
+  renderStickyStrip();
 }
 
 // ── Profile helpers ───────────────────────────────────────────────────────────
@@ -3455,30 +3473,6 @@ window.addEventListener('DOMContentLoaded', function() {
   }, 300);
 });
 
-
-// ── Patch switchTab: init calendar on first open + handle URL param ──
-const _origSwitchTab = switchTab;
-function switchTab(name) {
-  _origSwitchTab(name);
-  if (name === 'calculator') {
-    calcRenderHistory();
-  }
-  if (name === 'calendar') {
-    if (!calViewYear) {
-      // Init view from localStorage
-      calCurrentView = calLoadView();
-      calToday();
-      calInitFilterUI();
-      // Apply persisted view
-      calSetView(calCurrentView);
-    } else {
-      calRender();
-    }
-    calMaybeShowNudge();
-  }
-  // Always re-render sticky strip on tab switch
-  renderStickyStrip();
-}
 
 // ── URL param handling ──
 (function() {
