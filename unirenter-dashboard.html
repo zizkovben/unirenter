@@ -3515,9 +3515,7 @@ const LAST_VISIT_KEY    = 'ur_last_dashboard_visit';
 // VAPID public key — set this in Vercel env and replace here
 // Generate with: npx web-push generate-vapid-keys
 // Then set VAPID_PUBLIC_KEY in Vercel env and paste the public key below
-const VAPID_PUBLIC_KEY  = (typeof __VAPID_PUBLIC_KEY__ !== 'undefined')
-  ? __VAPID_PUBLIC_KEY__
-  : ''; // Replaced at deploy time — see build notes
+const VAPID_PUBLIC_KEY  = 'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEYITI8LbsIbZPP0SUHqNL6bDSg4qPe6eJ_CVh4t9jLFxcMj3cwNIy0_tDMoy0i6YPkSf_A9od4hAzN9KllAKxAQ';
 
 // ── Utility: convert VAPID key to Uint8Array ──
 function urlBase64ToUint8Array(base64String) {
