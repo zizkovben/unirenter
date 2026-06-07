@@ -1154,6 +1154,73 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
     nav { padding: 8px 6px; overflow: visible; }
     .nav-logo img { height: 26px; }
   }
+
+/* ── Welfare check-in card (Tier 3 — shown after 7-day absence) ── */
+.welfare-card {
+  display: none;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(75,191,224,0.08);
+  border: 1px solid rgba(75,191,224,0.25);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 0 0 12px;
+  position: relative;
+}
+.welfare-card.show { display: flex; }
+.welfare-card-avatar { font-size: 24px; flex-shrink: 0; margin-top: 1px; }
+.welfare-card-body { flex: 1; }
+.welfare-card-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+.welfare-card-text { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+.welfare-card-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.welfare-card-btn {
+  font-size: 12px; padding: 6px 14px; border-radius: 20px;
+  border: 1px solid rgba(75,191,224,0.4); background: transparent;
+  color: var(--brand-blue); cursor: pointer; font-family: var(--font-body);
+}
+.welfare-card-btn:hover { background: rgba(75,191,224,0.1); }
+.welfare-card-btn.primary { background: var(--brand-blue); color: #0d1f2d; border-color: var(--brand-blue); }
+.welfare-card-btn.primary:hover { opacity: 0.88; }
+.welfare-card-dismiss {
+  position: absolute; top: 10px; right: 12px;
+  background: none; border: none; color: var(--text-muted);
+  font-size: 16px; cursor: pointer; line-height: 1;
+}
+.welfare-card-dismiss:hover { color: var(--text); }
+
+/* ── Push permission prompt card ── */
+.push-prompt-card {
+  display: none;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(61,170,92,0.08);
+  border: 1px solid rgba(61,170,92,0.25);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 0 0 12px;
+  position: relative;
+}
+.push-prompt-card.show { display: flex; }
+.push-prompt-avatar { font-size: 24px; flex-shrink: 0; margin-top: 1px; }
+.push-prompt-body { flex: 1; }
+.push-prompt-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+.push-prompt-text { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+.push-prompt-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.push-prompt-btn {
+  font-size: 12px; padding: 6px 14px; border-radius: 20px;
+  border: 1px solid rgba(61,170,92,0.4); background: transparent;
+  color: var(--brand-green); cursor: pointer; font-family: var(--font-body);
+}
+.push-prompt-btn:hover { background: rgba(61,170,92,0.1); }
+.push-prompt-btn.primary { background: var(--brand-green); color: #fff; border-color: var(--brand-green); }
+.push-prompt-btn.primary:hover { opacity: 0.88; }
+.push-prompt-dismiss {
+  position: absolute; top: 10px; right: 12px;
+  background: none; border: none; color: var(--text-muted);
+  font-size: 16px; cursor: pointer; line-height: 1;
+}
+.push-prompt-dismiss:hover { color: var(--text); }
+
 </style>
 </head>
 <body>
@@ -1212,6 +1279,35 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
       </div>
     </div>
     <button class="tier2-card-dismiss" id="tier2-dismiss" onclick="dismissTier2()" title="Dismiss">✕</button>
+  </div>
+
+
+  <!-- Welfare check-in card (Tier 3 — shown after 7-day absence) -->
+  <div class="welfare-card" id="welfare-card">
+    <div class="welfare-card-avatar">🤠</div>
+    <div class="welfare-card-body">
+      <div class="welfare-card-title" id="welfare-title">Hey, it's been a while</div>
+      <div class="welfare-card-text" id="welfare-text"></div>
+      <div class="welfare-card-actions">
+        <button class="welfare-card-btn primary" onclick="switchTab('calendar')">View calendar ↗</button>
+        <button class="welfare-card-btn" onclick="openCobDashboard()">Talk to Cob 🤠</button>
+      </div>
+    </div>
+    <button class="welfare-card-dismiss" onclick="dismissWelfare()" title="Dismiss">✕</button>
+  </div>
+
+  <!-- Push permission prompt card -->
+  <div class="push-prompt-card" id="push-prompt-card">
+    <div class="push-prompt-avatar">🔔</div>
+    <div class="push-prompt-body">
+      <div class="push-prompt-title">Want a heads-up before key dates?</div>
+      <div class="push-prompt-text">Cob can send you a browser notification when an important date is 7 days away — lease dates, inspections, bond deadlines. No spam, just the dates that matter.</div>
+      <div class="push-prompt-actions">
+        <button class="push-prompt-btn primary" onclick="requestPushPermission()">Allow notifications</button>
+        <button class="push-prompt-btn" onclick="dismissPushPrompt()">Not now</button>
+      </div>
+    </div>
+    <button class="push-prompt-dismiss" onclick="dismissPushPrompt()" title="Dismiss">✕</button>
   </div>
 
   <!-- Tab bar -->
@@ -1751,6 +1847,17 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
       <div class="settings-card">
         <div class="settings-card-head">🔔 Notifications</div>
         <div class="settings-rows">
+          <div class="settings-row" id="push-settings-row">
+            <div class="settings-row-info">
+              <div class="settings-row-label">Key date reminders</div>
+              <div class="settings-row-sub" id="push-settings-sub">Browser notifications for dates ≤7 days away</div>
+            </div>
+            <label class="toggle-wrap">
+              <input type="checkbox" id="push-notif-toggle" onchange="handlePushToggle(this.checked)">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
           <div class="settings-row">
             <div class="settings-row-info">
               <div class="settings-row-label">New match alerts</div>
@@ -3395,6 +3502,393 @@ window.addEventListener('DOMContentLoaded', function() {
       if (el) el.style.display = '';
     }
   })();
+// ══════════════════════════════════════════════════════════════
+// TIER 3 — Browser Push + Resend Email Fallback + Welfare + Seasonal
+// ══════════════════════════════════════════════════════════════
+
+// ── Constants ──
+const PUSH_PROMPT_KEY   = 'ur_push_dismissed';
+const PUSH_SUBBED_KEY   = 'ur_push_subscribed';
+const WELFARE_KEY       = 'ur_welfare_dismissed';
+const LAST_VISIT_KEY    = 'ur_last_dashboard_visit';
+
+// VAPID public key — set this in Vercel env and replace here
+// Generate with: npx web-push generate-vapid-keys
+// Then set VAPID_PUBLIC_KEY in Vercel env and paste the public key below
+const VAPID_PUBLIC_KEY  = (typeof __VAPID_PUBLIC_KEY__ !== 'undefined')
+  ? __VAPID_PUBLIC_KEY__
+  : ''; // Replaced at deploy time — see build notes
+
+// ── Utility: convert VAPID key to Uint8Array ──
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw     = atob(base64);
+  const arr     = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+
+// ── Service Worker registration ──
+let _swRegistration = null;
+
+async function registerServiceWorker() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+  try {
+    const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    _swRegistration = reg;
+    return reg;
+  } catch(e) {
+    console.warn('SW registration failed:', e);
+    return null;
+  }
+}
+
+// ── Push permission prompt — non-intrusive Cob card ──
+function maybeShowPushPrompt() {
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+  if (Notification.permission === 'granted') return; // Already have it
+  if (Notification.permission === 'denied')  return; // Blocked — don't re-ask
+  if (localStorage.getItem(PUSH_PROMPT_KEY) === '1') return; // Dismissed
+
+  // Only prompt if user has ≥1 calendar event (worth notifying about)
+  const events = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]');
+  if (events.length === 0) return;
+
+  // Show after 2s on first visit with events
+  setTimeout(function() {
+    const card = document.getElementById('push-prompt-card');
+    if (card) card.classList.add('show');
+  }, 2000);
+}
+
+function dismissPushPrompt() {
+  localStorage.setItem(PUSH_PROMPT_KEY, '1');
+  const card = document.getElementById('push-prompt-card');
+  if (card) card.classList.remove('show');
+}
+
+async function requestPushPermission() {
+  dismissPushPrompt(); // Hide card immediately
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+
+    // Register SW if not already
+    const reg = _swRegistration || await registerServiceWorker();
+    if (!reg) return;
+
+    // Subscribe
+    const subscription = await reg.pushManager.subscribe({
+      userVisibleOnly:      true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+
+    // Save to Supabase
+    const email = localStorage.getItem('unirenter_email') || '';
+    const city  = localStorage.getItem('ur_city') || 'melbourne';
+
+    if (email) {
+      await fetch('/api/notifications/register-push', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, subscription, city })
+      });
+    }
+
+    localStorage.setItem(PUSH_SUBBED_KEY, '1');
+
+    // Update settings toggle
+    const toggle = document.getElementById('push-notif-toggle');
+    if (toggle) toggle.checked = true;
+    const sub = document.getElementById('push-settings-sub');
+    if (sub) sub.textContent = 'Browser notifications enabled ✅';
+
+  } catch(e) {
+    console.warn('Push subscription failed:', e);
+  }
+}
+
+// ── Settings toggle handler ──
+async function handlePushToggle(checked) {
+  if (checked) {
+    // User toggled on — request permission
+    await requestPushPermission();
+  } else {
+    // Unsubscribe
+    if (_swRegistration) {
+      try {
+        const sub = await _swRegistration.pushManager.getSubscription();
+        if (sub) await sub.unsubscribe();
+      } catch(e) {}
+    }
+    localStorage.removeItem(PUSH_SUBBED_KEY);
+    const sub = document.getElementById('push-settings-sub');
+    if (sub) sub.textContent = 'Browser notifications for dates ≤7 days away';
+  }
+}
+
+// Init settings toggle state
+function initPushSettingsRow() {
+  const toggle = document.getElementById('push-notif-toggle');
+  const sub    = document.getElementById('push-settings-sub');
+  if (!toggle) return;
+
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+    // Push not supported in this browser
+    if (sub) sub.textContent = 'Not supported in this browser';
+    toggle.disabled = true;
+    return;
+  }
+  if (Notification.permission === 'denied') {
+    if (sub) sub.textContent = 'Blocked — enable in browser settings';
+    toggle.disabled = true;
+    return;
+  }
+  if (Notification.permission === 'granted' || localStorage.getItem(PUSH_SUBBED_KEY) === '1') {
+    toggle.checked = true;
+    if (sub) sub.textContent = 'Browser notifications enabled ✅';
+  }
+}
+
+// ── Resend email fallback — events ≤3 days, push unavailable/denied ──
+async function sendEmailReminders() {
+  const email = localStorage.getItem('unirenter_email');
+  if (!email) return;
+
+  // Only send if push is NOT available
+  const pushAvailable = ('Notification' in window) && Notification.permission === 'granted';
+  if (pushAvailable) return; // Push handling it
+
+  const events = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]');
+  const now    = new Date();
+  const nowStr = now.toISOString().slice(0,10);
+  const in3    = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+  const in3Str = in3.toISOString().slice(0,10);
+
+  const remindable = events.filter(function(e) {
+    if (!e.date || e.date < nowStr || e.date > in3Str) return false;
+    // Skip public holidays — not actionable
+    if (e.cat === 'public_holiday') return false;
+    // Check localStorage gate
+    const gateKey = 'ur_notif_emailed_' + (e.id || e.date);
+    return localStorage.getItem(gateKey) !== '1';
+  });
+
+  for (const event of remindable) {
+    const eventDate  = new Date(event.date + 'T12:00:00');
+    const daysUntil  = Math.round((eventDate - now) / (24*60*60*1000));
+    const gateKey    = 'ur_notif_emailed_' + (event.id || event.date);
+
+    try {
+      const resp = await fetch('/api/notifications/send-reminder', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, event, daysUntil })
+      });
+      if (resp.ok) {
+        localStorage.setItem(gateKey, '1');
+      }
+    } catch(e) {
+      // Silent fail — don't break the dashboard
+    }
+  }
+}
+
+// ── Welfare check-in — 7-day absence heuristic ──
+function checkWelfare() {
+  const lastVisit = localStorage.getItem(LAST_VISIT_KEY);
+  if (!lastVisit) return; // First visit — no check needed
+
+  const daysSince = Math.floor((Date.now() - new Date(lastVisit).getTime()) / (24*60*60*1000));
+  if (daysSince < 7) return; // Visited recently
+
+  // Check if dismissed this week
+  const dismissed = localStorage.getItem(WELFARE_KEY);
+  if (dismissed) {
+    const daysSinceDismiss = Math.floor((Date.now() - new Date(dismissed).getTime()) / (24*60*60*1000));
+    if (daysSinceDismiss < 7) return;
+  }
+
+  // Check they have ≥1 event ≤14 days away
+  const events   = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]');
+  const now      = new Date();
+  const in14     = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+  const nowStr   = now.toISOString().slice(0,10);
+  const in14Str  = in14.toISOString().slice(0,10);
+
+  const upcoming = events.filter(function(e) {
+    return e.date && e.date >= nowStr && e.date <= in14Str;
+  });
+
+  if (upcoming.length === 0) return;
+
+  // Build welfare card copy
+  const card    = document.getElementById('welfare-card');
+  const titleEl = document.getElementById('welfare-title');
+  const textEl  = document.getElementById('welfare-text');
+  if (!card || !titleEl || !textEl) return;
+
+  const soonest   = upcoming.sort(function(a,b){ return a.date.localeCompare(b.date); })[0];
+  const eventName = soonest.title || soonest.name || 'an important date';
+  const eventDate = new Date(soonest.date + 'T12:00:00');
+  const daysUntil = Math.round((eventDate - now) / (24*60*60*1000));
+  const daysLabel = daysUntil === 0 ? 'today' : daysUntil === 1 ? 'tomorrow' : 'in ' + daysUntil + ' days';
+
+  titleEl.textContent = "Hey, it's been a while 🤠";
+  textEl.textContent  = "You've got " + upcoming.length + " date" + (upcoming.length > 1 ? 's' : '') +
+    " coming up \u2014 the soonest is \u201c" + eventName + "\u201d " + daysLabel +
+    ". Just making sure everything's on your radar. Want to check in?";
+
+  card.classList.add('show');
+}
+
+function dismissWelfare() {
+  localStorage.setItem(WELFARE_KEY, new Date().toISOString());
+  const card = document.getElementById('welfare-card');
+  if (card) card.classList.remove('show');
+}
+
+// Update last-visit timestamp every load
+function recordVisit() {
+  localStorage.setItem(LAST_VISIT_KEY, new Date().toISOString());
+}
+
+// ══════════════════════════════════════════════════════════════
+// SEASONAL NUDGES — hardcoded academic calendar per city
+// ══════════════════════════════════════════════════════════════
+
+// Semester dates per city (year-agnostic month-day pairs)
+// Format: [month (1-indexed), day]
+// Nudge fires when within 14 days of milestone
+const ACADEMIC_CAL = {
+  melbourne: [
+    { id: 'sem1_start',  label: 'Semester 1', md: [2, 24], copy: 'Semester 1 is about to kick off for most Melbourne universities. If your accommodation isn\'t locked in yet, now\'s the time — rooms near campus fill fast once semester starts.' },
+    { id: 'sem1_exam',   label: 'Sem 1 exams', md: [5, 26], copy: 'Exam period is approaching for most Melbourne universities. Worth making sure your lease and accommodation situation isn\'t adding to your stress right now.' },
+    { id: 'sem1_end',    label: 'Sem 1 end',   md: [6, 28], copy: 'Semester 1 is wrapping up. If your lease ends over winter break, your notice period may be due soon — check your lease companion for the deadline.' },
+    { id: 'sem2_start',  label: 'Semester 2', md: [7, 21], copy: 'Semester 2 starts soon for most Melbourne universities. Good time to confirm your living situation is sorted through second semester.' },
+    { id: 'sem2_exam',   label: 'Sem 2 exams', md: [10, 27], copy: 'End-of-year exams are around the corner. If your lease ends in November or December, your notice-to-vacate deadline may be coming up — check your calendar.' },
+    { id: 'sem2_end',    label: 'Sem 2 end',   md: [11, 22], copy: 'Semester 2 is nearly done. Lots of students are moving on at this time of year — if you\'re leaving, make sure your bond claim and condition report are ready.' }
+  ],
+  sydney: [
+    { id: 'sem1_start',  label: 'Semester 1', md: [2, 17], copy: 'Semester 1 is starting soon for most Sydney universities. If you\'re still searching for accommodation, rooms near USYD and UNSW fill up quickly once lectures begin.' },
+    { id: 'sem1_exam',   label: 'Sem 1 exams', md: [5, 19], copy: 'Exam period is approaching for most Sydney universities. Make sure your accommodation situation is stable so you can focus on study.' },
+    { id: 'sem1_end',    label: 'Sem 1 end',   md: [6, 21], copy: 'Semester 1 is wrapping up in Sydney. If your lease ends in the mid-year break, your notice deadline may be coming up soon.' },
+    { id: 'sem2_start',  label: 'Semester 2', md: [7, 14], copy: 'Semester 2 is around the corner in Sydney. Good time to confirm your lease runs through to the end of the year.' },
+    { id: 'sem2_exam',   label: 'Sem 2 exams', md: [10, 27], copy: 'End-of-year exams are approaching. November is one of the busiest lease-end periods in Sydney — check your notice deadline now.' },
+    { id: 'sem2_end',    label: 'Sem 2 end',   md: [11, 15], copy: 'The Sydney uni year is wrapping up. If you\'re finishing up and moving out, bond claim and condition report timing matters — check your lease companion.' }
+  ],
+  brisbane: [
+    { id: 'sem1_start',  label: 'Semester 1', md: [2, 24], copy: 'Semester 1 is starting soon at QUT and UQ. February intake is one of the busiest moving periods in Brisbane — if your accommodation isn\'t locked in, act quickly.' },
+    { id: 'sem1_exam',   label: 'Sem 1 exams', md: [5, 19], copy: 'Exam period is approaching for Brisbane universities. A settled living situation makes a real difference during exam time.' },
+    { id: 'sem1_end',    label: 'Sem 1 end',   md: [6, 14], copy: 'Semester 1 is finishing up. If your lease expires over the mid-year break, check when your notice-to-vacate deadline falls.' },
+    { id: 'sem2_start',  label: 'Semester 2', md: [7, 14], copy: 'Semester 2 is starting soon in Brisbane. July is a big lease-changeover period at QUT and UQ campuses.' },
+    { id: 'sem2_exam',   label: 'Sem 2 exams', md: [10, 20], copy: 'End-of-year exams are coming up. November in Brisbane is peak moving season — worth getting ahead of any accommodation changes now.' },
+    { id: 'sem2_end',    label: 'Sem 2 end',   md: [11, 8], copy: 'The Brisbane uni year is nearly done. If you\'re leaving your current place, your condition report and bond paperwork should be ready to go.' }
+  ],
+  adelaide: [
+    { id: 'sem1_start',  label: 'Semester 1', md: [2, 24], copy: 'Semester 1 is starting soon for Adelaide universities. It\'s one of Australia\'s most affordable student cities — but rooms near UniSA and UniAdelaide still fill up fast in February.' },
+    { id: 'sem1_exam',   label: 'Sem 1 exams', md: [5, 26], copy: 'Exam period is approaching in Adelaide. Make sure your lease situation is stable so you can concentrate on study.' },
+    { id: 'sem1_end',    label: 'Sem 1 end',   md: [6, 28], copy: 'Semester 1 is wrapping up. If your lease ends over winter break, check your notice-to-vacate deadline in your lease companion.' },
+    { id: 'sem2_start',  label: 'Semester 2', md: [7, 21], copy: 'Semester 2 is starting soon in Adelaide. A good time to confirm your accommodation is locked through the rest of the year.' },
+    { id: 'sem2_exam',   label: 'Sem 2 exams', md: [10, 27], copy: 'End-of-year exams are around the corner. If your lease ends in November, your notice deadline is probably coming up soon.' },
+    { id: 'sem2_end',    label: 'Sem 2 end',   md: [11, 22], copy: 'The Adelaide university year is finishing up. Bond claims and condition reports are time-sensitive — don\'t leave them until the last minute.' }
+  ],
+  perth: [
+    { id: 'sem1_start',  label: 'Semester 1', md: [2, 24], copy: 'Semester 1 is starting soon at UWA, Curtin, and Murdoch. Perth rental demand has surged — rooms near campus are snapped up quickly at the start of semester.' },
+    { id: 'sem1_exam',   label: 'Sem 1 exams', md: [5, 26], copy: 'Exam time is coming up for Perth universities. Stable accommodation makes a real difference when you\'re trying to focus.' },
+    { id: 'sem1_end',    label: 'Sem 1 end',   md: [6, 28], copy: 'Semester 1 is wrapping up. If your lease ends over the mid-year break, check when your notice-to-vacate deadline falls.' },
+    { id: 'sem2_start',  label: 'Semester 2', md: [7, 21], copy: 'Semester 2 is starting soon in Perth. July is a common lease-changeover period near Curtin and Murdoch campuses.' },
+    { id: 'sem2_exam',   label: 'Sem 2 exams', md: [10, 27], copy: 'End-of-year exams are approaching in Perth. If your lease is ending soon, your notice-to-vacate deadline may be sooner than you think.' },
+    { id: 'sem2_end',    label: 'Sem 2 end',   md: [11, 22], copy: 'The Perth university year is nearly done. Make sure your bond claim and condition report are ready before you hand over the keys.' }
+  ],
+  canberra: [
+    { id: 'sem1_start',  label: 'Semester 1', md: [2, 17], copy: 'Semester 1 is starting soon at ANU and UC. Canberra\'s student rental market is tight — February and July are the two biggest pressure points of the year.' },
+    { id: 'sem1_exam',   label: 'Sem 1 exams', md: [5, 26], copy: 'Exam period is approaching at ANU and UC. A settled home situation makes study easier — check everything is in order.' },
+    { id: 'sem1_end',    label: 'Sem 1 end',   md: [6, 21], copy: 'Semester 1 is finishing up. If your lease ends over winter, your notice-to-vacate deadline may already be here.' },
+    { id: 'sem2_start',  label: 'Semester 2', md: [7, 21], copy: 'Semester 2 kicks off in Canberra. A good time to make sure your lease runs through to the end of the year.' },
+    { id: 'sem2_exam',   label: 'Sem 2 exams', md: [10, 27], copy: 'End-of-year exams are around the corner. November in Canberra is peak lease-end time — don\'t let the notice deadline catch you off guard.' },
+    { id: 'sem2_end',    label: 'Sem 2 end',   md: [11, 15], copy: 'The Canberra university year is wrapping up. Bond claims, condition reports, and final inspections — get ahead of these before the holiday period.' }
+  ]
+};
+
+function checkSeasonalNudges() {
+  const city = (localStorage.getItem('ur_city') || 'melbourne').toLowerCase();
+  const cal  = ACADEMIC_CAL[city] || ACADEMIC_CAL['melbourne'];
+  if (!cal) return;
+
+  const now    = new Date();
+  const year   = now.getFullYear();
+  const nowTs  = now.getTime();
+
+  for (const milestone of cal) {
+    const gateKey = 'ur_seasonal_' + city + '_' + milestone.id + '_' + year;
+    if (localStorage.getItem(gateKey) === '1') continue; // Already shown this year
+
+    // Build milestone date for this year
+    const mDate = new Date(year, milestone.md[0] - 1, milestone.md[1]);
+    const diff  = Math.floor((mDate.getTime() - nowTs) / (24*60*60*1000));
+
+    if (diff >= 0 && diff <= 14) {
+      // Within 14-day window — fire Cob nudge via panel
+      // We'll queue this to fire as Cob's opening message if panel is first opened
+      window._cobSeasonalNudge = window._cobSeasonalNudge || [];
+      window._cobSeasonalNudge.push({
+        label: milestone.label,
+        copy:  milestone.copy,
+        diff:  diff
+      });
+      localStorage.setItem(gateKey, '1');
+    }
+  }
+}
+
+// Inject seasonal nudge into Cob panel on open (if queued)
+const _origOpenCobDashboard = typeof openCobDashboard === 'function' ? openCobDashboard : null;
+function openCobDashboard() {
+  if (_origOpenCobDashboard) _origOpenCobDashboard();
+
+  // Inject queued seasonal nudge as Cob message after short delay
+  if (window._cobSeasonalNudge && window._cobSeasonalNudge.length > 0) {
+    const nudge = window._cobSeasonalNudge.shift(); // Take first
+    setTimeout(function() {
+      const messagesEl = document.getElementById('cob-panel-messages');
+      if (!messagesEl) return;
+      const msg = document.createElement('div');
+      msg.className = 'cob-msg cob-msg-assistant';
+      const dLabel = nudge.diff === 0 ? 'starting today' : nudge.diff === 1 ? 'starting tomorrow' : 'in ' + nudge.diff + ' days';
+      msg.innerHTML = '<div class="cob-msg-bubble">📅 <strong>' + nudge.label + ' ' + dLabel + '</strong><br><br>' + nudge.copy + '</div>';
+      messagesEl.appendChild(msg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }, 1200);
+  }
+}
+
+// ── Init all Tier 3 systems on page load ──
+window.addEventListener('DOMContentLoaded', function() {
+  recordVisit();
+
+  // Register SW in background (needed for push)
+  registerServiceWorker();
+
+  // Init push settings row state
+  initPushSettingsRow();
+
+  setTimeout(function() {
+    // Non-intrusive push prompt (if conditions met)
+    maybeShowPushPrompt();
+
+    // Welfare check-in (if absent 7+ days with upcoming events)
+    checkWelfare();
+
+    // Email fallback reminders (events ≤3 days, push not available)
+    sendEmailReminders();
+
+    // Seasonal academic calendar nudges (queued for Cob panel)
+    checkSeasonalNudges();
+  }, 800);
+});
+
 
 </script>
 
