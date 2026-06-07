@@ -3,7 +3,7 @@
 // GET ?city=melbourne[&limit=20][&offset=0]
 // Returns { reviews: [...], total: N }
  
-import { createClient } from '@supabase/supabase-js';
+const { createClient } = require('@supabase/supabase-js');
  
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -14,7 +14,7 @@ const ALLOWED_CITIES = ['melbourne', 'sydney', 'brisbane', 'adelaide', 'perth', 
 const MAX_LIMIT = 50;
 const DEFAULT_LIMIT = 20;
  
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
