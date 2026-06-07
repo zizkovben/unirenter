@@ -4,7 +4,7 @@
 // Used by the dashboard to load profile data without requiring a new city page session.
 // Auth: uses SUPABASE_SERVICE_ROLE_KEY (server-side only — never exposed to client)
  
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
