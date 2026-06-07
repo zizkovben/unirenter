@@ -898,6 +898,204 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
 .report-cat-title { font-size: 13px; font-weight: 600; }
 .report-cat-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
+
+/* ── Calculator tab ── */
+.calc-mode-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.calc-mode-btn {
+  background: none; border: 1px solid var(--navy-border);
+  color: var(--text-muted); font-family: var(--font-body); font-size: 13px;
+  padding: 8px 14px; border-radius: 20px; cursor: pointer; transition: all 0.2s;
+  white-space: nowrap;
+}
+.calc-mode-btn:hover { border-color: rgba(75,191,224,0.3); color: var(--text); }
+.calc-mode-btn.active {
+  background: rgba(75,191,224,0.12); border-color: var(--brand-blue);
+  color: var(--brand-blue); font-weight: 600;
+}
+.calc-panel { display: none; }
+.calc-panel.active { display: block; }
+.calc-field-group { margin-bottom: 14px; }
+.calc-label { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.04em; }
+.calc-input {
+  width: 100%; background: var(--navy-mid); border: 1px solid var(--navy-border);
+  color: var(--text); font-family: var(--font-body); font-size: 14px;
+  padding: 10px 12px; border-radius: 8px; outline: none; transition: border-color 0.2s;
+}
+.calc-input:focus { border-color: var(--brand-blue); }
+.calc-toggle-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.calc-toggle-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
+.calc-toggle-item input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--brand-blue); cursor: pointer; }
+.calc-btn {
+  width: 100%; background: var(--brand-yellow); color: #0d1f2d;
+  border: none; font-family: var(--font-display); font-weight: 700;
+  font-size: 14px; padding: 13px; border-radius: 10px; cursor: pointer;
+  transition: opacity 0.2s; margin-top: 4px;
+}
+.calc-btn:hover { opacity: 0.88; }
+.calc-result {
+  background: var(--navy-mid); border: 1px solid var(--navy-border);
+  border-radius: 12px; padding: 18px; margin-top: 16px; display: none;
+}
+.calc-result.show { display: block; }
+.calc-result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.calc-result-item { text-align: center; }
+.calc-result-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+.calc-result-val { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--text); }
+.calc-result-val.highlight { color: var(--brand-yellow); }
+.calc-result-val.danger { color: var(--brand-coral); }
+.calc-cob-nudge {
+  background: rgba(245,184,0,0.07); border: 1px solid rgba(245,184,0,0.2);
+  border-radius: 10px; padding: 14px 16px; margin-top: 14px;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.calc-cob-nudge .cob-av { font-size: 20px; flex-shrink: 0; }
+.calc-cob-nudge .cob-txt { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+.calc-cob-nudge .cob-txt strong { color: var(--text); }
+.calc-notice-box {
+  background: rgba(75,191,224,0.06); border: 1px solid rgba(75,191,224,0.2);
+  border-radius: 8px; padding: 12px 14px; margin-top: 10px;
+  font-size: 12px; color: var(--text-muted); line-height: 1.5;
+}
+.calc-divider { height: 1px; background: var(--navy-border); margin: 20px 0; }
+.calc-history-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 12px; }
+.calc-history-list { display: flex; flex-direction: column; gap: 8px; }
+.calc-history-item {
+  background: var(--navy-mid); border: 1px solid var(--navy-border);
+  border-radius: 10px; padding: 12px 14px; cursor: pointer;
+  transition: border-color 0.2s; display: flex; align-items: center; gap: 12px;
+}
+.calc-history-item:hover { border-color: rgba(75,191,224,0.3); }
+.calc-history-icon { font-size: 18px; flex-shrink: 0; }
+.calc-history-info { flex: 1; min-width: 0; }
+.calc-history-summary { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.calc-history-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.calc-history-restore { font-size: 11px; color: var(--brand-blue); flex-shrink: 0; }
+
+/* ── Cob FAB (dashboard) ── */
+.cob-fab-dashboard {
+  position: fixed; bottom: 72px; right: 20px; z-index: 500;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--brand-yellow); border: none; cursor: pointer;
+  font-size: 22px; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(245,184,0,0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.cob-fab-dashboard:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(245,184,0,0.45); }
+.cob-fab-pulse { animation: cobPulse 1.8s ease-in-out infinite; }
+@keyframes cobPulse {
+  0%,100% { box-shadow: 0 4px 20px rgba(245,184,0,0.35); }
+  50% { box-shadow: 0 4px 28px rgba(245,184,0,0.7), 0 0 0 8px rgba(245,184,0,0.12); }
+}
+.cob-fab-badge-count {
+  position: absolute; top: -4px; right: -4px;
+  background: var(--brand-coral); color: #fff;
+  font-size: 10px; font-weight: 700; font-family: var(--font-body);
+  min-width: 18px; height: 18px; border-radius: 9px;
+  display: none; align-items: center; justify-content: center;
+  padding: 0 4px; border: 2px solid var(--navy);
+}
+.cob-fab-badge-count.show { display: flex; }
+
+/* ── Cob chat panel (dashboard) ── */
+.cob-panel-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 600; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.cob-panel-backdrop.open { opacity: 1; pointer-events: auto; }
+.cob-panel {
+  position: fixed; bottom: 0; right: 0; z-index: 700;
+  width: 380px; max-width: 100vw; height: 540px; max-height: 85vh;
+  background: var(--navy-card); border: 1px solid var(--navy-border);
+  border-radius: 20px 20px 0 0;
+  display: flex; flex-direction: column;
+  transform: translateY(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.4);
+}
+.cob-panel.open { transform: translateY(0); }
+.cob-panel-header {
+  padding: 16px 18px 14px; border-bottom: 1px solid var(--navy-border);
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.cob-panel-avatar { font-size: 24px; }
+.cob-panel-title { flex: 1; }
+.cob-panel-title strong { font-family: var(--font-display); font-size: 15px; display: block; }
+.cob-panel-title span { font-size: 11px; color: var(--brand-green); }
+.cob-panel-close {
+  background: none; border: none; color: var(--text-muted);
+  font-size: 18px; cursor: pointer; padding: 4px; border-radius: 6px;
+}
+.cob-panel-close:hover { color: var(--text); }
+.cob-panel-messages {
+  flex: 1; overflow-y: auto; padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.cob-panel-messages::-webkit-scrollbar { width: 4px; }
+.cob-panel-messages::-webkit-scrollbar-thumb { background: var(--navy-border); border-radius: 2px; }
+.cob-msg { max-width: 86%; }
+.cob-msg.cob { align-self: flex-start; }
+.cob-msg.user { align-self: flex-end; }
+.cob-msg .cob-bubble {
+  padding: 10px 13px; border-radius: 14px; font-size: 13px; line-height: 1.55;
+}
+.cob-msg.cob .cob-bubble {
+  background: rgba(255,255,255,0.06); border-radius: 14px 14px 14px 2px;
+  color: var(--text);
+}
+.cob-msg.user .cob-bubble {
+  background: rgba(75,191,224,0.15); border-radius: 14px 14px 2px 14px;
+  color: var(--text);
+}
+.cob-msg-meta { font-size: 10px; color: var(--text-muted); margin-top: 3px; padding: 0 2px; }
+.cob-panel-typing {
+  padding: 0 16px 8px; font-size: 12px; color: var(--text-muted);
+  min-height: 20px; flex-shrink: 0;
+}
+.cob-panel-input-row {
+  padding: 10px 14px 16px; display: flex; gap: 8px; flex-shrink: 0;
+  border-top: 1px solid var(--navy-border);
+}
+.cob-panel-input {
+  flex: 1; background: var(--navy-mid); border: 1px solid var(--navy-border);
+  color: var(--text); font-family: var(--font-body); font-size: 13px;
+  padding: 10px 12px; border-radius: 10px; outline: none;
+  transition: border-color 0.2s; resize: none;
+}
+.cob-panel-input:focus { border-color: var(--brand-blue); }
+.cob-panel-send {
+  background: var(--brand-yellow); color: #0d1f2d; border: none;
+  font-family: var(--font-body); font-weight: 700; font-size: 13px;
+  padding: 10px 14px; border-radius: 10px; cursor: pointer; flex-shrink: 0;
+}
+.cob-panel-send:hover { opacity: 0.88; }
+
+/* ── Tier 2 check-in card ── */
+.tier2-card {
+  background: rgba(245,184,0,0.07); border: 1px solid rgba(245,184,0,0.25);
+  border-radius: 14px; padding: 16px 18px; margin-bottom: 16px;
+  display: none;
+}
+.tier2-card.show { display: flex; align-items: flex-start; gap: 12px; }
+.tier2-card-avatar { font-size: 24px; flex-shrink: 0; margin-top: 1px; }
+.tier2-card-body { flex: 1; }
+.tier2-card-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.tier2-card-text { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+.tier2-card-text a { color: var(--brand-blue); text-decoration: none; }
+.tier2-card-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.tier2-card-btn {
+  background: none; border: 1px solid rgba(245,184,0,0.4); color: var(--brand-yellow);
+  font-family: var(--font-body); font-size: 12px; font-weight: 600;
+  padding: 6px 12px; border-radius: 20px; cursor: pointer; transition: all 0.2s;
+}
+.tier2-card-btn:hover { background: rgba(245,184,0,0.1); }
+.tier2-card-btn.primary { background: var(--brand-yellow); color: #0d1f2d; border-color: var(--brand-yellow); }
+.tier2-card-btn.primary:hover { opacity: 0.88; }
+.tier2-card-dismiss {
+  background: none; border: none; color: var(--text-muted);
+  font-size: 16px; cursor: pointer; flex-shrink: 0; align-self: flex-start;
+  padding: 0; margin-top: 1px;
+}
+.tier2-card-dismiss:hover { color: var(--text); }
+
 /* ── Responsive ── */
 @media (max-width: 600px) {
   .user-header { flex-wrap: wrap; }
@@ -906,7 +1104,7 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
   @media (max-width: 480px) {
     .tab-bar {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
       gap: 4px;
       padding: 6px;
     }
@@ -1002,6 +1200,20 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
     </div>
   </div>
 
+  <!-- Tier 2 check-in card — date-aware Cob nudge -->
+  <div class="tier2-card" id="tier2-card">
+    <div class="tier2-card-avatar">🤠</div>
+    <div class="tier2-card-body">
+      <div class="tier2-card-title" id="tier2-title">Checking in 👋</div>
+      <div class="tier2-card-text" id="tier2-text"></div>
+      <div class="tier2-card-actions" id="tier2-actions">
+        <button class="tier2-card-btn primary" onclick="switchTab('calendar')">View calendar ↗</button>
+        <button class="tier2-card-btn" onclick="openCobDashboard()">Talk to Cob 🤠</button>
+      </div>
+    </div>
+    <button class="tier2-card-dismiss" id="tier2-dismiss" onclick="dismissTier2()" title="Dismiss">✕</button>
+  </div>
+
   <!-- Tab bar -->
   <div class="tab-bar" role="tablist">
     <button class="tab-btn active" id="tab-btn-matches" role="tab" onclick="switchTab('matches')">
@@ -1009,6 +1221,9 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
     </button>
     <button class="tab-btn" id="tab-btn-calendar" role="tab" onclick="switchTab('calendar')">
       📅 Calendar
+    </button>
+    <button class="tab-btn" id="tab-btn-calculator" role="tab" onclick="switchTab('calculator')">
+      🧮 Calculator
     </button>
     <button class="tab-btn" id="tab-btn-messages" role="tab" onclick="switchTab('messages')">
       💬 Messages <span class="tab-badge" id="msg-badge">2</span>
@@ -1238,6 +1453,137 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
       <button class="cal-add-btn" id="cal-add-btn" onclick="calSaveEvent()">Add date</button>
     </div>
   </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- TAB: CALCULATOR -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-calculator">
+    <div class="section-header">
+      <div>
+        <div class="section-title">🧮 Calculator</div>
+        <div class="section-sub">Budget tools for smarter housing decisions</div>
+      </div>
+    </div>
+
+    <!-- Mode tabs -->
+    <div class="calc-mode-tabs">
+      <button class="calc-mode-btn active" id="calc-mode-btn-budget" onclick="calcSetMode('budget')">💰 Budget</button>
+      <button class="calc-mode-btn" id="calc-mode-btn-break" onclick="calcSetMode('break')">📋 Break lease</button>
+      <button class="calc-mode-btn" id="calc-mode-btn-increase" onclick="calcSetMode('increase')">📈 Rent increase</button>
+    </div>
+
+    <!-- MODE 1: Budget calculator -->
+    <div class="calc-panel active" id="calc-panel-budget">
+      <div class="calc-field-group">
+        <label class="calc-label" for="calc-weekly-rent">Weekly rent ($)</label>
+        <input class="calc-input" type="number" id="calc-weekly-rent" placeholder="e.g. 260" min="0" max="5000">
+      </div>
+      <div class="calc-field-group">
+        <label class="calc-label" for="calc-bedrooms">Bedrooms in property</label>
+        <input class="calc-input" type="number" id="calc-bedrooms" placeholder="e.g. 3" min="1" max="10" value="3">
+      </div>
+      <div class="calc-toggle-row">
+        <label class="calc-toggle-item">
+          <input type="checkbox" id="calc-furnished"> Furnished
+        </label>
+        <label class="calc-toggle-item">
+          <input type="checkbox" id="calc-utilities"> Utilities included
+        </label>
+      </div>
+      <button class="calc-btn" onclick="calcRunBudget()">Calculate costs</button>
+      <div class="calc-result" id="calc-result-budget">
+        <div class="calc-result-grid">
+          <div class="calc-result-item">
+            <div class="calc-result-label">Weekly cost</div>
+            <div class="calc-result-val highlight" id="calc-out-weekly">—</div>
+          </div>
+          <div class="calc-result-item">
+            <div class="calc-result-label">Monthly cost</div>
+            <div class="calc-result-val" id="calc-out-monthly">—</div>
+          </div>
+          <div class="calc-result-item">
+            <div class="calc-result-label">Bond required</div>
+            <div class="calc-result-val" id="calc-out-bond">—</div>
+          </div>
+          <div class="calc-result-item">
+            <div class="calc-result-label">Total move-in cost</div>
+            <div class="calc-result-val highlight" id="calc-out-movein">—</div>
+          </div>
+        </div>
+        <div id="calc-budget-note" style="margin-top:12px;font-size:12px;color:var(--text-muted);line-height:1.5;"></div>
+      </div>
+    </div>
+
+    <!-- MODE 2: Break lease cost estimator -->
+    <div class="calc-panel" id="calc-panel-break">
+      <div class="calc-field-group">
+        <label class="calc-label" for="calc-break-rent">Weekly rent ($)</label>
+        <input class="calc-input" type="number" id="calc-break-rent" placeholder="e.g. 280" min="0" max="5000">
+      </div>
+      <div class="calc-field-group">
+        <label class="calc-label" for="calc-break-weeks">Weeks remaining on lease</label>
+        <input class="calc-input" type="number" id="calc-break-weeks" placeholder="e.g. 24" min="0" max="260">
+      </div>
+      <button class="calc-btn" onclick="calcRunBreak()">Estimate cost</button>
+      <div class="calc-result" id="calc-result-break">
+        <div class="calc-result-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="calc-result-item">
+            <div class="calc-result-label">Max liability</div>
+            <div class="calc-result-val danger" id="calc-out-break-total">—</div>
+          </div>
+          <div class="calc-result-item">
+            <div class="calc-result-label">Weeks remaining</div>
+            <div class="calc-result-val" id="calc-out-break-weeks">—</div>
+          </div>
+        </div>
+        <div id="calc-break-note" style="margin-top:12px;font-size:12px;color:var(--text-muted);line-height:1.5;"></div>
+        <div class="calc-cob-nudge" id="calc-break-cob" style="display:none;">
+          <div class="cob-av">🤠</div>
+          <div class="cob-txt"><strong>That's a significant amount.</strong> A break lease listing on UniRenter can help you find an incoming tenant fast — potentially reducing your liability to near zero if someone takes over quickly. <a href="/lease" style="color:var(--brand-blue);">List your break lease ↗</a></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODE 3: Rent increase assessment -->
+    <div class="calc-panel" id="calc-panel-increase">
+      <div class="calc-field-group">
+        <label class="calc-label" for="calc-current-rent">Current weekly rent ($)</label>
+        <input class="calc-input" type="number" id="calc-current-rent" placeholder="e.g. 280" min="0" max="5000">
+      </div>
+      <div class="calc-field-group">
+        <label class="calc-label" for="calc-proposed-rent">Proposed weekly rent ($)</label>
+        <input class="calc-input" type="number" id="calc-proposed-rent" placeholder="e.g. 310" min="0" max="5000">
+      </div>
+      <button class="calc-btn" onclick="calcRunIncrease()">Assess increase</button>
+      <div class="calc-result" id="calc-result-increase">
+        <div class="calc-result-grid" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="calc-result-item">
+            <div class="calc-result-label">Weekly increase</div>
+            <div class="calc-result-val danger" id="calc-out-inc-wk">—</div>
+          </div>
+          <div class="calc-result-item">
+            <div class="calc-result-label">% increase</div>
+            <div class="calc-result-val danger" id="calc-out-inc-pct">—</div>
+          </div>
+          <div class="calc-result-item">
+            <div class="calc-result-label">Annual difference</div>
+            <div class="calc-result-val danger" id="calc-out-inc-yr">—</div>
+          </div>
+        </div>
+        <div class="calc-notice-box" id="calc-increase-notice"></div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="calc-divider"></div>
+    <div id="calc-history-wrap">
+      <div class="calc-history-title">Recent calculations</div>
+      <div class="calc-history-list" id="calc-history-list">
+        <div style="font-size:13px;color:var(--text-muted);padding:8px 0;">No recent calculations yet.</div>
+      </div>
+    </div>
+  </div>
+
 
   <!-- ══════════════════════════════════════════════════════ -->
   <!-- TAB: MY PROFILE -->
@@ -2489,10 +2835,513 @@ document.addEventListener('click', function(e) {
   if (delBtn) { calDeleteEvent(delBtn.dataset.delId); return; }
 });
 
+
+// ══════════════════════════════════════════════════════════════
+// CALCULATOR
+// ══════════════════════════════════════════════════════════════
+
+const CALC_HISTORY_KEY = 'ur_calc_history';
+const CALC_HISTORY_MAX = 5;
+const CALC_HISTORY_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days ms
+
+function calcLoadHistory() {
+  try {
+    const raw = localStorage.getItem(CALC_HISTORY_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    const now = Date.now();
+    return arr.filter(e => e.expires_at > now);
+  } catch(e) { return []; }
+}
+
+function calcSaveHistory(entry) {
+  let arr = calcLoadHistory();
+  // Remove old entry with same mode if pushing duplicates would exceed max
+  arr.unshift(entry);
+  arr = arr.slice(0, CALC_HISTORY_MAX);
+  localStorage.setItem(CALC_HISTORY_KEY, JSON.stringify(arr));
+}
+
+function calcRenderHistory() {
+  const list = document.getElementById('calc-history-list');
+  if (!list) return;
+  const arr = calcLoadHistory();
+  if (!arr.length) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:8px 0;">No recent calculations yet.</div>';
+    return;
+  }
+  const modeIcon = { budget: '💰', break: '📋', increase: '📈' };
+  const modeLabel = { budget: 'Budget', break: 'Break lease', increase: 'Rent increase' };
+  list.innerHTML = arr.map(e => {
+    const ago = calcRelTime(e.calculated_at);
+    return '<div class="calc-history-item" onclick="calcRestoreFromHistory(\'' + e.id + '\')">'
+      + '<div class="calc-history-icon">' + (modeIcon[e.mode] || '🧮') + '</div>'
+      + '<div class="calc-history-info">'
+      + '<div class="calc-history-summary">' + e.result_summary + '</div>'
+      + '<div class="calc-history-meta">' + (modeLabel[e.mode] || e.mode) + ' · ' + ago + '</div>'
+      + '</div>'
+      + '<div class="calc-history-restore">Restore ↗</div>'
+      + '</div>';
+  }).join('');
+}
+
+function calcRelTime(ts) {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  return Math.floor(hrs / 24) + 'd ago';
+}
+
+function calcRestoreFromHistory(id) {
+  const arr = calcLoadHistory();
+  const entry = arr.find(e => e.id === id);
+  if (!entry) return;
+  calcSetMode(entry.mode);
+  if (entry.inputs) {
+    Object.keys(entry.inputs).forEach(k => {
+      const el = document.getElementById(k);
+      if (!el) return;
+      if (el.type === 'checkbox') el.checked = entry.inputs[k];
+      else el.value = entry.inputs[k];
+    });
+  }
+  // Re-run to show result
+  if (entry.mode === 'budget') calcRunBudget(true);
+  else if (entry.mode === 'break') calcRunBreak(true);
+  else if (entry.mode === 'increase') calcRunIncrease(true);
+}
+
+function calcSetMode(mode) {
+  ['budget','break','increase'].forEach(m => {
+    document.getElementById('calc-panel-' + m).classList.toggle('active', m === mode);
+    document.getElementById('calc-mode-btn-' + m).classList.toggle('active', m === mode);
+  });
+}
+
+function calcGenId() {
+  return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+
+function calcRunBudget(silent) {
+  const rent = parseFloat(document.getElementById('calc-weekly-rent').value);
+  const furnished = document.getElementById('calc-furnished').checked;
+  const utilities = document.getElementById('calc-utilities').checked;
+  if (!rent || rent <= 0) { alert('Please enter a weekly rent amount.'); return; }
+
+  const monthly = Math.round(rent * 52 / 12);
+  const bond = rent * 4;
+  const movein = bond + monthly;
+
+  document.getElementById('calc-out-weekly').textContent = '$' + rent;
+  document.getElementById('calc-out-monthly').textContent = '$' + monthly;
+  document.getElementById('calc-out-bond').textContent = '$' + bond;
+  document.getElementById('calc-out-movein').textContent = '$' + movein;
+
+  let note = 'Bond is calculated at 4 weeks rent (standard in all Australian states).';
+  if (furnished) note += ' Furnished rooms typically carry a slightly higher bond risk.';
+  if (utilities) note += ' Utilities included — no separate bills to budget for.';
+  else note += ' Budget an extra $25–60/wk for utilities (electricity, gas, internet) not included in rent.';
+  document.getElementById('calc-budget-note').textContent = note;
+
+  document.getElementById('calc-result-budget').classList.add('show');
+
+  const summary = '$' + rent + '/wk → move-in $' + movein + ' (bond $' + bond + ' + 1 month $' + monthly + ')';
+  if (!silent) {
+    calcSaveHistory({
+      id: calcGenId(), mode: 'budget', calculated_at: Date.now(), expires_at: Date.now() + CALC_HISTORY_TTL,
+      inputs: { 'calc-weekly-rent': rent, 'calc-furnished': furnished, 'calc-utilities': utilities },
+      result_summary: summary
+    });
+    calcRenderHistory();
+  }
+}
+
+function calcRunBreak(silent) {
+  const rent = parseFloat(document.getElementById('calc-break-rent').value);
+  const weeks = parseFloat(document.getElementById('calc-break-weeks').value);
+  if (!rent || rent <= 0) { alert('Please enter a weekly rent amount.'); return; }
+  if (!weeks || weeks <= 0) { alert('Please enter weeks remaining.'); return; }
+
+  const total = Math.round(rent * weeks);
+  document.getElementById('calc-out-break-total').textContent = '$' + total.toLocaleString();
+  document.getElementById('calc-out-break-weeks').textContent = weeks + ' wks';
+
+  let note = 'This is your maximum theoretical liability — actual costs depend on your state, lease type, and how quickly a replacement tenant is found. In most states, your landlord must mitigate their loss by actively seeking a new tenant.';
+  document.getElementById('calc-break-note').textContent = note;
+
+  const cobNudge = document.getElementById('calc-break-cob');
+  cobNudge.style.display = total > 1000 ? 'flex' : 'none';
+
+  document.getElementById('calc-result-break').classList.add('show');
+
+  const summary = '$' + rent + '/wk × ' + weeks + ' wks = $' + total.toLocaleString() + ' max liability';
+  if (!silent) {
+    calcSaveHistory({
+      id: calcGenId(), mode: 'break', calculated_at: Date.now(), expires_at: Date.now() + CALC_HISTORY_TTL,
+      inputs: { 'calc-break-rent': rent, 'calc-break-weeks': weeks },
+      result_summary: summary
+    });
+    calcRenderHistory();
+  }
+}
+
+function calcRunIncrease(silent) {
+  const curr = parseFloat(document.getElementById('calc-current-rent').value);
+  const prop = parseFloat(document.getElementById('calc-proposed-rent').value);
+  if (!curr || curr <= 0) { alert('Please enter current rent.'); return; }
+  if (!prop || prop <= 0) { alert('Please enter proposed rent.'); return; }
+
+  const wkDiff = prop - curr;
+  const pct = ((wkDiff / curr) * 100).toFixed(1);
+  const yrDiff = Math.round(wkDiff * 52);
+
+  document.getElementById('calc-out-inc-wk').textContent = (wkDiff >= 0 ? '+' : '') + '$' + wkDiff.toFixed(0);
+  document.getElementById('calc-out-inc-pct').textContent = (wkDiff >= 0 ? '+' : '') + pct + '%';
+  document.getElementById('calc-out-inc-yr').textContent = (wkDiff >= 0 ? '+' : '') + '$' + Math.abs(yrDiff).toLocaleString() + '/yr';
+
+  const noticeEl = document.getElementById('calc-increase-notice');
+  let noticeHtml = '<strong>Notice period requirements:</strong> Landlords must give at least 60 days written notice of a rent increase in VIC, NSW, and QLD. In SA, WA, and ACT it\'s 60 days. In TAS it\'s 60 days. Rent can only be increased once every 12 months in most states.';
+  if (wkDiff > 0 && parseFloat(pct) > 10) {
+    noticeHtml += ' <strong style="color:var(--brand-coral);">A ' + pct + '% increase is above typical market movements</strong> — you may be able to negotiate or challenge it. Check your state\'s tenancy authority.';
+  }
+  noticeEl.innerHTML = noticeHtml;
+  document.getElementById('calc-result-increase').classList.add('show');
+
+  const summary = '$' + curr + ' → $' + prop + '/wk (+$' + wkDiff.toFixed(0) + '/wk, +' + pct + '%, +$' + Math.abs(yrDiff).toLocaleString() + '/yr)';
+  if (!silent) {
+    calcSaveHistory({
+      id: calcGenId(), mode: 'increase', calculated_at: Date.now(), expires_at: Date.now() + CALC_HISTORY_TTL,
+      inputs: { 'calc-current-rent': curr, 'calc-proposed-rent': prop },
+      result_summary: summary
+    });
+    calcRenderHistory();
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// TIER 1 — Cob FAB pulse + badge on key dates ≤ 7 days
+// ══════════════════════════════════════════════════════════════
+
+const T1_CRITICAL_CATS = ['lease','inspection','bond','rent'];
+
+function tier1CheckDates() {
+  try {
+    const events = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]');
+    const now = new Date();
+    const in7 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const nowStr = now.toISOString().slice(0,10);
+    const in7Str = in7.toISOString().slice(0,10);
+
+    const upcoming = events.filter(e => {
+      if (!e.date) return false;
+      return e.date >= nowStr && e.date <= in7Str;
+    });
+
+    const fab = document.getElementById('cob-fab-db');
+    const badge = document.getElementById('cob-fab-badge');
+    if (!fab || !badge) return;
+
+    if (upcoming.length > 0) {
+      fab.classList.add('cob-fab-pulse');
+      badge.textContent = upcoming.length;
+      badge.classList.add('show');
+    } else {
+      fab.classList.remove('cob-fab-pulse');
+      badge.classList.remove('show');
+    }
+
+    // Store for Cob context
+    window._cobUpcomingDates = upcoming;
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════════════════════════
+// TIER 2 — Dismissible check-in card for dates ≤ 14 days
+// ══════════════════════════════════════════════════════════════
+
+const T2_DISMISS_KEY = 'ur_t2_dismissed';
+
+function tier2CheckDates() {
+  try {
+    const events = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]');
+    const now = new Date();
+    const in14 = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+    const nowStr = now.toISOString().slice(0,10);
+    const in14Str = in14.toISOString().slice(0,10);
+
+    const upcoming = events
+      .filter(e => e.date && e.date >= nowStr && e.date <= in14Str)
+      .sort((a,b) => a.date.localeCompare(b.date));
+
+    if (!upcoming.length) return;
+
+    // Dismiss key based on soonest event date — new event window re-triggers
+    const dismissKey = T2_DISMISS_KEY + '_' + upcoming[0].date;
+    if (localStorage.getItem(dismissKey) === '1') return;
+
+    const card = document.getElementById('tier2-card');
+    const titleEl = document.getElementById('tier2-title');
+    const textEl = document.getElementById('tier2-text');
+    if (!card || !titleEl || !textEl) return;
+
+    // Build smart copy based on event types and timing
+    const soonest = upcoming[0];
+    const daysUntil = Math.round((new Date(soonest.date) - now) / (24*60*60*1000));
+    const daysLabel = daysUntil === 0 ? 'today' : daysUntil === 1 ? 'tomorrow' : 'in ' + daysUntil + ' days';
+
+    let title, text;
+
+    // Contextual copy based on category
+    const cat = (soonest.cat || soonest.category || '');
+    const name = soonest.title || soonest.name || 'an important date';
+
+    if (cat === 'lease' && name.toLowerCase().includes('notice')) {
+      title = 'Notice to vacate — ' + daysLabel + ' 🏠';
+      text = 'Just checking in — your notice to vacate deadline is coming up ' + daysLabel + '. Have you sent written notice to your landlord? Getting this wrong can cost you weeks of extra rent. <a href="/lease-companion">Your lease companion ↗</a> has the details.';
+    } else if (cat === 'lease' && name.toLowerCase().includes('end')) {
+      title = 'Lease ending ' + daysLabel + ' 🗓️';
+      text = 'Your lease is ending ' + daysLabel + '. Have you sorted your next move? If you\'re renewing, now\'s the time to confirm with your landlord. If you\'re leaving — make sure your bond claim is ready and the property is inspection-ready.';
+    } else if (cat === 'lease' && name.toLowerCase().includes('renewal')) {
+      title = 'Lease renewal decision — ' + daysLabel;
+      text = 'Your lease renewal decision window opens ' + daysLabel + '. This is the point to decide: renew, negotiate, or give notice. Don\'t let it slip — your landlord will need time to plan too.';
+    } else if (cat === 'inspection') {
+      title = 'Inspection coming up ' + daysLabel + ' 🏠';
+      text = 'You have a routine inspection ' + daysLabel + '. A quick tidy and making sure any previously noted issues are addressed goes a long way. Want some tips on what inspectors typically look for?';
+    } else if (cat === 'bond') {
+      title = 'Bond date — ' + daysLabel + ' 🏦';
+      text = '"' + name + '" is ' + daysLabel + '. Bond claims have strict windows — make sure you have your condition report and photos ready. If you\'re owed a refund, lodging promptly means faster resolution.';
+    } else if (cat === 'rent') {
+      title = 'Rent due ' + daysLabel + ' 💰';
+      text = 'Rent is due ' + daysLabel + '. Staying ahead of rent payments (even by a day) protects your rental history — which matters a lot when you\'re applying for your next place.';
+    } else {
+      title = 'Upcoming date — ' + daysLabel;
+      text = '"' + name + '" is coming up ' + daysLabel + '. Just making sure it\'s on your radar. Tap the calendar to see everything coming up.';
+    }
+
+    // If multiple events, note it
+    if (upcoming.length > 1) {
+      text += ' You also have ' + (upcoming.length - 1) + ' other date' + (upcoming.length > 2 ? 's' : '') + ' in the next 2 weeks.';
+    }
+
+    titleEl.textContent = title;
+    textEl.innerHTML = text;
+
+    // Store dismiss key for use in dismissTier2
+    card.dataset.dismissKey = dismissKey;
+    card.classList.add('show');
+
+    // Store for Cob context
+    window._cobTier2Event = soonest;
+  } catch(e) {}
+}
+
+function dismissTier2() {
+  const card = document.getElementById('tier2-card');
+  if (!card) return;
+  const key = card.dataset.dismissKey;
+  if (key) localStorage.setItem(key, '1');
+  card.classList.remove('show');
+}
+
+// ══════════════════════════════════════════════════════════════
+// COB CHAT PANEL (dashboard)
+// ══════════════════════════════════════════════════════════════
+
+let cobPanelOpen = false;
+let cobPanelHistory = []; // {role, content}
+let cobPanelInFlight = false;
+
+function buildCobContext() {
+  // Gather key context for a date-aware opening message
+  const lines = [];
+
+  // Upcoming dates from Tier 1 check
+  const upcoming = window._cobUpcomingDates || [];
+  if (upcoming.length) {
+    const dateLines = upcoming.map(e => {
+      const d = new Date(e.date);
+      const daysUntil = Math.round((d - new Date()) / (24*60*60*1000));
+      const label = daysUntil === 0 ? 'today' : daysUntil === 1 ? 'tomorrow' : 'in ' + daysUntil + ' days';
+      return (e.title || e.name || 'Event') + ' (' + (e.cat || e.category || 'other') + ') — ' + label;
+    });
+    lines.push('Upcoming dates within 7 days:\n' + dateLines.join('\n'));
+  }
+
+  // Lease companion context
+  const lcStart = localStorage.getItem('ur_lc_start');
+  const lcEnd = localStorage.getItem('ur_lc_end');
+  if (lcStart) lines.push('Lease start: ' + lcStart);
+  if (lcEnd) lines.push('Lease end: ' + lcEnd);
+
+  // City
+  const city = localStorage.getItem('ur_city');
+  if (city) lines.push('City: ' + city);
+
+  // Recent calculator result
+  const calcHist = calcLoadHistory();
+  if (calcHist.length) {
+    lines.push('Most recent calculator result: ' + calcHist[0].result_summary);
+  }
+
+  return lines.length ? lines.join('\n') : '';
+}
+
+function cobPanelGreeting() {
+  // Build context-aware greeting
+  const upcoming = window._cobUpcomingDates || [];
+  const tier2Event = window._cobTier2Event;
+
+  if (tier2Event) {
+    const cat = tier2Event.cat || tier2Event.category || '';
+    const name = tier2Event.title || tier2Event.name || 'a key date';
+    const d = new Date(tier2Event.date);
+    const daysUntil = Math.round((d - new Date()) / (24*60*60*1000));
+    const daysLabel = daysUntil === 0 ? 'today' : daysUntil === 1 ? 'tomorrow' : 'in ' + daysUntil + ' days';
+
+    if (cat === 'lease' && name.toLowerCase().includes('notice')) {
+      return "Hey! Checking in about your notice to vacate — it's due " + daysLabel + ". Have you sent written notice to your landlord yet? It needs to be in writing to be valid. What state are you in? I can tell you exactly what you need to do.";
+    } else if (cat === 'inspection') {
+      return "Hey! You've got an inspection coming up " + daysLabel + ". Want me to run you through what to expect and any quick prep tips?";
+    } else if (cat === 'lease') {
+      return "Hey! Just checking in — \"" + name + "\" is coming up " + daysLabel + ". What do you need to know? I'm across all the tenancy rules for your state.";
+    } else if (cat === 'bond') {
+      return "Hey! Your bond date is " + daysLabel + ". Bond claims can be tricky — want me to walk you through the process for your state?";
+    }
+    return "Hey! I noticed \"" + name + "\" is coming up " + daysLabel + ". Is there anything I can help you sort out before then? 🤠";
+  }
+
+  if (upcoming.length) {
+    return "Hey! You've got " + upcoming.length + " date" + (upcoming.length > 1 ? 's' : '') + " coming up this week. What do you need help with? 🤠";
+  }
+
+  return "Hey! I'm Cob — your housing companion. What's on your mind? Whether it's tenancy law, your lease, housemate stuff, or the calculator — I've got you. 🤠";
+}
+
+function openCobDashboard() {
+  const panel = document.getElementById('cob-panel-db');
+  const backdrop = document.getElementById('cob-backdrop');
+  if (!panel || !backdrop) return;
+
+  cobPanelOpen = true;
+  panel.classList.add('open');
+  backdrop.classList.add('open');
+
+  // If first open, send greeting
+  if (cobPanelHistory.length === 0) {
+    const greeting = cobPanelGreeting();
+    cobPanelAddMsg('cob', greeting);
+    cobPanelHistory.push({ role: 'assistant', content: greeting });
+  }
+
+  // Focus input
+  setTimeout(() => {
+    const inp = document.getElementById('cob-panel-input');
+    if (inp) inp.focus();
+  }, 300);
+}
+
+function closeCobDashboard() {
+  const panel = document.getElementById('cob-panel-db');
+  const backdrop = document.getElementById('cob-backdrop');
+  if (panel) panel.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('open');
+  cobPanelOpen = false;
+}
+
+function cobPanelAddMsg(role, text) {
+  const msgs = document.getElementById('cob-panel-messages');
+  if (!msgs) return;
+  const div = document.createElement('div');
+  div.className = 'cob-msg ' + (role === 'cob' ? 'cob' : 'user');
+  // Convert markdown-style **bold** and line breaks
+  const formatted = text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+  div.innerHTML = '<div class="cob-bubble">' + formatted + '</div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function cobPanelKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    cobPanelSend();
+  }
+}
+
+async function cobPanelSend() {
+  if (cobPanelInFlight) return;
+  const inp = document.getElementById('cob-panel-input');
+  const typing = document.getElementById('cob-panel-typing');
+  if (!inp) return;
+  const text = inp.value.trim();
+  if (!text) return;
+
+  inp.value = '';
+  cobPanelAddMsg('user', text);
+  cobPanelHistory.push({ role: 'user', content: text });
+
+  cobPanelInFlight = true;
+  if (typing) typing.textContent = 'Cob is typing…';
+
+  // Build system prompt with context
+  const ctx = buildCobContext();
+  const systemPrompt = `You are Cob (short for Cobber) — a warm, knowledgeable Australian student housing assistant for UniRenter. You help students with tenancy law, lease questions, housemate situations, budgeting, and anything housing-related. You are NOT a lawyer — frame advice as general guidance. Be specific about Australian tenancy law when relevant (state-specific rules, notice periods, bond rules, repair timeframes). Keep replies concise and warm — 2-4 short paragraphs max unless detail is needed.
+
+Student context:
+${ctx || 'No additional context available.'}
+
+When a student asks about a calculator result or says "I saved a result" — refer to the most recent calculator result in context if available. Always end with a practical next step or question to keep things moving.`;
+
+  try {
+    const res = await fetch('/api/cob', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: cobPanelHistory.slice(-10), // last 10 turns
+        systemPrompt: systemPrompt
+      })
+    });
+    const data = await res.json();
+    const reply = (data.reply || data.message || 'Sorry, I hit a snag. Try again?');
+    cobPanelHistory.push({ role: 'assistant', content: reply });
+    cobPanelAddMsg('cob', reply);
+
+    // Check for calc result bridge — if Cob references a calc, save to history
+    if (reply.match(/\$[\d,]+.*per week|weekly.*\$[\d,]+|move.in.*\$[\d,]+/i)) {
+      // Append bridge link hint in a subtle way — handled client-side
+    }
+  } catch(err) {
+    cobPanelAddMsg('cob', 'Something went wrong on my end — try again in a moment. 🤠');
+  } finally {
+    cobPanelInFlight = false;
+    if (typing) typing.textContent = '';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT — run on load
+// ══════════════════════════════════════════════════════════════
+
+window.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    tier1CheckDates();
+    tier2CheckDates();
+    calcRenderHistory();
+  }, 300);
+});
+
+
 // ── Patch switchTab: init calendar on first open + handle URL param ──
 const _origSwitchTab = switchTab;
 function switchTab(name) {
   _origSwitchTab(name);
+  if (name === 'calculator') {
+    calcRenderHistory();
+  }
   if (name === 'calendar') {
     if (!calViewYear) {
       // Init view from localStorage
@@ -2514,7 +3363,7 @@ function switchTab(name) {
 (function() {
   const params = new URLSearchParams(window.location.search);
   const tab = params.get('tab');
-  if (tab && ['matches','calendar','messages','profile','settings'].includes(tab)) {
+  if (tab && ['matches','calendar','calculator','messages','profile','settings'].includes(tab)) {
     // Defer until after DOM + profile load
     window.addEventListener('DOMContentLoaded', function() {
       setTimeout(function() { switchTab(tab); }, 50);
@@ -2548,6 +3397,37 @@ window.addEventListener('DOMContentLoaded', function() {
   })();
 
 </script>
+
+<!-- Cob FAB (dashboard) -->
+<button class="cob-fab-dashboard" id="cob-fab-db" onclick="openCobDashboard()" title="Oi Cob! 🤠">
+  🤠
+  <span class="cob-fab-badge-count" id="cob-fab-badge"></span>
+</button>
+
+<!-- Cob panel backdrop -->
+<div class="cob-panel-backdrop" id="cob-backdrop" onclick="closeCobDashboard()"></div>
+
+<!-- Cob chat panel -->
+<div class="cob-panel" id="cob-panel-db">
+  <div class="cob-panel-header">
+    <div class="cob-panel-avatar">🤠</div>
+    <div class="cob-panel-title">
+      <strong>Cob</strong>
+      <span>● Online — here to help</span>
+    </div>
+    <button class="cob-panel-close" onclick="closeCobDashboard()">✕</button>
+  </div>
+  <div class="cob-panel-messages" id="cob-panel-messages">
+    <!-- populated by JS -->
+  </div>
+  <div class="cob-panel-typing" id="cob-panel-typing"></div>
+  <div class="cob-panel-input-row">
+    <textarea class="cob-panel-input" id="cob-panel-input" rows="1"
+      placeholder="Ask Cob anything about your tenancy…"
+      onkeydown="cobPanelKeydown(event)"></textarea>
+    <button class="cob-panel-send" onclick="cobPanelSend()">Send</button>
+  </div>
+</div>
 
 <!-- Sticky this-week strip -->
 <div class="sticky-week-strip" id="sticky-week-strip">
