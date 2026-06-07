@@ -4,8 +4,8 @@
 // Sends confirmation email via Resend.
 // Returns { ok: true, id } on success.
  
-import { createClient } from '@supabase/supabase-js';
-import { Resend } from 'resend';
+const { createClient } = require('@supabase/supabase-js');
+const { Resend } = require('resend');
  
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -19,7 +19,7 @@ const ALLOWED_TYPES = ['share_house', 'apartment', 'student_complex', 'granny_fl
 const ALLOWED_ROOMS = ['1', '2', '3', '4', '6+'];
 const ALLOWED_RENTS = ['under200', '200-250', '250-300', '300-350', '350-400', '400+'];
  
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
