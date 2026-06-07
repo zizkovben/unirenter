@@ -1241,7 +1241,6 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
         <a class="nav-dd-item" href="/dashboard" id="nav-dd-dashboard" style="display:none;">&#128101; My Dashboard</a>
       </div>
     </div>
-    <a class="nav-btn" href="/" style="background:none;border:1px solid rgba(255,255,255,0.15);color:#e8f0f5;padding:7px 12px;border-radius:8px;font-size:13px;text-decoration:none;white-space:nowrap;">&#8592; Home</a>
     <button class="mode-toggle" id="mode-toggle" onclick="toggleMode()" style="background:none;border:1px solid rgba(255,255,255,0.15);color:#e8f0f5;width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;">🌙</button>
   </div>
 </nav>
@@ -3343,6 +3342,21 @@ function openCobDashboard() {
     cobPanelHistory.push({ role: 'assistant', content: greeting });
   }
 
+  // Inject queued seasonal nudge as Cob message after short delay
+  if (window._cobSeasonalNudge && window._cobSeasonalNudge.length > 0) {
+    const nudge = window._cobSeasonalNudge.shift();
+    setTimeout(function() {
+      const messagesEl = document.getElementById('cob-panel-messages');
+      if (!messagesEl) return;
+      const msg = document.createElement('div');
+      msg.className = 'cob-msg cob-msg-assistant';
+      const dLabel = nudge.diff === 0 ? 'starting today' : nudge.diff === 1 ? 'starting tomorrow' : 'in ' + nudge.diff + ' days';
+      msg.innerHTML = '<div class="cob-msg-bubble">📅 <strong>' + nudge.label + ' ' + dLabel + '</strong><br><br>' + nudge.copy + '</div>';
+      messagesEl.appendChild(msg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }, 1200);
+  }
+
   // Focus input
   setTimeout(() => {
     const inp = document.getElementById('cob-panel-input');
@@ -3838,27 +3852,6 @@ function checkSeasonalNudges() {
       });
       localStorage.setItem(gateKey, '1');
     }
-  }
-}
-
-// Inject seasonal nudge into Cob panel on open (if queued)
-const _origOpenCobDashboard = typeof openCobDashboard === 'function' ? openCobDashboard : null;
-function openCobDashboard() {
-  if (_origOpenCobDashboard) _origOpenCobDashboard();
-
-  // Inject queued seasonal nudge as Cob message after short delay
-  if (window._cobSeasonalNudge && window._cobSeasonalNudge.length > 0) {
-    const nudge = window._cobSeasonalNudge.shift(); // Take first
-    setTimeout(function() {
-      const messagesEl = document.getElementById('cob-panel-messages');
-      if (!messagesEl) return;
-      const msg = document.createElement('div');
-      msg.className = 'cob-msg cob-msg-assistant';
-      const dLabel = nudge.diff === 0 ? 'starting today' : nudge.diff === 1 ? 'starting tomorrow' : 'in ' + nudge.diff + ' days';
-      msg.innerHTML = '<div class="cob-msg-bubble">📅 <strong>' + nudge.label + ' ' + dLabel + '</strong><br><br>' + nudge.copy + '</div>';
-      messagesEl.appendChild(msg);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }, 1200);
   }
 }
 
