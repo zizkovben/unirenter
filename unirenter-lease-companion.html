@@ -61,6 +61,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .auto-sleep-info{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 18px;margin-bottom:24px}
 .auto-sleep-info h4{font-family:var(--fd);font-size:14px;font-weight:700;margin-bottom:10px;color:var(--blue)}
 .auto-timeline{display:flex;flex-direction:column;gap:8px}
+.tl-cal-btn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:5px 12px;background:rgba(75,191,224,0.1);border:1px solid rgba(75,191,224,0.25);border-radius:20px;font-size:12px;font-weight:600;color:#4BBFE0;cursor:pointer;transition:all 0.18s;text-decoration:none}
+.tl-cal-btn:hover{background:rgba(75,191,224,0.2);border-color:rgba(75,191,224,0.45)}
+.tl-cal-btn.added{background:rgba(61,170,92,0.1);border-color:rgba(61,170,92,0.3);color:#3DAA5C;cursor:default}
+.tl-open-cal{display:none;font-size:12px;color:#4BBFE0;text-decoration:none;margin-left:8px;font-weight:600}
+.tl-open-cal.vis{display:inline}
+.tl-cal-row{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin-top:8px}
 .auto-item{display:flex;gap:12px;align-items:flex-start;font-size:12px}
 .auto-day{min-width:80px;font-weight:600;color:var(--yellow)}
 .auto-action{color:var(--muted);line-height:1.55}
@@ -415,6 +421,7 @@ body.light-mode .tl-item{border-color:rgba(0,31,45,0.1)}
             <div class="tl-title">Complete entry condition report</div>
             <div class="tl-desc">You have until 4 Feb (3 business days) to photograph every room, note every mark and defect, and return the signed report. This protects your entire $1,280 bond.</div>
             <div class="tl-cob" onclick="openCob()">🤠 Ask Cob what to photograph</div>
+            <div class="tl-cal-row"><button class="tl-cal-btn" id="tl-cal-move_in" onclick="tlAddToCalendar('move_in',this)">📅 Add to calendar</button><a class="tl-open-cal" id="tl-open-move_in" href="/dashboard?tab=calendar">Open calendar ↗</a></div>
           </div>
         </div>
 
@@ -425,6 +432,7 @@ body.light-mode .tl-item{border-color:rgba(0,31,45,0.1)}
             <div class="tl-title">Return condition report — LAST DAY</div>
             <div class="tl-desc">Final day to return your signed entry condition report. Missing this deadline weakens your bond protection significantly.</div>
             <div class="tl-cob" onclick="showToast('📞 Cob reminds you','Condition report is due TODAY — have you returned it to the landlord?')">🤠 Set reminder for today</div>
+            <div class="tl-cal-row"><button class="tl-cal-btn" id="tl-cal-cr_deadline" onclick="tlAddToCalendar('cr_deadline',this)">📅 Add to calendar</button><a class="tl-open-cal" id="tl-open-cr_deadline" href="/dashboard?tab=calendar">Open calendar ↗</a></div>
           </div>
         </div>
 
@@ -454,6 +462,7 @@ body.light-mode .tl-item{border-color:rgba(0,31,45,0.1)}
             <div class="tl-title">Decision time — renew or vacate?</div>
             <div class="tl-desc">Your lease ends 31 Jan 2026. If you're leaving, you must give 28 days notice by 3 January. Cob will remind you on 1 November to start thinking about your decision.</div>
             <div class="tl-cob" onclick="openCob()">🤠 What are my renewal rights?</div>
+            <div class="tl-cal-row"><button class="tl-cal-btn" id="tl-cal-renewal_decision" onclick="tlAddToCalendar('renewal_decision',this)">📅 Add to calendar</button><a class="tl-open-cal" id="tl-open-renewal_decision" href="/dashboard?tab=calendar">Open calendar ↗</a></div>
           </div>
         </div>
 
@@ -464,6 +473,7 @@ body.light-mode .tl-item{border-color:rgba(0,31,45,0.1)}
             <div class="tl-title">Last day to give notice if vacating</div>
             <div class="tl-desc">If you are NOT renewing your lease, you must give written notice TODAY (28 days before lease end). If you miss this date you may be liable for additional rent. Cob will send a push notification at 8am.</div>
             <div class="tl-cob" onclick="showToast('📝 Template ready','Cob can draft your notice to vacate letter — just confirm your details.')">🤠 Draft my notice to vacate</div>
+            <div class="tl-cal-row"><button class="tl-cal-btn" id="tl-cal-notice_deadline" onclick="tlAddToCalendar('notice_deadline',this)">📅 Add to calendar</button><a class="tl-open-cal" id="tl-open-notice_deadline" href="/dashboard?tab=calendar">Open calendar ↗</a></div>
           </div>
         </div>
 
@@ -483,6 +493,7 @@ body.light-mode .tl-item{border-color:rgba(0,31,45,0.1)}
             <div class="tl-title">Bond return — $1,280</div>
             <div class="tl-desc">Your landlord has 14 days to return your bond or make a claim. If not returned: Cob guides you through an RTBA bond claim — it's free and straightforward.</div>
             <div class="tl-cob" onclick="openCob()">🤠 What if my bond isn't returned?</div>
+            <div class="tl-cal-row"><button class="tl-cal-btn" id="tl-cal-lease_end" onclick="tlAddToCalendar('lease_end',this)">📅 Add to calendar</button><a class="tl-open-cal" id="tl-open-lease_end" href="/dashboard?tab=calendar">Open calendar ↗</a></div>
           </div>
         </div>
 
@@ -623,6 +634,7 @@ function renderSavedTimeline(d) {
   ];
   fields.forEach((el, i) => { if (vals[i]) el.textContent = vals[i]; });
   result.classList.add('vis');
+  lcRefreshCalButtons();
 }
 
 async function saveLeaseCompanion() {
@@ -658,12 +670,16 @@ async function saveLeaseCompanion() {
     });
     const json = await res.json();
     if (json.ok) {
-      showToast('✅ Companion saved', 'Cob has your lease dates. Reminders are active for all critical dates.');
-      // Update localStorage for quick access
       localStorage.setItem('ur_lc_start', body.lease_start);
       localStorage.setItem('ur_lc_end', body.lease_end);
+      // Auto-populate calendar
+      const calAdded = lcPopulateCalendar(body);
+      const calMsg = calAdded > 0 ? ' ' + calAdded + ' key dates added to your calendar.' : '';
+      showToast('✅ Companion saved', 'Cob has your lease dates.' + calMsg);
       // Refresh display
       populateLeaseUI({ ...body, weekly_rent: parseFloat(String(body.weekly_rent).replace(/[$,]/g,'')), bond_amount: parseFloat(String(body.bond_amount).replace(/[$,]/g,'')) });
+      // Update Add-to-cal button states
+      lcRefreshCalButtons();
     } else {
       showToast('⚠️ Save failed', json.error || 'Please try again.');
     }
@@ -671,6 +687,175 @@ async function saveLeaseCompanion() {
     console.error('saveLeaseCompanion error:', e);
     showToast('⚠️ Save failed', 'Network error — please try again.');
   }
+}
+
+// ── Calendar integration ─────────────────────────────────────────────────────
+
+// Add business days (skip Sat/Sun)
+function addBusinessDays(dateStr, n) {
+  const d = new Date(dateStr + 'T00:00:00');
+  let added = 0;
+  while (added < n) {
+    d.setDate(d.getDate() + 1);
+    const dow = d.getDay();
+    if (dow !== 0 && dow !== 6) added++;
+  }
+  return d.toISOString().split('T')[0];
+}
+
+// Parse inspection frequency to days
+function inspectFreqToDays(freq) {
+  if (!freq) return 90;
+  const f = String(freq).toLowerCase();
+  if (f.includes('6')) return 180;
+  if (f.includes('annual') || f.includes('year')) return 365;
+  return 90; // default: every 3 months
+}
+
+// Build calendar events from lease data
+function lcBuildCalEvents(data) {
+  const events = [];
+  const startStr = data.lease_start;
+  const endStr   = data.lease_end;
+  if (!startStr || !endStr) return events;
+
+  // Normalise dates
+  const tryDate = (s) => {
+    if (!s) return null;
+    const d = new Date(s);
+    if (!isNaN(d)) return d.toISOString().split('T')[0];
+    return null;
+  };
+  const start = tryDate(startStr);
+  const end   = tryDate(endStr);
+  if (!start || !end) return events;
+
+  const noticeDays = parseInt(data.notice_period_days, 10) || 28;
+  const inspFreqDays = inspectFreqToDays(data.inspection_frequency);
+
+  // 1. Move-in day
+  events.push({ id: 'lc_move_in', name: 'Move-in day', date: start, cat: 'lease', notes: 'Check entry condition report', source: 'lease_companion' });
+
+  // 2. Condition report deadline (start + 3 business days)
+  const crDeadline = addBusinessDays(start, 3);
+  events.push({ id: 'lc_cr_deadline', name: 'Condition report deadline', date: crDeadline, cat: 'inspection', notes: 'Return signed condition report to landlord', source: 'lease_companion' });
+
+  // 3. Routine inspections
+  const startDate = new Date(start + 'T00:00:00');
+  const endDate   = new Date(end + 'T00:00:00');
+  let inspDate = new Date(startDate);
+  inspDate.setDate(inspDate.getDate() + inspFreqDays);
+  let inspNum = 1;
+  while (inspDate < endDate && inspNum <= 12) {
+    const inspStr = inspDate.toISOString().split('T')[0];
+    events.push({ id: 'lc_inspect_' + inspNum, name: 'Routine inspection #' + inspNum, date: inspStr, cat: 'inspection', notes: data.inspection_frequency || 'Every 3 months', source: 'lease_companion' });
+    inspDate.setDate(inspDate.getDate() + inspFreqDays);
+    inspNum++;
+  }
+
+  // 4. Renewal decision (end − 90 days)
+  const renewalDate = new Date(endDate);
+  renewalDate.setDate(renewalDate.getDate() - 90);
+  if (renewalDate > startDate) {
+    events.push({ id: 'lc_renewal_decision', name: 'Renewal decision date', date: renewalDate.toISOString().split('T')[0], cat: 'lease', notes: 'Decide: renew or give notice to vacate?', source: 'lease_companion' });
+  }
+
+  // 5. Notice deadline (end − noticeDays)
+  const noticeDate = new Date(endDate);
+  noticeDate.setDate(noticeDate.getDate() - noticeDays);
+  if (noticeDate > startDate) {
+    events.push({ id: 'lc_notice_deadline', name: 'Notice to vacate deadline', date: noticeDate.toISOString().split('T')[0], cat: 'lease', notes: 'Last day to give ' + noticeDays + '-day notice if vacating', source: 'lease_companion' });
+  }
+
+  // 6. Lease end
+  events.push({ id: 'lc_lease_end', name: 'Lease end date', date: end, cat: 'lease', notes: 'Bond return window opens — landlord has 14 days', source: 'lease_companion' });
+
+  return events;
+}
+
+// Write events to ur_calendar_events — skip if id already exists (idempotent)
+function lcPopulateCalendar(data) {
+  const newEvs = lcBuildCalEvents(data);
+  if (!newEvs.length) return 0;
+  let existing;
+  try { existing = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]'); }
+  catch(e) { existing = []; }
+  const existingIds = new Set(existing.map(e => e.id));
+  let added = 0;
+  newEvs.forEach(ev => {
+    if (!existingIds.has(ev.id)) {
+      existing.push(ev);
+      added++;
+    } else {
+      // Update date if it has changed (re-save)
+      const idx = existing.findIndex(e => e.id === ev.id);
+      if (idx !== -1) existing[idx] = ev;
+    }
+  });
+  localStorage.setItem('ur_calendar_events', JSON.stringify(existing));
+  return added;
+}
+
+// Per-item "Add to calendar" button on static timeline items
+// Maps tl key → calendar event id generated by lcBuildCalEvents
+const TL_CAL_MAP = {
+  move_in:          'lc_move_in',
+  cr_deadline:      'lc_cr_deadline',
+  renewal_decision: 'lc_renewal_decision',
+  notice_deadline:  'lc_notice_deadline',
+  lease_end:        'lc_lease_end',
+};
+
+function tlAddToCalendar(key, btn) {
+  const calId = TL_CAL_MAP[key];
+  if (!calId) return;
+  let events;
+  try { events = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]'); }
+  catch(e) { events = []; }
+  const existing = events.find(e => e.id === calId);
+  if (existing) {
+    // Already in calendar — just show open link
+    btn.classList.add('added');
+    btn.textContent = '✅ Already in calendar';
+  } else {
+    // Need lease data to compute the date
+    const startStr = localStorage.getItem('ur_lc_start');
+    const endStr   = localStorage.getItem('ur_lc_end');
+    const noticeStr = document.getElementById('lc-notice') ? document.getElementById('lc-notice').value : '28 days';
+    const noticeDays = parseInt(String(noticeStr).replace(/\D/g,''), 10) || 28;
+    const inspFreq = document.getElementById('lc-inspect') ? document.getElementById('lc-inspect').value : 'Every 3 months';
+    const mockData = { lease_start: startStr, lease_end: endStr, notice_period_days: noticeDays, inspection_frequency: inspFreq };
+    const built = lcBuildCalEvents(mockData);
+    const target = built.find(e => e.id === calId);
+    if (!target) {
+      showToast('⚠️ Set up Lease Companion first', 'Enter your lease dates and save to add this date.');
+      return;
+    }
+    events.push(target);
+    localStorage.setItem('ur_calendar_events', JSON.stringify(events));
+    btn.classList.add('added');
+    btn.textContent = '✅ Added to calendar';
+  }
+  // Show "Open calendar ↗" link
+  const openLink = document.getElementById('tl-open-' + key);
+  if (openLink) openLink.classList.add('vis');
+  showToast('📅 Added', 'Date added to your dashboard calendar.');
+}
+
+// Refresh button states on page load if events already exist
+function lcRefreshCalButtons() {
+  let events;
+  try { events = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]'); }
+  catch(e) { events = []; }
+  const existingIds = new Set(events.map(e => e.id));
+  Object.entries(TL_CAL_MAP).forEach(([key, calId]) => {
+    const btn = document.getElementById('tl-cal-' + key);
+    const openLink = document.getElementById('tl-open-' + key);
+    if (existingIds.has(calId)) {
+      if (btn) { btn.classList.add('added'); btn.textContent = '✅ Added to calendar'; }
+      if (openLink) openLink.classList.add('vis');
+    }
+  });
 }
 
 // Load saved data on page load

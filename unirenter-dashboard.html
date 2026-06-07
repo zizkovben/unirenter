@@ -90,7 +90,7 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
 /* ── Page layout ── */
 .page-wrap {
   max-width: 1100px; margin: 0 auto;
-  padding: 28px 20px 80px;
+  padding: 28px 20px 130px;
 }
 
 /* ── User header ── */
@@ -312,6 +312,173 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
   .cal-event-actions { width: 100%; margin-top: 4px; }
 }
 
+/* ── Calendar view toggles ── */
+.cal-view-toggles {
+  display: flex; gap: 6px; margin-bottom: 18px;
+}
+.cal-view-btn {
+  background: var(--navy-card); border: 1px solid var(--navy-border);
+  color: var(--text-muted); border-radius: 8px;
+  padding: 7px 14px; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.18s; font-family: var(--font-body);
+}
+.cal-view-btn:hover { background: var(--navy-mid); color: var(--text); }
+.cal-view-btn.active { background: var(--brand-blue); color: #0d1f2d; border-color: var(--brand-blue); }
+
+/* ── Category filter pills ── */
+.cal-filter-row {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px;
+}
+.cal-filter-pill {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--navy-card); border: 1px solid var(--navy-border);
+  border-radius: 20px; padding: 5px 12px;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  color: var(--text-muted); transition: all 0.18s; user-select: none;
+}
+.cal-filter-pill.on { border-color: rgba(75,191,224,0.4); color: var(--text); background: rgba(75,191,224,0.08); }
+.cal-filter-pill .fpill-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* ── Week strip view (This week) ── */
+.cal-week-strip {
+  display: flex; gap: 6px; margin-bottom: 24px; overflow-x: auto;
+  padding-bottom: 4px;
+}
+.cal-week-strip::-webkit-scrollbar { height: 3px; }
+.cal-week-strip::-webkit-scrollbar-thumb { background: var(--navy-border); border-radius: 2px; }
+.cal-week-day {
+  flex: 1; min-width: 44px;
+  background: var(--navy-card); border: 1px solid var(--navy-border);
+  border-radius: 10px; padding: 10px 6px 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: default; transition: border-color 0.15s;
+}
+.cal-week-day.wday-today {
+  border-color: var(--brand-blue); background: rgba(75,191,224,0.07);
+}
+.cal-week-day.wday-has-event { cursor: pointer; }
+.cal-week-day.wday-has-event:hover { border-color: rgba(75,191,224,0.4); }
+.wday-name {
+  font-size: 10px; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.wday-num {
+  font-size: 17px; font-weight: 700; color: var(--text); line-height: 1;
+}
+.cal-week-day.wday-today .wday-num { color: var(--brand-blue); }
+.wday-dots {
+  display: flex; gap: 3px; flex-wrap: wrap; justify-content: center;
+  min-height: 8px;
+}
+.wday-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+}
+.cal-week-events {
+  display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px;
+}
+.cal-week-ev-item {
+  background: var(--navy-card); border: 1px solid var(--navy-border);
+  border-radius: 10px; padding: 12px 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.cal-week-ev-label {
+  font-size: 13px; font-weight: 600; flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cal-week-ev-date { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.cal-week-empty {
+  text-align: center; padding: 28px 16px;
+  color: var(--text-muted); font-size: 13px;
+  background: var(--navy-card); border: 1px solid var(--navy-border);
+  border-radius: var(--radius); margin-bottom: 24px;
+}
+
+/* ── Weekly (7-column day) view ── */
+.cal-weekly-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 6px; margin-bottom: 24px;
+}
+.cal-weekly-col {
+  background: var(--navy-card); border: 1px solid var(--navy-border);
+  border-radius: 10px; overflow: hidden; min-height: 120px;
+}
+.cal-weekly-col.wcol-today {
+  border-color: var(--brand-blue);
+}
+.cal-weekly-col-head {
+  padding: 6px 4px; text-align: center;
+  border-bottom: 1px solid var(--navy-border);
+}
+.wcol-dow { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+.wcol-num {
+  font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.2;
+}
+.cal-weekly-col.wcol-today .wcol-num { color: var(--brand-blue); }
+.cal-weekly-events { padding: 4px; display: flex; flex-direction: column; gap: 3px; }
+.cal-weekly-ev {
+  border-radius: 5px; padding: 3px 5px;
+  font-size: 10px; font-weight: 600; line-height: 1.3;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  cursor: default;
+}
+.cal-weekly-ev.cat-yellow { background: rgba(245,184,0,0.18); color: var(--brand-yellow); }
+.cal-weekly-ev.cat-coral  { background: rgba(232,98,58,0.18); color: var(--brand-coral); }
+.cal-weekly-ev.cat-blue   { background: rgba(75,191,224,0.18); color: var(--brand-blue); }
+.cal-weekly-ev.cat-green  { background: rgba(61,170,92,0.18); color: var(--brand-green); }
+@media (max-width: 600px) {
+  .cal-weekly-grid { grid-template-columns: repeat(7, minmax(38px, 1fr)); overflow-x: auto; }
+  .cal-weekly-ev { font-size: 9px; }
+}
+
+/* ── Sticky "this week" mini-strip — always visible above tab bar placeholder ── */
+.sticky-week-strip {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--navy-card);
+  border-top: 1px solid var(--navy-border);
+  padding: 10px 16px 10px;
+  z-index: 200;
+  display: flex; align-items: center; gap: 8px;
+  backdrop-filter: blur(8px);
+}
+.sws-label {
+  font-size: 11px; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  flex-shrink: 0; display: flex; align-items: center; gap: 4px;
+}
+.sws-events {
+  flex: 1; display: flex; gap: 8px; overflow: hidden; min-width: 0;
+}
+.sws-event {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  flex-shrink: 0; max-width: 180px;
+}
+.sws-event-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sws-event-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sws-event-days {
+  font-size: 10px; font-weight: 700; padding: 1px 5px;
+  border-radius: 8px; flex-shrink: 0;
+}
+.sws-event-days.today { background: rgba(245,184,0,0.15); color: var(--brand-yellow); }
+.sws-event-days.soon  { background: rgba(232,98,58,0.12); color: var(--brand-coral); }
+.sws-event-days.ok    { background: rgba(61,170,92,0.12); color: var(--brand-green); }
+.sws-empty {
+  flex: 1; font-size: 12px; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sws-link {
+  font-size: 12px; color: var(--brand-blue); text-decoration: none;
+  flex-shrink: 0; font-weight: 600; margin-left: 6px;
+}
+.sws-link:hover { text-decoration: underline; }
+@media (min-width: 700px) {
+  .sticky-week-strip { max-width: 1100px; left: 50%; right: auto;
+    transform: translateX(-50%); width: 100%; border-left: 1px solid var(--navy-border);
+    border-right: 1px solid var(--navy-border); border-radius: var(--radius) var(--radius) 0 0; }
+}
 
 /* ── Section header ── */
 .section-header {
@@ -840,11 +1007,11 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
     <button class="tab-btn active" id="tab-btn-matches" role="tab" onclick="switchTab('matches')">
       🎯 Matches
     </button>
-    <button class="tab-btn" id="tab-btn-messages" role="tab" onclick="switchTab('messages')">
-      💬 Messages <span class="tab-badge" id="msg-badge">2</span>
-    </button>
     <button class="tab-btn" id="tab-btn-calendar" role="tab" onclick="switchTab('calendar')">
       📅 Calendar
+    </button>
+    <button class="tab-btn" id="tab-btn-messages" role="tab" onclick="switchTab('messages')">
+      💬 Messages <span class="tab-badge" id="msg-badge">2</span>
     </button>
     <button class="tab-btn" id="tab-btn-profile" role="tab" onclick="switchTab('profile')">
       👤 My Profile
@@ -971,28 +1138,70 @@ body.light-mode nav { background: rgba(240,248,255,0.95); }
     <div class="cal-cob-nudge" id="cal-cob-nudge" style="display:none;">
       <div class="cal-cob-avatar">🤠</div>
       <div class="cal-cob-text">
-        <strong>Oi! Add your key dates here.</strong> Your lease end date is the big one — once it's in, I can nudge you when things like your bond claim window or lease renewal decision are coming up.
+        <strong>Oi! Add your key dates here.</strong> Your lease end date is the big one — once it's in, I can nudge you when things like your bond claim window or lease renewal decision are coming up. Set up your <a href="/lease-companion" style="color:var(--brand-blue);">Lease Companion</a> and they'll all auto-populate.
       </div>
     </div>
 
-    <!-- Mini calendar -->
-    <div class="cal-header-row">
-      <div class="cal-month-nav">
-        <button class="cal-nav-btn" onclick="calChangeMonth(-1)">‹</button>
-        <div class="cal-month-label" id="cal-month-label"></div>
-        <button class="cal-nav-btn" onclick="calChangeMonth(1)">›</button>
-      </div>
-    </div>
-    <div class="cal-grid" id="cal-grid">
-      <!-- Populated by JS -->
+    <!-- View toggles -->
+    <div class="cal-view-toggles" id="cal-view-toggles">
+      <button class="cal-view-btn active" id="vbtn-week_strip" onclick="calSetView('week_strip')">This week</button>
+      <button class="cal-view-btn" id="vbtn-weekly" onclick="calSetView('weekly')">Weekly</button>
+      <button class="cal-view-btn" id="vbtn-monthly" onclick="calSetView('monthly')">Monthly</button>
     </div>
 
-    <!-- Upcoming events -->
-    <div class="cal-events-section">
+    <!-- Category filter pills -->
+    <div class="cal-filter-row" id="cal-filter-row">
+      <div class="cal-filter-pill on" data-filter="housing" onclick="calToggleFilter('housing')">
+        <span class="fpill-dot" style="background:#F5B800;"></span> 🏠 Housing
+      </div>
+      <div class="cal-filter-pill on" data-filter="uni" onclick="calToggleFilter('uni')">
+        <span class="fpill-dot" style="background:#4BBFE0;"></span> 🎓 Uni
+      </div>
+      <div class="cal-filter-pill on" data-filter="public_holidays" onclick="calToggleFilter('public_holidays')">
+        <span class="fpill-dot" style="background:#3DAA5C;"></span> 🇦🇺 Public holidays
+      </div>
+      <div class="cal-filter-pill on" data-filter="work" onclick="calToggleFilter('work')">
+        <span class="fpill-dot" style="background:#7a96aa;"></span> 💼 Work
+      </div>
+      <div class="cal-filter-pill on" data-filter="other" onclick="calToggleFilter('other')">
+        <span class="fpill-dot" style="background:#7a96aa;"></span> 📌 Other
+      </div>
+    </div>
+
+    <!-- VIEW: This week strip -->
+    <div id="cal-view-week_strip">
+      <div class="cal-week-strip" id="cal-week-strip"><!-- populated by JS --></div>
+      <div class="cal-week-events" id="cal-week-events"><!-- populated by JS --></div>
+    </div>
+
+    <!-- VIEW: Weekly (7-column) -->
+    <div id="cal-view-weekly" style="display:none;">
+      <div class="cal-header-row">
+        <div class="cal-month-nav">
+          <button class="cal-nav-btn" onclick="calChangeWeek(-1)">‹</button>
+          <div class="cal-month-label" id="cal-week-label"></div>
+          <button class="cal-nav-btn" onclick="calChangeWeek(1)">›</button>
+        </div>
+      </div>
+      <div class="cal-weekly-grid" id="cal-weekly-grid"><!-- populated by JS --></div>
+    </div>
+
+    <!-- VIEW: Monthly grid -->
+    <div id="cal-view-monthly" style="display:none;">
+      <div class="cal-header-row">
+        <div class="cal-month-nav">
+          <button class="cal-nav-btn" onclick="calChangeMonth(-1)">‹</button>
+          <div class="cal-month-label" id="cal-month-label"></div>
+          <button class="cal-nav-btn" onclick="calChangeMonth(1)">›</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="cal-grid"><!-- populated by JS --></div>
+    </div>
+
+    <!-- Upcoming events list (shown in monthly + week strip view) -->
+    <div class="cal-events-section" id="cal-events-section">
       <div class="cal-events-title">Upcoming &amp; recent dates</div>
-      <div class="cal-event-list" id="cal-event-list">
-        <!-- Populated by JS -->
-      </div>
+      <div class="cal-event-list" id="cal-event-list"><!-- populated by JS --></div>
     </div>
 
     <!-- Add event form -->
@@ -1897,17 +2106,28 @@ renderMatches();
 
 // ── Calendar tab ─────────────────────────────────────────────────────────────
 const CAL_STORE_KEY = 'ur_calendar_events';
-let calViewYear, calViewMonth;
-let calEditingId = null;
+const CAL_FILTERS_KEY = 'ur_cal_filters';
+const CAL_VIEW_KEY = 'ur_cal_view';
 
+let calViewYear, calViewMonth;
+let calWeekStart = null; // Monday of currently viewed week (weekly view)
+let calEditingId = null;
+let calCurrentView = 'week_strip'; // 'week_strip' | 'weekly' | 'monthly'
+
+// Category metadata — existing event cats (stored per-event)
 const CAT_META = {
-  lease:      { icon: '📋', color: 'yellow', dot: '' },
-  rent:       { icon: '💰', color: 'coral',  dot: 'dot-urgent' },
-  inspection: { icon: '🏠', color: 'blue',   dot: 'dot-info' },
-  bond:       { icon: '🏦', color: 'green',  dot: 'dot-green' },
-  study:      { icon: '📚', color: 'blue',   dot: 'dot-info' },
-  other:      { icon: '📌', color: 'yellow', dot: '' }
+  lease:      { icon: '📋', color: 'yellow', dot: 'dot-yellow',  filterGroup: 'housing' },
+  rent:       { icon: '💰', color: 'coral',  dot: 'dot-urgent',  filterGroup: 'housing' },
+  inspection: { icon: '🏠', color: 'blue',   dot: 'dot-info',    filterGroup: 'housing' },
+  bond:       { icon: '🏦', color: 'green',  dot: 'dot-green',   filterGroup: 'housing' },
+  study:      { icon: '📚', color: 'blue',   dot: 'dot-info',    filterGroup: 'uni' },
+  other:      { icon: '📌', color: 'yellow', dot: '',            filterGroup: 'other' },
+  work:       { icon: '💼', color: 'yellow', dot: '',            filterGroup: 'work' },
+  public_holiday: { icon: '🇦🇺', color: 'green', dot: 'dot-green', filterGroup: 'public_holidays' }
 };
+
+// Filter groups — stored in ur_cal_filters
+const ALL_FILTERS = ['housing','uni','public_holidays','work','other'];
 
 function calLoadEvents() {
   try { return JSON.parse(localStorage.getItem(CAL_STORE_KEY) || '[]'); }
@@ -1916,10 +2136,76 @@ function calLoadEvents() {
 function calSaveEvents(events) {
   localStorage.setItem(CAL_STORE_KEY, JSON.stringify(events));
 }
+function calLoadFilters() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(CAL_FILTERS_KEY));
+    if (Array.isArray(stored)) return stored;
+  } catch(e) {}
+  return [...ALL_FILTERS]; // default: all on
+}
+function calSaveFilters(filters) {
+  localStorage.setItem(CAL_FILTERS_KEY, JSON.stringify(filters));
+}
+function calFilterEvents(events) {
+  const active = calLoadFilters();
+  return events.filter(ev => {
+    const meta = CAT_META[ev.cat] || CAT_META.other;
+    return active.includes(meta.filterGroup);
+  });
+}
+function calToggleFilter(group) {
+  const filters = calLoadFilters();
+  const idx = filters.indexOf(group);
+  if (idx === -1) filters.push(group);
+  else filters.splice(idx, 1);
+  calSaveFilters(filters);
+  // Update pill UI
+  const pill = document.querySelector('.cal-filter-pill[data-filter="' + group + '"]');
+  if (pill) pill.classList.toggle('on', filters.includes(group));
+  calRender();
+}
+function calInitFilterUI() {
+  const active = calLoadFilters();
+  document.querySelectorAll('.cal-filter-pill').forEach(pill => {
+    const g = pill.dataset.filter;
+    pill.classList.toggle('on', active.includes(g));
+  });
+}
+
+// ── View management ──
+function calSetView(view) {
+  calCurrentView = view;
+  localStorage.setItem(CAL_VIEW_KEY, view);
+  // Update toggle buttons
+  document.querySelectorAll('.cal-view-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('vbtn-' + view);
+  if (btn) btn.classList.add('active');
+  // Show/hide view containers
+  ['week_strip','weekly','monthly'].forEach(v => {
+    const el = document.getElementById('cal-view-' + v);
+    if (el) el.style.display = (v === view) ? '' : 'none';
+  });
+  // Events list: show for week_strip and monthly, hide for weekly (events are inline)
+  const evSection = document.getElementById('cal-events-section');
+  if (evSection) evSection.style.display = (view === 'weekly') ? 'none' : '';
+  calRender();
+}
+function calLoadView() {
+  const stored = localStorage.getItem(CAL_VIEW_KEY);
+  return (stored && ['week_strip','weekly','monthly'].includes(stored)) ? stored : 'week_strip';
+}
+
+// ── Navigation ──
 function calToday() {
   const now = new Date();
   calViewYear  = now.getFullYear();
   calViewMonth = now.getMonth();
+  // Set week start to this week's Monday
+  const d = new Date(now);
+  d.setHours(0,0,0,0);
+  const dow = (d.getDay() + 6) % 7; // Mon=0
+  d.setDate(d.getDate() - dow);
+  calWeekStart = new Date(d);
   calRender();
 }
 function calChangeMonth(delta) {
@@ -1928,14 +2214,113 @@ function calChangeMonth(delta) {
   if (calViewMonth < 0)  { calViewMonth = 11; calViewYear--; }
   calRender();
 }
-function calRender() {
-  const now   = new Date();
-  const events = calLoadEvents();
-  const label  = new Date(calViewYear, calViewMonth, 1)
-    .toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
-  document.getElementById('cal-month-label').textContent = label;
+function calChangeWeek(delta) {
+  if (!calWeekStart) calToday();
+  calWeekStart.setDate(calWeekStart.getDate() + delta * 7);
+  calRender();
+}
 
-  // Build event date lookup
+// ── Master render dispatcher ──
+function calRender() {
+  const view = calCurrentView;
+  if (view === 'week_strip') calRenderWeekStrip();
+  else if (view === 'weekly') calRenderWeekly();
+  else calRenderMonthly();
+  calRenderEvents(calFilterEvents(calLoadEvents()));
+  renderStickyStrip();
+}
+
+// ── This week strip view ──
+function calRenderWeekStrip() {
+  const now = new Date(); now.setHours(0,0,0,0);
+  // Show next 7 days from today
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(now);
+    d.setDate(now.getDate() + i);
+    days.push(d);
+  }
+  const events = calFilterEvents(calLoadEvents());
+  const stripEl = document.getElementById('cal-week-strip');
+  const weekEvEl = document.getElementById('cal-week-events');
+  if (!stripEl) return;
+
+  // Build day cells
+  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  stripEl.innerHTML = days.map(d => {
+    const dateStr = d.toISOString().split('T')[0];
+    const dayEvs = events.filter(ev => ev.date === dateStr);
+    const isToday = (d.getTime() === now.getTime());
+    let cls = 'cal-week-day';
+    if (isToday) cls += ' wday-today';
+    if (dayEvs.length) cls += ' wday-has-event';
+    const dotsHtml = dayEvs.slice(0,3).map(ev => {
+      const meta = CAT_META[ev.cat] || CAT_META.other;
+      const dotColor = { yellow:'#F5B800', coral:'#E8623A', blue:'#4BBFE0', green:'#3DAA5C' }[meta.color] || '#7a96aa';
+      return '<span class="wday-dot" style="background:' + dotColor + ';"></span>';
+    }).join('');
+    return '<div class="' + cls + '"><span class="wday-name">' + DAYS[d.getDay()] + '</span><span class="wday-num">' + d.getDate() + '</span><div class="wday-dots">' + dotsHtml + '</div></div>';
+  }).join('');
+
+  // Events for the next 7 days
+  const weekDateStrs = new Set(days.map(d => d.toISOString().split('T')[0]));
+  const weekEvs = events.filter(ev => weekDateStrs.has(ev.date))
+    .sort((a,b) => a.date.localeCompare(b.date));
+
+  if (!weekEvs.length) {
+    weekEvEl.innerHTML = '<div class="cal-week-empty">📅 No events this week — <a href="/lease-companion" style="color:var(--brand-blue);">set up your Lease Companion</a> to auto-populate key dates.</div>';
+  } else {
+    weekEvEl.innerHTML = weekEvs.map(ev => {
+      const meta = CAT_META[ev.cat] || CAT_META.other;
+      const dotColor = { yellow:'#F5B800', coral:'#E8623A', blue:'#4BBFE0', green:'#3DAA5C' }[meta.color] || '#7a96aa';
+      const d = new Date(ev.date + 'T00:00:00');
+      const diff = Math.round((d - now) / 86400000);
+      const dayLabel = diff === 0 ? 'Today' : (diff === 1 ? 'Tomorrow' : d.toLocaleDateString('en-AU',{weekday:'long'}));
+      return '<div class="cal-week-ev-item"><span style="width:9px;height:9px;border-radius:50%;background:' + dotColor + ';flex-shrink:0;display:inline-block;"></span><span class="cal-week-ev-label">' + meta.icon + ' ' + ev.name + '</span><span class="cal-week-ev-date">' + dayLabel + '</span></div>';
+    }).join('');
+  }
+}
+
+// ── Weekly 7-column view ──
+function calRenderWeekly() {
+  if (!calWeekStart) calToday();
+  const now = new Date(); now.setHours(0,0,0,0);
+  const ws = new Date(calWeekStart);
+  const we = new Date(ws); we.setDate(ws.getDate() + 6);
+  const label = ws.toLocaleDateString('en-AU',{day:'numeric',month:'short'}) + ' – ' + we.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+  const labelEl = document.getElementById('cal-week-label');
+  if (labelEl) labelEl.textContent = label;
+
+  const events = calFilterEvents(calLoadEvents());
+  const DOWS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const grid = document.getElementById('cal-weekly-grid');
+  if (!grid) return;
+
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(ws);
+    d.setDate(ws.getDate() + i);
+    const dateStr = d.toISOString().split('T')[0];
+    const isToday = d.getTime() === now.getTime();
+    const dayEvs = events.filter(ev => ev.date === dateStr);
+    const colClass = 'cal-weekly-col' + (isToday ? ' wcol-today' : '');
+    const numClass = 'wcol-num' + (isToday ? ' today' : '');
+    const evsHtml = dayEvs.map(ev => {
+      const meta = CAT_META[ev.cat] || CAT_META.other;
+      return '<div class="cal-weekly-ev cat-' + meta.color + '">' + meta.icon + ' ' + ev.name + '</div>';
+    }).join('');
+    html += '<div class="' + colClass + '"><div class="cal-weekly-col-head"><div class="wcol-dow">' + DOWS[i] + '</div><div class="' + numClass + '">' + d.getDate() + '</div></div><div class="cal-weekly-events">' + evsHtml + '</div></div>';
+  }
+  grid.innerHTML = html;
+}
+
+// ── Monthly grid view ──
+function calRenderMonthly() {
+  const now   = new Date();
+  const events = calFilterEvents(calLoadEvents());
+  const labelEl = document.getElementById('cal-month-label');
+  if (labelEl) labelEl.textContent = new Date(calViewYear, calViewMonth, 1).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+
   const dotsByDay = {};
   events.forEach(ev => {
     const d = new Date(ev.date + 'T00:00:00');
@@ -1946,49 +2331,43 @@ function calRender() {
     }
   });
 
-  // Days of week header
   const dows = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const first = new Date(calViewYear, calViewMonth, 1);
-  // JS getDay(): 0=Sun, shift to Mon-start
   const startDow = (first.getDay() + 6) % 7;
   const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
   const daysInPrev  = new Date(calViewYear, calViewMonth, 0).getDate();
 
-  let html = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
-
-  // Fill prev-month tail
+  let html = dows.map(d => '<div class="cal-dow">' + d + '</div>').join('');
   for (let i = startDow - 1; i >= 0; i--) {
-    html += `<div class="cal-day other-month">${daysInPrev - i}</div>`;
+    html += '<div class="cal-day other-month">' + (daysInPrev - i) + '</div>';
   }
-  // Current month days
   for (let d = 1; d <= daysInMonth; d++) {
     const isToday = (d === now.getDate() && calViewMonth === now.getMonth() && calViewYear === now.getFullYear());
     const hasDot  = dotsByDay[d];
     let cls = 'cal-day';
     if (isToday)  cls += ' today';
     if (hasDot)   cls += ' has-event';
-    const dotHtml = hasDot ? `<span class="cal-day-dot ${hasDot}"></span>` : '';
-    html += `<div class="${cls}">${d}${dotHtml}</div>`;
+    const dotHtml = hasDot ? '<span class="cal-day-dot ' + hasDot + '"></span>' : '';
+    html += '<div class="' + cls + '">' + d + dotHtml + '</div>';
   }
-  // Next-month fill
   const totalCells = startDow + daysInMonth;
   const remainder  = (7 - (totalCells % 7)) % 7;
   for (let d = 1; d <= remainder; d++) {
-    html += `<div class="cal-day other-month">${d}</div>`;
+    html += '<div class="cal-day other-month">' + d + '</div>';
   }
-
-  document.getElementById('cal-grid').innerHTML = html;
-  calRenderEvents(events);
+  const gridEl = document.getElementById('cal-grid');
+  if (gridEl) gridEl.innerHTML = html;
 }
 
+// ── Events list (monthly + week strip views) ──
 function calRenderEvents(events) {
   const listEl = document.getElementById('cal-event-list');
+  if (!listEl) return;
   if (!events.length) {
-    listEl.innerHTML = `<div class="cal-empty-state"><div class="cal-empty-icon">📅</div><div>No dates added yet — use the form below to track your lease, rent, and inspection dates.</div></div>`;
+    listEl.innerHTML = '<div class="cal-empty-state"><div class="cal-empty-icon">📅</div><div>No dates added yet — use the form below to track your lease, rent, and inspection dates. Or <a href="/lease-companion" style="color:var(--brand-blue);">set up your Lease Companion</a> to auto-populate them.</div></div>';
     return;
   }
   const now = new Date(); now.setHours(0,0,0,0);
-  // Sort: future first, then past
   const sorted = [...events].sort((a,b) => {
     const da = new Date(a.date + 'T00:00:00');
     const db = new Date(b.date + 'T00:00:00');
@@ -1997,36 +2376,52 @@ function calRenderEvents(events) {
     if (!fa && fb) return 1;
     return fa ? da - db : db - da;
   });
-
   listEl.innerHTML = sorted.map(ev => {
     const meta = CAT_META[ev.cat] || CAT_META.other;
     const d    = new Date(ev.date + 'T00:00:00');
     const diff = Math.round((d - now) / 86400000);
     let cdClass, cdText;
-    if (diff === 0)       { cdClass = 'today'; cdText = 'Today'; }
-    else if (diff < 0)    { cdClass = 'past';  cdText = `${Math.abs(diff)}d ago`; }
-    else if (diff <= 7)   { cdClass = 'soon';  cdText = `${diff}d`; }
-    else if (diff <= 30)  { cdClass = 'soon';  cdText = `${diff}d`; }
-    else                  { cdClass = 'ok';    cdText = `${diff}d`; }
+    if (diff === 0)      { cdClass = 'today'; cdText = 'Today'; }
+    else if (diff < 0)   { cdClass = 'past';  cdText = Math.abs(diff) + 'd ago'; }
+    else if (diff <= 30) { cdClass = 'soon';  cdText = diff + 'd'; }
+    else                 { cdClass = 'ok';    cdText = diff + 'd'; }
     const dateStr = d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
-    const notesHtml = ev.notes ? `<span style="color:var(--text-muted);font-size:11px;margin-top:2px;display:block;">${ev.notes}</span>` : '';
-    return `
-    <div class="cal-event-card">
-      <div class="cal-event-icon ${meta.color}">${meta.icon}</div>
-      <div class="cal-event-body">
-        <div class="cal-event-name">${ev.name}</div>
-        <div class="cal-event-date">${dateStr}</div>
-        ${notesHtml}
-      </div>
-      <span class="cal-event-countdown ${cdClass}">${cdText}</span>
-      <div class="cal-event-actions">
-        <button class="cal-event-edit" onclick="calEditEvent('${ev.id}')">Edit</button>
-        <button class="cal-event-del"  onclick="calDeleteEvent('${ev.id}')">✕</button>
-      </div>
-    </div>`;
+    const notesHtml = ev.notes ? '<span style="color:var(--text-muted);font-size:11px;margin-top:2px;display:block;">' + ev.notes + '</span>' : '';
+    const eid = ev.id;
+    return '<div class="cal-event-card"><div class="cal-event-icon ' + meta.color + '">' + meta.icon + '</div><div class="cal-event-body"><div class="cal-event-name">' + ev.name + '</div><div class="cal-event-date">' + dateStr + '</div>' + notesHtml + '</div><span class="cal-event-countdown ' + cdClass + '">' + cdText + '</span><div class="cal-event-actions"><button class="cal-event-edit" data-edit-id="' + eid + '">Edit</button><button class="cal-event-del" data-del-id="' + eid + '">&#10005;</button></div></div>';
   }).join('');
 }
 
+// ── Sticky strip renderer ──
+function renderStickyStrip() {
+  const swsEl = document.getElementById('sws-events');
+  if (!swsEl) return;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const cutoff = new Date(now); cutoff.setDate(now.getDate() + 14);
+  const events = calFilterEvents(calLoadEvents())
+    .filter(ev => {
+      const d = new Date(ev.date + 'T00:00:00');
+      return d >= now && d <= cutoff;
+    })
+    .sort((a,b) => a.date.localeCompare(b.date))
+    .slice(0, 5);
+
+  if (!events.length) {
+    swsEl.innerHTML = '<span class="sws-empty">No upcoming dates — <a href="/lease-companion" style="color:var(--brand-blue);text-decoration:none;">add your lease details</a></span>';
+    return;
+  }
+  swsEl.innerHTML = events.map(ev => {
+    const meta = CAT_META[ev.cat] || CAT_META.other;
+    const dotColor = { yellow:'#F5B800', coral:'#E8623A', blue:'#4BBFE0', green:'#3DAA5C' }[meta.color] || '#7a96aa';
+    const d = new Date(ev.date + 'T00:00:00');
+    const diff = Math.round((d - now) / 86400000);
+    const daysClass = diff === 0 ? 'today' : (diff <= 3 ? 'soon' : 'ok');
+    const daysText = diff === 0 ? 'Today' : (diff + 'd');
+    return '<span class="sws-event"><span class="sws-event-dot" style="background:' + dotColor + ';"></span><span class="sws-event-text">' + ev.name + '</span><span class="sws-event-days ' + daysClass + '">' + daysText + '</span></span>';
+  }).join('');
+}
+
+// ── Save / edit / delete ──
 function calSaveEvent() {
   const name  = document.getElementById('cal-input-name').value.trim();
   const date  = document.getElementById('cal-input-date').value;
@@ -2043,7 +2438,7 @@ function calSaveEvent() {
     document.getElementById('cal-add-btn').textContent = 'Add date';
     document.getElementById('cal-edit-id').value = '';
   } else {
-    events.push({ id: 'cal_' + Date.now(), name, date, cat, notes });
+    events.push({ id: 'cal_' + Date.now(), name, date, cat, notes, source: 'manual' });
   }
   calSaveEvents(events);
   document.getElementById('cal-input-name').value = '';
@@ -2074,7 +2469,7 @@ function calDeleteEvent(id) {
   showToast('🗑️ Removed', 'Date removed from your calendar.');
 }
 
-// Show Cob nudge on first open if no events saved
+// ── Cob nudge on first open ──
 function calMaybeShowNudge() {
   const nudge = document.getElementById('cal-cob-nudge');
   if (!nudge) return;
@@ -2086,15 +2481,51 @@ function calMaybeShowNudge() {
   }
 }
 
-// Patch switchTab to init calendar on first open
+// ── Delegated event handlers for cal-event-list ──
+document.addEventListener('click', function(e) {
+  const editBtn = e.target.closest('[data-edit-id]');
+  if (editBtn) { calEditEvent(editBtn.dataset.editId); return; }
+  const delBtn = e.target.closest('[data-del-id]');
+  if (delBtn) { calDeleteEvent(delBtn.dataset.delId); return; }
+});
+
+// ── Patch switchTab: init calendar on first open + handle URL param ──
 const _origSwitchTab = switchTab;
 function switchTab(name) {
   _origSwitchTab(name);
   if (name === 'calendar') {
-    if (!calViewYear) calToday();
+    if (!calViewYear) {
+      // Init view from localStorage
+      calCurrentView = calLoadView();
+      calToday();
+      calInitFilterUI();
+      // Apply persisted view
+      calSetView(calCurrentView);
+    } else {
+      calRender();
+    }
     calMaybeShowNudge();
   }
+  // Always re-render sticky strip on tab switch
+  renderStickyStrip();
 }
+
+// ── URL param handling ──
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const tab = params.get('tab');
+  if (tab && ['matches','calendar','messages','profile','settings'].includes(tab)) {
+    // Defer until after DOM + profile load
+    window.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() { switchTab(tab); }, 50);
+    });
+  }
+})();
+
+// ── Init sticky strip on page load ──
+window.addEventListener('DOMContentLoaded', function() {
+  setTimeout(renderStickyStrip, 200);
+});
 
 
   // ── Explore dropdown ──
@@ -2118,5 +2549,11 @@ function switchTab(name) {
 
 </script>
 
+<!-- Sticky this-week strip -->
+<div class="sticky-week-strip" id="sticky-week-strip">
+  <span class="sws-label">📅 Next up</span>
+  <div class="sws-events" id="sws-events"><!-- populated by JS --></div>
+  <a class="sws-link" href="#" onclick="switchTab('calendar');return false;">↗</a>
+</div>
 </body>
 </html>
