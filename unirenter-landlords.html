@@ -22,6 +22,132 @@
     --font-display:'Epilogue',sans-serif;
     --font-body:'Inter',sans-serif;
   }
+
+/* ── NAV — UNIVERSAL STANDARD (Session 39) ── */
+nav {
+  background: #0a1a26;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding: 0 20px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  min-width: 0;
+}
+nav .nav-logo-link { display: contents; line-height: 0; }
+nav .nav-logo img { height: 36px; width: auto; flex-shrink: 0; display: block; }
+a.nav-logo {
+  font-family: 'Epilogue', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: #F5B800;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+.city-badge {
+  background: rgba(75,191,224,0.1);
+  border: 1px solid rgba(75,191,224,0.3);
+  color: #4BBFE0;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.nav-right-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.nav-cta {
+  background: #F5B800;
+  color: #0d1f2d;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: 'Epilogue', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+.nav-cta:hover { opacity: 0.88; }
+.nav-explore-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #e8f0f5;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-explore-btn:hover { border-color: rgba(75,191,224,0.4); color: #4BBFE0; }
+.btn-theme {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #e8f0f5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+/* Dropdown */
+.nav-dropdown-wrap { position: relative; }
+.nav-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #162535;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 6px;
+  min-width: 210px;
+  z-index: 200;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.nav-dropdown.open { display: block; }
+.nav-dd-item {
+  display: block;
+  padding: 9px 12px;
+  color: #e8f0f5;
+  text-decoration: none;
+  font-size: 13px;
+  border-radius: 7px;
+  transition: background 0.15s;
+}
+.nav-dd-item:hover { background: rgba(255,255,255,0.07); }
+.nav-dd-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 4px 0; }
+
+/* ── MOBILE NAV — single breakpoint block, replaces all others ── */
+@media (max-width: 600px) {
+  nav { padding: 0 14px; gap: 6px; height: 52px; }
+  nav .nav-logo img { height: 30px; }
+  .city-badge { display: none; }
+  .nav-cta { font-size: 12px; padding: 7px 10px; }
+  .nav-explore-btn { font-size: 0; padding: 7px 10px; letter-spacing: 0; }
+  .nav-explore-btn::after { content: '▾'; font-size: 14px; }
+  .btn-theme { width: 32px; height: 32px; font-size: 14px; }
+}
+@media (max-width: 380px) {
+  nav { padding: 0 10px; gap: 4px; }
+  nav .nav-logo img { height: 26px; }
+  .nav-cta { font-size: 11px; padding: 6px 8px; }
+}
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   /* ── LIGHT MODE ── */
@@ -32,7 +158,6 @@
     --text:#1a2e3d;
     --text-muted:#4a6070;
   }
-  body.light nav { background: #0d1f2d !important; }
 
   body {
     font-family: var(--font-body);
@@ -42,26 +167,10 @@
     transition: background .3s, color .3s;
   }
 
-  /* ── NAV ── */
-  nav {
-    position: sticky; top: 0; z-index: 100;
-    background: #0d1f2d;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 1.5rem; height: 60px;
-    box-shadow: 0 2px 12px rgba(0,0,0,.35);
-  }
-  .nav-logo { display: flex; align-items: center; }
-  .nav-logo img { height: 36px; width: auto; }
-  nav { display:flex; align-items:center; justify-content:space-between; padding:0 16px; height:56px; gap:8px; min-width:0; }
-  .nav-logo { flex-shrink:0; }
-  .nav-right-group { display:flex; align-items:center; gap:6px; flex-shrink:0; margin-left:auto; }
   @media (max-width:400px) {
-    nav { padding:0 10px; }
-    .nav-logo img { height:28px; }
     .btn-find { font-size:12px; padding:6px 10px; }
     #btn-theme { font-size:.9rem; }
   }
-  .nav-right { display: flex; align-items: center; gap: .75rem; }
   .btn-find {
     background: var(--brand-yellow); color: #0d1f2d;
     font-family: var(--font-display); font-weight: 700; font-size: .85rem;
@@ -281,21 +390,9 @@
   }
   #toast.show { opacity: 1; }
 
-  /* ── Responsive nav fix — Session 17 ── */
   @media (max-width: 600px) {
-    nav {
-      padding: 8px 12px;
-      gap: 6px;
-      flex-wrap: nowrap;
-    }
-    .nav-logo img { height: 34px; }
-    .nav-right, #nav-right { gap: 6px; }
-    .nav-cta, .btn-find { font-size: .78rem; padding: .38rem .7rem; }
-    #btn-theme, .btn-theme { font-size: 1rem; padding: .2rem .35rem; }
   }
   @media (max-width: 400px) {
-    nav { padding: 8px 6px; overflow: visible; }
-    .nav-logo img { height: 26px; }
   }
 
   /* ── COB FAB + CHAT PANEL (Landlords) ── */
@@ -372,7 +469,6 @@
   }
   .cob-nudge.show { display: block; }
   .cob-nudge strong { color: var(--brand-yellow); }
-
 </style>
 </head>
 <body>
@@ -557,12 +653,6 @@
 
 <footer>
   <p>© 2025 UniRenter · <a href="/legal">Legal &amp; privacy</a> · <a href="mailto:hello@unirenter.com.au">hello@unirenter.com.au</a> · ABN registered</p>
-
-  <span style="display:block;margin-top:12px;font-size:10px;opacity:0;transition:opacity 0.3s;" onmouseover="this.style.opacity='0.35'" onmouseout="this.style.opacity='0'">
-    <a href="/admin" style="color:inherit;text-decoration:none;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">Admin</a>
-    &nbsp;·&nbsp;
-    <a href="/agent" style="color:inherit;text-decoration:none;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">Agent</a>
-  </span>
 </footer>
 
 <div id="toast"></div>

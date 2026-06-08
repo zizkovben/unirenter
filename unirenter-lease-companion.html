@@ -14,14 +14,136 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--fb);background:var(--navy);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── NAV — UNIVERSAL STANDARD (Session 39) ── */
+nav {
+  background: #0a1a26;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding: 0 20px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  min-width: 0;
+}
+nav .nav-logo-link { display: contents; line-height: 0; }
+nav .nav-logo img { height: 36px; width: auto; flex-shrink: 0; display: block; }
+a.nav-logo {
+  font-family: 'Epilogue', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: #F5B800;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+.city-badge {
+  background: rgba(75,191,224,0.1);
+  border: 1px solid rgba(75,191,224,0.3);
+  color: #4BBFE0;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.nav-right-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.nav-cta {
+  background: #F5B800;
+  color: #0d1f2d;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: 'Epilogue', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+.nav-cta:hover { opacity: 0.88; }
+.nav-explore-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #e8f0f5;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-explore-btn:hover { border-color: rgba(75,191,224,0.4); color: #4BBFE0; }
+.btn-theme {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #e8f0f5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+/* Dropdown */
+.nav-dropdown-wrap { position: relative; }
+.nav-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #162535;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 6px;
+  min-width: 210px;
+  z-index: 200;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.nav-dropdown.open { display: block; }
+.nav-dd-item {
+  display: block;
+  padding: 9px 12px;
+  color: #e8f0f5;
+  text-decoration: none;
+  font-size: 13px;
+  border-radius: 7px;
+  transition: background 0.15s;
+}
+.nav-dd-item:hover { background: rgba(255,255,255,0.07); }
+.nav-dd-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 4px 0; }
+
+/* ── MOBILE NAV — single breakpoint block, replaces all others ── */
+@media (max-width: 600px) {
+  nav { padding: 0 14px; gap: 6px; height: 52px; }
+  nav .nav-logo img { height: 30px; }
+  .city-badge { display: none; }
+  .nav-cta { font-size: 12px; padding: 7px 10px; }
+  .nav-explore-btn { font-size: 0; padding: 7px 10px; letter-spacing: 0; }
+  .nav-explore-btn::after { content: '▾'; font-size: 14px; }
+  .btn-theme { width: 32px; height: 32px; font-size: 14px; }
+}
+@media (max-width: 380px) {
+  nav { padding: 0 10px; gap: 4px; }
+  nav .nav-logo img { height: 26px; }
+  .nav-cta { font-size: 11px; padding: 6px 8px; }
+}
+
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(75,191,224,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(75,191,224,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
 
-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:12px 28px;background:rgba(13,31,45,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(75,191,224,0.1)}
-.nav-logo img{height:44px}
 .nav-back{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--muted);font-family:var(--fb);font-size:13px;padding:8px 16px;border-radius:8px;cursor:pointer;transition:all 0.2s}
 .nav-back:hover{color:var(--text)}
-.nav-cta{background:var(--yellow);color:#1a1000;font-family:var(--fb);font-weight:600;font-size:13px;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;transition:all 0.2s}
-.nav-cta:hover{background:#e0a800;transform:translateY(-1px)}
 
 .page{max-width:900px;margin:0 auto;padding:100px 24px 120px;position:relative;z-index:1}
 .page-tabs{display:flex;gap:8px;margin-bottom:40px;flex-wrap:wrap}
@@ -188,12 +310,7 @@ select option{background:var(--mid)}
 .toast.show{transform:translateY(0);opacity:1}
 .toast-title{font-weight:700;color:var(--yellow);margin-bottom:2px;font-size:12px}
 
-/* ── Theme toggle button ── */
-.btn-theme{background:none;border:1px solid rgba(255,255,255,0.15);color:var(--muted);font-size:16px;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0}
-.btn-theme:hover{border-color:rgba(75,191,224,0.4);color:var(--blue)}
 body.light-mode{--navy:#f0f4f8;--mid:#e2e8f0;--card:#ffffff;--border:rgba(0,31,45,0.12);--text:#0d1f2d;--muted:#4a6070;--slate:#5a7080}
-body.light-mode nav{background:rgba(13,31,45,0.95);border-bottom:1px solid rgba(75,191,224,0.12)}
-body.light-mode .btn-theme{border-color:rgba(255,255,255,0.15);color:#7a96aa}
 body.light-mode .sleep-header{background:rgba(75,191,224,0.06);border-color:rgba(75,191,224,0.2)}
 body.light-mode .snooze-bar{background:#ffffff;border-color:rgba(0,31,45,0.12)}
 body.light-mode .sleep-mode{background:#ffffff;border-color:rgba(0,31,45,0.12)}
@@ -1013,11 +1130,5 @@ function toggleTheme() {
   }
 })();
 </script>
-
-  <span style="display:block;margin-top:12px;font-size:10px;opacity:0;transition:opacity 0.3s;" onmouseover="this.style.opacity='0.35'" onmouseout="this.style.opacity='0'">
-    <a href="/admin" style="color:inherit;text-decoration:none;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">Admin</a>
-    &nbsp;·&nbsp;
-    <a href="/agent" style="color:inherit;text-decoration:none;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">Agent</a>
-  </span>
 </body>
 </html>
