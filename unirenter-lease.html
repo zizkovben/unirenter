@@ -607,6 +607,28 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
 .save-btn:hover { border-color:rgba(75,191,224,0.3); color:var(--brand-blue); }
 
 /* Lease page hero */
+/* ── CITY SWITCHER ── */
+.city-switcher {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 20px 0;
+  flex-wrap: wrap;
+}
+.city-sw-btn {
+  padding: 7px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #7a96aa;
+  text-decoration: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.city-sw-btn:hover { border-color: rgba(245,184,0,0.4); color: #F5B800; }
+.city-sw-btn.active { background: rgba(245,184,0,0.1); border-color: #F5B800; color: #F5B800; }
+
 .lease-hero {
   padding: 100px 24px 48px;
   text-align: center;
@@ -975,6 +997,14 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
   </div>
 </nav>
 
+<div class="city-switcher">
+  <a href="/lease" class="city-sw-btn active">Melbourne</a>
+  <a href="/sydney/lease" class="city-sw-btn">Sydney</a>
+  <a href="/brisbane/lease" class="city-sw-btn">Brisbane</a>
+  <a href="/adelaide/lease" class="city-sw-btn">Adelaide</a>
+  <a href="/perth/lease" class="city-sw-btn">Perth</a>
+  <a href="/canberra/lease" class="city-sw-btn">Canberra</a>
+</div>
 <div class="lease-hero">
   <div style="font-size:11px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:var(--brand-coral);margin-bottom:18px;display:flex;align-items:center;gap:10px;justify-content:center;">
     <span style="flex:1;max-width:40px;height:1px;background:var(--brand-coral);opacity:0.4;display:inline-block;"></span>
@@ -982,7 +1012,7 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
     <span style="flex:1;max-width:40px;height:1px;background:var(--brand-coral);opacity:0.4;display:inline-block;"></span>
   </div>
   <h1>Find or transfer a lease<br><span style="color:var(--brand-coral);">safely.</span></h1>
-  <p>Take over an existing Melbourne lease, or find a verified student to take yours. Full legal guidance, mandatory acknowledgements, and document upload built in.</p>
+  <p>Take over an existing Melbourne lease, or find a verified student to take yours. Mandatory acknowledgements, step-by-step guidance, and document upload built in.</p>
   <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
     <button class="btn-primary" onclick="heroTab('browse')">🔍 Browse leases</button>
     <button class="btn-secondary" onclick="heroTab('post')">➕ Post my lease</button>
