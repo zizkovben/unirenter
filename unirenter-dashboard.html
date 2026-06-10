@@ -1272,6 +1272,194 @@ body.light-mode {
   font-size: 16px; cursor: pointer; line-height: 1;
 }
 .push-prompt-dismiss:hover { color: var(--text); }
+
+/* ── Tenancy sub-nav (V46) ── */
+.tenancy-subnav {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  padding: 4px;
+  background: var(--navy-card);
+  border: 1px solid var(--navy-border);
+  border-radius: var(--radius);
+}
+.tsn-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  text-align: center;
+}
+.tsn-btn:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.tsn-btn.active { background: var(--navy-mid); color: var(--text); font-weight: 600; }
+.tsn-section { display: none; }
+.tsn-section.active { display: block; }
+
+/* ── Lease Companion embedded (Tenancy → Lease) ── */
+.lc-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+.lc-cob-intro {
+  display: flex;
+  gap: 12px;
+  background: rgba(245,184,0,0.06);
+  border: 1px solid rgba(245,184,0,0.18);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  align-items: flex-start;
+}
+.lc-cob-av { font-size: 22px; flex-shrink: 0; }
+.lc-cob-msg { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+.lc-cob-msg strong { color: var(--text); }
+.lc-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+@media (max-width: 600px) { .lc-form-grid { grid-template-columns: 1fr; } }
+.lc-field-group { display: flex; flex-direction: column; gap: 5px; }
+.lc-field-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.lc-input {
+  background: var(--navy-mid);
+  border: 1px solid var(--navy-border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: var(--font-body);
+  width: 100%;
+  box-sizing: border-box;
+}
+.lc-input:focus { outline: none; border-color: var(--brand-blue); }
+.lc-save-btn {
+  background: var(--brand-yellow);
+  color: #0d1f2d;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  width: 100%;
+  margin-top: 4px;
+}
+.lc-save-btn:hover { opacity: 0.88; }
+.lc-summary-card {
+  background: var(--navy-card);
+  border: 1px solid var(--navy-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.lc-summary-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.lc-summary-label { font-size: 13px; font-weight: 600; color: var(--brand-green); }
+.lc-edit-btn { background: none; border: 1px solid var(--navy-border); color: var(--text-muted); font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+.lc-summary-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+@media (max-width: 600px) { .lc-summary-grid { grid-template-columns: 1fr 1fr; } }
+.lc-summary-item { display: flex; flex-direction: column; gap: 2px; }
+.lc-summary-item-label { font-size: 11px; color: var(--text-muted); }
+.lc-summary-item-val { font-size: 14px; font-weight: 600; color: var(--text); }
+.lc-timeline-head { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+.lc-tl-item { display: flex; gap: 12px; padding-bottom: 16px; }
+.lc-tl-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.lc-tl-dot.urgent { background: rgba(232,98,58,0.12); border: 1px solid var(--brand-coral); }
+.lc-tl-dot.soon { background: rgba(245,184,0,0.1); border: 1px solid var(--brand-yellow); }
+.lc-tl-dot.info { background: rgba(75,191,224,0.08); border: 1px solid var(--brand-blue); }
+.lc-tl-dot.ok { background: rgba(61,170,92,0.08); border: 1px solid var(--brand-green); }
+.lc-tl-body { flex: 1; }
+.lc-tl-date { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+.lc-tl-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.lc-tl-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+/* ── Profile tab — vibe card (shell S41, wired S42) ── */
+.vibe-card {
+  background: var(--navy-card);
+  border: 1px solid var(--navy-border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-top: 16px;
+}
+.vibe-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.vibe-optional { font-size: 11px; font-weight: 400; color: var(--text-muted); margin-left: 4px; }
+.vibe-cob-badge {
+  font-size: 11px;
+  background: rgba(245,184,0,0.1);
+  border: 1px solid rgba(245,184,0,0.22);
+  color: var(--brand-yellow);
+  padding: 3px 8px;
+  border-radius: 10px;
+}
+.vibe-card-intro { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 14px; }
+.vibe-start-btn {
+  background: var(--brand-yellow);
+  color: #0d1f2d;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.vibe-start-btn:hover { opacity: 0.88; }
+.vibe-coming-soon { font-size: 13px; color: var(--text-muted); margin-top: 10px; padding: 10px 14px; background: rgba(245,184,0,0.05); border-radius: 8px; }
+.vibe-result { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 14px; }
+.vibe-result-emoji { font-size: 28px; }
+.vibe-result-text { font-size: 14px; color: var(--text); line-height: 1.6; font-style: italic; flex: 1; }
+.vibe-chips-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+.vibe-chip-group { display: flex; flex-direction: column; gap: 3px; }
+.vibe-chip-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+.vibe-chip-val { font-size: 20px; }
+.vibe-retake-btn { background: none; border: 1px solid var(--navy-border); color: var(--text-muted); font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+
+/* ── Settings collapse (inside Profile tab) ── */
+.settings-collapse-wrap {
+  margin-top: 24px;
+  border: 1px solid var(--navy-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.settings-collapse-btn {
+  width: 100%;
+  background: var(--navy-card);
+  border: none;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 14px 18px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.15s;
+}
+.settings-collapse-btn:hover { background: var(--navy-mid); }
+.settings-collapse-arrow { font-size: 16px; transition: transform 0.2s; }
+.settings-collapse-arrow.open { transform: rotate(180deg); }
+.settings-collapse-body { background: var(--navy-card); }
+.settings-collapse-body .settings-layout { padding: 0 0 8px; }
 </style>
 </head>
 <body>
@@ -1313,7 +1501,7 @@ body.light-mode {
       </div>
     </div>
     <div class="user-header-actions">
-      <div class="status-pill" id="status-pill" onclick="switchTab('settings')">🟢 Active</div>
+      <div class="status-pill" id="status-pill" onclick="switchTab('profile');openSettingsCollapse()">🟢 Active</div>
     </div>
   </div>
 
@@ -1324,7 +1512,7 @@ body.light-mode {
       <div class="tier2-card-title" id="tier2-title">Checking in 👋</div>
       <div class="tier2-card-text" id="tier2-text"></div>
       <div class="tier2-card-actions" id="tier2-actions">
-        <button class="tier2-card-btn primary" onclick="switchTab('calendar')">View calendar ↗</button>
+        <button class="tier2-card-btn primary" onclick="switchTab('tenancy');switchTenancySection('calendar')">View calendar ↗</button>
         <button class="tier2-card-btn" onclick="openCobDashboard()">Talk to Cob 🤠</button>
       </div>
     </div>
@@ -1339,7 +1527,7 @@ body.light-mode {
       <div class="welfare-card-title" id="welfare-title">Hey, it's been a while</div>
       <div class="welfare-card-text" id="welfare-text"></div>
       <div class="welfare-card-actions">
-        <button class="welfare-card-btn primary" onclick="switchTab('calendar')">View calendar ↗</button>
+        <button class="welfare-card-btn primary" onclick="switchTab('tenancy');switchTenancySection('calendar')">View calendar ↗</button>
         <button class="welfare-card-btn" onclick="openCobDashboard()">Talk to Cob 🤠</button>
       </div>
     </div>
@@ -1360,25 +1548,19 @@ body.light-mode {
     <button class="push-prompt-dismiss" onclick="dismissPushPrompt()" title="Dismiss">✕</button>
   </div>
 
-  <!-- Tab bar -->
+  <!-- Tab bar — 4 tabs (V46 restructure, Session 41) -->
   <div class="tab-bar" role="tablist">
     <button class="tab-btn active" id="tab-btn-matches" role="tab" onclick="switchTab('matches')">
       🎯 <span class="tab-label">Matches</span>
     </button>
-    <button class="tab-btn" id="tab-btn-calendar" role="tab" onclick="switchTab('calendar')">
-      📅 <span class="tab-label">Calendar</span>
-    </button>
-    <button class="tab-btn" id="tab-btn-calculator" role="tab" onclick="switchTab('calculator')">
-      🧮 <span class="tab-label">Calculator</span>
+    <button class="tab-btn" id="tab-btn-tenancy" role="tab" onclick="switchTab('tenancy')">
+      🏠 <span class="tab-label">Tenancy</span>
     </button>
     <button class="tab-btn" id="tab-btn-messages" role="tab" onclick="switchTab('messages')">
       💬 <span class="tab-label">Messages</span> <span class="tab-badge" id="msg-badge">2</span>
     </button>
     <button class="tab-btn" id="tab-btn-profile" role="tab" onclick="switchTab('profile')">
-      👤 <span class="tab-label">My Profile</span>
-    </button>
-    <button class="tab-btn" id="tab-btn-settings" role="tab" onclick="switchTab('settings')">
-      ⚙️ <span class="tab-label">Settings</span>
+      👤 <span class="tab-label">Profile</span>
     </button>
   </div>
 
@@ -1484,9 +1666,21 @@ body.light-mode {
   </div>
 
   <!-- ══════════════════════════════════════════════════════ -->
-  <!-- TAB: CALENDAR -->
   <!-- ══════════════════════════════════════════════════════ -->
-  <div class="tab-panel" id="panel-calendar">
+  <!-- TAB: TENANCY (V46 — Calendar + Lease + Calculator) -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-tenancy">
+
+    <!-- Tenancy sub-nav (pill nav — not a new tab bar) -->
+    <div class="tenancy-subnav">
+      <button class="tsn-btn active" id="tsn-btn-calendar" onclick="switchTenancySection('calendar')">📅 Calendar</button>
+      <button class="tsn-btn" id="tsn-btn-lease" onclick="switchTenancySection('lease')">📋 Lease</button>
+      <button class="tsn-btn" id="tsn-btn-calculator" onclick="switchTenancySection('calculator')">🧮 Calculator</button>
+    </div>
+
+    <!-- ── SUB-SECTION: CALENDAR ── -->
+    <div class="tsn-section active" id="tsn-calendar">
+
     <div class="section-header">
       <div>
         <div class="section-title">📅 Calendar</div>
@@ -1601,9 +1795,97 @@ body.light-mode {
   </div>
 
   <!-- ══════════════════════════════════════════════════════ -->
-  <!-- TAB: CALCULATOR -->
-  <!-- ══════════════════════════════════════════════════════ -->
-  <div class="tab-panel" id="panel-calculator">
+    </div>
+
+    <!-- ── SUB-SECTION: LEASE COMPANION ── -->
+    <div class="tsn-section" id="tsn-lease">
+    <!-- ── Lease Companion (Tenancy → Lease sub-section) ── -->
+    <div class="lc-section-header">
+      <div>
+        <div class="section-title">📋 Lease Companion</div>
+        <div class="section-sub">Cob manages your tenancy timeline — key dates, reminders, and guidance</div>
+      </div>
+      <a href="/lease-companion" class="section-action" style="text-decoration:none;">Open full page ↗</a>
+    </div>
+
+    <!-- Result view (when lease companion already saved) -->
+    <div id="lc-dashboard-result" style="display:none;">
+      <div class="lc-summary-card" id="lc-summary-card">
+        <div class="lc-summary-head">
+          <span class="lc-summary-label">✅ Lease Companion active</span>
+          <button class="lc-edit-btn" onclick="showLcForm()">Edit</button>
+        </div>
+        <div class="lc-summary-grid" id="lc-summary-grid"></div>
+      </div>
+      <div class="lc-timeline-head">📅 Your tenancy timeline</div>
+      <div id="lc-dashboard-timeline"></div>
+    </div>
+
+    <!-- Form view (when not yet saved, or editing) -->
+    <div id="lc-dashboard-form">
+      <div class="lc-cob-intro">
+        <div class="lc-cob-av">🤠</div>
+        <div class="lc-cob-msg">
+          <strong>Oi! Set up your Lease Companion.</strong> Enter your lease details and I'll build your personal tenancy timeline — I'll remind you about your condition report deadline, inspections, renewal decision, notice deadline, and lease end. Takes 30 seconds.
+        </div>
+      </div>
+      <div class="lc-form-grid">
+        <div class="lc-field-group">
+          <label class="lc-field-label">Lease start date</label>
+          <input class="lc-input" id="lc-db-start" type="text" placeholder="e.g. 1 Feb 2025 or 2025-02-01">
+        </div>
+        <div class="lc-field-group">
+          <label class="lc-field-label">Lease end date</label>
+          <input class="lc-input" id="lc-db-end" type="text" placeholder="e.g. 31 Jan 2026 or 2026-01-31">
+        </div>
+        <div class="lc-field-group">
+          <label class="lc-field-label">Weekly rent ($)</label>
+          <input class="lc-input" id="lc-db-rent" type="text" placeholder="e.g. $320">
+        </div>
+        <div class="lc-field-group">
+          <label class="lc-field-label">Bond amount ($)</label>
+          <input class="lc-input" id="lc-db-bond" type="text" placeholder="e.g. $1,280">
+        </div>
+        <div class="lc-field-group">
+          <label class="lc-field-label">Notice period</label>
+          <select class="lc-input" id="lc-db-notice">
+            <option value="28 days">28 days</option>
+            <option value="14 days">14 days</option>
+            <option value="21 days">21 days</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="lc-field-group">
+          <label class="lc-field-label">Inspection frequency</label>
+          <select class="lc-input" id="lc-db-inspect">
+            <option value="Every 3 months">Every 3 months</option>
+            <option value="Every 6 months">Every 6 months</option>
+            <option value="Annually">Annually</option>
+          </select>
+        </div>
+        <div class="lc-field-group" style="grid-column:1/-1;">
+          <label class="lc-field-label">University (for semester dates)</label>
+          <select class="lc-input" id="lc-db-uni">
+            <option value="">Select your university</option>
+            <option>University of Melbourne</option><option>RMIT University</option>
+            <option>Monash University</option><option>UNSW Sydney</option>
+            <option>University of Sydney</option><option>UTS</option>
+            <option>UQ Brisbane</option><option>QUT Brisbane</option>
+            <option>Griffith University</option><option>University of Adelaide</option>
+            <option>UniSA</option><option>Flinders University</option>
+            <option>University of Western Australia</option><option>Curtin University</option>
+            <option>Murdoch University</option><option>Australian National University</option>
+            <option>University of Canberra</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <button class="lc-save-btn" onclick="lcDashboardSave()">Set up my Lease Companion 🤠</button>
+    </div>
+    </div>
+
+    <!-- ── SUB-SECTION: CALCULATOR ── -->
+    <div class="tsn-section" id="tsn-calculator">
+
     <div class="section-header">
       <div>
         <div class="section-title">🧮 Calculator</div>
@@ -1732,6 +2014,10 @@ body.light-mode {
 
 
   <!-- ══════════════════════════════════════════════════════ -->
+    </div>
+
+  </div><!-- /panel-tenancy -->
+
   <!-- TAB: MY PROFILE -->
   <!-- ══════════════════════════════════════════════════════ -->
   <div class="tab-panel" id="panel-profile">
@@ -1837,13 +2123,45 @@ body.light-mode {
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- ══════════════════════════════════════════════════════ -->
-  <!-- TAB: SETTINGS -->
-  <!-- ══════════════════════════════════════════════════════ -->
-  <div class="tab-panel" id="panel-settings">
+    </div>
+    <!-- ── "Your vibe" card shell (Cob quiz wiring in Session 42) ── -->
+    <div class="vibe-card" id="vibe-card">
+      <div class="vibe-card-head">
+        <span>Your vibe <span class="vibe-optional">(optional)</span></span>
+        <span class="vibe-cob-badge">🤠 Cob</span>
+      </div>
+      <div id="vibe-card-empty">
+        <div class="vibe-card-intro">
+          Let Cob write a short personality portrait based on how you describe yourself — shown to potential housemates so they get a real sense of you beyond checkboxes.
+        </div>
+        <button class="vibe-start-btn" onclick="showVibeComingSoon()">Let Cob write your vibe →</button>
+        <div class="vibe-coming-soon" id="vibe-coming-soon" style="display:none;">
+          🤠 This feature is coming in Session 42 — Cob is getting ready to write your vibe!
+        </div>
+      </div>
+      <div id="vibe-card-done" style="display:none;">
+        <div class="vibe-result">
+          <div class="vibe-result-emoji" id="vibe-primary-emoji">🌿</div>
+          <div class="vibe-result-text" id="vibe-summary-text">"Your vibe summary will appear here."</div>
+        </div>
+        <div class="vibe-chips-row">
+          <div class="vibe-chip-group"><div class="vibe-chip-label">Primary</div><div class="vibe-chip-val" id="vibe-chip-primary">—</div></div>
+          <div class="vibe-chip-group"><div class="vibe-chip-label">Secondary</div><div class="vibe-chip-val" id="vibe-chip-secondary">—</div></div>
+          <div class="vibe-chip-group"><div class="vibe-chip-label">Star sign</div><div class="vibe-chip-val" id="vibe-chip-star">—</div></div>
+          <div class="vibe-chip-group"><div class="vibe-chip-label">Gen</div><div class="vibe-chip-val" id="vibe-chip-gen">—</div></div>
+        </div>
+        <button class="vibe-retake-btn" onclick="showVibeComingSoon()">Retake</button>
+      </div>
+    </div>
+
+    <!-- ── Settings (collapsed section at bottom of Profile tab) ── -->
+    <div class="settings-collapse-wrap" id="settings-collapse-wrap">
+      <button class="settings-collapse-btn" id="settings-collapse-btn" onclick="toggleSettingsCollapse()">
+        ⚙️ Settings <span class="settings-collapse-arrow" id="settings-collapse-arrow">▾</span>
+      </button>
+      <div class="settings-collapse-body" id="settings-collapse-body" style="display:none;">
+
     <div class="section-header">
       <div>
         <div class="section-title">Settings</div>
@@ -2020,9 +2338,10 @@ body.light-mode {
           </div>
         </div>
       </div>
-
+      </div>
     </div>
-  </div>
+
+  </div><!-- /panel-profile -->
 
 </div><!-- /page-wrap -->
 
@@ -2095,35 +2414,174 @@ function applyTheme(val) {
   }
 })();
 
-// ── Tab switching ─────────────────────────────────────────────────────────────
+// ── Tab switching (V46 — 4 tabs) ──────────────────────────────────────────────
 function switchTab(name) {
+  // Backwards compat: old tab names redirect to new structure
+  if (name === 'calendar')   { switchTab('tenancy'); switchTenancySection('calendar');    return; }
+  if (name === 'calculator') { switchTab('tenancy'); switchTenancySection('calculator');  return; }
+  if (name === 'settings')   { switchTab('profile'); openSettingsCollapse();              return; }
+
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-btn-' + name).classList.add('active');
-  document.getElementById('panel-' + name).classList.add('active');
-  // Hide message badge once opened
+  var btn = document.getElementById('tab-btn-' + name);
+  var panel = document.getElementById('panel-' + name);
+  if (!btn || !panel) { console.warn('switchTab: unknown tab', name); return; }
+  btn.classList.add('active');
+  panel.classList.add('active');
+
   if (name === 'messages') {
-    const badge = document.getElementById('msg-badge');
+    var badge = document.getElementById('msg-badge');
     if (badge) badge.style.display = 'none';
   }
-  // Calculator — re-render history on open
-  if (name === 'calculator') {
-    calcRenderHistory();
+  if (name === 'tenancy') {
+    // Init whichever sub-section is active
+    var activeSec = document.querySelector('.tsn-section.active');
+    var secId = activeSec ? activeSec.id : 'tsn-calendar';
+    if (secId === 'tsn-calendar')    _calInit();
+    if (secId === 'tsn-calculator')  calcRenderHistory();
+    if (secId === 'tsn-lease')       lcDashboardInit();
   }
-  // Calendar — init on first open, re-render on subsequent opens
-  if (name === 'calendar') {
-    if (!calViewYear) {
-      calCurrentView = calLoadView();
-      calToday();
-      calInitFilterUI();
-      calSetView(calCurrentView);
-    } else {
-      calRender();
-    }
-    calMaybeShowNudge();
-  }
-  // Always re-render sticky strip on tab switch
   renderStickyStrip();
+}
+
+// ── Tenancy sub-section switching ─────────────────────────────────────────────
+function switchTenancySection(section) {
+  document.querySelectorAll('.tsn-btn').forEach(function(b)     { b.classList.remove('active'); });
+  document.querySelectorAll('.tsn-section').forEach(function(s) { s.classList.remove('active'); });
+  var btn = document.getElementById('tsn-btn-' + section);
+  var sec = document.getElementById('tsn-' + section);
+  if (btn) btn.classList.add('active');
+  if (sec) sec.classList.add('active');
+  if (section === 'calendar')   _calInit();
+  if (section === 'calculator') calcRenderHistory();
+  if (section === 'lease')      lcDashboardInit();
+}
+
+function _calInit() {
+  if (!calViewYear) {
+    calCurrentView = calLoadView();
+    calToday();
+    calInitFilterUI();
+    calSetView(calCurrentView);
+  } else {
+    calRender();
+  }
+  calMaybeShowNudge();
+}
+
+// ── Settings collapse (Profile tab) ───────────────────────────────────────────
+function toggleSettingsCollapse() {
+  var body  = document.getElementById('settings-collapse-body');
+  var arrow = document.getElementById('settings-collapse-arrow');
+  var isOpen = body && body.style.display !== 'none';
+  if (body)  body.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.classList.toggle('open', !isOpen);
+}
+function openSettingsCollapse() {
+  var body  = document.getElementById('settings-collapse-body');
+  var arrow = document.getElementById('settings-collapse-arrow');
+  if (body  && body.style.display  === 'none') body.style.display  = 'block';
+  if (arrow && !arrow.classList.contains('open')) arrow.classList.add('open');
+}
+
+// ── Vibe card (shell — quiz wired in Session 42) ───────────────────────────────
+function showVibeComingSoon() {
+  var el = document.getElementById('vibe-coming-soon');
+  if (el) el.style.display = 'block';
+}
+
+// ── Lease Companion in Dashboard ─────────────────────────────────────────────
+function lcDashboardInit() {
+  var start  = localStorage.getItem('ur_lc_start')   || '';
+  var end    = localStorage.getItem('ur_lc_end')     || '';
+  var rent   = localStorage.getItem('ur_lc_rent')    || '';
+  var bond   = localStorage.getItem('ur_lc_bond')    || '';
+  var notice = localStorage.getItem('ur_lc_notice')  || '28 days';
+  var inspect= localStorage.getItem('ur_lc_inspect') || 'Every 3 months';
+
+  var resultEl = document.getElementById('lc-dashboard-result');
+  var formEl   = document.getElementById('lc-dashboard-form');
+  if (!resultEl || !formEl) return;
+
+  if (start && end) {
+    resultEl.style.display = 'block';
+    formEl.style.display   = 'none';
+    // Summary grid
+    var grid = document.getElementById('lc-summary-grid');
+    if (grid) {
+      var items = [
+        ['Lease start', start], ['Lease end', end],
+        ['Weekly rent', rent ? '$' + rent.replace(/[^0-9]/g,'') : '—'],
+        ['Bond', bond ? '$' + bond.replace(/[^0-9]/g,'') : '—'],
+        ['Notice period', notice], ['Inspections', inspect]
+      ];
+      grid.innerHTML = items.map(function(x) {
+        return '<div class="lc-summary-item"><div class="lc-summary-item-label">' + x[0] + '</div><div class="lc-summary-item-val">' + (x[1]||'—') + '</div></div>';
+      }).join('');
+    }
+    lcDashboardRenderTimeline(start, end, notice, rent);
+  } else {
+    resultEl.style.display = 'none';
+    formEl.style.display   = 'block';
+    var dbStart = document.getElementById('lc-db-start');
+    var dbEnd   = document.getElementById('lc-db-end');
+    var dbRent  = document.getElementById('lc-db-rent');
+    var dbBond  = document.getElementById('lc-db-bond');
+    if (dbStart) dbStart.value = start;
+    if (dbEnd)   dbEnd.value   = end;
+    if (dbRent)  dbRent.value  = rent;
+    if (dbBond)  dbBond.value  = bond;
+  }
+}
+function showLcForm() {
+  var r = document.getElementById('lc-dashboard-result');
+  var f = document.getElementById('lc-dashboard-form');
+  if (r) r.style.display = 'none';
+  if (f) f.style.display = 'block';
+}
+function lcDashboardSave() {
+  var start  = (document.getElementById('lc-db-start').value  || '').trim();
+  var end    = (document.getElementById('lc-db-end').value    || '').trim();
+  var rent   = (document.getElementById('lc-db-rent').value   || '').trim().replace(/[^0-9.]/g,'');
+  var bond   = (document.getElementById('lc-db-bond').value   || '').trim().replace(/[^0-9.]/g,'');
+  var notice = document.getElementById('lc-db-notice').value  || '28 days';
+  var inspect= document.getElementById('lc-db-inspect').value || 'Every 3 months';
+  var uni    = document.getElementById('lc-db-uni').value     || '';
+  if (!start || !end) { showToast('Missing dates', 'Please enter both lease start and end dates.'); return; }
+  localStorage.setItem('ur_lc_start',   start);
+  localStorage.setItem('ur_lc_end',     end);
+  if (rent)    localStorage.setItem('ur_lc_rent',    rent);
+  if (bond)    localStorage.setItem('ur_lc_bond',    bond);
+  if (notice)  localStorage.setItem('ur_lc_notice',  notice);
+  if (inspect) localStorage.setItem('ur_lc_inspect', inspect);
+  if (uni)     localStorage.setItem('ur_lc_uni',     uni);
+  if (typeof lcPopulateCalendar === 'function') lcPopulateCalendar(start, end, inspect, notice);
+  showToast('Lease Companion active! 🤠', 'Your tenancy timeline is set up. Check Calendar for key dates.');
+  lcDashboardInit();
+}
+function lcDashboardRenderTimeline(startDate, endDate, noticePeriod, rent) {
+  var wrap = document.getElementById('lc-dashboard-timeline');
+  if (!wrap) return;
+  var sd = new Date(startDate);
+  var ed = new Date(endDate);
+  if (isNaN(sd)||isNaN(ed)) { wrap.innerHTML='<div style="font-size:13px;color:var(--text-muted)">Could not parse dates — please check your lease details.</div>'; return; }
+  var fmt = function(d) { return d.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}); };
+  var crDeadline = new Date(sd); crDeadline.setDate(crDeadline.getDate()+3);
+  var nd = parseInt((noticePeriod||'28').replace(/[^0-9]/g,''))||28;
+  var noticeDeadline = new Date(ed); noticeDeadline.setDate(noticeDeadline.getDate()-nd);
+  var renewalDecision = new Date(ed); renewalDecision.setDate(renewalDecision.getDate()-90);
+  var today = new Date(); today.setHours(0,0,0,0);
+  var items = [
+    { dot:'urgent', icon:'⚠️', date:fmt(sd),            title:'Move-in — complete condition report',     desc:'You have 3 business days (by '+fmt(crDeadline)+') to return your signed entry condition report. Photograph every room.', show: sd>=today },
+    { dot:'urgent', icon:'📸', date:fmt(crDeadline),    title:'Condition report deadline',               desc:'Final day to return signed condition report to your landlord.', show: crDeadline>=today },
+    { dot:'soon',   icon:'📋', date:fmt(renewalDecision), title:'Renewal decision — 90 days out',        desc:'Your lease ends '+fmt(ed)+'. Decide by this date whether you are renewing or vacating.', show: renewalDecision>=today },
+    { dot:'urgent', icon:'🚨', date:fmt(noticeDeadline), title:'Last day to give notice if vacating',    desc:'If you are NOT renewing, written notice is due today ('+nd+' days before lease end).', show: noticeDeadline>=today },
+    { dot:'info',   icon:'🏦', date:fmt(ed),            title:'Lease end — bond return',                 desc:'Your landlord has 14 days to return your bond or lodge a claim.', show: true }
+  ].filter(function(i){return i.show;});
+  if (!items.length) { wrap.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:8px 0;">All key tenancy dates have passed.</div>'; return; }
+  wrap.innerHTML = items.map(function(i) {
+    return '<div class="lc-tl-item"><div class="lc-tl-dot '+i.dot+'">'+i.icon+'</div><div class="lc-tl-body"><div class="lc-tl-date">'+i.date+'</div><div class="lc-tl-title">'+i.title+'</div><div class="lc-tl-desc">'+i.desc+'</div></div></div>';
+  }).join('');
 }
 
 // ── Profile helpers ───────────────────────────────────────────────────────────
@@ -3525,16 +3983,28 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 
-// ── URL param handling ──
+// ── URL param handling (V46 — backwards compat: ?tab=calendar → tenancy+calendar etc) ──
 (function() {
-  const params = new URLSearchParams(window.location.search);
-  const tab = params.get('tab');
-  if (tab && ['matches','calendar','calculator','messages','profile','settings'].includes(tab)) {
-    // Defer until after DOM + profile load
-    window.addEventListener('DOMContentLoaded', function() {
-      setTimeout(function() { switchTab(tab); }, 50);
-    });
-  }
+  var params  = new URLSearchParams(window.location.search);
+  var tab     = params.get('tab');
+  var section = params.get('section');
+  var validTabs = ['matches','tenancy','messages','profile'];
+  var legacyMap = { 'calendar':'calendar', 'calculator':'calculator', 'settings':null };
+  window.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      if (!tab) return;
+      if (validTabs.indexOf(tab) !== -1) {
+        switchTab(tab);
+        if (tab === 'tenancy' && section && ['calendar','lease','calculator'].indexOf(section) !== -1) {
+          switchTenancySection(section);
+        }
+      } else if (legacyMap.hasOwnProperty(tab)) {
+        switchTab('tenancy');
+        if (legacyMap[tab]) switchTenancySection(legacyMap[tab]);
+        if (tab === 'settings') { switchTab('profile'); openSettingsCollapse(); }
+      }
+    }, 50);
+  });
 })();
 
 // ── Init sticky strip on page load ──
@@ -3963,7 +4433,7 @@ window.addEventListener('DOMContentLoaded', function() {
 <div class="sticky-week-strip" id="sticky-week-strip">
   <span class="sws-label">📅 Next up</span>
   <div class="sws-events" id="sws-events"><!-- populated by JS --></div>
-  <a class="sws-link" href="#" onclick="switchTab('calendar');return false;">↗</a>
+  <a class="sws-link" href="#" onclick="switchTab('tenancy');switchTenancySection('calendar');return false;">↗</a>
 </div>
 </body>
 </html>
