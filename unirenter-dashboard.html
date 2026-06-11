@@ -1706,6 +1706,52 @@ body.light-mode {
   border: 1px solid rgba(75,191,224,0.25); border-radius: 14px; padding: 20px 22px;
   margin-bottom: 24px; display: flex; flex-direction: column; gap: 14px;
 }
+.lc-photo-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.lc-btn-primary {
+  background: var(--brand-yellow, #F5B800) !important;
+  color: var(--navy, #0d1f2d) !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  text-align: center;
+  justify-content: center;
+}
+.lc-btn-primary:hover { opacity: 0.88; }
+.lc-btn-secondary {
+  background: rgba(255,255,255,0.05) !important;
+  color: var(--text-muted, #7a96aa) !important;
+  font-size: 13px !important;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+.lc-btn-secondary:hover { border-color: rgba(75,191,224,0.3) !important; color: var(--brand-blue, #4BBFE0) !important; }
+.lc-manual-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  margin-top: 8px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.lc-manual-label {
+  font-size: 13px;
+  color: var(--text-muted, #7a96aa);
+}
+.lc-manual-btn {
+  font-size: 12px;
+  color: var(--brand-blue, #4BBFE0);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.lc-manual-btn:hover { text-decoration: underline; }
 .lc-entry-header { display: flex; align-items: flex-start; gap: 14px; }
 .lc-entry-icon { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
 .lc-entry-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
@@ -2068,6 +2114,101 @@ body.light-mode {
   .household-actions { flex-direction: column; }
   .household-action-btn { text-align: center; }
 }
+
+/* ── Household empty state ── */
+.hh-cob-intro {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: rgba(245,184,0,0.06);
+  border: 1px solid rgba(245,184,0,0.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+.hh-cob-avatar { font-size: 24px; flex-shrink: 0; }
+.hh-cob-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+.hh-preview-card {
+  position: relative;
+  background: var(--navy-mid, #162535);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  text-align: left;
+}
+.hh-preview-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+.hh-preview-members {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.hh-preview-member {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.hh-preview-member.you {
+  border-color: rgba(75,191,224,0.4);
+  color: var(--brand-blue, #4BBFE0);
+}
+.hh-preview-cob-line {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-bottom: 14px;
+  line-height: 1.4;
+  border-left: 2px solid rgba(245,184,0,0.3);
+  padding-left: 10px;
+}
+.hh-compat-rows { display: flex; flex-direction: column; gap: 8px; }
+.hh-compat-row { display: flex; align-items: center; gap: 8px; }
+.hh-compat-label { font-size: 12px; color: var(--text-muted); width: 100px; flex-shrink: 0; }
+.hh-compat-bar-wrap { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+.hh-compat-bar { height: 100%; border-radius: 3px; transition: width 0.4s; }
+.hh-compat-tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+.hh-compat-tag.green { background: rgba(61,170,92,0.15); color: #3DAA5C; }
+.hh-compat-tag.yellow { background: rgba(245,184,0,0.12); color: #F5B800; }
+.hh-compat-tag.blue { background: rgba(75,191,224,0.12); color: #4BBFE0; }
+.hh-preview-blur-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 32px 16px 12px;
+  background: linear-gradient(to bottom, transparent, rgba(22,37,53,0.97) 50%);
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+}
+.hh-family-banner {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: rgba(75,191,224,0.06);
+  border: 1px solid rgba(75,191,224,0.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+.hh-family-banner-icon { font-size: 22px; flex-shrink: 0; }
+.hh-family-banner-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.hh-family-banner-sub { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -2289,15 +2430,36 @@ body.light-mode {
 
     <!-- ── Lease Companion Entry Card ── -->
     <div class="lc-entry-card" id="lc-entry-card">
-      <div class="lc-entry-header">
-        <div class="lc-entry-icon">🤠</div>
-        <div>
-          <div class="lc-entry-title" id="lc-entry-title">Track your lease</div>
-          <div class="lc-entry-sub" id="lc-entry-sub">Oi! Drop your lease start date and I'll handle the rest — key dates, notice deadlines, the lot. 🤠</div>
+      <!-- NOT SET UP state -->
+      <div id="lc-entry-setup" style="display:block;">
+        <div class="lc-entry-header">
+          <div class="lc-entry-icon">🤠</div>
+          <div>
+            <div class="lc-entry-title">Track your lease with Cob</div>
+            <div class="lc-entry-sub">Cob reads your lease and builds your full tenancy timeline automatically — key dates, notice deadlines, inspection reminders, the lot.</div>
+          </div>
+        </div>
+        <div class="lc-photo-row">
+          <a class="lc-entry-btn lc-btn-primary" href="/lease-companion#photo">
+            📸 Photo my lease — Cob will do the rest
+          </a>
+          <a class="lc-entry-btn lc-btn-secondary" href="/lease-companion">
+            Enter manually ↗
+          </a>
         </div>
       </div>
-      <div class="lc-entry-next-date" id="lc-entry-next-date" style="display:none;"></div>
-      <a class="lc-entry-btn" href="/lease-companion">Open Lease Companion ↗</a>
+      <!-- ACTIVE state — shown by lcEntryCardInit when lease dates exist -->
+      <div id="lc-entry-active" style="display:none;">
+        <div class="lc-entry-header">
+          <div class="lc-entry-icon">✅</div>
+          <div>
+            <div class="lc-entry-title" id="lc-entry-title">Lease tracked</div>
+            <div class="lc-entry-sub" id="lc-entry-sub"></div>
+          </div>
+        </div>
+        <div class="lc-entry-next-date" id="lc-entry-next-date" style="display:none;"></div>
+        <a class="lc-entry-btn lc-btn-secondary" href="/lease-companion">Open Lease Companion ↗</a>
+      </div>
     </div>
 
     <!-- ── CALENDAR ── -->
@@ -2415,230 +2577,125 @@ body.light-mode {
       <button class="cal-add-btn" id="cal-add-btn" onclick="calSaveEvent()">Add date</button>
     </div>
   </div>
+    <!-- /tenancy-calendar-section -->
 
-  <!-- ══════════════════════════════════════════════════════ -->
-    </div><!-- /tenancy-calendar-section -->
-
-    <!-- ── LEASE COMPANION (embedded) ── -->
-    <div id="tenancy-lease-section">
-    <!-- ── Lease Companion (Tenancy → Lease sub-section) ── -->
-    <div class="lc-section-header">
-      <div>
-        <div class="section-title">📋 Lease Companion</div>
-        <div class="section-sub">Cob manages your tenancy timeline — key dates, reminders, and guidance</div>
-      </div>
-      <a href="/lease-companion" class="section-action" style="text-decoration:none;">Open full page ↗</a>
-    </div>
-
-    <!-- Result view (when lease companion already saved) -->
-    <div id="lc-dashboard-result" style="display:none;">
-      <div class="lc-summary-card" id="lc-summary-card">
-        <div class="lc-summary-head">
-          <span class="lc-summary-label">✅ Lease Companion active</span>
-          <button class="lc-edit-btn" onclick="showLcForm()">Edit</button>
-        </div>
-        <div class="lc-summary-grid" id="lc-summary-grid"></div>
-      </div>
-      <div class="lc-timeline-head">📅 Your tenancy timeline</div>
-      <div id="lc-dashboard-timeline"></div>
-    </div>
-
-    <!-- Form view (when not yet saved, or editing) -->
-    <div id="lc-dashboard-form">
-      <div class="lc-cob-intro">
-        <div class="lc-cob-av">🤠</div>
-        <div class="lc-cob-msg">
-          <strong>Oi! Set up your Lease Companion.</strong> Enter your lease details and I'll build your personal tenancy timeline — I'll remind you about your condition report deadline, inspections, renewal decision, notice deadline, and lease end. Takes 30 seconds.
-        </div>
-      </div>
-      <div class="lc-form-grid">
-        <div class="lc-field-group">
-          <label class="lc-field-label">Lease start date</label>
-          <input class="lc-input" id="lc-db-start" type="text" placeholder="e.g. 1 Feb 2025 or 2025-02-01">
-        </div>
-        <div class="lc-field-group">
-          <label class="lc-field-label">Lease end date</label>
-          <input class="lc-input" id="lc-db-end" type="text" placeholder="e.g. 31 Jan 2026 or 2026-01-31">
-        </div>
-        <div class="lc-field-group">
-          <label class="lc-field-label">Weekly rent ($)</label>
-          <input class="lc-input" id="lc-db-rent" type="text" placeholder="e.g. $320">
-        </div>
-        <div class="lc-field-group">
-          <label class="lc-field-label">Bond amount ($)</label>
-          <input class="lc-input" id="lc-db-bond" type="text" placeholder="e.g. $1,280">
-        </div>
-        <div class="lc-field-group">
-          <label class="lc-field-label">Notice period</label>
-          <select class="lc-input" id="lc-db-notice">
-            <option value="28 days">28 days</option>
-            <option value="14 days">14 days</option>
-            <option value="21 days">21 days</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="lc-field-group">
-          <label class="lc-field-label">Inspection frequency</label>
-          <select class="lc-input" id="lc-db-inspect">
-            <option value="Every 3 months">Every 3 months</option>
-            <option value="Every 6 months">Every 6 months</option>
-            <option value="Annually">Annually</option>
-          </select>
-        </div>
-        <div class="lc-field-group" style="grid-column:1/-1;">
-          <label class="lc-field-label">University (for semester dates)</label>
-          <select class="lc-input" id="lc-db-uni">
-            <option value="">Select your university</option>
-            <option>University of Melbourne</option><option>RMIT University</option>
-            <option>Monash University</option><option>UNSW Sydney</option>
-            <option>University of Sydney</option><option>UTS</option>
-            <option>UQ Brisbane</option><option>QUT Brisbane</option>
-            <option>Griffith University</option><option>University of Adelaide</option>
-            <option>UniSA</option><option>Flinders University</option>
-            <option>University of Western Australia</option><option>Curtin University</option>
-            <option>Murdoch University</option><option>Australian National University</option>
-            <option>University of Canberra</option><option>Other</option>
-          </select>
-        </div>
-      </div>
-      <button class="lc-save-btn" onclick="lcDashboardSave()">Set up my Lease Companion 🤠</button>
-    </div>
-    </div>
-    </div><!-- /tenancy-lease-section -->
-
-    <!-- ── CALCULATOR ── -->
+    <!-- ── Calculator ── -->
     <div id="tenancy-calculator-section">
-
-    <div class="section-header">
-      <div>
-        <div class="section-title">🧮 Calculator</div>
-        <div class="section-sub">Budget tools for smarter housing decisions</div>
-      </div>
-    </div>
-
-    <!-- Mode tabs -->
-    <div class="calc-mode-tabs">
-      <button class="calc-mode-btn active" id="calc-mode-btn-budget" onclick="calcSetMode('budget')">💰 Budget</button>
-      <button class="calc-mode-btn" id="calc-mode-btn-break" onclick="calcSetMode('break')">📋 Break lease</button>
-      <button class="calc-mode-btn" id="calc-mode-btn-increase" onclick="calcSetMode('increase')">📈 Rent increase</button>
-    </div>
-
-    <!-- MODE 1: Budget calculator -->
-    <div class="calc-panel active" id="calc-panel-budget">
-      <div class="calc-field-group">
-        <label class="calc-label" for="calc-weekly-rent">Weekly rent ($)</label>
-        <input class="calc-input" type="number" id="calc-weekly-rent" placeholder="e.g. 260" min="0" max="5000">
-      </div>
-      <div class="calc-field-group">
-        <label class="calc-label" for="calc-bedrooms">Bedrooms in property</label>
-        <input class="calc-input" type="number" id="calc-bedrooms" placeholder="e.g. 3" min="1" max="10" value="3">
-      </div>
-      <div class="calc-toggle-row">
-        <label class="calc-toggle-item">
-          <input type="checkbox" id="calc-furnished"> Furnished
-        </label>
-        <label class="calc-toggle-item">
-          <input type="checkbox" id="calc-utilities"> Utilities included
-        </label>
-      </div>
-      <button class="calc-btn" onclick="calcRunBudget()">Calculate costs</button>
-      <div class="calc-result" id="calc-result-budget">
-        <div class="calc-result-grid">
-          <div class="calc-result-item">
-            <div class="calc-result-label">Weekly cost</div>
-            <div class="calc-result-val highlight" id="calc-out-weekly">—</div>
-          </div>
-          <div class="calc-result-item">
-            <div class="calc-result-label">Monthly cost</div>
-            <div class="calc-result-val" id="calc-out-monthly">—</div>
-          </div>
-          <div class="calc-result-item">
-            <div class="calc-result-label">Bond required</div>
-            <div class="calc-result-val" id="calc-out-bond">—</div>
-          </div>
-          <div class="calc-result-item">
-            <div class="calc-result-label">Total move-in cost</div>
-            <div class="calc-result-val highlight" id="calc-out-movein">—</div>
-          </div>
-        </div>
-        <div id="calc-budget-note" style="margin-top:12px;font-size:12px;color:var(--text-muted);line-height:1.5;"></div>
-      </div>
-    </div>
-
-    <!-- MODE 2: Break lease cost estimator -->
-    <div class="calc-panel" id="calc-panel-break">
-      <div class="calc-field-group">
-        <label class="calc-label" for="calc-break-rent">Weekly rent ($)</label>
-        <input class="calc-input" type="number" id="calc-break-rent" placeholder="e.g. 280" min="0" max="5000">
-      </div>
-      <div class="calc-field-group">
-        <label class="calc-label" for="calc-break-weeks">Weeks remaining on lease</label>
-        <input class="calc-input" type="number" id="calc-break-weeks" placeholder="e.g. 24" min="0" max="260">
-      </div>
-      <button class="calc-btn" onclick="calcRunBreak()">Estimate cost</button>
-      <div class="calc-result" id="calc-result-break">
-        <div class="calc-result-grid" style="grid-template-columns:1fr 1fr;">
-          <div class="calc-result-item">
-            <div class="calc-result-label">Max liability</div>
-            <div class="calc-result-val danger" id="calc-out-break-total">—</div>
-          </div>
-          <div class="calc-result-item">
-            <div class="calc-result-label">Weeks remaining</div>
-            <div class="calc-result-val" id="calc-out-break-weeks">—</div>
-          </div>
-        </div>
-        <div id="calc-break-note" style="margin-top:12px;font-size:12px;color:var(--text-muted);line-height:1.5;"></div>
-        <div class="calc-cob-nudge" id="calc-break-cob" style="display:none;">
-          <div class="cob-av">🤠</div>
-          <div class="cob-txt"><strong>That's a significant amount.</strong> A break lease listing on UniRenter can help you find an incoming tenant fast — potentially reducing your liability to near zero if someone takes over quickly. <a href="/lease" style="color:var(--brand-blue);">List your break lease ↗</a></div>
+      <div class="section-header">
+        <div>
+          <div class="section-title">🧮 Calculator</div>
+          <div class="section-sub">Budget tools for smarter housing decisions</div>
         </div>
       </div>
-    </div>
 
-    <!-- MODE 3: Rent increase assessment -->
-    <div class="calc-panel" id="calc-panel-increase">
-      <div class="calc-field-group">
-        <label class="calc-label" for="calc-current-rent">Current weekly rent ($)</label>
-        <input class="calc-input" type="number" id="calc-current-rent" placeholder="e.g. 280" min="0" max="5000">
+      <!-- Mode tabs -->
+      <div class="calc-mode-row">
+        <button class="calc-mode-btn active" id="calc-mode-btn-budget" onclick="calcSetMode('budget')">💰 Budget</button>
+        <button class="calc-mode-btn" id="calc-mode-btn-break" onclick="calcSetMode('break')">🔄 Break lease</button>
+        <button class="calc-mode-btn" id="calc-mode-btn-increase" onclick="calcSetMode('increase')">📈 Rent increase</button>
       </div>
-      <div class="calc-field-group">
-        <label class="calc-label" for="calc-proposed-rent">Proposed weekly rent ($)</label>
-        <input class="calc-input" type="number" id="calc-proposed-rent" placeholder="e.g. 310" min="0" max="5000">
-      </div>
-      <button class="calc-btn" onclick="calcRunIncrease()">Assess increase</button>
-      <div class="calc-result" id="calc-result-increase">
-        <div class="calc-result-grid" style="grid-template-columns:1fr 1fr 1fr;">
-          <div class="calc-result-item">
-            <div class="calc-result-label">Weekly increase</div>
-            <div class="calc-result-val danger" id="calc-out-inc-wk">—</div>
-          </div>
-          <div class="calc-result-item">
-            <div class="calc-result-label">% increase</div>
-            <div class="calc-result-val danger" id="calc-out-inc-pct">—</div>
-          </div>
-          <div class="calc-result-item">
-            <div class="calc-result-label">Annual difference</div>
-            <div class="calc-result-val danger" id="calc-out-inc-yr">—</div>
+
+      <!-- MODE 1: Budget calculator -->
+      <div class="calc-section" id="calc-section-budget">
+        <div class="calc-field-group">
+          <label class="calc-label">Weekly rent ($)</label>
+          <input class="calc-input-field" id="calc-weekly-rent" type="number" placeholder="e.g. 260" min="0">
+        </div>
+        <div class="calc-field-group">
+          <label class="calc-label">Bedrooms in property</label>
+          <input class="calc-input-field" id="calc-bedrooms" type="number" placeholder="e.g. 3" min="1" max="10" value="3">
+        </div>
+        <div class="calc-checkbox-row">
+          <label class="calc-checkbox-label"><input type="checkbox" id="calc-furnished"> Furnished</label>
+          <label class="calc-checkbox-label"><input type="checkbox" id="calc-utilities"> Utilities included</label>
+        </div>
+        <button class="calc-run-btn" onclick="calcRunBudget()">Calculate costs</button>
+        <div class="calc-result" id="calc-result-budget">
+          <div class="calc-result-grid">
+            <div class="calc-result-item"><span class="calc-result-label">Weekly</span><span class="calc-result-val" id="calc-out-weekly">—</span></div>
+            <div class="calc-result-item"><span class="calc-result-label">Monthly</span><span class="calc-result-val" id="calc-out-monthly">—</span></div>
+            <div class="calc-result-item"><span class="calc-result-label">Bond (4 wks)</span><span class="calc-result-val" id="calc-out-bond">—</span></div>
+            <div class="calc-result-item"><span class="calc-result-label">Move-in total</span><span class="calc-result-val" id="calc-out-movein">—</span></div>
           </div>
         </div>
-        <div class="calc-notice-box" id="calc-increase-notice"></div>
+      </div>
+
+      <!-- MODE 2: Break lease cost estimator -->
+      <div class="calc-section" id="calc-section-break" style="display:none;">
+        <div class="calc-field-group">
+          <label class="calc-label">Weekly rent ($)</label>
+          <input class="calc-input-field" id="calc-break-rent" type="number" placeholder="e.g. 320" min="0">
+        </div>
+        <div class="calc-field-group">
+          <label class="calc-label">Weeks remaining on lease</label>
+          <input class="calc-input-field" id="calc-break-weeks" type="number" placeholder="e.g. 24" min="0">
+        </div>
+        <div class="calc-field-group">
+          <label class="calc-label">Letting agent fee (from your lease)</label>
+          <div class="calc-agent-fee-row">
+            <select class="calc-select-field" id="calc-agent-fee-type" onchange="calcToggleAgentFee()">
+              <option value="none">None / not specified</option>
+              <option value="1week">1 week's rent</option>
+              <option value="2weeks">2 weeks' rent</option>
+              <option value="custom">Custom amount ($)</option>
+            </select>
+            <input class="calc-input-field" id="calc-agent-fee-custom" type="number" placeholder="e.g. 550" style="display:none;margin-top:6px;">
+          </div>
+          <div class="calc-field-hint">Check your lease agreement for the re-letting or break-lease admin fee charged by your agent.</div>
+        </div>
+        <button class="calc-run-btn" onclick="calcRunBreak()">Calculate exposure</button>
+        <div class="calc-result" id="calc-result-break">
+          <div class="calc-result-grid">
+            <div class="calc-result-item"><span class="calc-result-label">Rent liability</span><span class="calc-result-val" id="calc-out-break-total">—</span></div>
+            <div class="calc-result-item"><span class="calc-result-label">Weeks remaining</span><span class="calc-result-val" id="calc-out-break-weeks">—</span></div>
+            <div class="calc-result-item" id="calc-agent-fee-row" style="display:none;"><span class="calc-result-label">Agent re-letting fee</span><span class="calc-result-val" id="calc-out-agent-fee">—</span></div>
+            <div class="calc-result-item calc-result-total"><span class="calc-result-label">Total exposure</span><span class="calc-result-val" id="calc-out-break-grand">—</span></div>
+          </div>
+          <div class="calc-result-note" id="calc-break-note"></div>
+          <div class="calc-cob-nudge" id="calc-break-cob" style="display:none;">
+            <span class="calc-cob-avatar">🤠</span>
+            <span>That's a significant exposure. Break lease board is free to list — <a href="/lease" style="color:var(--brand-yellow);">post yours</a> and Cob will guide both parties through the handover.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODE 3: Rent increase assessment -->
+      <div class="calc-section" id="calc-section-increase" style="display:none;">
+        <div class="calc-field-group">
+          <label class="calc-label">Current weekly rent ($)</label>
+          <input class="calc-input-field" id="calc-inc-current" type="number" placeholder="e.g. 320" min="0">
+        </div>
+        <div class="calc-field-group">
+          <label class="calc-label">Proposed weekly rent ($)</label>
+          <input class="calc-input-field" id="calc-inc-proposed" type="number" placeholder="e.g. 360" min="0">
+        </div>
+        <button class="calc-run-btn" onclick="calcRunIncrease()">Assess increase</button>
+        <div class="calc-result" id="calc-result-increase">
+          <div class="calc-result-grid">
+            <div class="calc-result-item"><span class="calc-result-label">Weekly increase</span><span class="calc-result-val" id="calc-out-inc-week">—</span></div>
+            <div class="calc-result-item"><span class="calc-result-label">% increase</span><span class="calc-result-val" id="calc-out-inc-pct">—</span></div>
+            <div class="calc-result-item"><span class="calc-result-label">Annual difference</span><span class="calc-result-val" id="calc-out-inc-annual">—</span></div>
+          </div>
+          <div class="calc-result-note" id="calc-increase-notice"></div>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="calc-divider"></div>
+      <div id="calc-history-wrap">
+        <div class="calc-history-title">Recent calculations</div>
+        <div class="calc-history-list" id="calc-history-list">
+          <div style="font-size:13px;color:var(--text-muted);padding:8px 0;">No recent calculations yet.</div>
+        </div>
       </div>
     </div>
+    <!-- /tenancy-calculator-section -->
 
-    <!-- History -->
-    <div class="calc-divider"></div>
-    <div id="calc-history-wrap">
-      <div class="calc-history-title">Recent calculations</div>
-      <div class="calc-history-list" id="calc-history-list">
-        <div style="font-size:13px;color:var(--text-muted);padding:8px 0;">No recent calculations yet.</div>
-      </div>
+    <!-- ── Manual entry link ── -->
+    <div class="lc-manual-link" id="lc-manual-link">
+      <span class="lc-manual-label">Prefer to enter manually?</span>
+      <a href="/lease-companion" class="lc-manual-btn">Open full Lease Companion ↗</a>
     </div>
-  </div>
-
-
-  <!-- ══════════════════════════════════════════════════════ -->
-    </div>
-    </div><!-- /tenancy-calculator-section -->
 
   </div><!-- /panel-tenancy -->
 
@@ -2665,10 +2722,60 @@ body.light-mode {
 
     <!-- Dynamic inner content populated by JS -->
     <div id="household-inner">
-      <!-- empty state default -->
+      <!-- empty state — rich preview with dummy card -->
       <div class="household-empty" id="household-empty-state">
-        <div class="household-empty-icon">🤠</div>
-        <p>Living with others? Invite your flatmates and see how you all compare — sleep schedules, cleanliness, guests, the lot.</p>
+
+        <!-- Cob intro -->
+        <div class="hh-cob-intro">
+          <div class="hh-cob-avatar">🤠</div>
+          <div class="hh-cob-text">
+            <strong>Living with others?</strong> Set up your household and Cob will map your compatibility — sleep schedules, cleanliness, guests, kitchen habits, the lot. The more flatmates join, the more useful it gets.
+          </div>
+        </div>
+
+        <!-- Dummy preview card -->
+        <div class="hh-preview-card">
+          <div class="hh-preview-label">Example household</div>
+          <div class="hh-preview-members">
+            <div class="hh-preview-member you">🌙 <span>You</span></div>
+            <div class="hh-preview-member">🍳 <span>Alex</span></div>
+            <div class="hh-preview-member">📚 <span>Jordan</span></div>
+          </div>
+          <div class="hh-preview-cob-line">"Two night owls and a home cook — kitchen's going to be well used. Agree on grocery sharing early. 🤠"</div>
+          <div class="hh-compat-rows">
+            <div class="hh-compat-row">
+              <span class="hh-compat-label">🌙 Sleep</span>
+              <div class="hh-compat-bar-wrap"><div class="hh-compat-bar" style="width:90%;background:#3DAA5C;"></div></div>
+              <span class="hh-compat-tag green">In sync</span>
+            </div>
+            <div class="hh-compat-row">
+              <span class="hh-compat-label">🧹 Cleanliness</span>
+              <div class="hh-compat-bar-wrap"><div class="hh-compat-bar" style="width:55%;background:#F5B800;"></div></div>
+              <span class="hh-compat-tag yellow">Mixed</span>
+            </div>
+            <div class="hh-compat-row">
+              <span class="hh-compat-label">🎉 Guests</span>
+              <div class="hh-compat-bar-wrap"><div class="hh-compat-bar" style="width:80%;background:#3DAA5C;"></div></div>
+              <span class="hh-compat-tag green">In sync</span>
+            </div>
+            <div class="hh-compat-row">
+              <span class="hh-compat-label">🍳 Kitchen</span>
+              <div class="hh-compat-bar-wrap"><div class="hh-compat-bar" style="width:70%;background:#4BBFE0;"></div></div>
+              <span class="hh-compat-tag blue">Lively</span>
+            </div>
+          </div>
+          <div class="hh-preview-blur-overlay">This is a preview — invite your flatmates to see your real household</div>
+        </div>
+
+        <!-- Share with family banner -->
+        <div class="hh-family-banner">
+          <div class="hh-family-banner-icon">👨‍👩‍👧</div>
+          <div class="hh-family-banner-body">
+            <div class="hh-family-banner-title">Share with family back home</div>
+            <div class="hh-family-banner-sub">International students can share their household card with parents and family — a real glimpse into their home life. Set up your household to generate a shareable card.</div>
+          </div>
+        </div>
+
         <button class="household-setup-btn" onclick="householdSetup()">Set up my household →</button>
       </div>
     </div>
@@ -3114,35 +3221,46 @@ function switchTenancySection(section) {
 function lcEntryCardInit() {
   var start = localStorage.getItem('ur_lc_start');
   var end = localStorage.getItem('ur_lc_end');
-  var titleEl = document.getElementById('lc-entry-title');
-  var subEl = document.getElementById('lc-entry-sub');
-  var nextEl = document.getElementById('lc-entry-next-date');
-  if (!titleEl) return;
-  if (start && end) {
-    titleEl.textContent = 'Your lease is tracked';
-    subEl.textContent = 'Lease runs ' + start + ' → ' + end + '. Open Lease Companion for key dates and upcoming deadlines.';
-    // Find next calendar event from housing category
-    try {
-      var events = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]');
-      var today = new Date();
-      var housing = events.filter(function(e) {
-        return ['lease','rent','inspection','bond'].indexOf(e.cat || e.category) >= 0;
-      }).filter(function(e) {
-        return new Date(e.date) >= today;
-      }).sort(function(a,b) { return new Date(a.date) - new Date(b.date); });
-      if (housing.length > 0) {
-        var next = housing[0];
-        var diff = Math.ceil((new Date(next.date) - today) / 86400000);
-        if (nextEl) {
-          nextEl.style.display = 'block';
-          nextEl.textContent = 'Next: ' + next.title + ' — ' + (diff <= 0 ? 'today' : diff + ' days away');
-        }
-      }
-    } catch(e) {}
-  } else {
-    titleEl.textContent = 'Track your lease';
-    subEl.textContent = "Oi! Drop your lease start date and I’ll handle the rest — key dates, notice deadlines, the lot. 🤠";
-    if (nextEl) nextEl.style.display = 'none';
+  var setupEl  = document.getElementById('lc-entry-setup');
+  var activeEl = document.getElementById('lc-entry-active');
+  var titleEl  = document.getElementById('lc-entry-title');
+  var subEl    = document.getElementById('lc-entry-sub');
+  var nextEl   = document.getElementById('lc-entry-next-date');
+
+  if (!start || !end) {
+    if (setupEl)  setupEl.style.display  = 'block';
+    if (activeEl) activeEl.style.display = 'none';
+    return;
+  }
+
+  // Lease is set up — show active state
+  if (setupEl)  setupEl.style.display  = 'none';
+  if (activeEl) activeEl.style.display = 'block';
+
+  if (titleEl) titleEl.textContent = 'Lease tracked';
+  if (subEl) {
+    var s = new Date(start + 'T00:00:00');
+    var e = new Date(end + 'T00:00:00');
+    var opts = { day: 'numeric', month: 'short', year: 'numeric' };
+    subEl.textContent = s.toLocaleDateString('en-AU', opts) + ' → ' + e.toLocaleDateString('en-AU', opts);
+  }
+
+  // Next key date
+  if (nextEl) {
+    var events = [];
+    try { events = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]'); } catch(e2) {}
+    var now = new Date(); now.setHours(0,0,0,0);
+    var upcoming = events
+      .filter(function(ev) { return ev.date && new Date(ev.date + 'T00:00:00') >= now; })
+      .sort(function(a,b) { return a.date.localeCompare(b.date); });
+    if (upcoming.length) {
+      var next = upcoming[0];
+      var d = new Date(next.date + 'T00:00:00');
+      var diff = Math.round((d - now) / 86400000);
+      var label = diff === 0 ? 'today' : diff === 1 ? 'tomorrow' : 'in ' + diff + ' days';
+      nextEl.textContent = '📅 Next: ' + next.title + ' — ' + label;
+      nextEl.style.display = 'block';
+    }
   }
 }
 
@@ -3810,15 +3928,15 @@ function loadProfile() {
   // Header — immediate paint from localStorage
   if (email) {
     document.getElementById('header-email').textContent = email;
-    document.getElementById('acct-email').textContent = email;
+    document.getElementById('sp-acct-email').textContent = email;
   } else {
     document.getElementById('header-email').textContent = 'Not signed in';
-    document.getElementById('acct-email').textContent = 'Not verified';
+    document.getElementById('sp-acct-email').textContent = 'Not verified';
   }
   document.getElementById('header-pct-bar').style.width  = pct + '%';
   document.getElementById('profile-pct-bar').style.width = pct + '%';
   document.getElementById('profile-pct-label').textContent = pct + '% complete';
-  document.getElementById('acct-pct').textContent = pct + '% complete';
+  document.getElementById('sp-acct-pct').textContent = pct + '% complete';
 
   const badgesEl = document.getElementById('header-badges');
   if (pct > 0) {
@@ -3836,7 +3954,7 @@ function loadProfile() {
         document.getElementById('header-pct-bar').style.width  = sbPct + '%';
         document.getElementById('profile-pct-bar').style.width = sbPct + '%';
         document.getElementById('profile-pct-label').textContent = sbPct + '% complete';
-        document.getElementById('acct-pct').textContent = sbPct + '% complete';
+        document.getElementById('sp-acct-pct').textContent = sbPct + '% complete';
         localStorage.setItem('unirenter_profile_complete', String(sbPct));
 
         const cobRefined = profile.cob_refined_fields || [];
@@ -4046,41 +4164,32 @@ function renderMatches() {
   grid.innerHTML = '';
 
   const email = localStorage.getItem('unirenter_email');
-  // Coming soon card if no email
-  if (!email) {
-    const cs = document.createElement('div');
-    cs.className = 'cs-card';
-    cs.innerHTML = `
-      <h3>🎯 Complete your profile to see matches</h3>
-      <p>Head back to the home page to finish your profile — takes about 3 minutes.<br>
-      We'll show you compatible students as soon as you're set up.</p>
-      <br>
-      <a href="/" style="display:inline-block;background:var(--brand-yellow);color:var(--navy);
-        font-family:var(--font-display);font-weight:700;font-size:14px;padding:12px 28px;
-        border-radius:10px;text-decoration:none;">Build my profile →</a>`;
-    grid.appendChild(cs);
-    const row = document.getElementById('vibe-filter-row');
-    if (row) { row.style.display = 'none'; row.innerHTML = ''; }
-    return;
-  }
 
   // Show dummy/real matches
   DUMMY_MATCHES.forEach(p => grid.appendChild(renderMatchCard(p)));
 
-  // Add coming-soon card at end
+  // Add card at end — profile CTA if no email, referral if signed in
   const cs = document.createElement('div');
   cs.className = 'cs-card';
   cs.style.cssText = 'text-align:center;';
-  cs.innerHTML = `
-    <p style="font-size:13px;color:var(--text-muted);">
-      More matches will appear as new students join UniRenter.<br>
-      Share your referral link to help more students find a housemate.
-    </p>
-    <button onclick="copyReferral()" style="margin-top:12px;background:none;
-      border:1px solid rgba(75,191,224,0.3);color:var(--brand-blue);
-      font-family:var(--font-body);font-size:12px;padding:7px 16px;border-radius:8px;cursor:pointer;">
-      📋 Copy referral link
-    </button>`;
+  if (!email) {
+    cs.innerHTML = `
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">These are example matches — your real ones appear once you complete your profile.</p>
+      <a href="/" style="display:inline-block;background:var(--brand-yellow);color:var(--navy);
+        font-family:var(--font-display);font-weight:700;font-size:13px;padding:10px 24px;
+        border-radius:8px;text-decoration:none;">Build my profile →</a>`;
+  } else {
+    cs.innerHTML = `
+      <p style="font-size:13px;color:var(--text-muted);">
+        More matches will appear as new students join UniRenter.<br>
+        Share your referral link to help more students find a housemate.
+      </p>
+      <button onclick="copyReferral()" style="margin-top:12px;background:none;
+        border:1px solid rgba(75,191,224,0.3);color:var(--brand-blue);
+        font-family:var(--font-body);font-size:12px;padding:7px 16px;border-radius:8px;cursor:pointer;">
+        📋 Copy referral link
+      </button>`;
+  }
   grid.appendChild(cs);
   // Render vibe emoji filter chips after match cards are in the DOM
   renderVibeFilterChips();
@@ -4441,10 +4550,6 @@ function submitReport() {
   selectedReport = null;
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
-loadProfile();
-renderMatches();
-
 // ── Calendar tab ─────────────────────────────────────────────────────────────
 const CAL_STORE_KEY = 'ur_calendar_events';
 const CAL_FILTERS_KEY = 'ur_cal_filters';
@@ -4469,6 +4574,11 @@ const CAT_META = {
 
 // Filter groups — stored in ur_cal_filters
 const ALL_FILTERS = ['housing','uni','public_holidays','work','other'];
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadProfile();
+renderMatches();
+
 
 function calLoadEvents() {
   try { return JSON.parse(localStorage.getItem(CAL_STORE_KEY) || '[]'); }
@@ -4954,25 +5064,53 @@ function calcRunBudget(silent) {
   }
 }
 
+function calcToggleAgentFee() {
+  const sel = document.getElementById('calc-agent-fee-type');
+  const custom = document.getElementById('calc-agent-fee-custom');
+  if (custom) custom.style.display = sel && sel.value === 'custom' ? 'block' : 'none';
+}
 function calcRunBreak(silent) {
   const rent = parseFloat(document.getElementById('calc-break-rent').value);
   const weeks = parseFloat(document.getElementById('calc-break-weeks').value);
   if (!rent || rent <= 0) { alert('Please enter a weekly rent amount.'); return; }
   if (!weeks || weeks <= 0) { alert('Please enter weeks remaining.'); return; }
 
-  const total = Math.round(rent * weeks);
-  document.getElementById('calc-out-break-total').textContent = '$' + total.toLocaleString();
+  const rentLiability = Math.round(rent * weeks);
+
+  // Letting agent fee
+  const feeType = (document.getElementById('calc-agent-fee-type') || {}).value || 'none';
+  let agentFee = 0;
+  if (feeType === '1week') agentFee = Math.round(rent);
+  else if (feeType === '2weeks') agentFee = Math.round(rent * 2);
+  else if (feeType === 'custom') {
+    const custom = parseFloat((document.getElementById('calc-agent-fee-custom') || {}).value);
+    agentFee = custom > 0 ? Math.round(custom) : 0;
+  }
+  const grand = rentLiability + agentFee;
+
+  document.getElementById('calc-out-break-total').textContent = '$' + rentLiability.toLocaleString();
   document.getElementById('calc-out-break-weeks').textContent = weeks + ' wks';
 
-  let note = 'This is your maximum theoretical liability — actual costs depend on your state, lease type, and how quickly a replacement tenant is found. In most states, your landlord must mitigate their loss by actively seeking a new tenant.';
+  const agentRow = document.getElementById('calc-agent-fee-row');
+  if (agentFee > 0 && agentRow) {
+    agentRow.style.display = 'flex';
+    document.getElementById('calc-out-agent-fee').textContent = '$' + agentFee.toLocaleString();
+  } else if (agentRow) {
+    agentRow.style.display = 'none';
+  }
+
+  const grandEl = document.getElementById('calc-out-break-grand');
+  if (grandEl) grandEl.textContent = '$' + grand.toLocaleString();
+
+  const note = 'Rent liability is your maximum theoretical exposure. In most states your landlord must actively seek a replacement tenant — your actual liability may be less. The re-letting fee is charged by some agents for admin costs; check your lease agreement.';
   document.getElementById('calc-break-note').textContent = note;
 
   const cobNudge = document.getElementById('calc-break-cob');
-  cobNudge.style.display = total > 1000 ? 'flex' : 'none';
+  if (cobNudge) cobNudge.style.display = grand > 1000 ? 'flex' : 'none';
 
   document.getElementById('calc-result-break').classList.add('show');
 
-  const summary = '$' + rent + '/wk × ' + weeks + ' wks = $' + total.toLocaleString() + ' max liability';
+  const summary = '$' + rentLiability.toLocaleString() + ' rent' + (agentFee > 0 ? ' + $' + agentFee.toLocaleString() + ' agent fee' : '') + ' = $' + grand.toLocaleString() + ' total';
   if (!silent) {
     calcSaveHistory({
       id: calcGenId(), mode: 'break', calculated_at: Date.now(), expires_at: Date.now() + CALC_HISTORY_TTL,
