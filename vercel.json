@@ -24,6 +24,10 @@
       "destination": "/unirenter-cob.html"
     },
     {
+      "source": "/about",
+      "destination": "/unirenter-about.html"
+    },
+    {
       "source": "/guide",
       "destination": "/unirenter-guide.html"
     },
