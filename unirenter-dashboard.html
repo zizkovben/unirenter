@@ -1677,6 +1677,272 @@ body.light-mode {
 .settings-collapse-arrow.open { transform: rotate(180deg); }
 .settings-collapse-body { background: var(--navy-card); }
 .settings-collapse-body .settings-layout { padding: 0 0 8px; }
+
+/* ── Household Hub (S45) ── */
+.household-section {
+  background: var(--navy-card);
+  border: 1px solid var(--navy-border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.household-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.household-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text);
+}
+.household-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+/* Empty state */
+.household-empty {
+  text-align: center;
+  padding: 10px 0 4px;
+}
+.household-empty p {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+.household-setup-btn {
+  background: var(--brand-yellow);
+  color: #0d1f2d;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.household-setup-btn:hover { opacity: 0.88; }
+/* Invite panel */
+.household-invite-panel {
+  background: rgba(75,191,224,0.06);
+  border: 1px solid rgba(75,191,224,0.2);
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 12px;
+}
+.household-invite-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.household-invite-link-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.household-invite-link {
+  flex: 1;
+  min-width: 0;
+  background: var(--navy-mid);
+  border: 1px solid var(--navy-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: monospace;
+}
+.household-copy-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s;
+  flex-shrink: 0;
+}
+.household-copy-btn:hover { border-color: rgba(75,191,224,0.4); color: #4BBFE0; }
+.household-copy-btn.copied { border-color: var(--brand-green); color: var(--brand-green); }
+.household-wa-btn {
+  background: rgba(37,211,102,0.1);
+  border: 1px solid rgba(37,211,102,0.25);
+  color: #25d366;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-block;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+.household-wa-btn:hover { opacity: 0.85; }
+.household-invite-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+/* Member chips */
+.household-members-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.household-member-chip {
+  background: var(--navy-mid);
+  border: 1px solid var(--navy-border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.household-member-chip.is-you {
+  border-color: rgba(245,184,0,0.35);
+  background: rgba(245,184,0,0.07);
+}
+.household-member-emoji {
+  font-size: 16px;
+}
+/* Compatibility bars */
+.household-compat-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.household-compat-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.household-compat-icon {
+  font-size: 14px;
+  width: 20px;
+  flex-shrink: 0;
+  text-align: center;
+}
+.household-compat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  width: 90px;
+  flex-shrink: 0;
+}
+.household-compat-bar-wrap {
+  flex: 1;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  height: 6px;
+  overflow: hidden;
+}
+.household-compat-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+.household-compat-bar.sync    { background: var(--brand-green); }
+.household-compat-bar.mixed   { background: var(--brand-yellow); }
+.household-compat-bar.tension { background: #E8623A; }
+.household-compat-status {
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 60px;
+  text-align: right;
+  flex-shrink: 0;
+}
+/* Cob tip */
+.household-cob-tip {
+  background: rgba(245,184,0,0.06);
+  border-left: 3px solid var(--brand-yellow);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+/* Emoji cluster */
+.household-cluster {
+  font-size: 18px;
+  letter-spacing: 2px;
+  margin-left: 6px;
+}
+/* Action buttons */
+.household-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.household-action-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+.household-action-btn:hover { border-color: rgba(75,191,224,0.4); color: #4BBFE0; }
+.household-action-btn.primary {
+  background: rgba(245,184,0,0.1);
+  border-color: rgba(245,184,0,0.3);
+  color: var(--brand-yellow);
+}
+.household-action-btn.primary:hover { background: rgba(245,184,0,0.18); }
+/* Join confirm banner */
+.household-join-banner {
+  background: rgba(61,170,92,0.1);
+  border: 1px solid rgba(61,170,92,0.25);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.household-join-banner-icon { font-size: 20px; flex-shrink: 0; }
+.household-join-banner-body { flex: 1; }
+.household-join-banner-title { font-weight: 600; font-size: 14px; color: var(--brand-green); margin-bottom: 4px; }
+.household-join-banner-sub { font-size: 13px; color: var(--text-muted); }
+.household-join-confirm-btn {
+  background: var(--brand-green);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: opacity 0.2s;
+}
+.household-join-confirm-btn:hover { opacity: 0.88; }
+@media (max-width: 600px) {
+  .household-invite-link-row { flex-direction: column; }
+  .household-invite-link { width: 100%; }
+  .household-actions { flex-direction: column; }
+  .household-action-btn { text-align: center; }
+}
 </style>
 </head>
 <body>
@@ -2633,6 +2899,35 @@ body.light-mode {
         <div class="vibe-retake-actions">
           <button class="vibe-nav-btn" onclick="vibeConfirmRetake()">Yes, redo it</button>
           <button class="vibe-nav-btn secondary" onclick="vibeCancelRetake()">Keep it</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── My Household (S45) ── -->
+    <div class="household-section" id="household-section">
+      <div class="household-header">
+        <div>
+          <div class="household-title">My Household <span class="household-cluster" id="household-cluster"></span></div>
+          <div class="household-subtitle" id="household-subtitle">Connect with your flatmates and see how you compare.</div>
+        </div>
+        <span style="font-size:22px;opacity:0.7;">🤠</span>
+      </div>
+      <!-- Join banner (shown when ?join= param detected) -->
+      <div class="household-join-banner" id="household-join-banner" style="display:none;">
+        <div class="household-join-banner-icon">🏠</div>
+        <div class="household-join-banner-body">
+          <div class="household-join-banner-title">You've been invited to a household!</div>
+          <div class="household-join-banner-sub">Tap below to join your flatmate's household and see your compatibility.</div>
+          <button class="household-join-confirm-btn" id="household-join-confirm-btn" onclick="householdJoinConfirm()">Join household →</button>
+        </div>
+      </div>
+      <!-- Dynamic inner content populated by JS -->
+      <div id="household-inner">
+        <!-- empty state default -->
+        <div class="household-empty" id="household-empty-state">
+          <p>Living with others? Invite your flatmates and see how you all compare.</p>
+          <button class="household-setup-btn" onclick="householdSetup()">Set up my household →</button>
         </div>
       </div>
     </div>
@@ -5134,6 +5429,7 @@ window.addEventListener('DOMContentLoaded', function() {
     tier2CheckDates();
     calcRenderHistory();
     vibeInit();
+    householdInit();
   }, 300);
 });
 
@@ -5147,6 +5443,12 @@ window.addEventListener('DOMContentLoaded', function() {
   var legacyMap = { 'calendar':'calendar', 'calculator':'calculator', 'settings':null };
   window.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
+      // If ?join= param present, switch to Profile tab so household section is visible
+      var joinToken = params.get('join');
+      if (joinToken) {
+        switchTab('profile');
+        return;
+      }
       if (!tab) return;
       if (validTabs.indexOf(tab) !== -1) {
         switchTab(tab);
@@ -5549,6 +5851,312 @@ window.addEventListener('DOMContentLoaded', function() {
     checkSeasonalNudges();
   }, 800);
 });
+
+
+// ── Household Hub (S45) ────────────────────────────────────────────────────────
+
+// Pending join token (from ?join= URL param) — stored before profile verified
+window._householdPendingJoin = null;
+
+// ── householdInit: called on DOMContentLoaded + after profile actions ──
+function householdInit() {
+  var householdId = localStorage.getItem('ur_household_id');
+
+  // Check for ?join= URL param
+  var params = new URLSearchParams(window.location.search);
+  var joinToken = params.get('join');
+  if (joinToken) {
+    window._householdPendingJoin = joinToken;
+    var banner = document.getElementById('household-join-banner');
+    if (banner) banner.style.display = 'flex';
+    // Scroll Profile tab into view if not already there
+    // (join links always land on profile tab naturally via URL)
+  }
+
+  if (!householdId) {
+    householdRenderEmpty();
+    return;
+  }
+  householdLoad(householdId);
+}
+
+function householdRenderEmpty() {
+  var inner = document.getElementById('household-inner');
+  var emptyState = document.getElementById('household-empty-state');
+  if (!inner) return;
+  // If invite token exists, show the pending invite panel too
+  var token = localStorage.getItem('ur_household_invite_token');
+  if (token && emptyState) {
+    emptyState.style.display = 'none';
+    inner.innerHTML = householdInvitePanel(token);
+  }
+}
+
+function householdSetup() {
+  var email = localStorage.getItem('unirenter_email');
+  if (!email || localStorage.getItem('unirenter_email_verified') !== '1') {
+    alert('Please verify your email first to set up a household.');
+    return;
+  }
+  var btn = document.querySelector('.household-setup-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Setting up…'; }
+  fetch('/api/household/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (!d.ok) throw new Error(d.error || 'Setup failed');
+    localStorage.setItem('ur_household_id', d.household_id);
+    localStorage.setItem('ur_household_invite_token', d.invite_token);
+    householdLoad(d.household_id);
+  })
+  .catch(function(err) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Set up my household →'; }
+    alert('Could not set up household: ' + err.message);
+  });
+}
+
+function householdJoinConfirm() {
+  var token = window._householdPendingJoin;
+  if (!token) return;
+  var email = localStorage.getItem('unirenter_email');
+  if (!email || localStorage.getItem('unirenter_email_verified') !== '1') {
+    alert('Please verify your email first to join a household.');
+    return;
+  }
+  var btn = document.getElementById('household-join-confirm-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Joining…'; }
+  fetch('/api/household/join', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token: token, email: email })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (!d.ok) throw new Error(d.error || 'Join failed');
+    localStorage.setItem('ur_household_id', d.household_id);
+    window._householdPendingJoin = null;
+    var banner = document.getElementById('household-join-banner');
+    if (banner) banner.style.display = 'none';
+    // Remove ?join= from URL cleanly
+    var url = new URL(window.location.href);
+    url.searchParams.delete('join');
+    window.history.replaceState({}, '', url.toString());
+    householdLoad(d.household_id);
+  })
+  .catch(function(err) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Join household →'; }
+    alert('Could not join household: ' + err.message);
+  });
+}
+
+function householdLoad(householdId) {
+  var email = localStorage.getItem('unirenter_email') || '';
+  fetch('/api/household/get?household_id=' + encodeURIComponent(householdId) + '&email=' + encodeURIComponent(email))
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (!d.ok || !d.data) { householdRenderEmpty(); return; }
+    householdRender(d.data, email);
+  })
+  .catch(function() {
+    householdRenderEmpty();
+  });
+}
+
+function householdInvitePanel(token) {
+  var link = 'https://unirenter.com.au/dashboard?join=' + token;
+  var waText = encodeURIComponent('Hey! Join my household on UniRenter so we can see how compatible we are 🤠 ' + link);
+  return '<div class="household-invite-panel">' +
+    '<div class="household-invite-label">Share this link with your flatmate(s):</div>' +
+    '<div class="household-invite-link-row">' +
+      '<div class="household-invite-link" id="hh-invite-link-text">' + link + '</div>' +
+      '<button class="household-copy-btn" id="hh-copy-btn" onclick="householdCopyLink(\'' + link + '\')">📋 Copy</button>' +
+      '<a class="household-wa-btn" href="https://wa.me/?text=' + waText + '" target="_blank" rel="noopener">💬 WhatsApp</a>' +
+    '</div>' +
+    '<div class="household-invite-note">Your flatmate will be asked to build their profile if they haven\'t already.</div>' +
+  '</div>';
+}
+
+function householdCopyLink(link) {
+  navigator.clipboard.writeText(link).then(function() {
+    var btn = document.getElementById('hh-copy-btn');
+    if (btn) { btn.textContent = '✅ Copied'; btn.classList.add('copied'); }
+    setTimeout(function() {
+      if (btn) { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }
+    }, 2000);
+  }).catch(function() {
+    // Fallback for older browsers
+    var ta = document.createElement('textarea');
+    ta.value = link;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    var btn = document.getElementById('hh-copy-btn');
+    if (btn) { btn.textContent = '✅ Copied'; btn.classList.add('copied'); }
+    setTimeout(function() {
+      if (btn) { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }
+    }, 2000);
+  });
+}
+
+function householdRender(data, currentEmail) {
+  var members = data.members || [];
+  var inner = document.getElementById('household-inner');
+  var clusterEl = document.getElementById('household-cluster');
+  var subtitleEl = document.getElementById('household-subtitle');
+  if (!inner) return;
+
+  // Build emoji cluster from member vibe primaries
+  var emojis = members.map(function(m) { return m.vibe_emoji_primary || ''; }).filter(Boolean);
+  if (clusterEl) clusterEl.textContent = emojis.join('');
+
+  // Compatibility dimensions
+  var compat = householdCalcCompat(members);
+
+  // Cob tip
+  var cobTip = householdCobTip(members, compat);
+
+  // Invite token for "invite another" button
+  var inviteToken = localStorage.getItem('ur_household_invite_token');
+  var inviteLink = inviteToken ? 'https://unirenter.com.au/dashboard?join=' + inviteToken : null;
+
+  // Member chips HTML
+  var chipsHtml = members.map(function(m) {
+    var isYou = m.email === currentEmail;
+    var name = m.display_name ? m.display_name.split(' ')[0] : 'Flatmate';
+    var emoji = m.vibe_emoji_primary || '🏠';
+    return '<div class="household-member-chip' + (isYou ? ' is-you' : '') + '">' +
+      '<span class="household-member-emoji">' + emoji + '</span>' +
+      '<span>' + name + (isYou ? ' (you)' : '') + '</span>' +
+    '</div>';
+  }).join('');
+
+  // Compatibility bars HTML
+  var barsHtml = '';
+  var dims = [
+    { icon: '🌙', label: 'Sleep',        key: 'sleep'    },
+    { icon: '🧹', label: 'Cleanliness',  key: 'clean'    },
+    { icon: '🎉', label: 'Guests',       key: 'guests'   },
+    { icon: '🍳', label: 'Kitchen',      key: 'kitchen'  }
+  ];
+  dims.forEach(function(d) {
+    var c = compat[d.key] || { score: 50, status: 'Mixed', cls: 'mixed' };
+    barsHtml += '<div class="household-compat-row">' +
+      '<span class="household-compat-icon">' + d.icon + '</span>' +
+      '<span class="household-compat-label">' + d.label + '</span>' +
+      '<div class="household-compat-bar-wrap">' +
+        '<div class="household-compat-bar ' + c.cls + '" style="width:' + c.score + '%"></div>' +
+      '</div>' +
+      '<span class="household-compat-status">' + c.status + '</span>' +
+    '</div>';
+  });
+
+  // Actions HTML
+  var actionsHtml = '<div class="household-actions">' +
+    '<button class="household-action-btn primary" onclick="alert(\'Vibe cards coming soon in the next update! 🤠\')">Share household card</button>' +
+    '<button class="household-action-btn" onclick="alert(\'Flatmate search coming soon! 🤠\')">Find a new flatmate</button>';
+  if (inviteLink) {
+    var waText = encodeURIComponent('Hey! Join my household on UniRenter 🤠 ' + inviteLink);
+    actionsHtml += '<button class="household-action-btn" onclick="householdShowInvite()">Invite another flatmate</button>';
+  }
+  actionsHtml += '</div>';
+
+  // Invite panel (collapsed by default, toggled by "Invite another" button)
+  var invitePanelHtml = inviteToken ?
+    '<div id="hh-invite-panel-wrap" style="display:none;margin-top:12px;">' + householdInvitePanel(inviteToken) + '</div>' : '';
+
+  var html =
+    '<div class="household-members-row">' + chipsHtml + '</div>' +
+    (barsHtml ? '<div class="household-compat-grid">' + barsHtml + '</div>' : '') +
+    (cobTip ? '<div class="household-cob-tip">🤠 ' + cobTip + '</div>' : '') +
+    actionsHtml +
+    invitePanelHtml;
+
+  inner.innerHTML = html;
+
+  if (subtitleEl) subtitleEl.textContent = members.length + ' member' + (members.length !== 1 ? 's' : '') + ' in your household';
+}
+
+function householdShowInvite() {
+  var wrap = document.getElementById('hh-invite-panel-wrap');
+  if (wrap) wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+}
+
+function householdCalcCompat(members) {
+  if (members.length < 2) {
+    return {
+      sleep:   { score: 0, status: '—', cls: 'mixed' },
+      clean:   { score: 0, status: '—', cls: 'mixed' },
+      guests:  { score: 0, status: '—', cls: 'mixed' },
+      kitchen: { score: 0, status: '—', cls: 'mixed' }
+    };
+  }
+
+  function scoreField(vals) {
+    // vals are strings like 'early', 'night', 'flexible', 'tidy', 'relaxed', 'moderate' etc.
+    // Map to numeric buckets and measure spread
+    if (!vals || vals.length < 2) return { score: 50, status: 'Mixed', cls: 'mixed' };
+    var unique = vals.filter(function(v,i,a){ return v && a.indexOf(v) === i; });
+    if (unique.length === 1) return { score: 95, status: 'In sync', cls: 'sync' };
+    if (unique.length === vals.length) return { score: 30, status: 'Mixed', cls: 'mixed' };
+    return { score: 60, status: 'Mostly', cls: 'mixed' };
+  }
+
+  var sleepVals  = members.map(function(m){ return m.sleep_schedule  || ''; });
+  var cleanVals  = members.map(function(m){ return m.cleanliness     || ''; });
+  var guestVals  = members.map(function(m){ return m.guests          || ''; });
+  var kitchenVals= members.map(function(m){ return m.household_type  || ''; });
+
+  return {
+    sleep:   scoreField(sleepVals),
+    clean:   scoreField(cleanVals),
+    guests:  scoreField(guestVals),
+    kitchen: scoreField(kitchenVals)
+  };
+}
+
+function householdCobTip(members, compat) {
+  // Tip dismissal: skip if dismissed in last 14 days
+  var dismissKey = 'ur_hh_tip_dismissed';
+  var dismissed = localStorage.getItem(dismissKey);
+  if (dismissed) {
+    var daysAgo = (Date.now() - parseInt(dismissed)) / 86400000;
+    if (daysAgo < 14) return null;
+  }
+
+  // Only show tip if ≥2 members have vibe profiles
+  var withVibe = members.filter(function(m){ return m.vibe_emoji_primary; });
+  if (withVibe.length < 2) return null;
+
+  // Pick the most relevant tip
+  if (compat.sleep && compat.sleep.cls !== 'sync') {
+    return '"One night owl and one early riser — the households that handle this best agree on earphones after 10pm and no surprise alarms on weekends."';
+  }
+  if (compat.clean && compat.clean.cls !== 'sync') {
+    return '"One tidy, one relaxed — the most common friction point in any share house. A Sunday 20-minute reset works better than a running tally."';
+  }
+  if (compat.guests && compat.guests.cls !== 'sync') {
+    return '"Worth agreeing on a heads-up window (24hrs?) so nobody\'s caught off guard by guests."';
+  }
+  // All in sync — celebrate
+  var emojis = members.map(function(m){ return m.vibe_emoji_primary || ''; }).filter(Boolean);
+  if (emojis.length >= 2 && emojis.every(function(e){ return e === emojis[0]; })) {
+    var e = emojis[0];
+    if (e === '🌙') return '"Two night owls! 🐓 Nobody\'s going to be annoyed by a 6am alarm in this house."';
+    if (e === '🐦') return '"Early birds! You\'re both up before the rest of the street. Breakfast together sounds like a vibe."';
+    if (e === '🍳') return '"Two home cooks! 🍳 The kitchen\'s going to be well used — agree on grocery sharing early."';
+    if (e === '🧹') return '"Both neat freaks — you\'ve won the housemate lottery. 🏆"';
+    return '"You\'re both on the same wavelength — that\'s rarer than you\'d think."';
+  }
+  return '"Your household is shaping up. Keep the communication open and you\'ll be sweet. 🤠"';
+}
+
+// ── Hook householdInit into DOMContentLoaded ──
+// (called alongside vibeInit)
+
 
 
 </script>
