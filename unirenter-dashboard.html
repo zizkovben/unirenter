@@ -956,6 +956,7 @@ body.light-mode {
 .sleep-card-icon { font-size: 20px; margin-bottom: 6px; }
 .sleep-card-name { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
 .sleep-card-desc { font-size: 10px; color: var(--text-muted); line-height: 1.4; }
+.sleep-card-badge { font-size: 10px; color: #4BBFE0; background: rgba(75,191,224,0.08); border-radius: 6px; padding: 2px 7px; margin-top: 4px; display: inline-block; }
 .sleep-actions { display: flex; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--navy-border); }
 .btn-sleep-on {
   flex: 1; background: var(--brand-yellow); color: var(--navy);
@@ -1649,6 +1650,82 @@ body.light-mode {
 }
 .ssw-cancel:hover { color: var(--text); }
 
+/* ── SSW option descriptions (V54) ── */
+.ssw-opt { display: flex; align-items: center; gap: 10px; text-align: left; padding: 10px 12px; }
+.ssw-opt-icon { font-size: 18px; flex-shrink: 0; width: 24px; text-align: center; }
+.ssw-opt-body { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.ssw-opt-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.ssw-opt-desc { font-size: 11px; color: var(--text-muted); }
+.ssw-opt-badge { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 8px; background: rgba(75,191,224,0.1); color: #4BBFE0; white-space: nowrap; flex-shrink: 0; }
+.ssw-more-detail { font-size: 11px; color: var(--text-muted); text-decoration: none; display: block; text-align: center; margin: 4px 0; }
+.ssw-more-detail:hover { color: var(--brand-yellow); }
+
+/* ── Settings slide-in panel (V54) ── */
+.settings-panel-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 500;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.settings-panel-backdrop.open { opacity: 1; pointer-events: auto; }
+.settings-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 380px; max-width: 100vw;
+  background: var(--navy-mid, #162535); border-left: 1px solid rgba(255,255,255,0.08);
+  z-index: 501; transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.32,0,0.15,1);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.settings-panel.open { transform: translateX(0); }
+.settings-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+}
+.settings-panel-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; }
+.settings-panel-close {
+  background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;
+  width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+}
+.settings-panel-close:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+.settings-panel-tabs {
+  display: flex; gap: 2px; padding: 10px 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0; overflow-x: auto; scrollbar-width: none;
+}
+.settings-panel-tabs::-webkit-scrollbar { display: none; }
+.sp-tab {
+  background: none; border: 1px solid transparent; border-radius: 8px;
+  color: var(--text-muted); font-size: 12px; font-weight: 500; padding: 6px 10px;
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
+}
+.sp-tab:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.sp-tab.active { background: var(--navy-card, #182f42); color: var(--text); border-color: rgba(255,255,255,0.1); font-weight: 600; }
+.settings-panel-body { flex: 1; overflow-y: auto; padding: 20px; }
+.sp-section { display: none; }
+.sp-section.active { display: block; }
+
+/* ── Tenancy tab vertical structure (V54) ── */
+.lc-entry-card {
+  background: linear-gradient(135deg, rgba(75,191,224,0.08) 0%, rgba(245,184,0,0.05) 100%);
+  border: 1px solid rgba(75,191,224,0.25); border-radius: 14px; padding: 20px 22px;
+  margin-bottom: 24px; display: flex; flex-direction: column; gap: 14px;
+}
+.lc-entry-header { display: flex; align-items: flex-start; gap: 14px; }
+.lc-entry-icon { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
+.lc-entry-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.lc-entry-sub { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+.lc-entry-next-date {
+  background: rgba(245,184,0,0.08); border: 1px solid rgba(245,184,0,0.2); border-radius: 8px;
+  padding: 8px 14px; font-size: 13px; color: var(--brand-yellow);
+}
+.lc-entry-btn {
+  display: inline-block; background: var(--brand-yellow); color: #0d1f2d;
+  border: none; border-radius: 8px; padding: 10px 18px; font-family: var(--font-display);
+  font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: none;
+  transition: opacity 0.2s; align-self: flex-start;
+}
+.lc-entry-btn:hover { opacity: 0.88; }
+#tenancy-calendar-section, #tenancy-lease-section, #tenancy-calculator-section { display: block; }
+
+/* ── Status pill in nav ── */
+.status-pill-wrap { display: flex; align-items: center; }
+
+
 /* ── Settings collapse (inside Profile tab) ── */
 .settings-collapse-wrap {
   margin-top: 24px;
@@ -1951,16 +2028,19 @@ body.light-mode {
 <nav>
   <a class="nav-logo" href="/">UniRenter</a>
   <div class="nav-right-group">
+    <div class="status-pill-wrap" id="status-pill-nav-wrap">
+      <div class="status-pill" id="status-pill" onclick="openSettingsPanel('sleep')">🟢 Active</div>
+    </div>
     <div class="nav-dropdown-wrap">
-      <button class="nav-explore-btn" onclick="toggleNavDropdown()">Explore &#9662;</button>
-      <div class="nav-dropdown" id="nav-dropdown">
-        <a class="nav-dd-item" href="/lease">&#128260; Break lease</a>
-        <a class="nav-dd-item" href="/landlords">&#127968; List your property</a>
+      <button class="nav-explore-btn" onclick="toggleSettingsDropdown()">⚙️ Settings ▾</button>
+      <div class="nav-dropdown" id="settings-dropdown">
+        <a class="nav-dd-item" href="#" onclick="openSettingsPanel('sleep');return false;">🌙 Sleep mode</a>
+        <a class="nav-dd-item" href="#" onclick="openSettingsPanel('notifications');return false;">🔔 Notifications</a>
+        <a class="nav-dd-item" href="#" onclick="openSettingsPanel('display');return false;">🎨 Display</a>
+        <a class="nav-dd-item" href="#" onclick="openSettingsPanel('sound');return false;">🔊 Sound effects</a>
+        <a class="nav-dd-item" href="#" onclick="openSettingsPanel('account');return false;">👤 Account</a>
         <div class="nav-dd-divider"></div>
-        <a class="nav-dd-item" href="/guide">&#128218; Renter's Guide</a>
-        <a class="nav-dd-item" href="/settled">&#127462;&#127482; Getting Settled</a>
-        <div class="nav-dd-divider"></div>
-        <a class="nav-dd-item" href="/dashboard" id="nav-dd-dashboard" style="display:none;">&#128101; My Dashboard</a>
+        <a class="nav-dd-item" href="/">🏠 Back to home</a>
       </div>
     </div>
     <button class="btn-theme" id="mode-toggle" onclick="toggleMode()">🌙</button>
@@ -1983,9 +2063,7 @@ body.light-mode {
         <div class="completeness-bar" id="header-pct-bar" style="width:0%"></div>
       </div>
     </div>
-    <div class="user-header-actions">
-      <div class="status-pill" id="status-pill" onclick="switchTab('profile');openSettingsCollapse()">🟢 Active</div>
-    </div>
+
   </div>
 
   <!-- Tier 2 check-in card — date-aware Cob nudge -->
@@ -2036,11 +2114,14 @@ body.light-mode {
     <button class="tab-btn active" id="tab-btn-matches" role="tab" onclick="switchTab('matches')">
       🎯 <span class="tab-label">Matches</span>
     </button>
+    <button class="tab-btn" id="tab-btn-messages" role="tab" onclick="switchTab('messages')">
+      💬 <span class="tab-label">Messages</span> <span class="tab-badge" id="msg-badge">2</span>
+    </button>
     <button class="tab-btn" id="tab-btn-tenancy" role="tab" onclick="switchTab('tenancy')">
       🏠 <span class="tab-label">Tenancy</span>
     </button>
-    <button class="tab-btn" id="tab-btn-messages" role="tab" onclick="switchTab('messages')">
-      💬 <span class="tab-label">Messages</span> <span class="tab-badge" id="msg-badge">2</span>
+    <button class="tab-btn" id="tab-btn-household" role="tab" onclick="switchTab('household')">
+      👥 <span class="tab-label">Household</span>
     </button>
     <button class="tab-btn" id="tab-btn-profile" role="tab" onclick="switchTab('profile')">
       👤 <span class="tab-label">Profile</span>
@@ -2156,15 +2237,21 @@ body.light-mode {
   <!-- ══════════════════════════════════════════════════════ -->
   <div class="tab-panel" id="panel-tenancy">
 
-    <!-- Tenancy sub-nav (pill nav — not a new tab bar) -->
-    <div class="tenancy-subnav">
-      <button class="tsn-btn active" id="tsn-btn-calendar" onclick="switchTenancySection('calendar')">📅 Calendar</button>
-      <button class="tsn-btn" id="tsn-btn-lease" onclick="switchTenancySection('lease')">📋 Lease</button>
-      <button class="tsn-btn" id="tsn-btn-calculator" onclick="switchTenancySection('calculator')">🧮 Calculator</button>
+    <!-- ── Lease Companion Entry Card ── -->
+    <div class="lc-entry-card" id="lc-entry-card">
+      <div class="lc-entry-header">
+        <div class="lc-entry-icon">🤠</div>
+        <div>
+          <div class="lc-entry-title" id="lc-entry-title">Track your lease</div>
+          <div class="lc-entry-sub" id="lc-entry-sub">Oi! Drop your lease start date and I'll handle the rest — key dates, notice deadlines, the lot. 🤠</div>
+        </div>
+      </div>
+      <div class="lc-entry-next-date" id="lc-entry-next-date" style="display:none;"></div>
+      <a class="lc-entry-btn" href="/lease-companion">Open Lease Companion ↗</a>
     </div>
 
-    <!-- ── SUB-SECTION: CALENDAR ── -->
-    <div class="tsn-section active" id="tsn-calendar">
+    <!-- ── CALENDAR ── -->
+    <div id="tenancy-calendar-section">
 
     <div class="section-header">
       <div>
@@ -2280,10 +2367,10 @@ body.light-mode {
   </div>
 
   <!-- ══════════════════════════════════════════════════════ -->
-    </div>
+    </div><!-- /tenancy-calendar-section -->
 
-    <!-- ── SUB-SECTION: LEASE COMPANION ── -->
-    <div class="tsn-section" id="tsn-lease">
+    <!-- ── LEASE COMPANION (embedded) ── -->
+    <div id="tenancy-lease-section">
     <!-- ── Lease Companion (Tenancy → Lease sub-section) ── -->
     <div class="lc-section-header">
       <div>
@@ -2367,9 +2454,10 @@ body.light-mode {
       <button class="lc-save-btn" onclick="lcDashboardSave()">Set up my Lease Companion 🤠</button>
     </div>
     </div>
+    </div><!-- /tenancy-lease-section -->
 
-    <!-- ── SUB-SECTION: CALCULATOR ── -->
-    <div class="tsn-section" id="tsn-calculator">
+    <!-- ── CALCULATOR ── -->
+    <div id="tenancy-calculator-section">
 
     <div class="section-header">
       <div>
@@ -2500,11 +2588,42 @@ body.light-mode {
 
   <!-- ══════════════════════════════════════════════════════ -->
     </div>
+    </div><!-- /tenancy-calculator-section -->
 
   </div><!-- /panel-tenancy -->
 
   <!-- TAB: MY PROFILE -->
   <!-- ══════════════════════════════════════════════════════ -->
+  <!-- ── HOUSEHOLD TAB ── -->
+  <div class="tab-panel" id="panel-household">
+    <div class="section-header">
+      <div>
+        <div class="section-title">My Household</div>
+        <div class="section-sub">Connect with flatmates and see how you all compare</div>
+      </div>
+    </div>
+
+    <!-- Join banner (shown when ?join= param detected) -->
+    <div class="household-join-banner" id="household-join-banner" style="display:none;">
+      <div class="household-join-banner-icon">🏠</div>
+      <div class="household-join-banner-body">
+        <div class="household-join-banner-title">You've been invited to a household!</div>
+        <div class="household-join-banner-sub">Tap below to join your flatmate's household and see your compatibility.</div>
+        <button class="household-join-confirm-btn" id="household-join-confirm-btn" onclick="householdJoinConfirm()">Join household →</button>
+      </div>
+    </div>
+
+    <!-- Dynamic inner content populated by JS -->
+    <div id="household-inner">
+      <!-- empty state default -->
+      <div class="household-empty" id="household-empty-state">
+        <div class="household-empty-icon">🤠</div>
+        <p>Living with others? Invite your flatmates and see how you all compare — sleep schedules, cleanliness, guests, the lot.</p>
+        <button class="household-setup-btn" onclick="householdSetup()">Set up my household →</button>
+      </div>
+    </div>
+  </div><!-- /panel-household -->
+
   <div class="tab-panel" id="panel-profile">
     <div class="section-header">
       <div>
@@ -2696,13 +2815,38 @@ body.light-mode {
           <div id="ssw-panel" class="ssw-panel" style="display:none;">
             <div class="ssw-panel-title">Pause your profile</div>
             <div class="ssw-options">
-              <button class="ssw-opt" onclick="sswActivate('study',this)">📚 Exam time</button>
-              <button class="ssw-opt" onclick="sswActivate('sorted',this)">🏠 Found a place</button>
-              <button class="ssw-opt" onclick="sswActivate('holiday',this)">✈️ On holiday</button>
-              <button class="ssw-opt" onclick="sswActivate('looking',this)">👀 Just looking</button>
-              <button class="ssw-opt" onclick="sswActivate('exams',this)">😰 Exam crunch</button>
-              <button class="ssw-opt" onclick="sswActivate('break',this)">😴 Taking a break</button>
+              <button class="ssw-opt" onclick="sswActivate('study',this)">
+                <span class="ssw-opt-icon">📚</span>
+                <span class="ssw-opt-body"><span class="ssw-opt-name">Study Mode</span><span class="ssw-opt-desc">Exams? Profile paused, chats open.</span></span>
+                <span class="ssw-opt-badge">Messages open</span>
+              </button>
+              <button class="ssw-opt" onclick="sswActivate('sorted',this)">
+                <span class="ssw-opt-icon">🏠</span>
+                <span class="ssw-opt-body"><span class="ssw-opt-name">Sorted!</span><span class="ssw-opt-desc">Found housing — profile hidden.</span></span>
+                <span class="ssw-opt-badge">Fully hidden</span>
+              </button>
+              <button class="ssw-opt" onclick="sswActivate('holiday',this)">
+                <span class="ssw-opt-icon">✈️</span>
+                <span class="ssw-opt-body"><span class="ssw-opt-name">Holiday Mode</span><span class="ssw-opt-desc">Away for a bit — back soon.</span></span>
+                <span class="ssw-opt-badge">Return date shown</span>
+              </button>
+              <button class="ssw-opt" onclick="sswActivate('looking',this)">
+                <span class="ssw-opt-icon">👀</span>
+                <span class="ssw-opt-body"><span class="ssw-opt-name">Just Looking</span><span class="ssw-opt-desc">Early stages — not ready yet.</span></span>
+                <span class="ssw-opt-badge">Still visible</span>
+              </button>
+              <button class="ssw-opt" onclick="sswActivate('exams',this)">
+                <span class="ssw-opt-icon">🤯</span>
+                <span class="ssw-opt-body"><span class="ssw-opt-name">Exam Crunch</span><span class="ssw-opt-desc">Short pause for exams.</span></span>
+                <span class="ssw-opt-badge">Auto-wakes 14 days</span>
+              </button>
+              <button class="ssw-opt" onclick="sswActivate('break',this)">
+                <span class="ssw-opt-icon">😴</span>
+                <span class="ssw-opt-body"><span class="ssw-opt-name">Taking a Break</span><span class="ssw-opt-desc">Pause for now, keep my data.</span></span>
+                <span class="ssw-opt-badge">No auto-wake</span>
+              </button>
             </div>
+            <a class="ssw-more-detail" href="#" onclick="openSettingsPanel('sleep');return false;">More detail →</a>
             <button class="ssw-cancel" onclick="sswTogglePanel()">Cancel</button>
           </div>
         </div>
@@ -2774,349 +2918,7 @@ body.light-mode {
       </div>
 
     </div>
-    <!-- ── "Your vibe" card (Cob quiz — Session 42) ── -->
-    <div class="vibe-card" id="vibe-card">
-      <div class="vibe-card-head">
-        <span>Your vibe <span class="vibe-optional">(optional)</span></span>
-        <span class="vibe-cob-badge">🤠 Cob</span>
-      </div>
 
-      <!-- Empty state — show quiz start button (gated on email verified) -->
-      <div id="vibe-card-empty">
-        <div class="vibe-card-intro">
-          Let Cob write a short personality portrait based on how you describe yourself — shown to potential housemates so they get a real sense of you beyond checkboxes.
-        </div>
-        <div id="vibe-locked-msg" style="display:none;" class="vibe-locked-notice">
-          🔒 Verify your email and complete your profile to unlock this.
-        </div>
-        <button class="vibe-start-btn" id="vibe-start-btn" onclick="vibeStartQuiz()">Let Cob write your vibe →</button>
-      </div>
-
-      <!-- Quiz — 5 inline questions -->
-      <div id="vibe-card-quiz" style="display:none;">
-        <div class="vibe-quiz-progress">
-          <div class="vibe-quiz-bar"><div class="vibe-quiz-fill" id="vibe-quiz-fill" style="width:20%"></div></div>
-          <span class="vibe-quiz-step" id="vibe-quiz-step">1 of 5</span>
-        </div>
-        <div class="vibe-quiz-questions" id="vibe-quiz-questions">
-          <!-- injected by JS -->
-        </div>
-        <div class="vibe-quiz-nav">
-          <button class="vibe-nav-btn secondary" id="vibe-btn-back" onclick="vibeNavBack()" style="display:none;">← Back</button>
-          <button class="vibe-nav-btn" id="vibe-btn-next" onclick="vibeNavNext()">Next →</button>
-        </div>
-      </div>
-
-      <!-- Generating state -->
-      <div id="vibe-card-generating" style="display:none;">
-        <div class="vibe-generating-wrap">
-          <div class="vibe-generating-spinner">🤠</div>
-          <div class="vibe-generating-text">Cob is writing your vibe<span id="vibe-gen-dots">…</span></div>
-        </div>
-      </div>
-
-      <!-- Done state — result + chips + retake -->
-      <div id="vibe-card-done" style="display:none;">
-        <div class="vibe-result" id="vibe-result-block">
-          <div class="vibe-result-emoji" id="vibe-primary-emoji">🌿</div>
-          <div class="vibe-result-text" id="vibe-summary-text">"Your vibe summary will appear here."</div>
-        </div>
-        <!-- Emoji override row -->
-        <div class="vibe-override-row">
-          <div class="vibe-override-group">
-            <div class="vibe-chip-label">Primary emoji</div>
-            <div class="vibe-emoji-override" id="vibe-override-primary" onclick="vibeOverridePrimary()" title="Change primary emoji">
-              <span id="vibe-override-primary-val">🌿</span>
-              <span class="vibe-override-edit">✏️</span>
-            </div>
-          </div>
-          <div class="vibe-override-group">
-            <div class="vibe-chip-label">Secondary emoji</div>
-            <div class="vibe-emoji-override" id="vibe-override-secondary" onclick="vibeOverrideSecondary()" title="Change secondary emoji">
-              <span id="vibe-override-secondary-val">☕</span>
-              <span class="vibe-override-edit">✏️</span>
-            </div>
-          </div>
-        </div>
-        <!-- Emoji picker (hidden by default) -->
-        <div id="vibe-emoji-picker" class="vibe-emoji-picker" style="display:none;">
-          <div class="vibe-picker-label" id="vibe-picker-label">Pick primary emoji</div>
-          <div class="vibe-picker-type" id="vibe-picker-type">primary</div>
-          <div class="vibe-picker-grid" id="vibe-picker-grid"></div>
-          <button class="vibe-nav-btn secondary" style="margin-top:8px;font-size:12px;" onclick="vibeClosePicker()">Cancel</button>
-        </div>
-        <div class="vibe-chips-row">
-          <div class="vibe-chip-group"><div class="vibe-chip-label">Primary</div><div class="vibe-chip-val" id="vibe-chip-primary">—</div></div>
-          <div class="vibe-chip-group"><div class="vibe-chip-label">Secondary</div><div class="vibe-chip-val" id="vibe-chip-secondary">—</div></div>
-          <div class="vibe-chip-group"><div class="vibe-chip-label">Star sign</div><div class="vibe-chip-val" id="vibe-chip-star">—</div></div>
-          <div class="vibe-chip-group"><div class="vibe-chip-label">Gen</div><div class="vibe-chip-val" id="vibe-chip-gen">—</div></div>
-        </div>
-        <!-- Star sign + generation selects — inline inside done state -->
-        <div class="vibe-inline-extras">
-          <div class="vibe-inline-extras-row">
-            <div class="vibe-extras-group">
-              <label class="vibe-extras-label" for="select-star-sign-inline">⭐ Star sign</label>
-              <select id="select-star-sign-inline" class="vibe-extras-select" onchange="vibeExtrasChangeInline()">
-                <option value="">Prefer not to say</option>
-                <option value="Aries">Aries ♈</option>
-                <option value="Taurus">Taurus ♉</option>
-                <option value="Gemini">Gemini ♊</option>
-                <option value="Cancer">Cancer ♋</option>
-                <option value="Leo">Leo ♌</option>
-                <option value="Virgo">Virgo ♍</option>
-                <option value="Libra">Libra ♎</option>
-                <option value="Scorpio">Scorpio ♏</option>
-                <option value="Sagittarius">Sagittarius ♐</option>
-                <option value="Capricorn">Capricorn ♑</option>
-                <option value="Aquarius">Aquarius ♒</option>
-                <option value="Pisces">Pisces ♓</option>
-              </select>
-            </div>
-            <div class="vibe-extras-group">
-              <label class="vibe-extras-label" for="select-generation-inline">🧬 Generation</label>
-              <select id="select-generation-inline" class="vibe-extras-select" onchange="vibeExtrasChangeInline()">
-                <option value="">Prefer not to say</option>
-                <option value="Gen Z">Gen Z (1997–2012)</option>
-                <option value="Millennial">Millennial (1981–1996)</option>
-                <option value="Gen X">Gen X (1965–1980)</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-          </div>
-          <div id="vibe-inline-extras-saved" style="display:none;" class="vibe-saved-notice">✅ Saved</div>
-        </div>
-        <div class="vibe-save-row">
-          <button class="vibe-save-btn" id="vibe-save-btn" onclick="vibeSave()">Save vibe ✓</button>
-          <button class="vibe-retake-btn" onclick="vibeRetakeRequest()">Retake</button>
-        </div>
-        <div id="vibe-saved-notice" style="display:none;" class="vibe-saved-notice">✅ Saved to your profile</div>
-      </div>
-
-      <!-- Retake confirmation dialog -->
-      <div id="vibe-retake-confirm" class="vibe-retake-confirm" style="display:none;">
-        <div class="vibe-retake-cob">🤠</div>
-        <div class="vibe-retake-msg">You sure? I thought your last one was pretty spot on 😏</div>
-        <div class="vibe-retake-actions">
-          <button class="vibe-nav-btn" onclick="vibeConfirmRetake()">Yes, redo it</button>
-          <button class="vibe-nav-btn secondary" onclick="vibeCancelRetake()">Keep it</button>
-        </div>
-      </div>
-    </div>
-
-
-    <!-- ── My Household (S45) ── -->
-    <div class="household-section" id="household-section">
-      <div class="household-header">
-        <div>
-          <div class="household-title">My Household <span class="household-cluster" id="household-cluster"></span></div>
-          <div class="household-subtitle" id="household-subtitle">Connect with your flatmates and see how you compare.</div>
-        </div>
-        <span style="font-size:22px;opacity:0.7;">🤠</span>
-      </div>
-      <!-- Join banner (shown when ?join= param detected) -->
-      <div class="household-join-banner" id="household-join-banner" style="display:none;">
-        <div class="household-join-banner-icon">🏠</div>
-        <div class="household-join-banner-body">
-          <div class="household-join-banner-title">You've been invited to a household!</div>
-          <div class="household-join-banner-sub">Tap below to join your flatmate's household and see your compatibility.</div>
-          <button class="household-join-confirm-btn" id="household-join-confirm-btn" onclick="householdJoinConfirm()">Join household →</button>
-        </div>
-      </div>
-      <!-- Dynamic inner content populated by JS -->
-      <div id="household-inner">
-        <!-- empty state default -->
-        <div class="household-empty" id="household-empty-state">
-          <p>Living with others? Invite your flatmates and see how you all compare.</p>
-          <button class="household-setup-btn" onclick="householdSetup()">Set up my household →</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Settings (collapsed section at bottom of Profile tab) ── -->
-    <div class="settings-collapse-wrap" id="settings-collapse-wrap">
-      <button class="settings-collapse-btn" id="settings-collapse-btn" onclick="toggleSettingsCollapse()">
-        ⚙️ Settings <span class="settings-collapse-arrow" id="settings-collapse-arrow">▾</span>
-      </button>
-      <div class="settings-collapse-body" id="settings-collapse-body" style="display:none;">
-
-    <div class="section-header">
-      <div>
-        <div class="section-title">Settings</div>
-        <div class="section-sub">Manage your account and preferences</div>
-      </div>
-    </div>
-    <div class="settings-layout">
-
-      <!-- Sleep mode -->
-      <div class="settings-card" style="grid-column:1/-1;">
-        <div class="settings-card-head">💤 Sleep Mode — pause your profile</div>
-        <div class="sleep-grid" id="sleep-grid">
-          <div class="sleep-card" onclick="selectSleep(this,'study')">
-            <div class="sleep-card-icon">📚</div>
-            <div class="sleep-card-name">Study Mode</div>
-            <div class="sleep-card-desc">Pause while I focus on exams</div>
-          </div>
-          <div class="sleep-card" onclick="selectSleep(this,'sorted')">
-            <div class="sleep-card-icon">🏠</div>
-            <div class="sleep-card-name">Sorted!</div>
-            <div class="sleep-card-desc">Found a place — hide my profile</div>
-          </div>
-          <div class="sleep-card" onclick="selectSleep(this,'holiday')">
-            <div class="sleep-card-icon">✈️</div>
-            <div class="sleep-card-name">Holiday Mode</div>
-            <div class="sleep-card-desc">Away for a bit, back soon</div>
-          </div>
-          <div class="sleep-card" onclick="selectSleep(this,'looking')">
-            <div class="sleep-card-icon">👀</div>
-            <div class="sleep-card-name">Just Looking</div>
-            <div class="sleep-card-desc">Early stages, not ready yet</div>
-          </div>
-          <div class="sleep-card" onclick="selectSleep(this,'break')">
-            <div class="sleep-card-icon">😴</div>
-            <div class="sleep-card-name">Taking a Break</div>
-            <div class="sleep-card-desc">Pause for now, keep my data</div>
-          </div>
-          <div class="sleep-card" onclick="selectSleep(this,'exams')">
-            <div class="sleep-card-icon">😰</div>
-            <div class="sleep-card-name">Exam Crunch</div>
-            <div class="sleep-card-desc">Short-term pause for exams</div>
-          </div>
-        </div>
-        <div class="sleep-actions">
-          <button class="btn-sleep-on" id="btn-sleep-activate" onclick="activateSleep()">Activate sleep mode</button>
-          <button class="btn-sleep-wake" id="btn-sleep-wake" style="display:none;" onclick="wakeUp()">☀️ Wake up — I'm looking again</button>
-        </div>
-      </div>
-
-      <!-- Notifications -->
-      <div class="settings-card">
-        <div class="settings-card-head">🔔 Notifications</div>
-        <div class="settings-rows">
-          <div class="settings-row" id="push-settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-label">Key date reminders</div>
-              <div class="settings-row-sub" id="push-settings-sub">Browser notifications for dates ≤7 days away</div>
-            </div>
-            <label class="toggle-wrap">
-              <input type="checkbox" id="push-notif-toggle" onchange="handlePushToggle(this.checked)">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-label">New match alerts</div>
-              <div class="settings-row-sub">Email when a new compatible student joins</div>
-            </div>
-            <label class="toggle-wrap">
-              <input type="checkbox" checked onchange="saveSetting('notif_matches', this.checked)">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-label">New messages</div>
-              <div class="settings-row-sub">Email when someone messages you</div>
-            </div>
-            <label class="toggle-wrap">
-              <input type="checkbox" checked onchange="saveSetting('notif_messages', this.checked)">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-label">UniRenter tips</div>
-              <div class="settings-row-sub">Renting guides and settling-in tips</div>
-            </div>
-            <label class="toggle-wrap">
-              <input type="checkbox" onchange="saveSetting('notif_tips', this.checked)">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-label">Sleep mode reminders</div>
-              <div class="settings-row-sub">Nudge after 14 days inactive</div>
-            </div>
-            <label class="toggle-wrap">
-              <input type="checkbox" checked onchange="saveSetting('notif_sleep', this.checked)">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Display -->
-      <div class="settings-card">
-        <div class="settings-card-head">🎨 Display</div>
-        <div class="settings-rows">
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-label">Theme</div>
-              <div class="settings-row-sub">Dark or light mode</div>
-            </div>
-            <select class="settings-select" onchange="applyTheme(this.value)" id="theme-select">
-              <option value="dark">🌙 Dark</option>
-              <option value="light">☀️ Light</option>
-            </select>
-          </div>
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-label">City</div>
-              <div class="settings-row-sub">Your current search city</div>
-            </div>
-            <select class="settings-select" onchange="saveSetting('city', this.value)" id="city-select">
-              <option value="melbourne">📍 Melbourne</option>
-              <option value="sydney">📍 Sydney</option>
-              <option value="brisbane">📍 Brisbane</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Account -->
-      <div class="settings-card">
-        <div class="settings-card-head">🔐 Account</div>
-        <div class="settings-rows">
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-label">Email</div>
-              <div class="settings-row-sub" id="acct-email">—</div>
-            </div>
-            <span class="badge badge-verified">✓ Verified</span>
-          </div>
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-label">Profile complete</div>
-              <div class="settings-row-sub" id="acct-pct">—</div>
-            </div>
-            <button class="section-action" onclick="window.location.href='/'">Edit →</button>
-          </div>
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-label">Sign out</div>
-              <div class="settings-row-sub">Clear your session from this device</div>
-            </div>
-            <button class="btn-danger" onclick="signOut()">Sign out</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Danger zone -->
-      <div class="settings-card danger-zone">
-        <div class="settings-card-head" style="color:var(--brand-coral);">⚠️ Danger zone</div>
-        <div class="settings-rows">
-          <div class="settings-row">
-            <div class="settings-row-info">
-              <div class="settings-row-label">Delete account</div>
-              <div class="settings-row-sub">Permanently delete your profile and all data. This cannot be undone.</div>
-            </div>
-            <button class="btn-danger" onclick="confirmDelete()">Delete</button>
-          </div>
-        </div>
-      </div>
-      </div>
-    </div>
 
   </div><!-- /panel-profile -->
 
@@ -3193,13 +2995,13 @@ function applyTheme(val) {
 
 // ── Tab switching (V46 — 4 tabs) ──────────────────────────────────────────────
 function switchTab(name) {
-  // Backwards compat: old tab names redirect to new structure
-  if (name === 'calendar')   { switchTab('tenancy'); switchTenancySection('calendar');    return; }
-  if (name === 'calculator') { switchTab('tenancy'); switchTenancySection('calculator');  return; }
-  if (name === 'settings')   { switchTab('profile'); openSettingsCollapse();              return; }
+  // Backwards compat: old tab names redirect
+  if (name === 'calendar')   { switchTab('tenancy'); setTimeout(function(){ lcEntryCardInit(); _calInit(); }, 60); return; }
+  if (name === 'calculator') { switchTab('tenancy'); setTimeout(function(){ calcRenderHistory(); }, 60); return; }
+  if (name === 'settings')   { openSettingsPanel('sleep'); return; }
 
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
   var btn = document.getElementById('tab-btn-' + name);
   var panel = document.getElementById('panel-' + name);
   if (!btn || !panel) { console.warn('switchTab: unknown tab', name); return; }
@@ -3211,27 +3013,60 @@ function switchTab(name) {
     if (badge) badge.style.display = 'none';
   }
   if (name === 'tenancy') {
-    // Init whichever sub-section is active
-    var activeSec = document.querySelector('.tsn-section.active');
-    var secId = activeSec ? activeSec.id : 'tsn-calendar';
-    if (secId === 'tsn-calendar')    _calInit();
-    if (secId === 'tsn-calculator')  calcRenderHistory();
-    if (secId === 'tsn-lease')       lcDashboardInit();
+    lcEntryCardInit();
+    _calInit();
+    calcRenderHistory();
+    lcDashboardInit();
+  }
+  if (name === 'household') {
+    householdInit();
   }
   renderStickyStrip();
 }
 
-// ── Tenancy sub-section switching ─────────────────────────────────────────────
+// ── switchTenancySection (kept for backwards compat — V54: no sub-nav, all visible)
 function switchTenancySection(section) {
-  document.querySelectorAll('.tsn-btn').forEach(function(b)     { b.classList.remove('active'); });
-  document.querySelectorAll('.tsn-section').forEach(function(s) { s.classList.remove('active'); });
-  var btn = document.getElementById('tsn-btn-' + section);
-  var sec = document.getElementById('tsn-' + section);
-  if (btn) btn.classList.add('active');
-  if (sec) sec.classList.add('active');
+  // No-op in V54 — Tenancy is now a single vertical scroll
+  // Just initialise the relevant part
   if (section === 'calendar')   _calInit();
   if (section === 'calculator') calcRenderHistory();
   if (section === 'lease')      lcDashboardInit();
+}
+
+// ── Lease Companion entry card init ──────────────────────────────────────────
+function lcEntryCardInit() {
+  var start = localStorage.getItem('ur_lc_start');
+  var end = localStorage.getItem('ur_lc_end');
+  var titleEl = document.getElementById('lc-entry-title');
+  var subEl = document.getElementById('lc-entry-sub');
+  var nextEl = document.getElementById('lc-entry-next-date');
+  if (!titleEl) return;
+  if (start && end) {
+    titleEl.textContent = 'Your lease is tracked';
+    subEl.textContent = 'Lease runs ' + start + ' → ' + end + '. Open Lease Companion for key dates and upcoming deadlines.';
+    // Find next calendar event from housing category
+    try {
+      var events = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]');
+      var today = new Date();
+      var housing = events.filter(function(e) {
+        return ['lease','rent','inspection','bond'].indexOf(e.cat || e.category) >= 0;
+      }).filter(function(e) {
+        return new Date(e.date) >= today;
+      }).sort(function(a,b) { return new Date(a.date) - new Date(b.date); });
+      if (housing.length > 0) {
+        var next = housing[0];
+        var diff = Math.ceil((new Date(next.date) - today) / 86400000);
+        if (nextEl) {
+          nextEl.style.display = 'block';
+          nextEl.textContent = 'Next: ' + next.title + ' — ' + (diff <= 0 ? 'today' : diff + ' days away');
+        }
+      }
+    } catch(e) {}
+  } else {
+    titleEl.textContent = 'Track your lease';
+    subEl.textContent = "Oi! Drop your lease start date and I’ll handle the rest — key dates, notice deadlines, the lot. 🤠";
+    if (nextEl) nextEl.style.display = 'none';
+  }
 }
 
 function _calInit() {
@@ -5434,31 +5269,31 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 
-// ── URL param handling (V46 — backwards compat: ?tab=calendar → tenancy+calendar etc) ──
+// ── URL param handling (V54) ──
 (function() {
   var params  = new URLSearchParams(window.location.search);
   var tab     = params.get('tab');
   var section = params.get('section');
-  var validTabs = ['matches','tenancy','messages','profile'];
-  var legacyMap = { 'calendar':'calendar', 'calculator':'calculator', 'settings':null };
+  var validTabs = ['matches','messages','tenancy','household','profile'];
+  var legacyMap = { 'calendar':'tenancy', 'calculator':'tenancy' };
   window.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
-      // If ?join= param present, switch to Profile tab so household section is visible
+      // ?join= param → Household tab
       var joinToken = params.get('join');
       if (joinToken) {
-        switchTab('profile');
+        switchTab('household');
         return;
       }
       if (!tab) return;
       if (validTabs.indexOf(tab) !== -1) {
         switchTab(tab);
-        if (tab === 'tenancy' && section && ['calendar','lease','calculator'].indexOf(section) !== -1) {
-          switchTenancySection(section);
+        if (tab === 'settings' && section) {
+          openSettingsPanel(section);
         }
       } else if (legacyMap.hasOwnProperty(tab)) {
         switchTab('tenancy');
-        if (legacyMap[tab]) switchTenancySection(legacyMap[tab]);
-        if (tab === 'settings') { switchTab('profile'); openSettingsCollapse(); }
+      } else if (tab === 'settings') {
+        openSettingsPanel(section || 'sleep');
       }
     }, 50);
   });
@@ -5467,27 +5302,89 @@ window.addEventListener('DOMContentLoaded', function() {
 // ── Init sticky strip on page load ──
 window.addEventListener('DOMContentLoaded', function() {
   setTimeout(renderStickyStrip, 200);
+  setTimeout(lcEntryCardInit, 300);
+  householdInit();
 });
 
 
-  // ── Explore dropdown ──
-  function toggleNavDropdown() {
-    document.getElementById('nav-dropdown').classList.toggle('open');
+  // ── Settings dropdown ──
+  function toggleSettingsDropdown() {
+    document.getElementById('settings-dropdown').classList.toggle('open');
   }
   document.addEventListener('click', function(e) {
-    const dd = document.getElementById('nav-dropdown');
-    const wrap = dd && dd.closest('.nav-dropdown-wrap');
+    var dd = document.getElementById('settings-dropdown');
+    var wrap = dd && dd.closest('.nav-dropdown-wrap');
     if (dd && wrap && !wrap.contains(e.target)) dd.classList.remove('open');
+    // Also close settings panel on outside click (backdrop handles this too)
   });
 
-
-  // ── Show dashboard link if verified ──
-  (function() {
-    if (localStorage.getItem('unirenter_email_verified') === '1') {
-      const el = document.getElementById('nav-dd-dashboard');
-      if (el) el.style.display = '';
+  // ── Settings slide-in panel ──
+  function openSettingsPanel(section) {
+    var panel = document.getElementById('settings-panel');
+    var backdrop = document.getElementById('settings-panel-backdrop');
+    if (panel) panel.classList.add('open');
+    if (backdrop) backdrop.classList.add('open');
+    if (section) switchSettingsSection(section);
+    // Close settings dropdown if open
+    var dd = document.getElementById('settings-dropdown');
+    if (dd) dd.classList.remove('open');
+    // Sync account email/pct
+    var acctEmail = document.getElementById('sp-acct-email');
+    if (acctEmail) acctEmail.textContent = localStorage.getItem('unirenter_email') || '—';
+    var acctPct = document.getElementById('sp-acct-pct');
+    if (acctPct) {
+      var pct = parseInt(localStorage.getItem('unirenter_profile_complete') || '0');
+      acctPct.textContent = pct + '% complete';
     }
-  })();
+    // Sync theme selects
+    var theme = localStorage.getItem('unirenter_theme') || 'dark';
+    var spTs = document.getElementById('sp-theme-select');
+    if (spTs) spTs.value = theme;
+    var city = localStorage.getItem('ur_city') || 'melbourne';
+    var spCs = document.getElementById('sp-city-select');
+    if (spCs) spCs.value = city;
+    // Sync push toggle
+    var spPush = document.getElementById('sp-push-notif-toggle');
+    if (spPush) spPush.checked = localStorage.getItem('ur_push_subscribed') === '1';
+    // Sync sleep grid active state
+    spSleepSyncActive();
+  }
+
+  function closeSettingsPanel() {
+    var panel = document.getElementById('settings-panel');
+    var backdrop = document.getElementById('settings-panel-backdrop');
+    if (panel) panel.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('open');
+  }
+
+  function switchSettingsSection(sec) {
+    document.querySelectorAll('.sp-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.sp-section').forEach(function(s) { s.classList.remove('active'); });
+    var tab = document.getElementById('sp-tab-' + sec);
+    var section = document.getElementById('sp-' + sec);
+    if (tab) tab.classList.add('active');
+    if (section) section.classList.add('active');
+  }
+
+  function spSleepSyncActive() {
+    var mode = localStorage.getItem('ur_sleep_mode');
+    var grid = document.getElementById('sp-sleep-grid');
+    var btnOn = document.getElementById('sp-btn-sleep-activate');
+    var btnWake = document.getElementById('sp-btn-sleep-wake');
+    if (!grid) return;
+    grid.querySelectorAll('.sleep-card').forEach(function(c) { c.classList.remove('active'); });
+    if (mode) {
+      var modeMap = { study:'study', sorted:'sorted', holiday:'holiday', looking:'looking', exams:'exams', break:'break' };
+      var cards = grid.querySelectorAll('.sleep-card');
+      var modeIdx = ['study','sorted','holiday','looking','exams','break'].indexOf(mode);
+      if (modeIdx >= 0 && cards[modeIdx]) cards[modeIdx].classList.add('active');
+      if (btnOn) btnOn.style.display = 'none';
+      if (btnWake) btnWake.style.display = '';
+    } else {
+      if (btnOn) btnOn.style.display = '';
+      if (btnWake) btnWake.style.display = 'none';
+    }
+  }
 // ══════════════════════════════════════════════════════════════
 // TIER 3 — Browser Push + Resend Email Fallback + Welfare + Seasonal
 // ══════════════════════════════════════════════════════════════
@@ -6198,5 +6095,212 @@ function householdCobTip(members, compat) {
   <div class="sws-events" id="sws-events"><!-- populated by JS --></div>
   <a class="sws-link" href="#" onclick="switchTab('tenancy');switchTenancySection('calendar');return false;">↗</a>
 </div>
+
+<!-- ── Settings slide-in panel (V54) ── -->
+<div class="settings-panel-backdrop" id="settings-panel-backdrop" onclick="closeSettingsPanel()"></div>
+<div class="settings-panel" id="settings-panel">
+  <div class="settings-panel-header">
+    <div class="settings-panel-title">⚙️ Settings</div>
+    <button class="settings-panel-close" onclick="closeSettingsPanel()">✕</button>
+  </div>
+  <div class="settings-panel-tabs">
+    <button class="sp-tab active" id="sp-tab-sleep" onclick="switchSettingsSection('sleep')">🌙 Sleep</button>
+    <button class="sp-tab" id="sp-tab-notifications" onclick="switchSettingsSection('notifications')">🔔 Notifications</button>
+    <button class="sp-tab" id="sp-tab-display" onclick="switchSettingsSection('display')">🎨 Display</button>
+    <button class="sp-tab" id="sp-tab-sound" onclick="switchSettingsSection('sound')">🔊 Sound</button>
+    <button class="sp-tab" id="sp-tab-account" onclick="switchSettingsSection('account')">👤 Account</button>
+  </div>
+  <div class="settings-panel-body">
+
+    <!-- Sleep mode section -->
+    <div class="sp-section active" id="sp-sleep">
+      <div class="settings-card-head" style="margin-bottom:14px;">💤 Sleep Mode — pause your profile</div>
+      <div class="sleep-grid" id="sp-sleep-grid">
+        <div class="sleep-card" onclick="selectSleep(this,'study')">
+          <div class="sleep-card-icon">📚</div>
+          <div class="sleep-card-name">Study Mode</div>
+          <div class="sleep-card-desc">Pause while you focus on exams or a heavy workload. Your profile is hidden from new matches but existing matches can still message you.</div>
+          <div class="sleep-card-badge">Profile hidden · messages open</div>
+        </div>
+        <div class="sleep-card" onclick="selectSleep(this,'sorted')">
+          <div class="sleep-card-icon">🏠</div>
+          <div class="sleep-card-name">Sorted! Found a place</div>
+          <div class="sleep-card-desc">You've found your place! Profile hidden completely. Come back when your situation changes.</div>
+          <div class="sleep-card-badge">Fully hidden · no return date</div>
+        </div>
+        <div class="sleep-card" onclick="selectSleep(this,'holiday')">
+          <div class="sleep-card-icon">✈️</div>
+          <div class="sleep-card-name">Holiday Mode</div>
+          <div class="sleep-card-desc">Travelling or heading home. Your profile is paused and your return date is shown to existing matches so they know when you're back.</div>
+          <div class="sleep-card-badge">Profile hidden · return date shown</div>
+        </div>
+        <div class="sleep-card" onclick="selectSleep(this,'looking')">
+          <div class="sleep-card-icon">👀</div>
+          <div class="sleep-card-name">Just Looking</div>
+          <div class="sleep-card-desc">You're not quite ready to commit. Profile stays visible but your status shows "just looking" so matches know you're early stage.</div>
+          <div class="sleep-card-badge">Profile visible · status shown</div>
+        </div>
+        <div class="sleep-card" onclick="selectSleep(this,'exams')">
+          <div class="sleep-card-icon">🤯</div>
+          <div class="sleep-card-name">Exam Crunch</div>
+          <div class="sleep-card-desc">A quick pause — profile hidden for up to 2 weeks. No decisions needed, just come back when exams are done.</div>
+          <div class="sleep-card-badge">Auto-wakes after 14 days</div>
+        </div>
+        <div class="sleep-card" onclick="selectSleep(this,'break')">
+          <div class="sleep-card-icon">😴</div>
+          <div class="sleep-card-name">Taking a Break</div>
+          <div class="sleep-card-desc">Step away without losing anything. Profile paused, data preserved. Wake up whenever you're ready.</div>
+          <div class="sleep-card-badge">Profile hidden · no auto-wake</div>
+        </div>
+      </div>
+      <div class="sleep-actions" style="margin-top:14px;">
+        <button class="btn-sleep-on" id="sp-btn-sleep-activate" onclick="activateSleep()">Activate sleep mode</button>
+        <button class="btn-sleep-wake" id="sp-btn-sleep-wake" style="display:none;" onclick="wakeUp()">☀️ Wake up — I'm looking again</button>
+      </div>
+    </div>
+
+    <!-- Notifications section -->
+    <div class="sp-section" id="sp-notifications">
+      <div class="settings-rows">
+        <div class="settings-row" id="sp-push-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Key date reminders</div>
+            <div class="settings-row-sub" id="sp-push-sub">Browser notifications for dates ≤7 days away</div>
+          </div>
+          <label class="toggle-wrap">
+            <input type="checkbox" id="sp-push-notif-toggle" onchange="handlePushToggle(this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">New match alerts</div>
+            <div class="settings-row-sub">Email when a new compatible student joins</div>
+          </div>
+          <label class="toggle-wrap">
+            <input type="checkbox" checked onchange="saveSetting('notif_matches', this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">New messages</div>
+            <div class="settings-row-sub">Email when someone messages you</div>
+          </div>
+          <label class="toggle-wrap">
+            <input type="checkbox" checked onchange="saveSetting('notif_messages', this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">UniRenter tips</div>
+            <div class="settings-row-sub">Renting guides and settling-in tips</div>
+          </div>
+          <label class="toggle-wrap">
+            <input type="checkbox" onchange="saveSetting('notif_tips', this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Sleep mode reminders</div>
+            <div class="settings-row-sub">Nudge after 14 days inactive</div>
+          </div>
+          <label class="toggle-wrap">
+            <input type="checkbox" checked onchange="saveSetting('notif_sleep', this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Display section -->
+    <div class="sp-section" id="sp-display">
+      <div class="settings-rows">
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Theme</div>
+            <div class="settings-row-sub">Dark or light mode</div>
+          </div>
+          <select class="settings-select" onchange="applyTheme(this.value)" id="sp-theme-select">
+            <option value="dark">🌙 Dark</option>
+            <option value="light">☀️ Light</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">City</div>
+            <div class="settings-row-sub">Your current search city</div>
+          </div>
+          <select class="settings-select" onchange="saveSetting('city', this.value)" id="sp-city-select">
+            <option value="melbourne">📍 Melbourne</option>
+            <option value="sydney">📍 Sydney</option>
+            <option value="brisbane">📍 Brisbane</option>
+            <option value="adelaide">📍 Adelaide</option>
+            <option value="perth">📍 Perth</option>
+            <option value="canberra">📍 Canberra</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sound section -->
+    <div class="sp-section" id="sp-sound">
+      <div class="settings-card-head" style="margin-bottom:14px;">🔊 Sound effects</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Optional audio feedback for key actions. Off by default.</p>
+      <div class="settings-rows">
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Sound pack</div>
+            <div class="settings-row-sub">Coming in a future update 🤠</div>
+          </div>
+          <span style="font-size:12px;color:var(--text-muted);">Soon</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account section -->
+    <div class="sp-section" id="sp-account">
+      <div class="settings-rows">
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Email</div>
+            <div class="settings-row-sub" id="sp-acct-email">—</div>
+          </div>
+          <span class="badge badge-verified">✓ Verified</span>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Profile complete</div>
+            <div class="settings-row-sub" id="sp-acct-pct">—</div>
+          </div>
+          <button class="section-action" onclick="window.location.href='/'">Edit →</button>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Sign out</div>
+            <div class="settings-row-sub">Clear your session from this device</div>
+          </div>
+          <button class="btn-danger" onclick="signOut()">Sign out</button>
+        </div>
+      </div>
+      <div class="settings-card danger-zone" style="margin-top:20px;">
+        <div class="settings-card-head" style="color:var(--brand-coral);">⚠️ Danger zone</div>
+        <div class="settings-rows">
+          <div class="settings-row">
+            <div class="settings-row-info">
+              <div class="settings-row-label">Delete account</div>
+              <div class="settings-row-sub">Permanently delete your profile and all data. This cannot be undone.</div>
+            </div>
+            <button class="btn-danger" onclick="confirmDelete()">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /settings-panel-body -->
+</div><!-- /settings-panel -->
+
 </body>
 </html>
