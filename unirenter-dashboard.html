@@ -634,6 +634,49 @@ body.light-mode {
 .match-compat { height: 3px; background: rgba(255,255,255,0.06); border-radius: 3px; margin-bottom: 14px; }
 .match-compat-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--brand-blue), var(--brand-green)); }
 .match-actions { display: flex; gap: 8px; }
+/* ── Vibe filter chips (Session 43) ── */
+.vibe-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+.vibe-filter-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-right: 2px;
+  white-space: nowrap;
+}
+.vibe-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  user-select: none;
+}
+.vibe-chip:hover { border-color: rgba(245,184,0,0.35); color: var(--text); }
+.vibe-chip.active {
+  background: rgba(245,184,0,0.12);
+  border-color: var(--brand-yellow);
+  color: var(--brand-yellow);
+  font-weight: 600;
+}
+.vibe-chip.chip-all { font-size: 12px; }
+.vibe-chip.chip-all.active { background: rgba(245,184,0,0.12); border-color: var(--brand-yellow); color: var(--brand-yellow); }
+@media (max-width: 480px) {
+  .vibe-chip { font-size: 14px; padding: 5px 10px; }
+  .vibe-filter-label { display: none; }
+}
 .btn-connect {
   flex: 1; background: var(--brand-blue); color: var(--navy);
   border: none; font-family: var(--font-body); font-size: 13px;
@@ -1749,6 +1792,8 @@ body.light-mode {
       </div>
       <button class="section-action" onclick="refreshMatches()">🔄 Refresh</button>
     </div>
+    <!-- Vibe emoji filter chips — rendered by JS when ≥10% of matches have a vibe -->
+    <div id="vibe-filter-row" style="display:none;"></div>
     <div class="match-grid" id="match-grid">
       <!-- Populated by JS -->
     </div>
@@ -3643,21 +3688,26 @@ async function applyCobSignals(signals, email) {
 const DUMMY_MATCHES = [
   { name:'Priya R.', initials:'P', bg:'linear-gradient(135deg,#e85d9f,#b83278)', score:96,
     sub:'UniMelb · Commerce/Law · 2nd year', tags:['🌙 Early bird','🧹 Very tidy','Carlton','$320/wk'],
-    tagClass:['','green','yellow','yellow'], reason:'Sleep, cleanliness & location match' },
+    tagClass:['','green','yellow','yellow'], reason:'Sleep, cleanliness & location match',
+    vibe_emoji_primary:'📚' },
   { name:'Jake S.', initials:'J', bg:'linear-gradient(135deg,#4BBFE0,#2a7a9e)', score:88,
     sub:'RMIT · Engineering · 3rd year', tags:['🌃 Night owl','⚖️ Average clean','Footscray','$280/wk'],
-    tagClass:['','','yellow','yellow'], reason:'Budget & suburb match' },
+    tagClass:['','','yellow','yellow'], reason:'Budget & suburb match',
+    vibe_emoji_primary:'🎮' },
   { name:'Anika M.', initials:'A', bg:'linear-gradient(135deg,#F5B800,#c4900a)', score:84,
     sub:'Monash · Psychology · 1st year', tags:['🔄 Flexible','🧹 Tidy','St Kilda','$320/wk'],
-    tagClass:['','green','yellow','yellow'], reason:'Lifestyle & budget match' },
+    tagClass:['','green','yellow','yellow'], reason:'Lifestyle & budget match',
+    vibe_emoji_primary:'🌿' },
   { name:'Tom O.', initials:'T', bg:'linear-gradient(135deg,#3DAA5C,#1d6b38)', score:79,
     sub:'Melbourne Uni · Arts · 3rd year', tags:['🌙 Early bird','🧹 Very tidy','Brunswick'],
-    tagClass:['','green','yellow'], reason:'Sleep schedule match' },
+    tagClass:['','green','yellow'], reason:'Sleep schedule match',
+    vibe_emoji_primary:'🏋️' },
 ];
 
 function renderMatchCard(p) {
   const card = document.createElement('div');
   card.className = 'match-card';
+  if (p.vibe_emoji_primary) card.dataset.vibe = p.vibe_emoji_primary;
   const tags = p.tags.map((t,i) =>
     `<span class="match-tag ${p.tagClass[i] || ''}">${t}</span>`
   ).join('');
@@ -3680,6 +3730,108 @@ function renderMatchCard(p) {
   return card;
 }
 
+// ── Vibe emoji filter chips (Session 43) ─────────────────────────────────────
+
+/**
+ * Scan the current match cards for vibe_emoji_primary values.
+ * Gate: only show chips when ≥10% of cards have a vibe set.
+ * Multi-select; "All" resets. Persists to ur_vibe_filter localStorage key.
+ */
+function renderVibeFilterChips() {
+  const row = document.getElementById('vibe-filter-row');
+  if (!row) return;
+
+  // Collect all match cards with a data-vibe attribute
+  const cards = Array.from(document.querySelectorAll('#match-grid .match-card[data-vibe]'));
+  const total = document.querySelectorAll('#match-grid .match-card').length;
+
+  // Gate: need ≥10% of match cards to have a vibe set
+  if (total === 0 || cards.length / total < 0.1) {
+    row.style.display = 'none';
+    row.innerHTML = '';
+    return;
+  }
+
+  // Count unique emojis present in the pool
+  const emojiCounts = {};
+  cards.forEach(c => {
+    const e = c.dataset.vibe;
+    if (e) emojiCounts[e] = (emojiCounts[e] || 0) + 1;
+  });
+  const emojis = Object.keys(emojiCounts);
+  if (emojis.length === 0) { row.style.display = 'none'; return; }
+
+  // Restore persisted selection
+  let activeFilters = [];
+  try { activeFilters = JSON.parse(localStorage.getItem('ur_vibe_filter') || '[]'); } catch(e) { activeFilters = []; }
+
+  // Build chip row
+  row.style.display = '';
+  row.innerHTML = '';
+  row.className = 'vibe-filter-row';
+
+  const label = document.createElement('span');
+  label.className = 'vibe-filter-label';
+  label.textContent = 'Vibe:';
+  row.appendChild(label);
+
+  // "All" chip
+  const allChip = document.createElement('button');
+  allChip.className = 'vibe-chip chip-all' + (activeFilters.length === 0 ? ' active' : '');
+  allChip.textContent = 'All';
+  allChip.setAttribute('aria-pressed', activeFilters.length === 0 ? 'true' : 'false');
+  allChip.onclick = () => {
+    activeFilters = [];
+    localStorage.setItem('ur_vibe_filter', JSON.stringify(activeFilters));
+    applyVibeFilter(activeFilters);
+    renderVibeFilterChips();
+  };
+  row.appendChild(allChip);
+
+  // Emoji chips — only emojis present in pool
+  emojis.forEach(emoji => {
+    const chip = document.createElement('button');
+    const isActive = activeFilters.includes(emoji);
+    chip.className = 'vibe-chip' + (isActive ? ' active' : '');
+    chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    chip.title = `Filter by ${emoji}`;
+    chip.textContent = emoji;
+    chip.onclick = () => {
+      const idx = activeFilters.indexOf(emoji);
+      if (idx === -1) {
+        activeFilters.push(emoji);
+      } else {
+        activeFilters.splice(idx, 1);
+      }
+      localStorage.setItem('ur_vibe_filter', JSON.stringify(activeFilters));
+      applyVibeFilter(activeFilters);
+      renderVibeFilterChips();
+    };
+    row.appendChild(chip);
+  });
+
+  // Apply any persisted filter immediately
+  applyVibeFilter(activeFilters);
+}
+
+/**
+ * Show/hide match cards based on active emoji filters.
+ * Empty array = show all. Non-match-card elements (e.g. cs-card) always visible.
+ */
+function applyVibeFilter(activeFilters) {
+  const grid = document.getElementById('match-grid');
+  if (!grid) return;
+  Array.from(grid.children).forEach(el => {
+    if (!el.classList.contains('match-card')) return; // always show cs-card etc.
+    if (activeFilters.length === 0) {
+      el.style.display = '';
+    } else {
+      const vibe = el.dataset.vibe || '';
+      el.style.display = activeFilters.includes(vibe) ? '' : 'none';
+    }
+  });
+}
+
 function renderMatches() {
   const grid = document.getElementById('match-grid');
   if (!grid) return;
@@ -3699,6 +3851,8 @@ function renderMatches() {
         font-family:var(--font-display);font-weight:700;font-size:14px;padding:12px 28px;
         border-radius:10px;text-decoration:none;">Build my profile →</a>`;
     grid.appendChild(cs);
+    const row = document.getElementById('vibe-filter-row');
+    if (row) { row.style.display = 'none'; row.innerHTML = ''; }
     return;
   }
 
@@ -3720,6 +3874,8 @@ function renderMatches() {
       📋 Copy referral link
     </button>`;
   grid.appendChild(cs);
+  // Render vibe emoji filter chips after match cards are in the DOM
+  renderVibeFilterChips();
 }
 
 function refreshMatches() {
