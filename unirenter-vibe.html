@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UniRenter Vibe Card 🤠</title>
+  <meta name="description" content="See this student's housemate vibe — powered by Cob on UniRenter." />
+  <meta property="og:title" content="Housemate Vibe Card 🤠" />
+  <meta property="og:description" content="Find out what kind of housemate this person is — powered by Cob on UniRenter." />
+  <meta property="og:image" content="https://unirenter.com.au/og-image.png" />
+  <meta property="og:url" content="https://unirenter.com.au/vibe" />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy:       #0d1f2d;
+      --navy-mid:   #162535;
+      --card-bg:    #182f42;
+      --text:       #e8f0f5;
+      --text-muted: #7a96aa;
+      --yellow:     #F5B800;
+      --blue:       #4BBFE0;
+      --green:      #3DAA5C;
+      --coral:      #E8623A;
+      --border:     rgba(255,255,255,0.08);
+      --radius:     14px;
+    }
+    html, body {
+      background: var(--navy);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: #0a1a26;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 0 20px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    a.nav-logo {
+      font-family: 'Epilogue', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--yellow);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+    .nav-right {
+      display: flex; align-items: center; gap: 8px; margin-left: auto;
+    }
+    .nav-cta {
+      background: var(--yellow); color: var(--navy);
+      border: none; border-radius: 8px;
+      padding: 8px 14px;
+      font-family: 'Epilogue', sans-serif; font-weight: 700; font-size: 13px;
+      cursor: pointer; text-decoration: none; white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* ── PAGE LAYOUT ── */
+    .page-wrap {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    /* ── LOADING / ERROR ── */
+    .state-center {
+      text-align: center; padding: 60px 20px;
+      color: var(--text-muted); font-size: 15px;
+    }
+    .state-center .state-emoji { font-size: 40px; margin-bottom: 12px; }
+    .state-center h2 { font-family: 'Epilogue', sans-serif; font-size: 18px; color: var(--text); margin-bottom: 8px; }
+
+    /* ── VIBE CARD ── */
+    .vibe-card-outer {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .vibe-card-header {
+      background: linear-gradient(135deg, #0d1f2d 0%, #162535 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 20px 20px;
+      text-align: center;
+      position: relative;
+    }
+    .vibe-card-brand {
+      font-size: 11px; color: var(--text-muted); font-weight: 500;
+      letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 16px;
+    }
+    .vibe-card-brand span { color: var(--yellow); }
+    .vibe-primary-emoji {
+      font-size: 64px; line-height: 1; margin-bottom: 8px;
+      filter: drop-shadow(0 4px 16px rgba(245,184,0,0.25));
+    }
+    .vibe-secondary-emoji {
+      font-size: 24px; margin-bottom: 16px; opacity: 0.8;
+    }
+    .vibe-name {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 22px; font-weight: 800;
+      color: var(--text); margin-bottom: 4px;
+    }
+    .vibe-meta {
+      font-size: 13px; color: var(--text-muted);
+    }
+    .vibe-meta span { color: var(--blue); font-weight: 500; }
+    .cob-branding {
+      position: absolute; bottom: 12px; right: 16px;
+      font-size: 12px; color: var(--text-muted);
+    }
+    .cob-branding strong { color: var(--yellow); }
+
+    .vibe-summary-block {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .vibe-summary-text {
+      font-size: 15px; line-height: 1.65;
+      color: var(--text); font-style: italic;
+    }
+    .vibe-summary-text::before { content: '"'; color: var(--yellow); font-size: 20px; font-style: normal; vertical-align: -2px; }
+    .vibe-summary-text::after  { content: '"'; color: var(--yellow); font-size: 20px; font-style: normal; vertical-align: -2px; }
+
+    .vibe-chips-block {
+      padding: 16px 20px;
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .vibe-chip {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px; font-weight: 500;
+      color: var(--text-muted);
+    }
+    .vibe-chip.yellow { border-color: rgba(245,184,0,0.3); color: var(--yellow); background: rgba(245,184,0,0.08); }
+    .vibe-chip.blue   { border-color: rgba(75,191,224,0.3); color: var(--blue);   background: rgba(75,191,224,0.08); }
+
+    /* ── REVIEW SUMMARY ── */
+    .review-block {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .review-block-head {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.4px;
+      text-transform: uppercase; color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .review-cob-text {
+      font-size: 14px; color: var(--text); line-height: 1.6;
+      background: rgba(245,184,0,0.06);
+      border: 1px solid rgba(245,184,0,0.2);
+      border-radius: 10px; padding: 14px;
+    }
+    .review-bars { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .review-bar-row { display: flex; align-items: center; gap: 8px; }
+    .review-bar-label { font-size: 12px; color: var(--text-muted); width: 120px; flex-shrink: 0; }
+    .review-bar-wrap { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+    .review-bar-fill { height: 100%; border-radius: 3px; background: var(--yellow); transition: width 0.6s ease; }
+    .review-bar-val { font-size: 11px; color: var(--text-muted); width: 24px; text-align: right; flex-shrink: 0; }
+
+    .review-quotes { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .review-quote {
+      font-size: 13px; color: var(--text); font-style: italic;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.03);
+      border-left: 2px solid var(--blue);
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* ── CTA ── */
+    .cta-block {
+      text-align: center; padding: 28px 20px;
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .cta-block h3 {
+      font-family: 'Epilogue', sans-serif; font-size: 18px; font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .cta-block p { font-size: 14px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
+    .cta-btn {
+      display: inline-block;
+      background: var(--yellow); color: var(--navy);
+      text-decoration: none; border-radius: 10px;
+      padding: 13px 24px;
+      font-family: 'Epilogue', sans-serif; font-weight: 800; font-size: 15px;
+      transition: opacity 0.2s;
+    }
+    .cta-btn:hover { opacity: 0.88; }
+
+    /* ── EXPIRED / NOT FOUND ── */
+    .expired-card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 32px 20px; text-align: center;
+    }
+    .expired-card .exp-emoji { font-size: 40px; margin-bottom: 12px; }
+    .expired-card h2 { font-family: 'Epilogue', sans-serif; font-size: 18px; margin-bottom: 8px; }
+    .expired-card p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+
+    @media (max-width: 480px) {
+      .page-wrap { padding: 20px 14px 48px; }
+      .vibe-primary-emoji { font-size: 52px; }
+      .vibe-name { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/">UniRenter</a>
+  <div class="nav-right">
+    <a class="nav-cta" href="/">🏠 Find housing</a>
+  </div>
+</nav>
+
+<div class="page-wrap" id="page-wrap">
+  <div class="state-center" id="loading-state">
+    <div class="state-emoji">🤠</div>
+    <h2>Loading vibe card…</h2>
+    <p>Just a sec</p>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // Extract token from URL — handles /vibe/TOKEN
+  function getToken() {
+    var path = window.location.pathname;
+    // Expect /vibe/TOKEN
+    var parts = path.split('/').filter(Boolean);
+    // parts = ['vibe', 'TOKEN']
+    if (parts.length >= 2 && parts[0] === 'vibe') return parts[1];
+    // Fallback: ?token=
+    var sp = new URLSearchParams(window.location.search);
+    return sp.get('token') || null;
+  }
+
+  var token = getToken();
+  var wrap = document.getElementById('page-wrap');
+
+  if (!token) {
+    renderError('No vibe card found', 'This link doesn\'t look right. Try getting a fresh link from your friend.', '🤔');
+    return;
+  }
+
+  // Fetch card data from API
+  fetch('/api/household/vibe-card-get?token=' + encodeURIComponent(token))
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d.ok || !d.card) {
+        renderError('Vibe card not found', 'This card may have expired or been removed. Ask your friend for a fresh link!', '👀');
+        return;
+      }
+      renderCard(d.card, d.review_summary);
+    })
+    .catch(function() {
+      renderError('Couldn\'t load card', 'Something went wrong. Try refreshing the page.', '😅');
+    });
+
+  function renderCard(card, reviewSummary) {
+    var name = card.display_name || 'Your potential flatmate';
+    var firstName = name.split(' ')[0];
+    var uni = card.university || '';
+    var city = capitalise(card.city || '');
+    var primaryEmoji = card.vibe_emoji_primary || '🌿';
+    var secondaryEmoji = card.vibe_emoji_secondary || '';
+    var summary = card.cob_summary || '';
+    var starSign = card.star_sign || '';
+    var generation = card.generation || '';
+
+    // Chips row
+    var chips = '';
+    if (uni) chips += '<div class="vibe-chip blue">🎓 ' + escHtml(uni) + '</div>';
+    if (city) chips += '<div class="vibe-chip">📍 ' + escHtml(city) + '</div>';
+    if (starSign) chips += '<div class="vibe-chip yellow">⭐ ' + escHtml(starSign) + '</div>';
+    if (generation) chips += '<div class="vibe-chip">🧬 ' + escHtml(generation) + '</div>';
+
+    var reviewHtml = '';
+    if (reviewSummary && reviewSummary.enough) {
+      reviewHtml = buildReviewHtml(reviewSummary);
+    }
+
+    wrap.innerHTML =
+      '<div class="vibe-card-outer">' +
+        '<div class="vibe-card-header">' +
+          '<div class="vibe-card-brand">Housemate Vibe Card — <span>UniRenter</span></div>' +
+          '<div class="vibe-primary-emoji">' + primaryEmoji + '</div>' +
+          (secondaryEmoji ? '<div class="vibe-secondary-emoji">' + secondaryEmoji + '</div>' : '') +
+          '<div class="vibe-name">' + escHtml(firstName) + '</div>' +
+          (uni || city ? '<div class="vibe-meta">' + (uni ? '<span>' + escHtml(uni) + '</span>' : '') + (uni && city ? ' · ' : '') + (city ? escHtml(city) : '') + '</div>' : '') +
+          '<div class="cob-branding">Powered by <strong>Cob 🤠</strong></div>' +
+        '</div>' +
+        (summary ? '<div class="vibe-summary-block"><div class="vibe-summary-text">' + escHtml(summary) + '</div></div>' : '') +
+        (chips ? '<div class="vibe-chips-block">' + chips + '</div>' : '') +
+      '</div>' +
+      reviewHtml +
+      '<div class="cta-block">' +
+        '<h3>Find your housemate match 🤠</h3>' +
+        '<p>Build your profile for free on UniRenter and see who you\'re compatible with in ' + (city || 'your city') + '.</p>' +
+        '<a class="cta-btn" href="/">Find my next housemate →</a>' +
+      '</div>';
+  }
+
+  function buildReviewHtml(rs) {
+    var html = '<div class="review-block">';
+    html += '<div class="review-block-head">What flatmates say 👥</div>';
+    html += '<div class="review-cob-text">' + escHtml(rs.cob_summary) + '</div>';
+
+    if (rs.scale_averages) {
+      html += '<div class="review-bars">';
+      var dims = [
+        { key: 'q1_social',        label: 'Social at home',    lo: 'Private', hi: 'Very social' },
+        { key: 'q2_shared_spaces', label: 'Shared spaces',     lo: 'Relaxed', hi: 'Tidy' },
+        { key: 'q3_sleep',         label: 'Sleep schedule',    lo: 'Early bird', hi: 'Night owl' },
+        { key: 'q4_tension',       label: 'Handles tension',   lo: 'Avoids it', hi: 'Addresses it' }
+      ];
+      dims.forEach(function(d) {
+        var avg = rs.scale_averages[d.key];
+        if (avg === undefined) return;
+        var pct = Math.round(((avg - 1) / 4) * 100);
+        html += '<div class="review-bar-row">' +
+          '<div class="review-bar-label">' + d.label + '</div>' +
+          '<div class="review-bar-wrap"><div class="review-bar-fill" style="width:' + pct + '%"></div></div>' +
+          '<div class="review-bar-val">' + avg + '</div>' +
+          '</div>';
+      });
+      html += '</div>';
+    }
+
+    if (rs.free_text_q7 && rs.free_text_q7.length > 0) {
+      html += '<div class="review-block-head" style="margin-top:16px;">What flatmates love about living with them</div>';
+      html += '<div class="review-quotes">';
+      rs.free_text_q7.forEach(function(q) {
+        html += '<div class="review-quote">' + escHtml(q) + '</div>';
+      });
+      html += '</div>';
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  function renderError(title, msg, emoji) {
+    wrap.innerHTML =
+      '<div class="expired-card">' +
+        '<div class="exp-emoji">' + (emoji || '😅') + '</div>' +
+        '<h2>' + escHtml(title) + '</h2>' +
+        '<p>' + escHtml(msg) + '</p>' +
+        '<p style="margin-top:20px;"><a href="/" style="color:var(--yellow);text-decoration:none;font-weight:600;">Go to UniRenter →</a></p>' +
+      '</div>';
+  }
+
+  function capitalise(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+})();
+</script>
+</body>
+</html>
