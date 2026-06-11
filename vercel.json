@@ -56,6 +56,30 @@
       "destination": "/unirenter-guide-brisbane.html"
     },
     {
+      "source": "/guide/adelaide",
+      "destination": "/unirenter-guide-adelaide.html"
+    },
+    {
+      "source": "/adelaide/guide",
+      "destination": "/unirenter-guide-adelaide.html"
+    },
+    {
+      "source": "/guide/perth",
+      "destination": "/unirenter-guide-perth.html"
+    },
+    {
+      "source": "/perth/guide",
+      "destination": "/unirenter-guide-perth.html"
+    },
+    {
+      "source": "/guide/canberra",
+      "destination": "/unirenter-guide-canberra.html"
+    },
+    {
+      "source": "/canberra/guide",
+      "destination": "/unirenter-guide-canberra.html"
+    },
+    {
       "source": "/lease",
       "destination": "/unirenter-lease.html"
     },
@@ -82,6 +106,30 @@
     {
       "source": "/brisbane/lease",
       "destination": "/unirenter-lease-brisbane.html"
+    },
+    {
+      "source": "/lease/adelaide",
+      "destination": "/unirenter-lease-adelaide.html"
+    },
+    {
+      "source": "/adelaide/lease",
+      "destination": "/unirenter-lease-adelaide.html"
+    },
+    {
+      "source": "/lease/perth",
+      "destination": "/unirenter-lease-perth.html"
+    },
+    {
+      "source": "/perth/lease",
+      "destination": "/unirenter-lease-perth.html"
+    },
+    {
+      "source": "/lease/canberra",
+      "destination": "/unirenter-lease-canberra.html"
+    },
+    {
+      "source": "/canberra/lease",
+      "destination": "/unirenter-lease-canberra.html"
     },
     {
       "source": "/settled",
@@ -112,6 +160,30 @@
       "destination": "/unirenter-settled-brisbane.html"
     },
     {
+      "source": "/settled/adelaide",
+      "destination": "/unirenter-settled-adelaide.html"
+    },
+    {
+      "source": "/adelaide/settled",
+      "destination": "/unirenter-settled-adelaide.html"
+    },
+    {
+      "source": "/settled/perth",
+      "destination": "/unirenter-settled-perth.html"
+    },
+    {
+      "source": "/perth/settled",
+      "destination": "/unirenter-settled-perth.html"
+    },
+    {
+      "source": "/settled/canberra",
+      "destination": "/unirenter-settled-canberra.html"
+    },
+    {
+      "source": "/canberra/settled",
+      "destination": "/unirenter-settled-canberra.html"
+    },
+    {
       "source": "/dashboard",
       "destination": "/unirenter-dashboard.html"
     },
@@ -128,6 +200,18 @@
       "destination": "/unirenter-brisbane.html"
     },
     {
+      "source": "/adelaide",
+      "destination": "/unirenter-adelaide.html"
+    },
+    {
+      "source": "/perth",
+      "destination": "/unirenter-perth.html"
+    },
+    {
+      "source": "/canberra",
+      "destination": "/unirenter-canberra.html"
+    },
+    {
       "source": "/agent",
       "destination": "/unirenter-agent.html"
     },
@@ -140,88 +224,20 @@
       "destination": "/unirenter-landlords.html"
     },
     {
-      "source": "/adelaide",
-      "destination": "/unirenter-adelaide.html"
+      "source": "/vibe",
+      "destination": "/unirenter-vibe.html"
     },
     {
-      "source": "/guide/adelaide",
-      "destination": "/unirenter-guide-adelaide.html"
+      "source": "/vibe/:token",
+      "destination": "/unirenter-vibe.html"
     },
     {
-      "source": "/adelaide/guide",
-      "destination": "/unirenter-guide-adelaide.html"
+      "source": "/find",
+      "destination": "/unirenter-find.html"
     },
     {
-      "source": "/lease/adelaide",
-      "destination": "/unirenter-lease-adelaide.html"
-    },
-    {
-      "source": "/adelaide/lease",
-      "destination": "/unirenter-lease-adelaide.html"
-    },
-    {
-      "source": "/settled/adelaide",
-      "destination": "/unirenter-settled-adelaide.html"
-    },
-    {
-      "source": "/adelaide/settled",
-      "destination": "/unirenter-settled-adelaide.html"
-    },
-    {
-      "source": "/perth",
-      "destination": "/unirenter-perth.html"
-    },
-    {
-      "source": "/guide/perth",
-      "destination": "/unirenter-guide-perth.html"
-    },
-    {
-      "source": "/perth/guide",
-      "destination": "/unirenter-guide-perth.html"
-    },
-    {
-      "source": "/lease/perth",
-      "destination": "/unirenter-lease-perth.html"
-    },
-    {
-      "source": "/perth/lease",
-      "destination": "/unirenter-lease-perth.html"
-    },
-    {
-      "source": "/settled/perth",
-      "destination": "/unirenter-settled-perth.html"
-    },
-    {
-      "source": "/perth/settled",
-      "destination": "/unirenter-settled-perth.html"
-    },
-    {
-      "source": "/canberra",
-      "destination": "/unirenter-canberra.html"
-    },
-    {
-      "source": "/guide/canberra",
-      "destination": "/unirenter-guide-canberra.html"
-    },
-    {
-      "source": "/canberra/guide",
-      "destination": "/unirenter-guide-canberra.html"
-    },
-    {
-      "source": "/lease/canberra",
-      "destination": "/unirenter-lease-canberra.html"
-    },
-    {
-      "source": "/canberra/lease",
-      "destination": "/unirenter-lease-canberra.html"
-    },
-    {
-      "source": "/settled/canberra",
-      "destination": "/unirenter-settled-canberra.html"
-    },
-    {
-      "source": "/canberra/settled",
-      "destination": "/unirenter-settled-canberra.html"
+      "source": "/find/:token",
+      "destination": "/unirenter-find.html"
     }
   ]
 }
