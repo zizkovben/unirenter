@@ -73,43 +73,134 @@ body::before {
   background-size: 48px 48px; pointer-events: none; z-index: 0;
 }
 
+/* ── NAV — UNIVERSAL STANDARD (Session 39) ── */
 nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 32px; background: rgba(13,31,45,0.92); backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(75,191,224,0.12);
+  background: #0a1a26;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding: 0 20px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  min-width: 0;
 }
-.nav-logo img { height: 48px; width: auto; display: block; }
-.city-badge { background: rgba(75,191,224,0.1); border: 1px solid rgba(75,191,224,0.3); color: var(--brand-blue); font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; }
-.nav-cta { background: var(--brand-yellow); color: #1a1000; font-family: var(--font-body); font-weight: 600; font-size: 14px; border: none; padding: 9px 22px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-.nav-cta:hover { background: #e0a800; transform: translateY(-1px); }
-.btn-theme { background: none; border: 1px solid rgba(255,255,255,0.15); color: var(--text-muted); font-size: 16px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; padding: 0; }
-.btn-theme:hover { border-color: rgba(75,191,224,0.4); color: var(--brand-blue); }
-/* ── Explore dropdown ── */
-.nav-dropdown { position: relative; }
-.nav-dropdown-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--text-muted); font-family: var(--font-body); font-size: 12px; font-weight: 500; padding: 8px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-.nav-dropdown-btn:hover { border-color: rgba(75,191,224,0.3); color: var(--brand-blue); }
-.nav-dropdown-btn .chevron { font-size: 10px; transition: transform 0.2s; }
-.nav-dropdown.open .chevron { transform: rotate(180deg); }
-.nav-dropdown-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; background: #1a3040; border: 1px solid rgba(75,191,224,0.18); border-radius: 14px; padding: 8px; min-width: 200px; z-index: 200; box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
-.nav-dropdown.open .nav-dropdown-menu { display: block; animation: fadeIn 0.15s ease; }
-.nav-dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; cursor: pointer; transition: background 0.15s; font-size: 13px; color: var(--text); text-decoration: none; width: 100%; background: none; border: none; font-family: var(--font-body); text-align: left; }
-.nav-dropdown-item:hover { background: rgba(75,191,224,0.08); color: var(--brand-blue); }
-.nav-dropdown-item .item-icon { font-size: 16px; width: 24px; text-align: center; flex-shrink: 0; }
-.nav-dropdown-item .item-label { font-weight: 500; }
-.nav-dropdown-item .item-desc { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-.nav-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 6px 0; }
-body.light-mode .nav-dropdown-menu { background: #1a3040; border-color: rgba(75,191,224,0.18); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
-body.light-mode .nav-dropdown-item { color: #e8f0f5; }
+nav .nav-logo-link { display: contents; line-height: 0; }
+nav .nav-logo img { height: 36px; width: auto; flex-shrink: 0; display: block; }
+a.nav-logo {
+  font-family: 'Epilogue', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: #F5B800;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+.city-badge {
+  background: rgba(75,191,224,0.1);
+  border: 1px solid rgba(75,191,224,0.3);
+  color: #4BBFE0;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.nav-right-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.nav-cta {
+  background: #F5B800;
+  color: #0d1f2d;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: 'Epilogue', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+.nav-cta:hover { opacity: 0.88; }
+.nav-explore-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #e8f0f5;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-explore-btn:hover { border-color: rgba(75,191,224,0.4); color: #4BBFE0; }
+.btn-theme {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #e8f0f5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+/* Dropdown */
+.nav-dropdown-wrap { position: relative; }
+.nav-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #162535;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 6px;
+  min-width: 210px;
+  z-index: 200;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.nav-dropdown.open { display: block; }
+.nav-dd-item {
+  display: block;
+  padding: 9px 12px;
+  color: #e8f0f5;
+  text-decoration: none;
+  font-size: 13px;
+  border-radius: 7px;
+  transition: background 0.15s;
+}
+.nav-dd-item:hover { background: rgba(255,255,255,0.07); }
+.nav-dd-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 4px 0; }
+
+/* ── MOBILE NAV — single breakpoint block, replaces all others ── */
+@media (max-width: 600px) {
+  nav { padding: 0 14px; gap: 6px; height: 52px; }
+  nav .nav-logo img { height: 30px; }
+  .city-badge { display: none; }
+  .nav-cta { font-size: 12px; padding: 7px 10px; }
+  .nav-explore-btn { font-size: 0; padding: 7px 10px; letter-spacing: 0; }
+  .nav-explore-btn::after { content: '▾'; font-size: 14px; }
+  .btn-theme { width: 32px; height: 32px; font-size: 14px; }
+}
+@media (max-width: 380px) {
+  nav { padding: 0 10px; gap: 4px; }
+  nav .nav-logo img { height: 26px; }
+  .nav-cta { font-size: 11px; padding: 6px 8px; }
+}
 
 /* ── Light mode ── */
 body.light-mode { --navy: #f0f4f8; --navy-mid: #e2e8f0; --card-bg: #ffffff; --card-border: rgba(0,31,45,0.12); --text: #0d1f2d; --text-muted: #4a6070; --slate: #6a8090; }
-body.light-mode nav { background: rgba(13,31,45,0.95); border-bottom: 1px solid rgba(75,191,224,0.12); }
-body.light-mode .nav-logo img { filter: none; background: none; padding: 0; border-radius: 0; }
-body.light-mode .city-badge { background: rgba(75,191,224,0.1); border-color: rgba(75,191,224,0.3); color: #4BBFE0; }
-body.light-mode .nav-cta { background: #F5B800; color: #1a1000; }
-body.light-mode .nav-dropdown-btn { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: #7a96aa; }
-body.light-mode .btn-theme { border-color: rgba(255,255,255,0.15); color: #7a96aa; }
+
 body.light-mode .hero { background: linear-gradient(135deg, #e8f4ff 0%, #f0f8ff 100%); }
 
 .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 110px 24px 60px; position: relative; z-index: 1; }
@@ -635,87 +726,9 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
    and all phones ≤480px
    ══════════════════════════════════════════ */
 
-/* Nav — base tightening for all small screens */
-@media (max-width: 600px) {
-  nav {
-    padding: 8px 12px;
-    gap: 6px;
-    flex-wrap: nowrap;
-  }
-  /* Logo — shrink on mobile */
-  .nav-logo img {
-    height: 34px;
-  }
-  /* City badge — hide on very small screens, show as tooltip instead */
-  .city-badge {
-    display: none;
-  }
-  /* CTA button — shorter label, smaller padding */
-  .nav-cta {
-    font-size: 11px;
-    padding: 7px 10px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  /* Explore dropdown button — shorten */
-  .nav-dropdown-btn {
-    font-size: 11px;
-    padding: 6px 9px;
-    white-space: nowrap;
-  }
-  /* Theme toggle — keep but shrink */
-  .btn-theme {
-    width: 30px;
-    height: 30px;
-    font-size: 14px;
-    flex-shrink: 0;
-    margin-right: 2px;
-  }
-  /* Dropdown menu — full width on mobile */
-  .nav-dropdown-menu {
-    right: -12px;
-    min-width: 180px;
-    left: auto;
-  }
-}
 
-/* Extra narrow — Galaxy Z Fold single panel and similar (~360px) */
-@media (max-width: 400px) {
-  nav {
-    padding: 8px 6px;
-    overflow: visible;
-  }
-  .nav-logo img {
-    height: 26px;
-  }
-  .nav-logo {
-    flex-shrink: 1;
-    min-width: 0;
-  }
-  .nav-cta {
-    font-size: 10px;
-    padding: 6px 7px;
-  }
-  .nav-dropdown-btn {
-    font-size: 10px;
-    padding: 5px 6px;
-    gap: 3px;
-  }
-  /* On very narrow screens, hide "Explore" text, keep just the chevron */
-  .nav-dropdown-btn-label {
-    display: none;
-  }
-  .nav-dropdown-btn .chevron {
-    font-size: 14px;
-  }
-  .btn-theme {
-    width: 28px;
-    height: 28px;
-    font-size: 13px;
-    flex-shrink: 0;
-    margin-right: 0;
-  }
-}
+
+
 
 /* ── Cob floating assistant ───────────────────────────────────────────────── */
 #cob-fab {
