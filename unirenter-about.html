@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About UniRenter — Student Housing, Simplified</title>
+<meta name="description" content="UniRenter helps Australian university students find compatible housemates, navigate break leases, and settle into accommodation — for free, forever.">
+<meta property="og:title" content="About UniRenter — Student Housing, Simplified">
+<meta property="og:description" content="Free housemate matching and settlement companion for students in Melbourne, Sydney, Brisbane and more.">
+<meta property="og:url" content="https://unirenter.com.au/about">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://unirenter.com.au/about">
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --yellow:#F5B800;--coral:#E8623A;--blue:#4BBFE0;--green:#3DAA5C;
+  --navy:#0d1f2d;--mid:#162535;--card:#182f42;--border:rgba(75,191,224,0.15);
+  --text:#e8f0f5;--muted:#7a96aa;
+  --fd:'Epilogue',sans-serif;--fb:'Inter',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fb);background:var(--navy);color:var(--text);min-height:100vh;overflow-x:hidden}
+.notranslate{translate:no}
+
+/* ── NAV — UNIVERSAL STANDARD (Session 39) ── */
+nav {
+  background: #0a1a26;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding: 0 20px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  min-width: 0;
+}
+nav .nav-logo-link { display: contents; line-height: 0; }
+nav .nav-logo img { height: 36px; width: auto; flex-shrink: 0; display: block; }
+a.nav-logo {
+  font-family: 'Epilogue', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: #F5B800;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+.city-badge {
+  background: rgba(75,191,224,0.1);
+  border: 1px solid rgba(75,191,224,0.3);
+  color: #4BBFE0;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.nav-right-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.nav-cta {
+  background: #F5B800;
+  color: #0d1f2d;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: 'Epilogue', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+.nav-cta:hover { opacity: 0.88; }
+.nav-explore-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #e8f0f5;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-explore-btn:hover { border-color: rgba(75,191,224,0.4); color: #4BBFE0; }
+.btn-theme {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #e8f0f5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.nav-dropdown-wrap { position: relative; }
+.nav-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #162535;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 6px;
+  min-width: 210px;
+  z-index: 200;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.nav-dropdown.open { display: block; }
+.nav-dd-item {
+  display: block;
+  padding: 9px 12px;
+  color: #e8f0f5;
+  text-decoration: none;
+  font-size: 13px;
+  border-radius: 7px;
+  transition: background 0.15s;
+}
+.nav-dd-item:hover { background: rgba(255,255,255,0.07); }
+.nav-dd-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 4px 0; }
+@media (max-width: 600px) {
+  nav { padding: 0 14px; gap: 6px; height: 52px; }
+  .city-badge { display: none; }
+  .nav-cta { font-size: 12px; padding: 7px 10px; }
+  .nav-explore-btn { font-size: 0; padding: 7px 10px; letter-spacing: 0; }
+  .nav-explore-btn::after { content: '▾'; font-size: 14px; }
+  .btn-theme { width: 32px; height: 32px; font-size: 14px; }
+}
+@media (max-width: 380px) {
+  nav { padding: 0 10px; gap: 4px; }
+  .nav-cta { font-size: 11px; padding: 6px 8px; }
+}
+
+/* ── PAGE ── */
+.page { max-width: 820px; margin: 0 auto; padding: 64px 24px 96px; }
+
+.hero { text-align: center; margin-bottom: 72px; }
+.hero-kicker {
+  display: inline-block;
+  background: rgba(75,191,224,0.1);
+  border: 1px solid rgba(75,191,224,0.25);
+  color: #4BBFE0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 20px;
+  margin-bottom: 24px;
+}
+.hero h1 {
+  font-family: 'Epilogue', sans-serif;
+  font-size: clamp(36px, 7vw, 60px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -1.5px;
+  margin-bottom: 20px;
+}
+.hero h1 em { font-style: normal; color: #F5B800; }
+.hero-lead {
+  font-size: 18px;
+  color: #7a96aa;
+  max-width: 560px;
+  margin: 0 auto 32px;
+  line-height: 1.65;
+}
+.hero-cta {
+  background: #F5B800;
+  color: #0d1f2d;
+  border: none;
+  border-radius: 10px;
+  padding: 15px 32px;
+  font-family: 'Epilogue', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.hero-cta:hover { opacity: 0.88; }
+
+.section { margin-bottom: 48px; }
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #4BBFE0;
+  margin-bottom: 8px;
+}
+.section h2 {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.section p {
+  color: #b0c4d0;
+  line-height: 1.75;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 48px; }
+.card {
+  background: #182f42;
+  border: 1px solid rgba(75,191,224,0.1);
+  border-radius: 16px;
+  padding: 28px 24px;
+}
+.card-icon { font-size: 30px; margin-bottom: 12px; }
+.card h3 {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.card p { color: #7a96aa; font-size: 14px; line-height: 1.6; margin: 0; }
+
+.cities-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.city-pill {
+  background: rgba(245,184,0,0.08);
+  border: 1px solid rgba(245,184,0,0.2);
+  color: #F5B800;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 20px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.city-pill:hover { background: rgba(245,184,0,0.15); }
+
+.trust-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 48px;
+}
+.trust-item { text-align: center; }
+.trust-val { font-family: 'Epilogue', sans-serif; font-size: 28px; font-weight: 800; color: #F5B800; }
+.trust-lbl { font-size: 12px; color: #7a96aa; margin-top: 2px; }
+
+.bottom-cta {
+  text-align: center;
+  padding: 48px 0 0;
+}
+.bottom-cta h2 {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+.bottom-cta p { color: #7a96aa; margin-bottom: 28px; font-size: 15px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo-link" style="display:contents;line-height:0">
+    <a class="nav-logo" href="/">UniRenter</a>
+  </a>
+  <div class="nav-right-group">
+    <button class="nav-cta" onclick="window.location='/'">🏠 Find housing</button>
+    <div class="nav-dropdown-wrap">
+      <button class="nav-explore-btn" onclick="toggleNavDropdown()">Explore ▾</button>
+      <div class="nav-dropdown" id="nav-dropdown">
+        <a class="nav-dd-item" href="/lease">🔄 Break lease</a>
+        <a class="nav-dd-item" href="/landlords">🏠 List your property</a>
+        <div class="nav-dd-divider"></div>
+        <a class="nav-dd-item" href="/guide">📖 Renter's Guide</a>
+        <a class="nav-dd-item" href="/settled">🇦🇺 Getting Settled</a>
+        <div class="nav-dd-divider"></div>
+        <a class="nav-dd-item" href="/cob">🤠 What is Cob?</a>
+        <div class="nav-dd-divider"></div>
+        <a class="nav-dd-item" href="/dashboard" id="nav-dd-dashboard" style="display:none;">👥 My Dashboard</a>
+      </div>
+    </div>
+    <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Toggle day/night mode">🌙</button>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-kicker">About UniRenter</div>
+    <h1>Student housing,<br><em>finally sorted.</em></h1>
+    <p class="hero-lead">
+      UniRenter helps Australian university students find compatible housemates, navigate break leases, and settle into accommodation — without the stress.
+    </p>
+    <button class="hero-cta" onclick="window.location='/'">Get started — it's free</button>
+  </div>
+
+  <!-- Trust numbers -->
+  <div class="trust-row">
+    <div class="trust-item">
+      <div class="trust-val">6</div>
+      <div class="trust-lbl">Australian cities</div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-val">100%</div>
+      <div class="trust-lbl">Free for students</div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-val">🤠</div>
+      <div class="trust-lbl"><span class="notranslate">Cob</span> — always on</div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-val">ABN</div>
+      <div class="trust-lbl">Registered Australian business</div>
+    </div>
+  </div>
+
+  <!-- What we do -->
+  <div class="section">
+    <div class="section-label">What we do</div>
+    <h2>More than a listings site</h2>
+    <p>
+      Most housing platforms show you listings and leave you to figure out the rest. UniRenter is a settlement companion — from finding your first housemate to managing your tenancy, understanding your rights, and navigating a break lease.
+    </p>
+    <p>
+      It's built by a student, for students. No advertising, no hidden fees, no spam. Students are free forever.
+    </p>
+  </div>
+
+  <!-- Feature cards -->
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🎯</div>
+      <h3>Housemate matching</h3>
+      <p>Build a profile in under 5 minutes. We match you with compatible students based on sleep schedules, lifestyle, budget, and location.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔄</div>
+      <h3>Break lease board</h3>
+      <p>Australia's only free break lease marketplace built for students. Post or find a break lease listing, with a guided six-step handover.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📋</div>
+      <h3>Renter's guide</h3>
+      <p>Plain-English guides covering repairs, bond, inspections, and your rights in each state — always attributing to the relevant authority.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🤠</div>
+      <h3><span class="notranslate">Cob</span>, your AI companion</h3>
+      <p>Built into every page. <span class="notranslate">Cob</span> nudges you at the right moment — profile tips, date reminders, safety checks on listings, and tenancy questions answered.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🗓️</div>
+      <h3>Tenancy calendar</h3>
+      <p>Connect your lease dates and UniRenter auto-populates your condition report deadline, inspection schedule, renewal window, and notice-to-vacate date.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🇦🇺</div>
+      <h3>Getting settled</h3>
+      <p>Guides for international students settling into Australian life — banking, SIM cards, transport, and finding community in a new city.</p>
+    </div>
+  </div>
+
+  <!-- Cities -->
+  <div class="section">
+    <div class="section-label">Where we operate</div>
+    <h2>Six cities, more coming</h2>
+    <p>UniRenter covers Australia's main university cities. Each city has its own matching pool, break lease board, suburb guides, and dedicated renter's guide.</p>
+    <div class="cities-row">
+      <a href="/" class="city-pill">Melbourne</a>
+      <a href="/sydney" class="city-pill">Sydney</a>
+      <a href="/brisbane" class="city-pill">Brisbane</a>
+      <a href="/adelaide" class="city-pill">Adelaide</a>
+      <a href="/perth" class="city-pill">Perth</a>
+      <a href="/canberra" class="city-pill">Canberra</a>
+    </div>
+  </div>
+
+  <!-- Free forever -->
+  <div class="section">
+    <div class="section-label">Our model</div>
+    <h2>Students pay nothing — ever</h2>
+    <p>
+      UniRenter is free for students, permanently. Revenue comes from the supply side: landlords, agents, and outgoing tenants who need to break a lease pay a small fee. Students never will.
+    </p>
+    <p>
+      There are no ads on UniRenter. Advertisers don't pay to appear in recommendations, and <span class="notranslate">Cob</span> will never be paid to suggest a product or service.
+    </p>
+  </div>
+
+  <!-- Bottom CTA -->
+  <div class="bottom-cta">
+    <h2>Ready to find your place?</h2>
+    <p>Build your profile in minutes. No account needed to start.</p>
+    <button class="hero-cta" onclick="window.location='/'">🏠 Find housing</button>
+  </div>
+
+</div>
+
+<script>
+function toggleTheme() {
+  const body = document.body;
+  const isLight = body.classList.toggle('light-mode');
+  localStorage.setItem('unirenter_theme', isLight ? 'light' : 'dark');
+  document.getElementById('btn-theme').textContent = isLight ? '☀️' : '🌙';
+}
+(function() {
+  if (localStorage.getItem('unirenter_theme') === 'light') {
+    document.body.classList.add('light-mode');
+    const btn = document.getElementById('btn-theme');
+    if (btn) btn.textContent = '☀️';
+  }
+})();
+
+function toggleNavDropdown() {
+  document.getElementById('nav-dropdown').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const dd = document.getElementById('nav-dropdown');
+  const wrap = dd && dd.closest('.nav-dropdown-wrap');
+  if (dd && wrap && !wrap.contains(e.target)) dd.classList.remove('open');
+});
+
+(function() {
+  if (localStorage.getItem('unirenter_email_verified') === '1') {
+    const el = document.getElementById('nav-dd-dashboard');
+    if (el) el.style.display = '';
+  }
+})();
+</script>
+</body>
+</html>

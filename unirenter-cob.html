@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UniRenter — Cob &amp; Compatibility Quiz</title>
+<title>Meet Cob — UniRenter's AI Housing Assistant</title>
 <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -342,525 +342,119 @@ body.light-mode{--navy:#f0f4f8;--mid:#e2e8f0;--card:#ffffff;--border:rgba(0,31,4
   </div>
 </nav>
 
-<div class="page">
+<div style="max-width:780px;margin:0 auto;padding:60px 24px 80px;">
 
-  <!-- ── QUIZ ── -->
-  <div class="eyebrow" style="color:var(--yellow)">
-    <span style="background:var(--yellow);opacity:0.4;"></span>
-    AI-Powered Feature
-    <span style="background:var(--yellow);opacity:0.4;"></span>
+  <!-- Hero -->
+  <div style="text-align:center;margin-bottom:56px;">
+    <div style="font-size:64px;margin-bottom:16px;">🤠</div>
+    <h1 style="font-family:'Epilogue',sans-serif;font-size:clamp(32px,6vw,52px);font-weight:800;line-height:1.1;letter-spacing:-1px;margin-bottom:16px;">
+      Meet <span class="notranslate" style="color:#F5B800;">Cob</span>.
+    </h1>
+    <p style="font-size:18px;color:#7a96aa;max-width:520px;margin:0 auto 28px;line-height:1.6;">
+      Your AI housing companion — built into UniRenter. Always on, always working in your corner.
+    </p>
+    <button onclick="window.location='/'" style="background:#F5B800;color:#0d1f2d;border:none;border-radius:10px;padding:14px 28px;font-family:'Epilogue',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">
+      🏠 Find housing with Cob
+    </button>
   </div>
-  <div class="section-title">Compatibility quiz.</div>
-  <div class="section-sub">Five questions in your own words. No chips, no checkboxes — just honest answers. Cob reads them and writes a personality summary that shows on your profile card.</div>
 
-  <div class="quiz-wrap">
-    <div class="quiz-prog-track"><div class="quiz-prog-fill" id="qprog"></div></div>
+  <!-- What is Cob -->
+  <div style="background:#182f42;border-radius:16px;padding:36px;margin-bottom:24px;border:1px solid rgba(75,191,224,0.12);">
+    <h2 style="font-family:'Epilogue',sans-serif;font-size:22px;font-weight:700;margin-bottom:12px;">What is <span class="notranslate">Cob</span>?</h2>
+    <p style="color:#b0c4d0;line-height:1.7;font-size:15px;">
+      <span class="notranslate">Cob</span> is short for <em>cobber</em> — Australian slang for a good mate. He's UniRenter's AI assistant, powered by Claude, and he's woven into every part of the platform. Whether you're building your housemate profile, browsing a break lease listing, managing key tenancy dates, or asking about your rights as a renter, <span class="notranslate">Cob</span>'s there — as a small floating button in the bottom-right corner of every page.
+    </p>
+  </div>
 
-    <div class="quiz-inner" id="quiz-inner">
+  <!-- What can Cob do -->
+  <div style="background:#182f42;border-radius:16px;padding:36px;margin-bottom:24px;border:1px solid rgba(75,191,224,0.12);">
+    <h2 style="font-family:'Epilogue',sans-serif;font-size:22px;font-weight:700;margin-bottom:20px;">What can <span class="notranslate">Cob</span> do?</h2>
+    <div style="display:grid;gap:16px;">
 
-      <div class="quiz-q active" id="qq1">
-        <div class="q-step">Question 1 of 5</div>
-        <div class="q-title">Describe your ideal Sunday at home.</div>
-        <div class="q-sub">Are you cooking a big meal, studying quietly, having friends over, sleeping in, or out all day? There's no right answer.</div>
-        <textarea class="q-ta" id="qa1" placeholder="e.g. I love a slow morning with coffee and podcasts, maybe some study in the afternoon, then cooking dinner with whoever's around. I like the house to feel relaxed but not chaotic."></textarea>
-      </div>
-
-      <div class="quiz-q" id="qq2">
-        <div class="q-step">Question 2 of 5</div>
-        <div class="q-title">What would make a housemate a complete nightmare?</div>
-        <div class="q-sub">Think about your biggest worries — noise at 2am? Never cleaning up? Always in the common areas? Someone too in your face?</div>
-        <textarea class="q-ta" id="qa2" placeholder="e.g. Someone who plays music loudly after I've gone to bed, or who leaves the kitchen a mess every night. I don't need a perfect housemate but I need someone who's at least aware of other people."></textarea>
-      </div>
-
-      <div class="quiz-q" id="qq3">
-        <div class="q-step">Question 3 of 5</div>
-        <div class="q-title">How important is it that your housemate becomes a friend?</div>
-        <div class="q-sub">Some people want a social home base, others prefer clear boundaries. Neither is wrong — but mismatched expectations cause most housemate conflicts.</div>
-        <div class="choices" id="qa3-choices">
-          <div class="choice" onclick="pickChoice(this,'qa3','very')">
-            <div class="choice-icon">🤝</div>
-            <div><div class="choice-title">Very important — I want us to actually hang out</div><div class="choice-desc">Cook together, watch things, maybe travel</div></div>
-          </div>
-          <div class="choice" onclick="pickChoice(this,'qa3','somewhat')">
-            <div class="choice-icon">😊</div>
-            <div><div class="choice-title">Somewhat — friendly coexistence is plenty</div><div class="choice-desc">Shared meals occasionally, mutual respect, no drama</div></div>
-          </div>
-          <div class="choice" onclick="pickChoice(this,'qa3','not_really')">
-            <div class="choice-icon">🚪</div>
-            <div><div class="choice-title">Not really — I have my own social life</div><div class="choice-desc">Clear home boundaries, professional coexistence</div></div>
-          </div>
-          <div class="choice" onclick="pickChoice(this,'qa3','open')">
-            <div class="choice-icon">🤷</div>
-            <div><div class="choice-title">Open to either — I adapt to the person</div><div class="choice-desc">Depends entirely on who it is</div></div>
-          </div>
-        </div>
-        <input type="hidden" id="qa3" />
-      </div>
-
-      <div class="quiz-q" id="qq4">
-        <div class="q-step">Question 4 of 5</div>
-        <div class="q-title">What's one thing people always notice about you as a housemate?</div>
-        <div class="q-sub">Ask someone who's lived with you if you're not sure. Could be great or something you're working on — honesty is what makes the matching work.</div>
-        <textarea class="q-ta" id="qa4" placeholder="e.g. My friends say I'm very considerate about noise — I always use headphones after 10pm. But I admit I can let dishes pile up for a day before I tackle them."></textarea>
-      </div>
-
-      <div class="quiz-q" id="qq5">
-        <div class="q-step">Question 5 of 5</div>
-        <div class="q-title">Paint us a picture of a typical weeknight.</div>
-        <div class="q-sub">Home by 6pm or 9pm? Study until midnight? Cooking or ordering? Everyone in their rooms or watching TV together?</div>
-        <textarea class="q-ta" id="qa5" placeholder="e.g. Home around 7 after uni and a shift. Quick dinner — I cook simple things. Study from about 8 til 11. I like the house fairly quiet during study time but don't mind if housemates are watching TV in the lounge."></textarea>
-      </div>
-
-      <div class="quiz-nav">
-        <button class="btn-qback" id="q-back" onclick="qBack()" style="opacity:0.3;pointer-events:none">← Back</button>
-        <button class="btn-qnext" id="q-next" onclick="qNext()">Next →</button>
-      </div>
-    </div>
-
-    <div class="quiz-loading" id="quiz-loading">
-      <div class="oi-thinking">🤠</div>
-      <div class="loading-label">Cob's reading your answers…</div>
-      <div class="loading-sub">Crafting a personality summary that'll appear on your profile card and help find genuinely compatible housemates.</div>
-      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-      <div style="font-size:11px;color:var(--muted);margin-top:14px;opacity:0.7">Live version powered by Claude AI · ~5 seconds</div>
-    </div>
-
-    <div class="quiz-result" id="quiz-result">
-      <div class="ai-pill">✨ Generated by Cob 🤠</div>
-      <div class="result-persona" id="r-persona">The Considerate Night Owl</div>
-      <div class="result-summary" id="r-summary">Loading…</div>
-      <div class="result-tags" id="r-tags"></div>
-      <div class="result-grid">
-        <div class="result-card">
-          <div class="rc-title" style="color:var(--green)">🤝 Best match for you</div>
-          <div class="rc-body" id="r-match">Loading…</div>
-        </div>
-        <div class="result-card">
-          <div class="rc-title" style="color:var(--coral)">⚠️ Likely friction points</div>
-          <div class="rc-body" id="r-friction">Loading…</div>
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div style="font-size:24px;flex-shrink:0;">🎯</div>
+        <div>
+          <div style="font-weight:600;margin-bottom:4px;font-family:'Epilogue',sans-serif;">Help you find the right housemate</div>
+          <div style="color:#7a96aa;font-size:14px;line-height:1.6;"><span class="notranslate">Cob</span> gives you nudges at each step of your profile — honest advice like "pick suburbs close to your uni first" and "be honest about your sleep schedule, it causes more friction than anything else."</div>
         </div>
       </div>
-      <div class="result-actions">
-        <button class="btn-retake" onclick="retake()">Retake quiz</button>
-        <button class="btn-save" onclick="showToast('✅ Saved to profile','Your Cob summary now appears on your match card.')">Save to my profile →</button>
+
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div style="font-size:24px;flex-shrink:0;">✍️</div>
+        <div>
+          <div style="font-weight:600;margin-bottom:4px;font-family:'Epilogue',sans-serif;">Write your vibe summary</div>
+          <div style="color:#7a96aa;font-size:14px;line-height:1.6;"><span class="notranslate">Cob</span> can generate a short personality portrait — a couple of sentences in plain language — based on five questions you answer in your own words. It appears on your profile so potential housemates get a real sense of you.</div>
+        </div>
       </div>
+
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div style="font-size:24px;flex-shrink:0;">🔄</div>
+        <div>
+          <div style="font-weight:600;margin-bottom:4px;font-family:'Epilogue',sans-serif;">Guide break lease handovers</div>
+          <div style="color:#7a96aa;font-size:14px;line-height:1.6;"><span class="notranslate">Cob</span> is active throughout the break lease process — from the moment you post a listing, through document upload, inspection, and the six-step handover. He knows which documents matter and when.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div style="font-size:24px;flex-shrink:0;">📅</div>
+        <div>
+          <div style="font-weight:600;margin-bottom:4px;font-family:'Epilogue',sans-serif;">Keep you on top of key dates</div>
+          <div style="color:#7a96aa;font-size:14px;line-height:1.6;"><span class="notranslate">Cob</span> pulses when a key date is approaching — rent reviews, condition report deadlines, notice-to-vacate windows. He'll check in if you haven't visited your dashboard in a while and a date is coming up.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div style="font-size:24px;flex-shrink:0;">📋</div>
+        <div>
+          <div style="font-weight:600;margin-bottom:4px;font-family:'Epilogue',sans-serif;">Answer tenancy questions</div>
+          <div style="color:#7a96aa;font-size:14px;line-height:1.6;"><span class="notranslate">Cob</span> knows what each state tenancy authority says about emergency repairs, pet bans, bond deductions, and more. He'll always point you to the right authority and free advice line — never pretend to be a lawyer.</div>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- ── OI SECTION ── -->
-  <div class="eyebrow" style="color:var(--blue)">
-    <span style="background:var(--blue);opacity:0.4;"></span>
-    Optional AI Tool
-    <span style="background:var(--blue);opacity:0.4;"></span>
+  <!-- How Cob is different -->
+  <div style="background:#182f42;border-radius:16px;padding:36px;margin-bottom:24px;border:1px solid rgba(75,191,224,0.12);">
+    <h2 style="font-family:'Epilogue',sans-serif;font-size:22px;font-weight:700;margin-bottom:12px;">Why <span class="notranslate">Cob</span> is different</h2>
+    <p style="color:#b0c4d0;line-height:1.7;font-size:15px;margin-bottom:16px;">
+      Most housing platforms treat AI as a search filter or a chatbot bolted on at the end. <span class="notranslate">Cob</span> is different — he's active from the moment you enter your email, and he understands where you are in the process.
+    </p>
+    <p style="color:#b0c4d0;line-height:1.7;font-size:15px;">
+      He's always in the bottom-right corner of the page — a small yellow button. Tap it any time. He won't pester you, but when something matters, he'll let you know.
+    </p>
   </div>
-  <div class="section-title">Meet <span style="color:var(--yellow)">Cob</span> —<br>your housing assistant.</div>
-  <div class="section-sub">Cob is UniRenter's AI assistant. Think of it as a knowledgeable cobber who's studied Australian tenancy law and knows Melbourne, Sydney, and Brisbane's rental markets inside out. Available 24/7.</div>
 
-  <div class="oi-intro">
-    <div class="oi-hero">
-      <div class="oi-avatar-large">🤠</div>
-      <div class="oi-hero-text">
-        <h3>G'day — I'm Cob. <span style="font-weight:300;color:var(--muted)">Your Aussie housing mate.</span></h3>
-        <p>Your uniquely Australian housing assistant. I can answer questions about renting, explain your legal rights in plain English, sniff out scam patterns, and guide you through the UniRenter app — in any language, any time. Think of me as the cobber who actually knows this stuff.</p>
-      </div>
-    </div>
-    <div class="oi-feature-grid">
-      <div class="oi-feat">
-        <div class="oi-feat-icon">💬</div>
-        <h4>Ask anything</h4>
-        <p>"What does bond mean?", "Is $350/wk fair for Carlton?", "Can my landlord refuse my pet?"</p>
-      </div>
-      <div class="oi-feat">
-        <div class="oi-feat-icon">🚩</div>
-        <h4>Scam detection</h4>
-        <p>Paste any suspicious message and Cob will analyse it for red flags and tell you what to watch out for.</p>
-      </div>
-      <div class="oi-feat">
-        <div class="oi-feat-icon">⚖️</div>
-        <h4>Know your rights</h4>
-        <p>State-specific rental law in plain English — Victoria, NSW, or Queensland.</p>
-      </div>
-      <div class="oi-feat">
-        <div class="oi-feat-icon">🌏</div>
-        <h4>International students</h4>
-        <p>Extra patience and cultural context for students navigating Australian renting for the first time.</p>
-      </div>
-    </div>
-    <div class="oi-cta-note" style="margin-top:16px;">
-      👇 Tap the <strong style="color:var(--yellow)">Cob</strong> button in the bottom-right corner to have a chat.
-      Ask about bonds, condition reports, scams, your rights, or anything else on your mind.
-    </div>
+  <!-- CTA -->
+  <div style="text-align:center;padding:40px 0;">
+    <p style="color:#7a96aa;margin-bottom:20px;font-size:15px;">Ready to find your next place?</p>
+    <button onclick="window.location='/'" style="background:#F5B800;color:#0d1f2d;border:none;border-radius:10px;padding:14px 32px;font-family:'Epilogue',sans-serif;font-weight:700;font-size:16px;cursor:pointer;margin-right:12px;">
+      🏠 Find housing
+    </button>
+    <button onclick="window.location='/dashboard'" style="background:transparent;color:#e8f0f5;border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:14px 24px;font-family:'Epilogue',sans-serif;font-weight:600;font-size:15px;cursor:pointer;">
+      Dashboard ↗
+    </button>
   </div>
 
 </div>
-
-<!-- OI FAB -->
-<div class="oi-label" id="oi-label">👋 G'day! I'm Cob — ask me anything 🤠</div>
-<button class="oi-fab oi-pulse" onclick="toggleOi()" id="oi-fab" aria-label="Open Cob assistant">
-  <div class="oi-fab-inner">
-    <span class="oi-fab-emoji">🤠</span>
-    <span class="oi-fab-name">Cob</span>
-  </div>
-</button>
-
-<!-- OI WINDOW -->
-<div class="oi-window" id="oi-window">
-  <div class="oi-header">
-    <div class="oi-header-avatar"><span>🤠</span></div>
-    <div class="oi-header-info">
-      <h4>Cob — Housing Assistant</h4>
-      <p>● Online now · Powered by Claude AI</p>
-      <div class="oi-header-sub">UniRenter's uniquely Australian housing mate</div>
-    </div>
-    <button class="oi-close" onclick="toggleOi()" aria-label="Close Cob">✕</button>
-  </div>
-
-  <div class="oi-msgs" id="oi-msgs">
-    <div class="oi-msg oi">
-      <div class="oi-bubble">G'day! 🤠 I'm <strong>Cob</strong> — UniRenter's housing assistant.<br><br>Whether you're confused about bonds, worried about a dodgy listing, not sure about your rights, or just need a hand finding the right place — I'm here. What can I help you with?</div>
-      <div class="oi-time">Now</div>
-    </div>
-  </div>
-
-  <div class="oi-typing" id="oi-typing">
-    <span></span><span></span><span></span>
-  </div>
-
-  <div class="oi-quick" id="oi-quick">
-    <button class="oiqr" onclick="cobSend('What does bond mean in Australia?')">💰 What is bond?</button>
-    <button class="oiqr" onclick="cobSend('Is $350/wk reasonable for Carlton?')">💸 Is this rent fair?</button>
-    <button class="oiqr" onclick="cobSend('What should I check on a condition report?')">📋 Condition reports</button>
-    <button class="oiqr" onclick="cobSend('How do I spot a rental scam?')">🚩 Spot a scam</button>
-    <button class="oiqr" onclick="cobSend('What are my rights as a renter in Victoria?')">⚖️ VIC rights</button>
-    <button class="oiqr" onclick="cobSend('What is PBSA and is it right for me?')">🏨 What is PBSA?</button>
-    <button class="oiqr" onclick="cobSend('Can my landlord refuse my pet?')">🐾 Pet rules</button>
-    <button class="oiqr" onclick="cobSend('I think this listing might be a scam — the rent seems too cheap and they want a deposit before I inspect.')">🔍 Analyse this listing</button>
-  </div>
-
-  <div class="oi-input-row">
-    <input class="oi-input" id="oi-input" placeholder="Ask Cob anything about renting…" onkeydown="if(event.key==='Enter')cobSend()" />
-    <button class="oi-send" onclick="cobSend()">➤</button>
-  </div>
-  <div class="oi-footer">Powered by Claude AI · Cob is not a lawyer — see Tenants Victoria for formal help</div>
-</div>
-
-<div class="toast" id="toast"><div class="toast-title" id="t-title"></div><div id="t-msg"></div></div>
 
 <script>
-// ── QUIZ ──────────────────────────────────────────────────
-let curQ = 1;
-const totalQ = 5;
-
-function qNext() {
-  const ans = getAns(curQ);
-  if (!ans.trim()) {
-    showToast("⚠️ Don't skip this one", "Your answer helps Cob understand your personality — the more honest, the better your matches.");
-    return;
+  // Theme toggle
+  function toggleTheme() {
+    const body = document.body;
+    const isLight = body.classList.toggle('light-mode');
+    localStorage.setItem('unirenter_theme', isLight ? 'light' : 'dark');
+    document.getElementById('btn-theme').textContent = isLight ? '☀️' : '🌙';
   }
-  if (curQ === totalQ) { runQuiz(); return; }
-  goQ(curQ + 1);
-}
-
-function qBack() { if (curQ > 1) goQ(curQ - 1); }
-
-function goQ(n) {
-  document.getElementById("qq" + curQ).classList.remove("active");
-  curQ = n;
-  document.getElementById("qq" + n).classList.add("active");
-  document.getElementById("qprog").style.width = (n / totalQ * 100) + "%";
-  const back = document.getElementById("q-back");
-  back.style.opacity = n > 1 ? "1" : "0.3";
-  back.style.pointerEvents = n > 1 ? "auto" : "none";
-  const next = document.getElementById("q-next");
-  next.textContent = n === totalQ ? "Generate my profile ✨" : "Next →";
-  next.className = n === totalQ ? "btn-qfinish" : "btn-qnext";
-}
-
-function getAns(q) {
-  const el = document.getElementById("qa" + q);
-  return el ? el.value : "";
-}
-
-function pickChoice(el, id, val) {
-  el.closest(".choices").querySelectorAll(".choice").forEach(c => c.classList.remove("sel"));
-  el.classList.add("sel");
-  document.getElementById(id).value = val;
-}
-
-// ── QUIZ RESULT — powered by Claude via /api/cob ──────────
-const FALLBACK_PERSONAS = [
-  {
-    persona: "The Considerate Night Owl",
-    summary: "You value your independence at home but you're not antisocial — you just live on your own schedule. You're conscientious about noise and shared spaces, and you expect the same in return.",
-    tags: ["🌙 Night owl", "🤫 Quiet by 11", "🧹 Tidy kitchen", "📚 Study-focused", "😊 Friendly not clingy"],
-    match: "Someone equally independent who respects quiet hours. A fellow student or working professional who doesn't need the house to be a social hub.",
-    friction: "Party types, people who need constant social interaction at home, or anyone lax about shared spaces."
-  },
-  {
-    persona: "The Social Homebody",
-    summary: "Home is your base camp and you love sharing it. You'd genuinely like to cook with your housemates, watch things together, and build a bit of a household vibe — without it being forced.",
-    tags: ["🍳 Communal cook", "🤝 Genuinely social", "🎉 Host sometimes", "😌 Laid-back", "🧼 Clean enough"],
-    match: "Someone who wants the same — a shared household with some warmth to it. Doesn't have to be best friends, but genuine friendliness matters.",
-    friction: "People who want full separation and minimal interaction. If they're going to treat it like a hotel, it won't click."
-  }
-];
-
-async function runQuiz() {
-  document.getElementById("quiz-inner").style.display = "none";
-  document.getElementById("quiz-loading").classList.add("vis");
-
-  const answers = [
-    document.getElementById("qa1").value,
-    document.getElementById("qa2").value,
-    document.getElementById("qa3").value,
-    document.getElementById("qa4").value,
-    document.getElementById("qa5").value
-  ];
-
-  let persona = null;
-
-  try {
-    const prompt = `You are analysing a student's housemate compatibility quiz for UniRenter, an Australian student housing platform.
-
-Their answers:
-Q1 (Ideal Sunday at home): ${answers[0]}
-Q2 (Nightmare housemate): ${answers[1]}
-Q3 (Want housemate as friend): ${answers[2]}
-Q4 (What people notice about them): ${answers[3]}
-Q5 (Typical weeknight): ${answers[4]}
-
-Generate a housemate personality profile. Respond ONLY with valid JSON (no markdown, no backticks) in this exact format:
-{
-  "persona": "2-4 word persona name (e.g. The Considerate Night Owl)",
-  "summary": "2-3 sentence honest description of their home personality and what makes them a good/tricky housemate",
-  "tags": ["emoji + short tag", "emoji + short tag", "emoji + short tag", "emoji + short tag", "emoji + short tag"],
-  "match": "1-2 sentences on their ideal housemate match",
-  "friction": "1-2 sentences on likely friction points with incompatible housemates"
-}`;
-
-    const res = await fetch('/api/cob', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [{ role: 'user', content: prompt }],
-        city: 'Melbourne'
-      })
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      let raw = data.reply || '';
-      // Strip any markdown fences
-      raw = raw.replace(/```json/g, '').replace(/```/g, '').trim();
-      persona = JSON.parse(raw);
+  (function() {
+    if (localStorage.getItem('unirenter_theme') === 'light') {
+      document.body.classList.add('light-mode');
+      const btn = document.getElementById('btn-theme');
+      if (btn) btn.textContent = '☀️';
     }
-  } catch (err) {
-    // Fallback to local persona if API fails
-    persona = FALLBACK_PERSONAS[Math.floor(Math.random() * FALLBACK_PERSONAS.length)];
-  }
+  })();
 
-  if (!persona) {
-    persona = FALLBACK_PERSONAS[Math.floor(Math.random() * FALLBACK_PERSONAS.length)];
-  }
-
-  document.getElementById("quiz-loading").classList.remove("vis");
-  document.getElementById("qprog").style.width = "100%";
-  document.getElementById("r-persona").textContent = persona.persona;
-  document.getElementById("r-summary").textContent = persona.summary;
-  document.getElementById("r-match").textContent = persona.match;
-  document.getElementById("r-friction").textContent = persona.friction;
-  document.getElementById("r-tags").innerHTML = (persona.tags || []).map(t => `<span class="rtag">${t}</span>`).join("");
-  document.getElementById("quiz-result").classList.add("vis");
-}
-
-function retake() {
-  document.getElementById("quiz-result").classList.remove("vis");
-  document.getElementById("quiz-inner").style.display = "block";
-  curQ = 1;
-  for (let i = 1; i <= totalQ; i++) {
-    document.getElementById("qq" + i).classList.remove("active");
-    const ta = document.getElementById("qa" + i);
-    if (ta && ta.tagName === "TEXTAREA") ta.value = "";
-    const hi = document.getElementById("qa" + i);
-    if (hi && hi.tagName === "INPUT") hi.value = "";
-  }
-  document.querySelectorAll(".choice").forEach(c => c.classList.remove("sel"));
-  document.getElementById("qq1").classList.add("active");
-  document.getElementById("qprog").style.width = "20%";
-  document.getElementById("q-back").style.opacity = "0.3";
-  document.getElementById("q-back").style.pointerEvents = "none";
-  document.getElementById("q-next").textContent = "Next →";
-  document.getElementById("q-next").className = "btn-qnext";
-}
-
-// ── COB CHAT — live Claude API ─────────────────────────────
-let cobOpen = false;
-let labelHidden = false;
-let cobHistory = []; // full conversation history for multi-turn context
-
-setTimeout(() => {
-  const l = document.getElementById("oi-label");
-  if (l && !cobOpen) { l.style.opacity = "0"; labelHidden = true; }
-}, 7000);
-
-function toggleOi() {
-  cobOpen = !cobOpen;
-  document.getElementById("oi-window").classList.toggle("open", cobOpen);
-  const l = document.getElementById("oi-label");
-  if (l) l.style.display = "none";
-  if (cobOpen) document.getElementById("oi-input").focus();
-}
-
-async function cobSend(preset) {
-  const input = document.getElementById("oi-input");
-  const msg = preset || input.value.trim();
-  if (!msg) return;
-
-  input.value = "";
-  document.getElementById("oi-quick").style.display = "none";
-  addCobMsg(msg, "me");
-
-  // Add to conversation history
-  cobHistory.push({ role: "user", content: msg });
-
-  const typing = document.getElementById("oi-typing");
-  typing.classList.add("vis");
-  scrollCob();
-
-  try {
-    const email = localStorage.getItem('unirenter_email') || null;
-    const res = await fetch('/api/cob', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: cobHistory,
-        city: 'Melbourne',
-        extract_signals: !!email   // only extract if we have an email to save against
-      })
-    });
-
-    typing.classList.remove("vis");
-
-    if (res.ok) {
-      const data = await res.json();
-      const reply = data.reply || "No worries — something went sideways. Give it another crack!";
-      cobHistory.push({ role: "assistant", content: reply });
-      addCobMsg(reply, "oi");
-
-      // If Cob detected profile signals, save them to Supabase + localStorage
-      if (data.profile_signals && email) {
-        await saveCobSignals(data.profile_signals, email);
-      }
-    } else {
-      const fallback = getCobFallback(msg);
-      addCobMsg(fallback, "oi");
-    }
-  } catch (err) {
-    typing.classList.remove("vis");
-    const fallback = getCobFallback(msg);
-    addCobMsg(fallback, "oi");
-  }
-}
-
-// ── Save Cob-extracted profile signals to Supabase ────────────────────────────
-async function saveCobSignals(signals, email) {
-  if (!signals || !signals.has_signals || !email) return;
-
-  const payload = { email, city: localStorage.getItem('ur_city') || 'melbourne' };
-  const refinedFields = JSON.parse(localStorage.getItem('ur_cob_refined') || '[]');
-
-  const fieldMap = {
-    university:         'university',
-    suburb_preferences: 'suburb_preferences',
-    budget_max:         'budget_max',
-    sleep_schedule:     'sleep_schedule',
-    cleanliness:        'cleanliness',
-    pets:               'pets',
-    student_status:     'student_status',
-    household_type:     'household_type',
-  };
-
-  let hasUpdate = false;
-  for (const [sigKey, profileKey] of Object.entries(fieldMap)) {
-    if (signals[sigKey] !== null && signals[sigKey] !== undefined) {
-      payload[profileKey] = signals[sigKey];
-      if (!refinedFields.includes(profileKey)) refinedFields.push(profileKey);
-      hasUpdate = true;
-    }
-  }
-
-  if (!hasUpdate) return;
-
-  localStorage.setItem('ur_cob_refined', JSON.stringify(refinedFields));
-
-  // Also write ur_* cache keys so dashboard gets them immediately
-  if (payload.university)      localStorage.setItem('ur_university',     payload.university);
-  if (payload.sleep_schedule)  localStorage.setItem('ur_sleep',          payload.sleep_schedule);
-  if (payload.cleanliness)     localStorage.setItem('ur_cleanliness',    payload.cleanliness);
-  if (payload.budget_max)      localStorage.setItem('ur_budget_max',     String(payload.budget_max));
-  if (payload.household_type)  localStorage.setItem('ur_household',      payload.household_type);
-  if (payload.pets)            localStorage.setItem('ur_pets',           payload.pets);
-  if (payload.student_status)  localStorage.setItem('ur_student_status', payload.student_status);
-
-  try {
-    await fetch('/api/profile/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-  } catch (err) {
-    console.warn('Cob signal save failed (non-fatal):', err.message);
-  }
-}
-
-// Offline fallback responses (used only if API completely unreachable)
-function getCobFallback(msg) {
-  const m = msg.toLowerCase();
-  if (m.includes("bond")) return "Bond is a security deposit — usually 4 weeks rent — lodged with a government authority (RTBA in VIC, NSW Fair Trading in NSW, RTA in QLD). It's held independently, not by the landlord. You get it back at the end of your tenancy as long as there's no damage or unpaid rent. \n\n⚠️ Cob is currently offline — for the full answer, try again in a moment!";
-  if (m.includes("scam") || m.includes("suspicious")) return "Classic scam red flags: money before inspection, rent too cheap for the area, overseas landlord, payment via gift cards or crypto, or artificial urgency. Never pay a cent before you've inspected in person.\n\n⚠️ Cob is currently offline — check back soon for a detailed scam analysis!";
-  return "Cob is having a moment offline — but I'll be back shortly! In the meantime, try Tenants Victoria (03 9416 2577) for urgent rental questions. 🤠";
-}
-
-function addCobMsg(text, who) {
-  const msgs = document.getElementById("oi-msgs");
-  const d = document.createElement("div");
-  d.className = "oi-msg " + who;
-  const now = new Date().toLocaleTimeString("en-AU", {hour:"2-digit", minute:"2-digit"});
-  // Convert newlines to <br> for readability
-  const formatted = text.replace(/\n/g, '<br>').replace(/\n\n/g, '<br><br>');
-  d.innerHTML = `<div class="oi-bubble">${formatted}</div><div class="oi-time">${now}</div>`;
-  msgs.appendChild(d);
-  scrollCob();
-}
-
-function scrollCob() {
-  const m = document.getElementById("oi-msgs");
-  setTimeout(() => { if (m) m.scrollTop = m.scrollHeight; }, 80);
-}
-
-function showToast(title, msg) {
-  const t = document.getElementById("toast");
-  document.getElementById("t-title").textContent = title;
-  document.getElementById("t-msg").textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 4500);
-}
-
-// ── Day / Night mode ──────────────────────────────────────────────────────
-function toggleTheme() {
-  const isLight = document.body.classList.toggle('light-mode');
-  document.getElementById('btn-theme').textContent = isLight ? '☀️' : '🌙';
-  localStorage.setItem('unirenter_theme', isLight ? 'light' : 'dark');
-}
-(function() {
-  if (localStorage.getItem('unirenter_theme') === 'light') {
-    document.body.classList.add('light-mode');
-    const btn = document.getElementById('btn-theme');
-    if (btn) btn.textContent = '☀️';
-  }
-})();
-
-  // ── Explore dropdown ──
+  // Nav dropdown
   function toggleNavDropdown() {
     document.getElementById('nav-dropdown').classList.toggle('open');
   }
@@ -870,15 +464,13 @@ function toggleTheme() {
     if (dd && wrap && !wrap.contains(e.target)) dd.classList.remove('open');
   });
 
-
-  // ── Show dashboard link if verified ──
+  // Show dashboard link if verified
   (function() {
     if (localStorage.getItem('unirenter_email_verified') === '1') {
       const el = document.getElementById('nav-dd-dashboard');
       if (el) el.style.display = '';
     }
   })();
-
 </script>
 </body>
 </html>

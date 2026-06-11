@@ -135,6 +135,11 @@
 
   <!-- Platform pages -->
   <url>
+    <loc>https://unirenter.com.au/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://unirenter.com.au/cob</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -143,6 +148,16 @@
     <loc>https://unirenter.com.au/landlords</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/lease-companion</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://unirenter.com.au/dashboard</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://unirenter.com.au/legal</loc>
