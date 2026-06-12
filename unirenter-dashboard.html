@@ -2823,8 +2823,13 @@ body.light-mode {
 
     <!-- Dynamic inner content populated by JS -->
     <div id="household-inner">
+      <!-- loading skeleton shown while API fetch is in flight -->
+      <div id="household-loading" style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:13px;">
+        <div style="width:20px;height:20px;border:2px solid rgba(255,255,255,0.1);border-top-color:var(--brand-yellow);border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block;margin-bottom:10px;"></div>
+        <div>Loading household…</div>
+      </div>
       <!-- empty state — rich preview with dummy card -->
-      <div class="household-empty" id="household-empty-state">
+      <div class="household-empty" id="household-empty-state" style="display:none;">
 
         <!-- Cob intro -->
         <div class="hh-cob-intro">
@@ -5651,7 +5656,6 @@ window.addEventListener('DOMContentLoaded', function() {
 window.addEventListener('DOMContentLoaded', function() {
   setTimeout(renderStickyStrip, 200);
   setTimeout(lcEntryCardInit, 300);
-  householdInit();
 });
 
 
@@ -6114,27 +6118,35 @@ function householdInit() {
     window._householdPendingJoin = joinToken;
     var banner = document.getElementById('household-join-banner');
     if (banner) banner.style.display = 'flex';
-    // Scroll Profile tab into view if not already there
-    // (join links always land on profile tab naturally via URL)
   }
 
   if (!householdId) {
+    // No household — show empty state immediately, no flash
+    var loading = document.getElementById('household-loading');
+    if (loading) loading.style.display = 'none';
     householdRenderEmpty();
     return;
   }
+  // Has a household ID — householdLoad handles showing/hiding skeleton
   householdLoad(householdId);
 }
 
 function householdRenderEmpty() {
   var inner = document.getElementById('household-inner');
   var emptyState = document.getElementById('household-empty-state');
+  var loading = document.getElementById('household-loading');
   if (!inner) return;
-  // If invite token exists, show the pending invite panel too
+  // Hide loading skeleton
+  if (loading) loading.style.display = 'none';
+  // If invite token exists, show the invite panel
   var token = localStorage.getItem('ur_household_invite_token');
   if (token && emptyState) {
     emptyState.style.display = 'none';
     inner.innerHTML = householdInvitePanel(token);
+    return;
   }
+  // Show empty state (sample preview)
+  if (emptyState) emptyState.style.display = 'block';
 }
 
 function householdSetup() {
@@ -6199,13 +6211,26 @@ function householdJoinConfirm() {
 
 function householdLoad(householdId) {
   var email = localStorage.getItem('unirenter_email') || '';
+  // Show loading skeleton while fetching
+  var loading = document.getElementById('household-loading');
+  var emptyState = document.getElementById('household-empty-state');
+  if (loading) loading.style.display = 'block';
+  if (emptyState) emptyState.style.display = 'none';
   fetch('/api/household/get?household_id=' + encodeURIComponent(householdId) + '&email=' + encodeURIComponent(email))
   .then(function(r) { return r.json(); })
   .then(function(d) {
-    if (!d.ok || !d.data) { householdRenderEmpty(); return; }
+    if (loading) loading.style.display = 'none';
+    if (!d.ok || !d.data) {
+      // Stale household ID — clear it and show empty state
+      localStorage.removeItem('ur_household_id');
+      householdRenderEmpty();
+      return;
+    }
     householdRender(d.data, email);
   })
   .catch(function() {
+    if (loading) loading.style.display = 'none';
+    localStorage.removeItem('ur_household_id');
     householdRenderEmpty();
   });
 }
