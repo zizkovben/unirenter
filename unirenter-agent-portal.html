@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Housing Partner Portal — UniRenter</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand-yellow: #F5B800;
+      --brand-coral: #E8623A;
+      --brand-blue: #4BBFE0;
+      --brand-green: #3DAA5C;
+      --navy: #0d1f2d;
+      --navy-mid: #162535;
+      --card-bg: #182f42;
+      --card-border: #1e3a50;
+      --text: #e8f0f5;
+      --text-muted: #7a96aa;
+      --font-display: 'Epilogue', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--navy);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      background: var(--navy);
+      border-bottom: 1px solid var(--card-border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.3px;
+    }
+    .nav-logo span { color: var(--brand-yellow); }
+    .nav-partner-badge {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--brand-blue);
+      letter-spacing: 0.3px;
+    }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-partner-name {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .btn-sign-out {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-family: var(--font-body);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-sign-out:hover { border-color: var(--text-muted); color: var(--text); }
+
+    /* AUTH GATE */
+    #auth-gate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 56px);
+      padding: 40px 24px;
+    }
+    .auth-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+    .auth-card h1 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .auth-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .auth-input {
+      width: 100%;
+      background: var(--navy-mid);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      margin-bottom: 12px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .auth-input:focus { border-color: var(--brand-blue); }
+    .btn-auth {
+      width: 100%;
+      background: var(--brand-yellow);
+      color: #0d1f2d;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-auth:hover { opacity: 0.9; }
+    .auth-error {
+      color: var(--brand-coral);
+      font-size: 13px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* MAIN PORTAL */
+    #portal { display: none; }
+
+    .portal-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+
+    /* PAGE HEADER */
+    .portal-header {
+      margin-bottom: 28px;
+    }
+    .portal-header h1 {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .portal-header p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* STATS STRIP */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .stat-card .stat-val {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-card .stat-lbl {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .stat-card.yellow .stat-val { color: var(--brand-yellow); }
+    .stat-card.blue .stat-val { color: var(--brand-blue); }
+    .stat-card.green .stat-val { color: var(--brand-green); }
+    .stat-card.coral .stat-val { color: var(--brand-coral); }
+
+    /* REFERRAL TRACKER */
+    .referral-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .referral-bar .ref-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      flex: 0 0 auto;
+    }
+    .ref-clock {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--navy-mid);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .ref-dot {
+      width: 7px; height: 7px;
+      background: var(--brand-green);
+      border-radius: 50%;
+    }
+    .ref-progress-wrap {
+      flex: 1;
+      min-width: 180px;
+    }
+    .ref-progress-track {
+      background: var(--navy-mid);
+      border-radius: 99px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .ref-progress-fill {
+      height: 100%;
+      background: var(--brand-yellow);
+      border-radius: 99px;
+      transition: width 0.6s ease;
+    }
+    .ref-progress-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* CITY FILTER */
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-label { font-size: 13px; color: var(--text-muted); }
+    .filter-chip {
+      background: var(--navy-mid);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-chip:hover { border-color: var(--brand-blue); color: var(--text); }
+    .filter-chip.active { background: var(--brand-blue); border-color: var(--brand-blue); color: #0d1f2d; }
+
+    /* LEADS TABLE */
+    .leads-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .leads-section-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .leads-section-header h2 {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .leads-count {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .leads-table { width: 100%; border-collapse: collapse; }
+    .leads-table th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--card-border);
+      background: var(--navy-mid);
+    }
+    .leads-table td {
+      padding: 14px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: middle;
+    }
+    .leads-table tr:last-child td { border-bottom: none; }
+    .leads-table tr:hover td { background: rgba(255,255,255,0.025); }
+
+    .lead-name { font-weight: 600; color: var(--text); }
+    .lead-email { font-size: 12px; color: var(--brand-blue); margin-top: 2px; }
+    .lead-city-badge {
+      background: var(--navy-mid);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 3px 9px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .lead-budget { font-weight: 600; }
+
+    /* STATUS SELECT */
+    .status-select {
+      background: var(--navy-mid);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 5px 10px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a96aa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 26px;
+    }
+    .status-select:focus { border-color: var(--brand-blue); }
+    .status-select.new { border-color: var(--brand-yellow); color: var(--brand-yellow); }
+    .status-select.contacted { border-color: var(--brand-blue); color: var(--brand-blue); }
+    .status-select.in_progress { border-color: var(--brand-coral); color: var(--brand-coral); }
+    .status-select.closed { border-color: var(--brand-green); color: var(--brand-green); }
+
+    .lead-date { color: var(--text-muted); font-size: 12px; }
+
+    /* EMPTY STATE */
+    .empty-state {
+      padding: 60px 24px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .empty-state .empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; line-height: 1.5; }
+
+    /* LOADING */
+    .loading-state {
+      padding: 40px 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px; height: 20px;
+      border: 2px solid var(--card-border);
+      border-top-color: var(--brand-blue);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .stats-strip { grid-template-columns: repeat(2, 1fr); }
+      .leads-table th:nth-child(3),
+      .leads-table td:nth-child(3),
+      .leads-table th:nth-child(5),
+      .leads-table td:nth-child(5) { display: none; }
+    }
+    @media (max-width: 480px) {
+      .portal-wrap { padding: 20px 16px 60px; }
+      .stats-strip { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .stat-card { padding: 14px 16px; }
+      .stat-card .stat-val { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">Uni<span>Renter</span></a>
+  <div class="nav-right">
+    <span class="nav-partner-badge">Housing Partner</span>
+    <span class="nav-partner-name" id="nav-partner-name"></span>
+    <button class="btn-sign-out" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<!-- AUTH GATE -->
+<div id="auth-gate">
+  <div class="auth-card">
+    <h1>Housing Partner Portal</h1>
+    <p>Enter your access token to view your leads.</p>
+    <input type="password" class="auth-input" id="token-input" placeholder="Access token" autocomplete="off">
+    <button class="btn-auth" onclick="submitToken()">Access portal</button>
+    <p class="auth-error" id="auth-error">Invalid token. Please check and try again.</p>
+  </div>
+</div>
+
+<!-- PORTAL (shown after auth) -->
+<div id="portal">
+  <div class="portal-wrap">
+
+    <div class="portal-header">
+      <h1 id="portal-title">Lead Inbox</h1>
+      <p id="portal-subtitle">Students who requested housing assistance through UniRenter.</p>
+    </div>
+
+    <!-- STATS STRIP -->
+    <div class="stats-strip">
+      <div class="stat-card yellow">
+        <div class="stat-val" id="stat-total">—</div>
+        <div class="stat-lbl">Total leads</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-val" id="stat-new">—</div>
+        <div class="stat-lbl">New this month</div>
+      </div>
+      <div class="stat-card coral">
+        <div class="stat-val" id="stat-open">—</div>
+        <div class="stat-lbl">Open leads</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-val" id="stat-closed">—</div>
+        <div class="stat-lbl">Closed</div>
+      </div>
+    </div>
+
+    <!-- REFERRAL TRACKER -->
+    <div class="referral-bar">
+      <span class="ref-label">Access period:</span>
+      <div class="ref-clock">
+        <span class="ref-dot"></span>
+        <span id="ref-days-remaining">— days free remaining</span>
+      </div>
+      <div class="ref-progress-wrap">
+        <div class="ref-progress-track">
+          <div class="ref-progress-fill" id="ref-progress-fill" style="width:0%"></div>
+        </div>
+        <div class="ref-progress-label" id="ref-progress-label">6-month complimentary access</div>
+      </div>
+    </div>
+
+    <!-- FILTER CHIPS -->
+    <div class="filter-row">
+      <span class="filter-label">City:</span>
+      <button class="filter-chip active" data-city="all" onclick="filterCity(this)">All cities</button>
+      <button class="filter-chip" data-city="melbourne" onclick="filterCity(this)">Melbourne</button>
+      <button class="filter-chip" data-city="sydney" onclick="filterCity(this)">Sydney</button>
+      <button class="filter-chip" data-city="brisbane" onclick="filterCity(this)">Brisbane</button>
+      <button class="filter-chip" data-city="adelaide" onclick="filterCity(this)">Adelaide</button>
+      <button class="filter-chip" data-city="perth" onclick="filterCity(this)">Perth</button>
+      <button class="filter-chip" data-city="canberra" onclick="filterCity(this)">Canberra</button>
+    </div>
+
+    <!-- LEADS TABLE -->
+    <div class="leads-section">
+      <div class="leads-section-header">
+        <h2>Student leads</h2>
+        <span class="leads-count" id="leads-count-label">Loading...</span>
+      </div>
+      <div id="leads-body">
+        <div class="loading-state"><span class="spinner"></span> Loading leads...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  // ─── State ───────────────────────────────────────────────────────────────────
+  let agentToken = null;
+  let allLeads = [];
+  let activeCityFilter = 'all';
+  let partnerData = null;
+
+  // ─── On load: check for token in URL or localStorage ─────────────────────────
+  (function init() {
+    const params = new URLSearchParams(window.location.search);
+    const urlToken = params.get('token');
+    if (urlToken) {
+      localStorage.setItem('ur_partner_token', urlToken);
+      // Clean URL without reload
+      window.history.replaceState({}, '', '/agent-portal');
+    }
+    const stored = localStorage.getItem('ur_partner_token');
+    if (stored) {
+      agentToken = stored;
+      loadPortal();
+    }
+    // Enter key on token input
+    document.getElementById('token-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') submitToken();
+    });
+  })();
+
+  // ─── Auth ─────────────────────────────────────────────────────────────────────
+  function submitToken() {
+    const val = document.getElementById('token-input').value.trim();
+    if (!val) return;
+    agentToken = val;
+    localStorage.setItem('ur_partner_token', val);
+    loadPortal();
+  }
+
+  function signOut() {
+    localStorage.removeItem('ur_partner_token');
+    agentToken = null;
+    document.getElementById('portal').style.display = 'none';
+    document.getElementById('auth-gate').style.display = 'flex';
+    document.getElementById('token-input').value = '';
+    document.getElementById('auth-error').style.display = 'none';
+  }
+
+  // ─── Load portal ─────────────────────────────────────────────────────────────
+  async function loadPortal() {
+    try {
+      const res = await fetch('/api/agents/leads', {
+        headers: { 'x-agent-token': agentToken }
+      });
+      if (res.status === 401 || res.status === 403) {
+        showAuthError();
+        return;
+      }
+      if (!res.ok) throw new Error('Server error');
+      const data = await res.json();
+      partnerData = data.partner;
+      allLeads = data.leads || [];
+      showPortal();
+    } catch (err) {
+      showAuthError();
+    }
+  }
+
+  function showAuthError() {
+    localStorage.removeItem('ur_partner_token');
+    agentToken = null;
+    document.getElementById('auth-error').style.display = 'block';
+  }
+
+  function showPortal() {
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('portal').style.display = 'block';
+
+    // Partner name in nav
+    if (partnerData && partnerData.name) {
+      document.getElementById('nav-partner-name').textContent = partnerData.name;
+      document.getElementById('portal-title').textContent = partnerData.name + ' — Lead Inbox';
+    }
+
+    // Referral tracker
+    renderReferralTracker();
+
+    // Stats
+    renderStats(allLeads);
+
+    // Render leads
+    renderLeads();
+  }
+
+  // ─── Referral tracker ────────────────────────────────────────────────────────
+  function renderReferralTracker() {
+    if (!partnerData || !partnerData.free_access_until) {
+      document.querySelector('.referral-bar').style.display = 'none';
+      return;
+    }
+    const until = new Date(partnerData.free_access_until);
+    const now = new Date();
+    const created = partnerData.created_at ? new Date(partnerData.created_at) : new Date(now - 180*24*60*60*1000);
+    const totalMs = until - created;
+    const remainingMs = until - now;
+    const daysRemaining = Math.max(0, Math.ceil(remainingMs / (1000*60*60*24)));
+    const pctUsed = Math.min(100, Math.max(0, Math.round((1 - remainingMs/totalMs) * 100)));
+
+    document.getElementById('ref-days-remaining').textContent = daysRemaining + ' days free remaining';
+    document.getElementById('ref-progress-fill').style.width = pctUsed + '%';
+    document.getElementById('ref-progress-label').textContent =
+      daysRemaining > 0
+        ? 'Complimentary access until ' + until.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
+        : 'Complimentary access period has ended';
+  }
+
+  // ─── Stats ───────────────────────────────────────────────────────────────────
+  function renderStats(leads) {
+    const now = new Date();
+    const thisMonth = leads.filter(l => {
+      const d = new Date(l.created_at);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    const open = leads.filter(l => l.status !== 'closed');
+    const closed = leads.filter(l => l.status === 'closed');
+
+    document.getElementById('stat-total').textContent = leads.length;
+    document.getElementById('stat-new').textContent = thisMonth.length;
+    document.getElementById('stat-open').textContent = open.length;
+    document.getElementById('stat-closed').textContent = closed.length;
+  }
+
+  // ─── City filter ─────────────────────────────────────────────────────────────
+  function filterCity(btn) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    activeCityFilter = btn.dataset.city;
+    renderLeads();
+  }
+
+  // ─── Render leads table ───────────────────────────────────────────────────────
+  function renderLeads() {
+    const filtered = activeCityFilter === 'all'
+      ? allLeads
+      : allLeads.filter(l => l.city === activeCityFilter);
+
+    const countLabel = document.getElementById('leads-count-label');
+    countLabel.textContent = filtered.length + ' lead' + (filtered.length !== 1 ? 's' : '');
+
+    const body = document.getElementById('leads-body');
+
+    if (filtered.length === 0) {
+      body.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <p>No leads yet${activeCityFilter !== 'all' ? ' for ' + cap(activeCityFilter) : ''}.<br>
+          Leads appear here as students tick "Free housing assistance" on UniRenter.</p>
+        </div>`;
+      return;
+    }
+
+    const rows = filtered.map(lead => {
+      const dateStr = formatDate(lead.created_at);
+      const statusClass = (lead.status || 'new').replace(' ', '_');
+      return `
+        <tr>
+          <td>
+            <div class="lead-name">${esc(lead.student_name || 'Student')}</div>
+            <div class="lead-email">${esc(lead.student_email)}</div>
+          </td>
+          <td><span class="lead-city-badge">${cap(lead.city || '')}</span></td>
+          <td>${esc(lead.university || '—')}</td>
+          <td class="lead-budget">${lead.budget_max ? '$' + lead.budget_max + '/wk' : '—'}</td>
+          <td>${esc(lead.move_in_date || '—')}</td>
+          <td>
+            <select class="status-select ${statusClass}" onchange="updateStatus('${lead.id}', this)">
+              <option value="new"${lead.status === 'new' ? ' selected' : ''}>New</option>
+              <option value="contacted"${lead.status === 'contacted' ? ' selected' : ''}>Contacted</option>
+              <option value="in_progress"${lead.status === 'in_progress' ? ' selected' : ''}>In progress</option>
+              <option value="closed"${lead.status === 'closed' ? ' selected' : ''}>Closed</option>
+            </select>
+          </td>
+          <td class="lead-date">${dateStr}</td>
+        </tr>`;
+    }).join('');
+
+    body.innerHTML = `
+      <table class="leads-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>City</th>
+            <th>University</th>
+            <th>Budget</th>
+            <th>Move-in</th>
+            <th>Status</th>
+            <th>Received</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  // ─── Update status ────────────────────────────────────────────────────────────
+  async function updateStatus(leadId, selectEl) {
+    const newStatus = selectEl.value;
+    // Optimistically update class
+    selectEl.className = 'status-select ' + newStatus;
+    // Update in allLeads
+    const lead = allLeads.find(l => l.id === leadId);
+    if (lead) lead.status = newStatus;
+    renderStats(allLeads);
+
+    try {
+      const res = await fetch('/api/agents/lead-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-agent-token': agentToken
+        },
+        body: JSON.stringify({ leadId, status: newStatus })
+      });
+      if (!res.ok) throw new Error('Failed');
+      showToast('Status updated ✓');
+    } catch (err) {
+      showToast('Could not save — try again');
+    }
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────────
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function cap(str) {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+  }
+  function formatDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  let toastTimer = null;
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+</script>
+</body>
+</html>
