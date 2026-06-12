@@ -216,7 +216,82 @@ body.light-mode {
 }
 .badge-verified { background: rgba(61,170,92,0.15); color: var(--brand-green); border: 1px solid rgba(61,170,92,0.25); }
 .badge-uni { background: rgba(75,191,224,0.1); color: var(--brand-blue); border: 1px solid rgba(75,191,224,0.2); }
+.badge-uni-verified { background: rgba(75,191,224,0.12); color: var(--brand-blue); border: 1px solid rgba(75,191,224,0.3); }
 .badge-pct { background: rgba(245,184,0,0.1); color: var(--brand-yellow); border: 1px solid rgba(245,184,0,0.2); }
+/* Review Cob card */
+.cob-review-card {
+  background: rgba(245,184,0,0.06);
+  border: 1px solid rgba(245,184,0,0.2);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.cob-review-card-icon { font-size: 26px; flex-shrink: 0; }
+.cob-review-card-body { flex: 1; }
+.cob-review-card-msg { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.cob-review-stars { display: flex; gap: 8px; }
+.cob-review-star {
+  background: none; border: none; cursor: pointer;
+  font-size: 26px; transition: transform 0.15s;
+  filter: grayscale(0.5); padding: 0;
+}
+.cob-review-star:hover { transform: scale(1.2); filter: none; }
+.cob-review-dismiss { background: none; border: none; cursor: pointer; font-size: 16px; color: var(--text-muted); flex-shrink: 0; padding: 0; }
+
+/* Uni email verify modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 16px;
+}
+.modal-card {
+  background: var(--navy-mid);
+  border-radius: 18px;
+  padding: 28px 24px;
+  max-width: 420px;
+  width: 100%;
+}
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.modal-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+.modal-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 9px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 11px 13px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+}
+.modal-input:focus { outline: none; border-color: rgba(75,191,224,0.4); }
+.modal-input::placeholder { color: var(--text-muted); }
+.modal-btn {
+  background: var(--brand-blue);
+  color: var(--navy);
+  border: none;
+  border-radius: 9px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 11px 20px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  width: 100%;
+  margin-bottom: 8px;
+}
+.modal-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.modal-btn.secondary {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.modal-error { font-size: 12px; color: var(--brand-coral); margin-bottom: 8px; }
+.modal-success { font-size: 14px; font-weight: 600; color: var(--brand-green); margin-bottom: 8px; }
 .completeness-bar-wrap {
   height: 4px; background: rgba(255,255,255,0.06);
   border-radius: 4px; margin-top: 8px; overflow: hidden; width: 100%;
@@ -2331,6 +2406,21 @@ body.light-mode {
       <button class="section-action" onclick="refreshMatches()">🔄 Refresh</button>
     </div>
     <!-- Vibe emoji filter chips — rendered by JS when ≥10% of matches have a vibe -->
+    <!-- Cob review card — shown when real matches load, suppressed if ur_review_submitted -->
+    <div class="cob-review-card" id="cob-review-card" style="display:none;">
+      <div class="cob-review-card-icon">🤠</div>
+      <div class="cob-review-card-body">
+        <div class="cob-review-card-msg">You've got matches! Quick one — how would you rate UniRenter so far?</div>
+        <div class="cob-review-stars">
+          <button class="cob-review-star" onclick="cobReviewStar(1)" title="1 star">⭐</button>
+          <button class="cob-review-star" onclick="cobReviewStar(2)" title="2 stars">⭐</button>
+          <button class="cob-review-star" onclick="cobReviewStar(3)" title="3 stars">⭐</button>
+          <button class="cob-review-star" onclick="cobReviewStar(4)" title="4 stars">⭐</button>
+          <button class="cob-review-star" onclick="cobReviewStar(5)" title="5 stars">⭐</button>
+        </div>
+      </div>
+      <button class="cob-review-dismiss" onclick="dismissCobReviewCard()" title="Dismiss">✕</button>
+    </div>
     <div id="vibe-filter-row" style="display:none;"></div>
     <div class="match-grid" id="match-grid">
       <!-- Populated by JS -->
@@ -2964,7 +3054,7 @@ body.light-mode {
           <div class="profile-big-avatar" id="profile-big-avatar">🧑</div>
           <div class="profile-big-name" id="profile-big-name">Your name</div>
           <div class="profile-big-uni" id="profile-big-uni">University</div>
-          <div class="user-badges" style="justify-content:center;">
+          <div class="user-badges" style="justify-content:center;" id="profile-sidebar-badges">
             <span class="badge badge-verified">✓ Email</span>
           </div>
           <div class="profile-completeness-label">
@@ -3097,6 +3187,30 @@ body.light-mode {
               <span class="profile-row-label">Study mode</span>
               <span class="profile-row-val" id="prow-studyloc">—</span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Uni email verification card -->
+      <div class="profile-section-card" id="uni-verify-card">
+        <div class="profile-section-head">🎓 Uni verified badge</div>
+        <div id="uni-verify-not-done">
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;">
+            Verify your university email (.edu.au) to get the 🎓 badge — it shows other students you're the real deal.
+          </p>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="profile-edit-btn" style="flex:0 0 auto;" onclick="openUniVerifyModal()">Verify uni email</button>
+            <span id="uni-verify-inline-status" style="font-size:12px;color:var(--text-muted);"></span>
+          </div>
+        </div>
+        <div id="uni-verify-done" style="display:none;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:20px;">🎓</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--brand-blue);">Uni verified</div>
+              <div style="font-size:12px;color:var(--text-muted);" id="uni-verify-email-display">—</div>
+            </div>
+            <span class="badge badge-uni-verified" style="margin-left:auto;">🎓 Uni verified</span>
           </div>
         </div>
       </div>
@@ -3860,8 +3974,17 @@ function applyProfileData(p, cobRefinedFields) {
     const uniEl = document.getElementById('profile-big-uni');
     if (uniEl) uniEl.textContent = uni;
     document.getElementById('header-name').textContent = 'Welcome back 👋';
+    const uniVerified = profile && profile.uni_email_verified;
     document.getElementById('header-badges').innerHTML =
-      `<span class="badge badge-verified">✓ Email verified</span><span class="badge badge-uni">${uni}</span>`;
+      `<span class="badge badge-verified">✓ Email verified</span><span class="badge badge-uni">${uni}</span>${uniVerified ? '<span class="badge badge-uni-verified">🎓 Uni verified</span>' : ''}`;
+    // Update sidebar badges
+    const sidebarBadges = document.getElementById('profile-sidebar-badges');
+    if (sidebarBadges) {
+      sidebarBadges.innerHTML = '<span class="badge badge-verified">✓ Email</span>' +
+        (uniVerified ? ' <span class="badge badge-uni-verified">🎓 Uni</span>' : '');
+    }
+    // Update uni verify card
+    updateUniVerifyCard(profile);
   }
 
   if (suburbs && Array.isArray(suburbs) && suburbs.length) {
@@ -4166,6 +4289,7 @@ function renderMatches() {
   const email = localStorage.getItem('unirenter_email');
 
   // Show dummy/real matches
+  maybeShowCobReviewCard();
   DUMMY_MATCHES.forEach(p => grid.appendChild(renderMatchCard(p)));
 
   // Add card at end — profile CTA if no email, referral if signed in
@@ -6081,13 +6205,11 @@ function householdLoad(householdId) {
 
 function householdInvitePanel(token) {
   var link = 'https://unirenter.com.au/dashboard?join=' + token;
-  var waText = encodeURIComponent('Hey! Join my household on UniRenter so we can see how compatible we are 🤠 ' + link);
   return '<div class="household-invite-panel">' +
     '<div class="household-invite-label">Share this link with your flatmate(s):</div>' +
     '<div class="household-invite-link-row">' +
       '<div class="household-invite-link" id="hh-invite-link-text">' + link + '</div>' +
       '<button class="household-copy-btn" id="hh-copy-btn" onclick="householdCopyLink(\'' + link + '\')">📋 Copy</button>' +
-      '<a class="household-wa-btn" href="https://wa.me/?text=' + waText + '" target="_blank" rel="noopener">💬 WhatsApp</a>' +
     '</div>' +
     '<div class="household-invite-note">Your flatmate will be asked to build their profile if they haven\'t already.</div>' +
   '</div>';
@@ -6173,7 +6295,6 @@ function householdRender(data, currentEmail) {
     '<button class="household-action-btn primary" onclick="alert(\'Vibe cards coming soon in the next update! 🤠\')">Share household card</button>' +
     '<button class="household-action-btn" onclick="alert(\'Flatmate search coming soon! 🤠\')">Find a new flatmate</button>';
   if (inviteLink) {
-    var waText = encodeURIComponent('Hey! Join my household on UniRenter 🤠 ' + inviteLink);
     actionsHtml += '<button class="household-action-btn" onclick="householdShowInvite()">Invite another flatmate</button>';
   }
   actionsHtml += '</div>';
@@ -6314,12 +6435,20 @@ function vibeCardCopyLink() {
 function vibeShareInit() {
   var vd = localStorage.getItem('ur_vibe'); if (!vd) return;
   try { var v=JSON.parse(vd); if(!v.summary) return; } catch(e){return;}
-  vibeShareBlockShow();
-  var token = localStorage.getItem('ur_vibe_card_token');
-  if (token) {
-    _vibeCardToken = token;
-    var le=document.getElementById('vibe-share-link-text'); if(le) le.textContent='https://unirenter.com.au/vibe/'+token;
-    var row=document.getElementById('vibe-share-link-row'); if(row) row.style.display='block';
+  // Only show the share block if the vibe-done panel is currently visible
+  var donePanel = document.getElementById('vibe-card-done');
+  if (donePanel && donePanel.style.display !== 'none') {
+    vibeShareBlockShow();
+    var token = localStorage.getItem('ur_vibe_card_token');
+    if (token) {
+      _vibeCardToken = token;
+      var le=document.getElementById('vibe-share-link-text'); if(le) le.textContent='https://unirenter.com.au/vibe/'+token;
+      var row=document.getElementById('vibe-share-link-row'); if(row) row.style.display='block';
+    }
+  } else {
+    // Still restore token for later use, but don't show UI
+    var token = localStorage.getItem('ur_vibe_card_token');
+    if (token) { _vibeCardToken = token; }
   }
 }
 
@@ -6485,8 +6614,215 @@ function hhReviewSummaryLoad(householdId, email, containerEl) {
 }
 function vibeCardShareHousehold() { alert('Household vibe cards — coming in the next update! 🤠'); }
 
+// ── Uni email verification ────────────────────────────────────────────────────
+
+let _uniEmailStaged = '';
+
+function openUniVerifyModal() {
+  document.getElementById('uni-verify-modal').style.display = 'flex';
+  document.getElementById('uni-modal-step-email').style.display = 'block';
+  document.getElementById('uni-modal-step-otp').style.display   = 'none';
+  document.getElementById('uni-modal-step-done').style.display  = 'none';
+  document.getElementById('uni-email-error').style.display = 'none';
+  document.getElementById('uni-otp-error').style.display   = 'none';
+  document.getElementById('uni-modal-sub').textContent = 'Enter your .edu.au address and Cob will send you a 6-digit code.';
+  setTimeout(() => { const el = document.getElementById('uni-email-input'); if (el) el.focus(); }, 100);
+}
+
+function closeUniVerifyModal() {
+  document.getElementById('uni-verify-modal').style.display = 'none';
+}
+
+function uniModalBackToEmail() {
+  document.getElementById('uni-modal-step-otp').style.display  = 'none';
+  document.getElementById('uni-modal-step-email').style.display = 'block';
+}
+
+async function uniEmailSend() {
+  const uniEmail = (document.getElementById('uni-email-input').value || '').trim().toLowerCase();
+  const errEl = document.getElementById('uni-email-error');
+  errEl.style.display = 'none';
+
+  if (!uniEmail.endsWith('.edu.au')) {
+    errEl.textContent = 'Must be a valid .edu.au address';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const email = localStorage.getItem('unirenter_email') || '';
+  if (!email) {
+    errEl.textContent = 'Please sign in first';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('uni-send-btn');
+  btn.disabled = true;
+  btn.textContent = '🤠 Sending…';
+
+  try {
+    const res = await fetch('/api/auth/verify-uni-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'send', email, uni_email: uniEmail }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to send');
+
+    _uniEmailStaged = uniEmail;
+    document.getElementById('uni-modal-sub').textContent = `Code sent to ${uniEmail} — check your inbox.`;
+    document.getElementById('uni-modal-step-email').style.display = 'none';
+    document.getElementById('uni-modal-step-otp').style.display   = 'block';
+    setTimeout(() => { const el = document.getElementById('uni-otp-input'); if (el) el.focus(); }, 100);
+  } catch (err) {
+    errEl.textContent = err.message || 'Something went wrong — try again.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send verification code';
+  }
+}
+
+async function uniEmailVerify() {
+  const otp = (document.getElementById('uni-otp-input').value || '').trim();
+  const errEl = document.getElementById('uni-otp-error');
+  errEl.style.display = 'none';
+
+  if (otp.length !== 6) {
+    errEl.textContent = 'Enter the 6-digit code';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const email = localStorage.getItem('unirenter_email') || '';
+  const btn = document.getElementById('uni-verify-btn');
+  btn.disabled = true;
+  btn.textContent = '🤠 Verifying…';
+
+  try {
+    const res = await fetch('/api/auth/verify-uni-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'verify', email, uni_email: _uniEmailStaged, otp }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Verification failed');
+
+    // Success — update localStorage + UI
+    localStorage.setItem('ur_uni_email_verified', '1');
+    localStorage.setItem('ur_uni_email', _uniEmailStaged);
+
+    document.getElementById('uni-modal-step-otp').style.display = 'none';
+    document.getElementById('uni-modal-step-done').style.display = 'block';
+
+    // Update profile sidebar + verify card without closing modal
+    updateUniVerifyCard({ uni_email_verified: true, uni_email: _uniEmailStaged });
+    const sidebarBadges = document.getElementById('profile-sidebar-badges');
+    if (sidebarBadges) {
+      sidebarBadges.innerHTML = '<span class="badge badge-verified">✓ Email</span> <span class="badge badge-uni-verified">🎓 Uni</span>';
+    }
+  } catch (err) {
+    errEl.textContent = err.message || 'Something went wrong — try again.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Verify';
+  }
+}
+
+function updateUniVerifyCard(profile) {
+  if (!profile) return;
+  const verified = profile.uni_email_verified || localStorage.getItem('ur_uni_email_verified') === '1';
+  const uniEmail = profile.uni_email || localStorage.getItem('ur_uni_email') || '';
+
+  const notDone = document.getElementById('uni-verify-not-done');
+  const done    = document.getElementById('uni-verify-done');
+  const display = document.getElementById('uni-verify-email-display');
+
+  if (!notDone || !done) return;
+  if (verified) {
+    notDone.style.display = 'none';
+    done.style.display    = 'block';
+    if (display) display.textContent = uniEmail;
+  } else {
+    notDone.style.display = 'block';
+    done.style.display    = 'none';
+  }
+}
+
+// Init uni verify card on load
+window.addEventListener('DOMContentLoaded', function() {
+  updateUniVerifyCard({
+    uni_email_verified: localStorage.getItem('ur_uni_email_verified') === '1',
+    uni_email: localStorage.getItem('ur_uni_email') || '',
+  });
+  // Close modal on overlay click
+  const overlay = document.getElementById('uni-verify-modal');
+  if (overlay) {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) closeUniVerifyModal();
+    });
+  }
+});
+
+// ── Review Cob card ───────────────────────────────────────────────────────────
+
+function maybeShowCobReviewCard() {
+  // Suppress if already submitted or dismissed this session
+  if (localStorage.getItem('ur_review_submitted') === '1') return;
+  if (sessionStorage.getItem('ur_review_card_dismissed') === '1') return;
+  const card = document.getElementById('cob-review-card');
+  if (card) card.style.display = 'flex';
+}
+
+function dismissCobReviewCard() {
+  const card = document.getElementById('cob-review-card');
+  if (card) { card.style.opacity = '0'; card.style.transition = 'opacity 0.3s'; setTimeout(() => card.style.display = 'none', 300); }
+  sessionStorage.setItem('ur_review_card_dismissed', '1');
+}
+
+function cobReviewStar(n) {
+  dismissCobReviewCard();
+  // Navigate to review page with pre-selected rating
+  const email = encodeURIComponent(localStorage.getItem('unirenter_email') || '');
+  window.location.href = '/review?rating=' + n + '&email=' + email;
+}
+
 </script>
 
+
+<!-- Uni email verify modal -->
+<div class="modal-overlay" id="uni-verify-modal" style="display:none;">
+  <div class="modal-card">
+    <div style="font-size:26px;margin-bottom:12px;">🎓</div>
+    <div class="modal-title">Verify your uni email</div>
+    <div class="modal-sub" id="uni-modal-sub">
+      Enter your .edu.au address and Cob will send you a 6-digit code.
+    </div>
+
+    <!-- Step 1: email input -->
+    <div id="uni-modal-step-email">
+      <input class="modal-input" type="email" id="uni-email-input" placeholder="you@student.uni.edu.au" autocomplete="email">
+      <p class="modal-error" id="uni-email-error" style="display:none;"></p>
+      <button class="modal-btn" id="uni-send-btn" onclick="uniEmailSend()">Send verification code</button>
+      <button class="modal-btn secondary" onclick="closeUniVerifyModal()">Cancel</button>
+    </div>
+
+    <!-- Step 2: OTP input -->
+    <div id="uni-modal-step-otp" style="display:none;">
+      <input class="modal-input" type="text" id="uni-otp-input" placeholder="6-digit code" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+      <p class="modal-error" id="uni-otp-error" style="display:none;"></p>
+      <button class="modal-btn" id="uni-verify-btn" onclick="uniEmailVerify()">Verify</button>
+      <button class="modal-btn secondary" onclick="uniModalBackToEmail()">← Change email</button>
+    </div>
+
+    <!-- Success -->
+    <div id="uni-modal-step-done" style="display:none;">
+      <div class="modal-success">🎓 Uni email verified!</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Your badge is now showing on your profile and match cards.</p>
+      <button class="modal-btn" onclick="closeUniVerifyModal()">Done</button>
+    </div>
+  </div>
+</div>
 
 <!-- Cob FAB (dashboard) -->
 <button class="cob-fab-dashboard" id="cob-fab-db" onclick="openCobDashboard()" title="Oi Cob! 🤠">

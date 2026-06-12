@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unsubscribe · UniRenter</title>
+  <meta name="description" content="Opt out of Cob emails from UniRenter.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤠</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand-yellow: #F5B800;
+      --brand-coral:  #E8623A;
+      --brand-blue:   #4BBFE0;
+      --brand-green:  #3DAA5C;
+      --navy:         #0d1f2d;
+      --navy-mid:     #162535;
+      --card-bg:      #182f42;
+      --text:         #e8f0f5;
+      --text-muted:   #7a96aa;
+      --font-display: 'Epilogue', sans-serif;
+      --font-body:    'Inter', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--navy);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .page-logo {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 32px;
+      letter-spacing: -0.5px;
+    }
+    .card {
+      background: var(--navy-mid);
+      border-radius: 18px;
+      padding: 36px 28px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+    }
+    .cob-icon { font-size: 42px; margin-bottom: 16px; }
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .card-msg {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+    .btn-unsub {
+      background: var(--brand-coral);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 28px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-bottom: 12px;
+      width: 100%;
+      max-width: 280px;
+    }
+    .btn-unsub:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-unsub:hover:not(:disabled) { opacity: 0.85; }
+    .btn-cancel {
+      background: transparent;
+      border: none;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-decoration: underline;
+      display: block;
+      margin: 0 auto;
+    }
+    .success-msg {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--brand-green);
+      margin-bottom: 10px;
+    }
+    .error-msg {
+      font-size: 13px;
+      color: var(--brand-coral);
+      margin-top: 10px;
+    }
+    .footer-link {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 24px;
+    }
+    .footer-link a { color: var(--brand-blue); text-decoration: none; }
+    @media (max-width: 480px) { .card { padding: 28px 18px; } }
+  </style>
+</head>
+<body>
+  <div class="page-logo">UniRenter</div>
+
+  <div class="card">
+    <!-- Loading state -->
+    <div id="state-loading">
+      <div class="cob-icon">🤠</div>
+      <div class="card-title">One sec…</div>
+    </div>
+
+    <!-- Confirm state -->
+    <div id="state-confirm" style="display:none;">
+      <div class="cob-icon">🤠</div>
+      <div class="card-title">Cob's here.</div>
+      <div class="card-msg">
+        You're asking to stop receiving emails from Cob. That's totally fine — Cob won't email you again.<br><br>
+        You can always turn emails back on in your dashboard settings.
+      </div>
+      <button class="btn-unsub" id="btn-confirm-unsub" onclick="confirmUnsub()">
+        Yes, stop emails
+      </button>
+      <button class="btn-cancel" onclick="window.location.href='/dashboard'">
+        Actually, keep them
+      </button>
+    </div>
+
+    <!-- Already unsubscribed -->
+    <div id="state-already" style="display:none;">
+      <div class="cob-icon">✅</div>
+      <div class="success-msg">You're already opted out.</div>
+      <div class="card-msg">Cob won't send you emails. If that changes, you can turn them back on in your dashboard.</div>
+    </div>
+
+    <!-- Success state -->
+    <div id="state-done" style="display:none;">
+      <div class="cob-icon">✅</div>
+      <div class="success-msg">Done — Cob won't email you again.</div>
+      <div class="card-msg">Your housing matches, messages, and dashboard are still there whenever you want them.</div>
+      <a href="/dashboard" style="display:inline-block;margin-top:16px;background:transparent;border:1px solid rgba(75,191,224,0.25);color:var(--brand-blue);font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;text-decoration:none;">
+        Go to my dashboard →
+      </a>
+    </div>
+
+    <!-- Error state -->
+    <div id="state-error" style="display:none;">
+      <div class="cob-icon">🤠</div>
+      <div class="card-title">Something went wrong.</div>
+      <div class="card-msg">Cob couldn't process that link. It may have expired or already been used.</div>
+      <a href="/dashboard" style="display:inline-block;margin-top:16px;background:transparent;border:1px solid rgba(75,191,224,0.25);color:var(--brand-blue);font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;text-decoration:none;">
+        Go to my dashboard →
+      </a>
+    </div>
+
+    <p id="error-inline" class="error-msg" style="display:none;margin-top:12px;"></p>
+  </div>
+
+  <div class="footer-link">
+    UniRenter · Free for students · <a href="/dashboard">Dashboard</a>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token') || '';
+    const email = params.get('email')
+      ? decodeURIComponent(params.get('email'))
+      : localStorage.getItem('unirenter_email') || '';
+
+    function showState(id) {
+      ['state-loading','state-confirm','state-already','state-done','state-error'].forEach(s => {
+        document.getElementById(s).style.display = s === id ? 'block' : 'none';
+      });
+    }
+
+    // ── Init ─────────────────────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      if (!token || !email) {
+        showState('state-error');
+        return;
+      }
+      // Short delay so it doesn't flash
+      setTimeout(() => showState('state-confirm'), 400);
+    });
+
+    // ── Confirm unsubscribe ──────────────────────────────────────────────────
+    async function confirmUnsub() {
+      const btn = document.getElementById('btn-confirm-unsub');
+      btn.disabled = true;
+      btn.textContent = 'Processing…';
+
+      try {
+        const res = await fetch('/api/email/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, token }),
+        });
+
+        const data = await res.json();
+
+        if (res.status === 200 && data.success) {
+          localStorage.setItem('ur_email_unsubscribed', '1');
+          showState('state-done');
+        } else if (res.status === 401) {
+          showState('state-error');
+        } else {
+          throw new Error(data.error || 'Failed');
+        }
+      } catch (err) {
+        const errEl = document.getElementById('error-inline');
+        errEl.textContent = 'Something went wrong — please try again.';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Yes, stop emails';
+      }
+    }
+  </script>
+</body>
+</html>
