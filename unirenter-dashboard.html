@@ -2293,6 +2293,147 @@ body.light-mode {
 .hh-family-banner-icon { font-size: 22px; flex-shrink: 0; }
 .hh-family-banner-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
 .hh-family-banner-sub { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+.fw-card {
+  background: rgba(245,184,0,0.05);
+  border: 1px solid rgba(245,184,0,0.15);
+  border-radius: 14px;
+  padding: 20px 20px 16px;
+  margin-top: 24px;
+}
+.fw-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.fw-card-icon { font-size: 22px; }
+.fw-card-title {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.fw-card-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.fw-post-box {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 10px;
+  padding: 14px 14px 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 220px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  font-family: 'Inter', sans-serif;
+}
+.fw-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.fw-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  font-family: 'Inter', sans-serif;
+}
+.fw-btn:hover { opacity: 0.85; }
+.fw-btn:active { transform: scale(0.97); }
+.fw-btn-copy {
+  background: var(--brand-yellow);
+  color: var(--navy);
+}
+.fw-btn-link {
+  background: rgba(75,191,224,0.12);
+  color: var(--brand-blue);
+  border: 1px solid rgba(75,191,224,0.2);
+}
+.fw-btn-regen {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-muted);
+  border: 1px solid rgba(255,255,255,0.1);
+  flex: 0 0 auto;
+  min-width: auto;
+}
+.fw-link-row {
+  background: rgba(75,191,224,0.05);
+  border: 1px solid rgba(75,191,224,0.12);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.fw-link-url {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+.fw-link-copy-btn {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--brand-blue);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  flex-shrink: 0;
+}
+.fw-expiry {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 8px;
+}
+.fw-skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: fwShimmer 1.4s ease infinite;
+  border-radius: 6px;
+  height: 14px;
+  margin-bottom: 8px;
+}
+@keyframes fwShimmer { to { background-position: -200% 0; } }
+.fw-toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--navy-light);
+  border: 1px solid rgba(75,191,224,0.25);
+  color: var(--text);
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 9999;
+}
+.fw-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 </style>
 </head>
 <body>
@@ -2436,6 +2577,39 @@ body.light-mode {
     <div class="match-grid" id="match-grid">
       <!-- Populated by JS -->
     </div>
+    <div class="fw-card" id="fw-card">
+      <div class="fw-card-header">
+        <span class="fw-card-icon">📢</span>
+        <div class="fw-card-title">Flatmate Wanted</div>
+      </div>
+      <div class="fw-card-sub">Generate a ready-to-post listing for your Facebook student group — or share your profile link directly.</div>
+      <div id="fw-idle">
+        <button class="fw-btn fw-btn-copy" style="width:100%;margin-bottom:8px;" onclick="fwGenerate()">✨ Generate my listing post</button>
+      </div>
+      <div id="fw-loading" style="display:none;">
+        <div class="fw-skeleton" style="width:80%;"></div>
+        <div class="fw-skeleton" style="width:60%;"></div>
+        <div class="fw-skeleton" style="width:72%;"></div>
+      </div>
+      <div id="fw-result" style="display:none;">
+        <div class="fw-post-box" id="fw-post-text"></div>
+        <div class="fw-actions">
+          <button class="fw-btn fw-btn-copy" onclick="fwCopyPost()">📋 Copy post</button>
+          <button class="fw-btn fw-btn-link" onclick="fwShowLink()">🔗 Share link</button>
+          <button class="fw-btn fw-btn-regen" onclick="fwGenerate()" title="Regenerate">↺</button>
+        </div>
+      </div>
+      <div id="fw-link-panel" style="display:none;margin-top:12px;">
+        <div class="fw-link-row">
+          <span class="fw-link-url" id="fw-link-url"></span>
+          <button class="fw-link-copy-btn" onclick="fwCopyLink()">Copy</button>
+        </div>
+        <div class="fw-expiry" id="fw-expiry-note"></div>
+      </div>
+    </div>
+    <!-- Flatmate Wanted toast -->
+    <div class="fw-toast" id="fw-toast"></div>
+
   </div>
 
   <!-- ══════════════════════════════════════════════════════ -->
@@ -4712,6 +4886,168 @@ const CAT_META = {
 const ALL_FILTERS = ['housing','uni','public_holidays','work','other'];
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+
+// ── Flatmate Wanted generator ─────────────────────────────────────────────────
+(function() {
+  let fwToken = null;
+  let fwUrl   = null;
+  let fwGenerated = false;
+
+  function fwToast(msg) {
+    const el = document.getElementById('fw-toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  function fwBuildPost(profile) {
+    const name      = (profile.display_name || '').split(' ')[0] || 'Student';
+    const city      = (profile.city || 'my city').replace(/\w/g, c => c.toUpperCase());
+    const uni       = profile.university || 'university';
+    const budgetMax = profile.budget_max;
+    const budgetMin = profile.budget_min;
+    const sleep     = (profile.sleep_schedule || '').replace(/_/g, ' ');
+    const clean     = (profile.cleanliness || '').replace(/_/g, ' ');
+    const pets      = profile.pets || '';
+
+    let budgetStr = budgetMax ? `$${budgetMax}/wk` : 'negotiable';
+    if (budgetMin && budgetMax && budgetMin !== budgetMax) {
+      budgetStr = `$${budgetMin}–$${budgetMax}/wk`;
+    }
+
+    let suburbs = [];
+    const sp = profile.suburb_preferences;
+    if (sp) {
+      if (Array.isArray(sp)) suburbs = sp.slice(0, 3);
+      else if (sp.selected) suburbs = sp.selected.slice(0, 3);
+      else suburbs = Object.values(sp).flat().slice(0, 3);
+    }
+
+    const moveIn = profile.move_in_date
+      ? new Date(profile.move_in_date).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' })
+      : null;
+
+    const traits = [];
+    if (sleep)                     traits.push(`🌙 ${sleep}`);
+    if (clean)                     traits.push(`🧹 ${clean}`);
+    if (pets && pets !== 'no_pets') traits.push(`🐾 ${pets.replace(/_/g,' ')}`);
+
+    let post = `🏠 FLATMATE WANTED — ${city.toUpperCase()}
+
+`;
+    post += `Hi! I'm a ${uni} student looking for a housemate in ${city}.
+
+`;
+    post += `💰 Budget: ${budgetStr}
+`;
+    if (moveIn)            post += `📅 Available: ${moveIn}
+`;
+    if (suburbs.length)    post += `📍 Preferred areas: ${suburbs.join(', ')}
+`;
+    post += `
+`;
+    if (traits.length) {
+      post += `About me:
+`;
+      traits.forEach(t => { post += `${t}
+`; });
+      post += `
+`;
+    }
+    post += `I'm verified on UniRenter — check out my full profile and connect with me there.
+`;
+    if (fwUrl) post += `👉 ${fwUrl}
+`;
+    post += `
+DM me if you're keen! 😊`;
+    return post;
+  }
+
+  window.fwGenerate = async function() {
+    const email = localStorage.getItem('unirenter_email');
+    if (!email) {
+      fwToast('Sign in first to generate your listing');
+      return;
+    }
+
+    document.getElementById('fw-idle').style.display    = 'none';
+    document.getElementById('fw-loading').style.display = '';
+    document.getElementById('fw-result').style.display  = 'none';
+    document.getElementById('fw-link-panel').style.display = 'none';
+
+    try {
+      // Generate token if not already done
+      if (!fwToken) {
+        const r = await fetch('/api/listing/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        if (!r.ok) throw new Error('Token generation failed');
+        const d = await r.json();
+        fwToken = d.token;
+        fwUrl   = d.url;
+
+        // Store expiry note
+        const exp = d.expires_at ? new Date(d.expires_at) : null;
+        if (exp) {
+          document.getElementById('fw-expiry-note').textContent =
+            'Link active until ' + exp.toLocaleDateString('en-AU', { day: 'numeric', month: 'long' });
+        }
+        if (fwUrl) {
+          document.getElementById('fw-link-url').textContent = fwUrl;
+        }
+      }
+
+      // Load profile for post text
+      const pr = await fetch('/api/profile/get?email=' + encodeURIComponent(email));
+      const pd = pr.ok ? (await pr.json()).profile : {};
+
+      const postText = fwBuildPost(pd || {});
+      document.getElementById('fw-post-text').textContent = postText;
+
+      document.getElementById('fw-loading').style.display = 'none';
+      document.getElementById('fw-result').style.display  = '';
+      fwGenerated = true;
+
+    } catch (err) {
+      console.error('fw error:', err);
+      document.getElementById('fw-loading').style.display = 'none';
+      document.getElementById('fw-idle').style.display    = '';
+      fwToast('Something went wrong — try again');
+    }
+  };
+
+  window.fwCopyPost = function() {
+    const text = document.getElementById('fw-post-text').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      fwToast('Post copied to clipboard! ✅');
+    }).catch(() => {
+      fwToast('Copy failed — select and copy manually');
+    });
+  };
+
+  window.fwShowLink = function() {
+    const panel = document.getElementById('fw-link-panel');
+    if (!panel) return;
+    if (panel.style.display === 'none') {
+      panel.style.display = '';
+    } else {
+      panel.style.display = 'none';
+    }
+  };
+
+  window.fwCopyLink = function() {
+    if (!fwUrl) return;
+    navigator.clipboard.writeText(fwUrl).then(() => {
+      fwToast('Link copied! ✅');
+    }).catch(() => {
+      fwToast('Copy failed');
+    });
+  };
+})();
+
 loadProfile();
 renderMatches();
 

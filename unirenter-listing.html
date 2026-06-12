@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flatmate Wanted · UniRenter</title>
+  <meta name="description" content="A student is looking for a housemate. Find your perfect student accommodation match on UniRenter.">
+  <meta property="og:title" content="Flatmate Wanted · UniRenter">
+  <meta property="og:description" content="Looking for a housemate? Check out this student's profile on UniRenter.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy:       #0d1f2d;
+      --navy-mid:   #162840;
+      --navy-light: #1e3450;
+      --brand-blue: #4BBFE0;
+      --brand-yellow:#F5B800;
+      --brand-coral: #E8623A;
+      --brand-green: #3DAA5C;
+      --text:        #e8f0f5;
+      --text-muted:  #7a96aa;
+      --border:      rgba(255,255,255,0.08);
+      --card-bg:     rgba(255,255,255,0.04);
+      --card-border: rgba(255,255,255,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--navy);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Nav ── */
+    nav {
+      background: var(--navy);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo {
+      font-family: 'Epilogue', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.3px;
+    }
+    .nav-logo span { color: var(--brand-blue); }
+    .nav-cta {
+      background: var(--brand-yellow);
+      color: var(--navy);
+      font-weight: 600;
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* ── Page layout ── */
+    .page-wrap {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+    }
+
+    /* ── Loading / error states ── */
+    .state-loading, .state-error, .state-expired {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 80px 24px;
+      text-align: center;
+    }
+    .state-loading .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(75,191,224,0.2);
+      border-top-color: var(--brand-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .state-error h2, .state-expired h2 { font-family: 'Epilogue', sans-serif; font-size: 22px; }
+    .state-error p, .state-expired p { color: var(--text-muted); font-size: 14px; margin-top: 6px; }
+
+    /* ── Profile card ── */
+    .profile-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      margin-bottom: 16px;
+    }
+    .profile-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .profile-avatar {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand-blue), #2a7a9e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+      border: 2px solid rgba(75,191,224,0.3);
+    }
+    .profile-name {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .profile-sub {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 3px;
+    }
+    .profile-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: rgba(75,191,224,0.12);
+      color: var(--brand-blue);
+      border: 1px solid rgba(75,191,224,0.2);
+    }
+    .badge-green {
+      background: rgba(61,170,92,0.12);
+      color: var(--brand-green);
+      border-color: rgba(61,170,92,0.2);
+    }
+    .badge-yellow {
+      background: rgba(245,184,0,0.12);
+      color: var(--brand-yellow);
+      border-color: rgba(245,184,0,0.2);
+    }
+
+    /* ── Vibe summary ── */
+    .vibe-row {
+      background: rgba(245,184,0,0.05);
+      border: 1px solid rgba(245,184,0,0.15);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .vibe-emojis { font-size: 22px; flex-shrink: 0; line-height: 1; margin-top: 1px; }
+    .vibe-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      margin-top: 20px;
+    }
+
+    /* ── Traits grid ── */
+    .traits-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .trait-chip {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .trait-icon { font-size: 16px; flex-shrink: 0; }
+    .trait-label { color: var(--text-muted); font-size: 11px; display: block; }
+    .trait-val { font-weight: 500; font-size: 13px; }
+
+    /* ── Budget card ── */
+    .budget-card {
+      background: linear-gradient(135deg, rgba(75,191,224,0.08), rgba(75,191,224,0.03));
+      border: 1px solid rgba(75,191,224,0.2);
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .budget-label { color: var(--text-muted); font-size: 13px; }
+    .budget-value {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--brand-blue);
+    }
+    .budget-suffix { font-size: 13px; color: var(--text-muted); font-family: 'Inter', sans-serif; font-weight: 400; }
+
+    /* ── Suburbs ── */
+    .suburb-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .suburb-chip {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── About ── */
+    .about-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+
+    /* ── CTA card ── */
+    .cta-card {
+      background: linear-gradient(135deg, rgba(245,184,0,0.1), rgba(245,184,0,0.04));
+      border: 1px solid rgba(245,184,0,0.2);
+      border-radius: 16px;
+      padding: 24px 20px;
+      text-align: center;
+      margin-top: 24px;
+    }
+    .cta-icon { font-size: 32px; margin-bottom: 10px; }
+    .cta-title {
+      font-family: 'Epilogue', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .cta-sub {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .cta-btn {
+      display: inline-block;
+      background: var(--brand-yellow);
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .cta-btn:hover { opacity: 0.88; }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    /* ── Move-in / expiry footer ── */
+    .listing-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .traits-grid { grid-template-columns: 1fr; }
+      .profile-avatar { width: 52px; height: 52px; font-size: 22px; }
+      .profile-name { font-size: 18px; }
+      .budget-value { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <a class="nav-logo" href="/">Uni<span>Renter</span></a>
+    <a class="nav-cta" href="/">Find a housemate →</a>
+  </nav>
+
+  <div class="page-wrap">
+    <!-- Loading state -->
+    <div class="state-loading" id="state-loading">
+      <div class="spinner"></div>
+      <p style="color:var(--text-muted);font-size:14px;">Loading listing…</p>
+    </div>
+
+    <!-- Error state -->
+    <div class="state-error" id="state-error" style="display:none;">
+      <div style="font-size:40px;">🤔</div>
+      <h2>Listing not found</h2>
+      <p>This listing link doesn't exist or may have been removed.</p>
+      <a class="cta-btn" href="/" style="margin-top:16px;display:inline-block;">Find housemates on UniRenter</a>
+    </div>
+
+    <!-- Expired state -->
+    <div class="state-expired" id="state-expired" style="display:none;">
+      <div style="font-size:40px;">⏳</div>
+      <h2>Listing expired</h2>
+      <p>This listing was active for 30 days and has now expired. The student may have already found a housemate!</p>
+      <a class="cta-btn" href="/" style="margin-top:16px;display:inline-block;">Find housemates on UniRenter</a>
+    </div>
+
+    <!-- Listing content -->
+    <div id="listing-content" style="display:none;">
+
+      <!-- Profile card -->
+      <div class="profile-card">
+        <div class="profile-top">
+          <div class="profile-avatar" id="lp-avatar">🎓</div>
+          <div>
+            <div class="profile-name" id="lp-name">Student</div>
+            <div class="profile-sub" id="lp-sub">UniRenter member</div>
+            <div class="profile-badges" id="lp-badges"></div>
+          </div>
+        </div>
+
+        <!-- Vibe row — only if vibe data exists -->
+        <div class="vibe-row" id="lp-vibe-row" style="display:none;">
+          <div class="vibe-emojis" id="lp-vibe-emojis"></div>
+          <div class="vibe-text" id="lp-vibe-text"></div>
+        </div>
+
+        <!-- Budget -->
+        <div class="section-label">Weekly budget</div>
+        <div class="budget-card">
+          <div>
+            <div class="budget-label">Looking to spend</div>
+            <div id="lp-budget-note" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
+          </div>
+          <div>
+            <span class="budget-value" id="lp-budget">–</span>
+            <span class="budget-suffix">/wk</span>
+          </div>
+        </div>
+
+        <!-- Key traits -->
+        <div class="section-label">Key traits</div>
+        <div class="traits-grid" id="lp-traits"></div>
+
+        <!-- Suburbs -->
+        <div id="lp-suburbs-section">
+          <div class="section-label">Open to areas</div>
+          <div class="suburb-chips" id="lp-suburbs"></div>
+        </div>
+
+        <!-- About -->
+        <div id="lp-about-section" style="display:none;">
+          <div class="section-label">About them</div>
+          <div class="about-text" id="lp-about"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="listing-meta">
+          <span id="lp-move-in"></span>
+          <span id="lp-expires"></span>
+        </div>
+      </div>
+
+      <!-- CTA card -->
+      <div class="cta-card">
+        <div class="cta-icon">🤠</div>
+        <div class="cta-title">Find your match on UniRenter</div>
+        <div class="cta-sub">Free for students. Cob matches you with housemates based on lifestyle, budget, and vibe — so there are no awkward surprises.</div>
+        <a class="cta-btn" id="lp-cta-link" href="/">Find me a housemate →</a>
+      </div>
+
+    </div><!-- /listing-content -->
+  </div><!-- /page-wrap -->
+
+  <script>
+    // ── Helpers ────────────────────────────────────────────────────────────────
+    function show(id) { const el = document.getElementById(id); if (el) el.style.display = ''; }
+    function hide(id) { const el = document.getElementById(id); if (el) el.style.display = 'none'; }
+
+    function fmt(str) {
+      if (!str) return '';
+      return str.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function cityUrl(city) {
+      const map = { melbourne: '/', sydney: '/sydney', brisbane: '/brisbane',
+                    adelaide: '/adelaide', perth: '/perth', canberra: '/canberra' };
+      return map[(city || '').toLowerCase()] || '/';
+    }
+
+    // ── Extract token from path ────────────────────────────────────────────────
+    function getToken() {
+      const parts = window.location.pathname.split('/');
+      return parts[parts.length - 1] || '';
+    }
+
+    // ── Render listing data ────────────────────────────────────────────────────
+    function renderListing(l) {
+      // Avatar — use vibe emoji if available, else graduation cap
+      const avatarEl = document.getElementById('lp-avatar');
+      if (l.vibe_emoji_primary) avatarEl.textContent = l.vibe_emoji_primary;
+
+      // Name
+      const name = l.display_name
+        ? l.display_name.split(' ')[0]   // first name only
+        : 'Student';
+      document.getElementById('lp-name').textContent = name + ' is looking for a housemate';
+
+      // Sub-line: city + uni
+      const cityName = fmt(l.city) || 'Australia';
+      const uniName  = l.university || '';
+      document.getElementById('lp-sub').textContent =
+        uniName ? `${uniName} · ${cityName}` : cityName;
+
+      // Badges
+      const badgeEl = document.getElementById('lp-badges');
+      const badges = [];
+      if (l.student_status) {
+        const stMap = {
+          'enrolled': 'Currently enrolled',
+          'incoming': 'Arriving soon',
+          'graduated': 'Graduate'
+        };
+        badges.push({ label: stMap[l.student_status] || fmt(l.student_status), cls: 'badge-green' });
+      }
+      if (l.household_type) badges.push({ label: fmt(l.household_type), cls: '' });
+      badgeEl.innerHTML = badges.map(b =>
+        `<span class="badge ${b.cls}">${b.label}</span>`
+      ).join('');
+
+      // Vibe
+      if (l.vibe_emoji_primary || l.cob_summary) {
+        const e1 = l.vibe_emoji_primary  || '';
+        const e2 = l.vibe_emoji_secondary || '';
+        document.getElementById('lp-vibe-emojis').textContent = e1 + (e2 ? ' ' + e2 : '');
+        document.getElementById('lp-vibe-text').textContent   = l.cob_summary || '';
+        document.getElementById('lp-vibe-row').style.display  = 'flex';
+      }
+
+      // Budget
+      if (l.budget_max) {
+        const budgetEl = document.getElementById('lp-budget');
+        if (l.budget_min && l.budget_min !== l.budget_max) {
+          budgetEl.textContent = `$${l.budget_min}–$${l.budget_max}`;
+        } else {
+          budgetEl.textContent = `Up to $${l.budget_max}`;
+        }
+      }
+      if (l.budget_min) {
+        document.getElementById('lp-budget-note').textContent = `Min $${l.budget_min}/wk`;
+      }
+
+      // Traits
+      const traits = [];
+      if (l.sleep_schedule) traits.push({ icon: '🌙', label: 'Sleep', val: fmt(l.sleep_schedule) });
+      if (l.cleanliness)    traits.push({ icon: '🧹', label: 'Cleanliness', val: fmt(l.cleanliness) });
+      if (l.guests)         traits.push({ icon: '👥', label: 'Guests', val: fmt(l.guests) });
+      if (l.pets)           traits.push({ icon: '🐾', label: 'Pets', val: fmt(l.pets) });
+
+      document.getElementById('lp-traits').innerHTML = traits.map(t => `
+        <div class="trait-chip">
+          <span class="trait-icon">${t.icon}</span>
+          <div>
+            <span class="trait-label">${t.label}</span>
+            <span class="trait-val">${t.val}</span>
+          </div>
+        </div>
+      `).join('');
+
+      // Suburbs
+      let suburbs = [];
+      if (l.suburb_preferences) {
+        if (Array.isArray(l.suburb_preferences)) {
+          suburbs = l.suburb_preferences;
+        } else if (typeof l.suburb_preferences === 'object') {
+          // May be stored as {selected: [...]} or similar
+          suburbs = l.suburb_preferences.selected || Object.values(l.suburb_preferences).flat() || [];
+        }
+      }
+      if (suburbs.length > 0) {
+        document.getElementById('lp-suburbs').innerHTML =
+          suburbs.slice(0, 8).map(s => `<span class="suburb-chip">${s}</span>`).join('');
+      } else {
+        document.getElementById('lp-suburbs-section').style.display = 'none';
+      }
+
+      // About
+      const about = typeof l.about === 'object'
+        ? (l.about.intro || l.about.text || Object.values(l.about || {}).filter(v => typeof v === 'string').join(' '))
+        : (l.about || '');
+      if (about && about.trim()) {
+        document.getElementById('lp-about').textContent = about.trim();
+        document.getElementById('lp-about-section').style.display = '';
+      }
+
+      // Move-in
+      if (l.move_in_date) {
+        const d = new Date(l.move_in_date);
+        document.getElementById('lp-move-in').textContent =
+          '📅 Available ' + d.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+      }
+
+      // Expires
+      if (l.expires_at) {
+        const d = new Date(l.expires_at);
+        document.getElementById('lp-expires').textContent =
+          'Listed until ' + d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+      }
+
+      // CTA link → city page
+      const ctaLink = document.getElementById('lp-cta-link');
+      ctaLink.href = cityUrl(l.city);
+
+      // Show content
+      hide('state-loading');
+      show('listing-content');
+    }
+
+    // ── Main ───────────────────────────────────────────────────────────────────
+    (async function init() {
+      const token = getToken();
+      if (!token) {
+        hide('state-loading');
+        show('state-error');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/listing/get?token=' + encodeURIComponent(token));
+        if (res.status === 410) {
+          hide('state-loading');
+          show('state-expired');
+          return;
+        }
+        if (!res.ok) {
+          hide('state-loading');
+          show('state-error');
+          return;
+        }
+        const data = await res.json();
+        if (!data.listing) {
+          hide('state-loading');
+          show('state-error');
+          return;
+        }
+        renderListing(data.listing);
+      } catch (err) {
+        console.error(err);
+        hide('state-loading');
+        show('state-error');
+      }
+    })();
+  </script>
+
+</body>
+</html>
