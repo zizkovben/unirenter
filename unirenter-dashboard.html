@@ -95,19 +95,22 @@ a.nav-logo {
 }
 .nav-cta:hover { opacity: 0.88; }
 .nav-explore-btn {
-  background: none;
-  border: 1px solid rgba(255,255,255,0.18);
-  color: #e8f0f5;
-  font-size: 13px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text-muted);
+  font-size: 12px;
   font-weight: 500;
   font-family: 'Inter', sans-serif;
-  padding: 7px 10px;
+  padding: 8px 14px;
   border-radius: 8px;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-.nav-explore-btn:hover { border-color: rgba(75,191,224,0.4); color: #4BBFE0; }
+.nav-explore-btn:hover { border-color: rgba(75,191,224,0.3); color: var(--brand-blue); }
 .btn-theme {
   background: none;
   border: 1px solid rgba(255,255,255,0.15);
@@ -299,14 +302,15 @@ body.light-mode {
 .completeness-bar { height: 100%; background: var(--brand-yellow); border-radius: 4px; transition: width 0.5s; }
 .user-header-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
 .status-pill {
-  font-size: 11px; font-weight: 600; padding: 4px 10px;
-  border-radius: 20px; cursor: pointer; transition: all 0.2s;
-  border: 1px solid rgba(61,170,92,0.3);
+  font-size: 13px; font-weight: 500; font-family: 'Inter', sans-serif;
+  padding: 7px 10px;
+  border-radius: 8px; cursor: pointer; transition: all 0.2s;
+  border: 1px solid rgba(61,170,92,0.35);
   background: rgba(61,170,92,0.1); color: var(--brand-green);
-  white-space: nowrap;
+  white-space: nowrap; line-height: 1;
 }
 .status-pill:hover { background: rgba(61,170,92,0.2); }
-.status-pill.sleeping { border-color: rgba(245,184,0,0.3); background: rgba(245,184,0,0.1); color: var(--brand-yellow); }
+.status-pill.sleeping { border-color: rgba(245,184,0,0.35); background: rgba(245,184,0,0.1); color: var(--brand-yellow); }
 
 /* ── Tab bar — Dashboard Tab Standard (Session 39) ── */
 .tab-bar {
@@ -1735,6 +1739,11 @@ body.light-mode {
 .ssw-opt-badge { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 8px; background: rgba(75,191,224,0.1); color: #4BBFE0; white-space: nowrap; flex-shrink: 0; }
 .ssw-more-detail { font-size: 11px; color: var(--text-muted); text-decoration: none; display: block; text-align: center; margin: 4px 0; }
 .ssw-more-detail:hover { color: var(--brand-yellow); }
+/* Sidebar uni verify card */
+.sidebar-uni-card {
+  background: var(--navy-card); border: 1px solid var(--navy-border);
+  border-radius: var(--radius); padding: 16px;
+}
 
 /* ── Settings slide-in panel (V54) ── */
 .settings-panel-backdrop {
@@ -3069,6 +3078,26 @@ body.light-mode {
           <button class="profile-edit-btn" onclick="window.location.href='/'">✏️ Update profile</button>
         </div>
 
+        <!-- Uni email verification — compact sidebar card -->
+        <div class="sidebar-uni-card" id="uni-verify-card">
+          <div id="uni-verify-not-done">
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;line-height:1.5;">
+              🎓 Verify your uni email (.edu.au) to earn the verified badge.
+            </div>
+            <button class="profile-edit-btn" onclick="openUniVerifyModal()" style="font-size:12px;padding:8px;">Verify uni email</button>
+            <span id="uni-verify-inline-status" style="font-size:11px;color:var(--text-muted);display:block;margin-top:6px;min-height:14px;"></span>
+          </div>
+          <div id="uni-verify-done" style="display:none;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:18px;">🎓</span>
+              <div>
+                <div style="font-size:12px;font-weight:600;color:var(--brand-blue);">Uni verified</div>
+                <div style="font-size:11px;color:var(--text-muted);" id="uni-verify-email-display">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- ── Profile status / sleep mode widget ── -->
         <div class="sidebar-sleep-widget" id="sidebar-sleep-widget">
           <!-- Active state -->
@@ -3189,30 +3218,6 @@ body.light-mode {
               <span class="profile-row-label">Study mode</span>
               <span class="profile-row-val" id="prow-studyloc">—</span>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Uni email verification card -->
-      <div class="profile-section-card" id="uni-verify-card">
-        <div class="profile-section-head">🎓 Uni verified badge</div>
-        <div id="uni-verify-not-done">
-          <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;">
-            Verify your university email (.edu.au) to get the 🎓 badge — it shows other students you're the real deal.
-          </p>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <button class="profile-edit-btn" style="flex:0 0 auto;" onclick="openUniVerifyModal()">Verify uni email</button>
-            <span id="uni-verify-inline-status" style="font-size:12px;color:var(--text-muted);"></span>
-          </div>
-        </div>
-        <div id="uni-verify-done" style="display:none;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span style="font-size:20px;">🎓</span>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--brand-blue);">Uni verified</div>
-              <div style="font-size:12px;color:var(--text-muted);" id="uni-verify-email-display">—</div>
-            </div>
-            <span class="badge badge-uni-verified" style="margin-left:auto;">🎓 Uni verified</span>
           </div>
         </div>
       </div>
