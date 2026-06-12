@@ -23,573 +23,203 @@
     --font-display: 'Epilogue', sans-serif;
     --font-body:    'Inter', sans-serif;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-body); background: var(--navy); color: var(--text); min-height: 100vh; font-size: 14px; }
 
-  body {
-    font-family: var(--font-body);
-    background: var(--navy);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 14px;
-  }
-
-  /* ── Login screen ── */
-  #login-screen {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 20px;
-  }
-
-  .login-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 48px 40px;
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-  }
-
-  .login-card .logo {
-    font-family: var(--font-display);
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--brand-yellow);
-    margin-bottom: 6px;
-    letter-spacing: -0.5px;
-  }
-
-  .login-card .subtitle {
-    color: var(--text-muted);
-    font-size: 13px;
-    margin-bottom: 32px;
-  }
-
-  .login-card input {
-    width: 100%;
-    background: var(--navy-mid);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 16px;
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: 15px;
-    margin-bottom: 16px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
+  /* Login */
+  #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+  .login-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 48px 40px; width: 100%; max-width: 400px; text-align: center; }
+  .login-card .logo { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--brand-yellow); margin-bottom: 6px; letter-spacing: -0.5px; }
+  .login-card .subtitle { color: var(--text-muted); font-size: 13px; margin-bottom: 32px; }
+  .login-card input { width: 100%; background: var(--navy-mid); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; color: var(--text); font-family: var(--font-body); font-size: 15px; margin-bottom: 16px; outline: none; transition: border-color 0.2s; }
   .login-card input:focus { border-color: var(--brand-yellow); }
-
-  .login-card button {
-    width: 100%;
-    background: var(--brand-yellow);
-    color: var(--navy);
-    border: none;
-    border-radius: 10px;
-    padding: 14px;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 15px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-
+  .login-card button { width: 100%; background: var(--brand-yellow); color: var(--navy); border: none; border-radius: 10px; padding: 14px; font-family: var(--font-display); font-weight: 700; font-size: 15px; cursor: pointer; transition: opacity 0.2s; }
   .login-card button:hover { opacity: 0.88; }
   .login-card button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .login-error { color: var(--brand-coral); font-size: 13px; margin-top: 12px; min-height: 18px; }
 
-  .login-error {
-    color: var(--brand-coral);
-    font-size: 13px;
-    margin-top: 12px;
-    min-height: 18px;
-  }
-
-  /* ── App shell ── */
+  /* App shell */
   #app { display: none; }
-
-  nav {
-    background: #0a1a26;
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .nav-logo {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 18px;
-    color: var(--brand-yellow);
-    letter-spacing: -0.5px;
-  }
-
-  .nav-logo span {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-muted);
-    font-family: var(--font-body);
-    margin-left: 8px;
-    letter-spacing: 0;
-  }
-
-  .nav-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .nav-badge {
-    background: var(--brand-coral);
-    color: #fff;
-    border-radius: 10px;
-    padding: 2px 8px;
-    font-size: 11px;
-    font-weight: 600;
-    display: none;
-  }
-
+  nav { background: #0a1a26; border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .nav-logo { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--brand-yellow); letter-spacing: -0.5px; }
+  .nav-logo span { font-size: 12px; font-weight: 500; color: var(--text-muted); font-family: var(--font-body); margin-left: 8px; letter-spacing: 0; }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .nav-badge { background: var(--brand-coral); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: 600; display: none; }
   .nav-badge.visible { display: inline-block; }
-
-  .btn-logout {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: var(--font-body);
-    transition: all 0.2s;
-  }
-
+  .nav-divider { width: 1px; height: 20px; background: var(--border); }
+  .btn-nav-link { background: transparent; border: none; color: var(--text-muted); font-size: 13px; cursor: pointer; font-family: var(--font-body); text-decoration: none; transition: color 0.2s; padding: 0; display: inline-block; }
+  .btn-nav-link:hover { color: var(--brand-blue); }
+  .btn-logout { background: transparent; border: 1px solid var(--border); color: var(--text-muted); border-radius: 8px; padding: 6px 14px; font-size: 13px; cursor: pointer; font-family: var(--font-body); transition: all 0.2s; }
   .btn-logout:hover { border-color: var(--brand-coral); color: var(--brand-coral); }
+  .session-timer { font-size: 11px; color: var(--text-muted); }
 
-  /* ── Tabs ── */
-  .tab-bar {
-    background: var(--navy-mid);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    display: flex;
-    gap: 0;
-  }
-
-  .tab-btn {
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    color: var(--text-muted);
-    padding: 14px 20px;
-    font-family: var(--font-body);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-  }
-
+  /* Tabs */
+  .tab-bar { background: var(--navy-mid); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn { background: none; border: none; border-bottom: 3px solid transparent; color: var(--text-muted); padding: 14px 20px; font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
   .tab-btn:hover { color: var(--text); }
   .tab-btn.active { color: var(--brand-yellow); border-bottom-color: var(--brand-yellow); }
-
-  .tab-count {
-    background: var(--brand-coral);
-    color: #fff;
-    border-radius: 10px;
-    padding: 1px 7px;
-    font-size: 11px;
-    font-weight: 600;
-    display: none;
-  }
-
+  .tab-count { background: var(--brand-coral); color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 11px; font-weight: 600; display: none; }
   .tab-count.show { display: inline-block; }
 
-  /* ── Main content ── */
+  /* Main */
   main { padding: 24px; max-width: 1200px; margin: 0 auto; }
-
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
-  /* ── KPI cards ── */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 16px;
-    margin-bottom: 28px;
-  }
-
-  .kpi-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-  }
-
-  .kpi-label {
-    color: var(--text-muted);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 8px;
-  }
-
-  .kpi-value {
-    font-family: var(--font-display);
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-
-  .kpi-card.alert .kpi-value { color: var(--brand-coral); }
+  /* KPI cards */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(162px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .kpi-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+  .kpi-label { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .kpi-value { font-family: var(--font-display); font-size: 30px; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 4px; }
+  .kpi-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .kpi-card.alert  .kpi-value { color: var(--brand-coral); }
   .kpi-card.success .kpi-value { color: var(--brand-green); }
-  .kpi-card.info .kpi-value { color: var(--brand-blue); }
+  .kpi-card.info   .kpi-value { color: var(--brand-blue); }
+  .kpi-card.yellow .kpi-value { color: var(--brand-yellow); }
 
-  /* ── Section headers ── */
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    margin-top: 8px;
-  }
+  /* Section headers */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; margin-top: 8px; }
+  .section-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text); }
+  .section-subtitle { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
 
-  .section-title {
-    font-family: var(--font-display);
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text);
-  }
+  /* Two col */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
 
-  .section-subtitle {
-    color: var(--text-muted);
-    font-size: 12px;
-    margin-top: 2px;
-  }
+  /* Panel card */
+  .panel-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .panel-card-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+  .panel-card-subtitle { font-size: 11px; color: var(--text-muted); font-weight: 400; }
 
-  /* ── Filter bar ── */
-  .filter-bar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
+  /* Bar chart */
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; padding-top: 8px; }
+  .bar-col { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 0; height: 100%; justify-content: flex-end; gap: 4px; }
+  .bar-fill { width: 100%; border-radius: 4px 4px 0 0; min-height: 2px; position: relative; transition: opacity 0.2s; }
+  .bar-fill:hover { opacity: 0.8; }
+  .bar-fill:hover::after { content: attr(data-val); position: absolute; top: -22px; left: 50%; transform: translateX(-50%); background: var(--navy-mid); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; font-size: 11px; white-space: nowrap; color: var(--text); pointer-events: none; z-index: 10; }
+  .bar-label { font-size: 10px; color: var(--text-muted); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; padding: 0 2px; }
 
-  .filter-chip {
-    background: var(--navy-mid);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    border-radius: 20px;
-    padding: 5px 14px;
-    font-size: 12px;
-    cursor: pointer;
-    font-family: var(--font-body);
-    transition: all 0.2s;
-  }
+  /* Horizontal stat bars */
+  .stat-rows { display: flex; flex-direction: column; gap: 10px; }
+  .stat-row { display: flex; align-items: center; gap: 10px; }
+  .stat-row-label { font-size: 12px; color: var(--text); min-width: 140px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stat-row-bar-wrap { flex: 1; height: 8px; background: var(--navy-mid); border-radius: 4px; overflow: hidden; }
+  .stat-row-bar { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .stat-row-val { font-size: 12px; color: var(--text-muted); min-width: 30px; text-align: right; flex-shrink: 0; }
 
+  /* Filter bar */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-chip { background: var(--navy-mid); border: 1px solid var(--border); color: var(--text-muted); border-radius: 20px; padding: 5px 14px; font-size: 12px; cursor: pointer; font-family: var(--font-body); transition: all 0.2s; }
   .filter-chip:hover { border-color: var(--brand-blue); color: var(--brand-blue); }
   .filter-chip.active { background: var(--brand-blue); border-color: var(--brand-blue); color: var(--navy); font-weight: 600; }
 
-  /* ── Listing cards ── */
-  .listing-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 12px;
-    transition: border-color 0.2s;
-  }
+  /* Feature cards */
+  .feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .feature-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+  .feature-icon { font-size: 24px; margin-bottom: 10px; }
+  .feature-name { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .feature-value { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--text); line-height: 1; }
+  .feature-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
+  /* Listing cards */
+  .listing-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 12px; transition: border-color 0.2s; }
   .listing-card:hover { border-color: rgba(255,255,255,0.15); }
   .listing-card.pending { border-left: 3px solid var(--brand-yellow); }
   .listing-card.flagged { border-left: 3px solid var(--brand-coral); }
-
-  .listing-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-  }
-
+  .listing-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
   .listing-meta { flex: 1; min-width: 0; }
-
-  .listing-ref {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 15px;
-    color: var(--brand-yellow);
-    margin-bottom: 4px;
-  }
-
-  .listing-detail {
-    color: var(--text-muted);
-    font-size: 12px;
-    margin-bottom: 8px;
-    line-height: 1.5;
-  }
-
-  .signal-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
-  }
-
-  .signal-chip {
-    background: rgba(232,98,58,0.15);
-    border: 1px solid rgba(232,98,58,0.3);
-    color: var(--brand-coral);
-    border-radius: 6px;
-    padding: 2px 8px;
-    font-size: 11px;
-    font-weight: 500;
-  }
-
-  .report-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: rgba(232,98,58,0.15);
-    border: 1px solid rgba(232,98,58,0.3);
-    color: var(--brand-coral);
-    border-radius: 6px;
-    padding: 3px 10px;
-    font-size: 12px;
-    font-weight: 600;
-    margin-top: 6px;
-  }
-
-  .listing-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-
-  .btn-action {
-    border: none;
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-family: var(--font-body);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s;
-    white-space: nowrap;
-    min-width: 100px;
-    text-align: center;
-  }
-
+  .listing-ref { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--brand-yellow); margin-bottom: 4px; }
+  .listing-detail { color: var(--text-muted); font-size: 12px; margin-bottom: 8px; line-height: 1.5; }
+  .signal-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .signal-chip { background: rgba(232,98,58,0.15); border: 1px solid rgba(232,98,58,0.3); color: var(--brand-coral); border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 500; }
+  .report-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(232,98,58,0.15); border: 1px solid rgba(232,98,58,0.3); color: var(--brand-coral); border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: 600; margin-top: 6px; }
+  .listing-actions { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+  .btn-action { border: none; border-radius: 8px; padding: 8px 16px; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; min-width: 110px; text-align: center; }
   .btn-action:hover { opacity: 0.85; }
   .btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-approve { background: var(--brand-green); color: #fff; }
+  .btn-reject  { background: var(--brand-coral); color: #fff; }
+  .btn-resolve { background: var(--brand-blue);  color: var(--navy); }
 
-  .btn-approve  { background: var(--brand-green); color: #fff; }
-  .btn-reject   { background: var(--brand-coral); color: #fff; }
-  .btn-resolve  { background: var(--brand-blue);  color: var(--navy); }
-
-  /* ── Status pill ── */
-  .status-pill {
-    display: inline-block;
-    border-radius: 20px;
-    padding: 2px 10px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
+  /* Status pills */
+  .status-pill { display: inline-block; border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
   .pill-active   { background: rgba(61,170,92,0.15);  color: var(--brand-green); border: 1px solid rgba(61,170,92,0.3); }
   .pill-pending  { background: rgba(245,184,0,0.15);  color: var(--brand-yellow); border: 1px solid rgba(245,184,0,0.3); }
   .pill-rejected { background: rgba(232,98,58,0.15);  color: var(--brand-coral); border: 1px solid rgba(232,98,58,0.3); }
   .pill-filled   { background: rgba(75,191,224,0.15); color: var(--brand-blue);  border: 1px solid rgba(75,191,224,0.3); }
 
-  /* ── City breakdown table ── */
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 28px;
-  }
-
-  .data-table th {
-    text-align: left;
-    padding: 10px 16px;
-    color: var(--text-muted);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .data-table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-    vertical-align: middle;
-  }
-
+  /* Data table */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th { text-align: left; padding: 10px 16px; color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; border-bottom: 1px solid var(--border); }
+  .data-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
   .data-table tr:last-child td { border-bottom: none; }
-
   .data-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+  .city-name { font-weight: 600; text-transform: capitalize; }
+  .table-wrap { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
 
-  .city-name {
-    font-weight: 600;
-    text-transform: capitalize;
-  }
-
-  .table-wrap {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 28px;
-  }
-
-  /* ── Activity feed ── */
-  .activity-feed {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  .activity-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-  }
-
+  /* Activity feed */
+  .activity-feed { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .activity-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
   .activity-item:last-child { border-bottom: none; }
-
-  .activity-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
+  .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .dot-signup  { background: var(--brand-green); }
   .dot-listing { background: var(--brand-blue); }
-
   .activity-label { flex: 1; font-size: 13px; }
   .activity-time  { color: var(--text-muted); font-size: 11px; flex-shrink: 0; }
 
-  /* ── Empty state ── */
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-muted);
-  }
-
+  /* Empty state */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
   .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
   .empty-state .msg  { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
   .empty-state .sub  { font-size: 13px; }
 
-  /* ── Toast ── */
-  #toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 20px;
-    font-size: 13px;
-    color: var(--text);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all 0.3s;
-    z-index: 9999;
-    max-width: 320px;
-  }
+  /* Accounting CTA */
+  .btn-accounting { display: inline-flex; align-items: center; gap: 6px; background: rgba(75,191,224,0.1); border: 1px solid rgba(75,191,224,0.3); color: var(--brand-blue); border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font-body); text-decoration: none; transition: all 0.2s; }
+  .btn-accounting:hover { background: rgba(75,191,224,0.18); }
 
+  /* Toast */
+  #toast { position: fixed; bottom: 24px; right: 24px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 20px; font-size: 13px; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.4); transform: translateY(80px); opacity: 0; transition: all 0.3s; z-index: 9999; max-width: 320px; }
   #toast.show { transform: translateY(0); opacity: 1; }
   #toast.success { border-color: var(--brand-green); color: var(--brand-green); }
   #toast.error   { border-color: var(--brand-coral); color: var(--brand-coral); }
 
-  /* ── Loading spinner ── */
-  .spinner {
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    border: 2px solid rgba(255,255,255,0.15);
-    border-top-color: var(--brand-yellow);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    vertical-align: middle;
-    margin-right: 8px;
-  }
-
+  /* Loading */
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.15); border-top-color: var(--brand-yellow); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-row { text-align: center; padding: 40px; color: var(--text-muted); font-size: 13px; }
 
-  .loading-row {
-    text-align: center;
-    padding: 40px;
-    color: var(--text-muted);
-    font-size: 13px;
-  }
-
-  /* ── Refresh btn ── */
-  .btn-refresh {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 12px;
-    cursor: pointer;
-    font-family: var(--font-body);
-    transition: all 0.2s;
-  }
-
+  /* Utility buttons */
+  .btn-refresh { background: transparent; border: 1px solid var(--border); color: var(--text-muted); border-radius: 8px; padding: 6px 14px; font-size: 12px; cursor: pointer; font-family: var(--font-body); transition: all 0.2s; }
   .btn-refresh:hover { border-color: var(--brand-blue); color: var(--brand-blue); }
 
-  /* ── Session timer ── */
-  .session-timer {
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-
-  /* ── Responsive ── */
+  /* Responsive */
   @media (max-width: 640px) {
     main { padding: 16px; }
     .listing-row { flex-direction: column; }
     .listing-actions { flex-direction: row; }
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .tab-btn { padding: 12px 12px; font-size: 12px; }
+    .tab-btn { padding: 12px 14px; font-size: 12px; }
+    .feature-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════ LOGIN SCREEN ══ -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="logo">UniRenter</div>
-    <div class="subtitle">Admin Access</div>
+    <div class="subtitle">Admin Portal</div>
     <input type="password" id="pw-input" placeholder="Admin password" autocomplete="current-password">
     <button id="btn-login" onclick="doLogin()">Sign in</button>
     <div class="login-error" id="login-error"></div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════ APP SHELL ══ -->
+<!-- APP -->
 <div id="app">
-
   <nav>
     <div style="display:flex;align-items:center;gap:12px;">
       <div class="nav-logo">UniRenter <span>Admin</span></div>
@@ -597,43 +227,62 @@
     </div>
     <div class="nav-right">
       <span class="session-timer" id="session-timer"></span>
+      <div class="nav-divider"></div>
+      <a href="/accounting" class="btn-nav-link">💰 Accounting</a>
+      <div class="nav-divider"></div>
       <button class="btn-logout" onclick="doLogout()">Sign out</button>
     </div>
   </nav>
 
-  <!-- Tab bar -->
   <div class="tab-bar">
-    <button class="tab-btn active" data-tab="analytics" onclick="switchTab('analytics')">
-      📊 Analytics
+    <button class="tab-btn active" data-tab="overview"    onclick="switchTab('overview')">📊 Overview</button>
+    <button class="tab-btn"        data-tab="users"       onclick="switchTab('users')">👥 Users</button>
+    <button class="tab-btn"        data-tab="features"    onclick="switchTab('features')">⚡ Features</button>
+    <button class="tab-btn"        data-tab="moderation"  onclick="switchTab('moderation')">
+      🔍 Moderation <span class="tab-count" id="mod-count"></span>
     </button>
-    <button class="tab-btn" data-tab="moderation" onclick="switchTab('moderation')">
-      🔍 Moderation queue
-      <span class="tab-count" id="mod-count">0</span>
-    </button>
-    <button class="tab-btn" data-tab="flagged" onclick="switchTab('flagged')">
-      🚩 Flagged listings
-      <span class="tab-count" id="flag-count">0</span>
+    <button class="tab-btn"        data-tab="reports"     onclick="switchTab('reports')">
+      🚩 Reports <span class="tab-count" id="flag-count"></span>
     </button>
   </div>
 
   <main>
 
-    <!-- ── Analytics tab ── -->
-    <div id="tab-analytics" class="tab-panel active">
+    <!-- OVERVIEW TAB -->
+    <div id="tab-overview" class="tab-panel active">
       <div class="kpi-grid" id="kpi-grid">
         <div class="loading-row" style="grid-column:1/-1"><span class="spinner"></span>Loading…</div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel-card">
+          <div class="panel-card-title">
+            Profiles by city
+            <button class="btn-refresh" onclick="loadAll()">↻</button>
+          </div>
+          <div class="bar-chart" id="city-chart">
+            <div class="loading-row" style="width:100%;padding:20px;"><span class="spinner"></span></div>
+          </div>
+        </div>
+        <div class="panel-card">
+          <div class="panel-card-title">Signups — last 30 days</div>
+          <svg id="signup-sparkline" width="100%" height="90" viewBox="0 0 400 90" preserveAspectRatio="none" style="display:block;">
+            <text x="50%" y="50%" fill="var(--text-muted)" text-anchor="middle" font-size="12" dy=".3em">Loading…</text>
+          </svg>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:8px;text-align:right;" id="signup-total-label"></div>
+        </div>
       </div>
 
       <div class="section-header">
         <div>
           <div class="section-title">City breakdown</div>
-          <div class="section-subtitle">Profiles and listings per city</div>
+          <div class="section-subtitle">All 6 cities · live data</div>
         </div>
-        <button class="btn-refresh" onclick="loadAnalytics()">↻ Refresh</button>
+        <a href="/accounting" class="btn-accounting">💰 Accounting →</a>
       </div>
 
       <div class="table-wrap">
-        <table class="data-table" id="city-table">
+        <table class="data-table">
           <thead>
             <tr>
               <th>City</th>
@@ -655,59 +304,101 @@
           <div class="section-subtitle">Last 7 days</div>
         </div>
       </div>
-
       <div class="activity-feed" id="activity-feed">
         <div class="loading-row"><span class="spinner"></span>Loading…</div>
       </div>
     </div>
 
-    <!-- ── Moderation queue tab ── -->
+    <!-- USERS TAB -->
+    <div id="tab-users" class="tab-panel">
+      <div class="kpi-grid" id="user-kpi-grid">
+        <div class="loading-row" style="grid-column:1/-1"><span class="spinner"></span>Loading…</div>
+      </div>
+      <div class="two-col">
+        <div class="panel-card">
+          <div class="panel-card-title">Student status</div>
+          <div class="stat-rows" id="student-status-rows">
+            <div class="loading-row"><span class="spinner"></span></div>
+          </div>
+        </div>
+        <div class="panel-card">
+          <div class="panel-card-title">Generation</div>
+          <div class="stat-rows" id="generation-rows">
+            <div class="loading-row"><span class="spinner"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-card">
+        <div class="panel-card-title">Profile count per city</div>
+        <div class="bar-chart" id="user-city-chart" style="height:140px;">
+          <div class="loading-row" style="width:100%"><span class="spinner"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEATURES TAB -->
+    <div id="tab-features" class="tab-panel">
+      <div class="feature-grid" id="feature-grid">
+        <div class="loading-row" style="grid-column:1/-1"><span class="spinner"></span>Loading…</div>
+      </div>
+      <div class="panel-card">
+        <div class="panel-card-title">
+          Agent leads by city
+          <span class="panel-card-subtitle">Housing partner tick-box submissions</span>
+        </div>
+        <div class="bar-chart" id="leads-city-chart">
+          <div class="loading-row" style="width:100%"><span class="spinner"></span></div>
+        </div>
+      </div>
+      <div class="panel-card">
+        <div class="panel-card-title">Active break lease listings by city</div>
+        <div class="bar-chart" id="listings-city-chart">
+          <div class="loading-row" style="width:100%"><span class="spinner"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODERATION TAB -->
     <div id="tab-moderation" class="tab-panel">
       <div class="section-header">
         <div>
           <div class="section-title">Moderation queue</div>
-          <div class="section-subtitle">Listings flagged by scam detection — approve or reject</div>
+          <div class="section-subtitle">Listings awaiting review — approve or reject</div>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn-refresh" onclick="loadModeration()">↻ Refresh</button>
-        </div>
+        <button class="btn-refresh" onclick="loadModeration()">↻ Refresh</button>
       </div>
-
       <div class="filter-bar" id="mod-filter-bar">
-        <button class="filter-chip active" data-city="all" onclick="setModFilter('all', this)">All cities</button>
-        <button class="filter-chip" data-city="melbourne"  onclick="setModFilter('melbourne',  this)">Melbourne</button>
-        <button class="filter-chip" data-city="sydney"     onclick="setModFilter('sydney',     this)">Sydney</button>
-        <button class="filter-chip" data-city="brisbane"   onclick="setModFilter('brisbane',   this)">Brisbane</button>
-        <button class="filter-chip" data-city="adelaide"   onclick="setModFilter('adelaide',   this)">Adelaide</button>
-        <button class="filter-chip" data-city="perth"      onclick="setModFilter('perth',      this)">Perth</button>
-        <button class="filter-chip" data-city="canberra"   onclick="setModFilter('canberra',   this)">Canberra</button>
+        <button class="filter-chip active" data-city="all"        onclick="setModFilter('all',       this)">All cities</button>
+        <button class="filter-chip"        data-city="melbourne"  onclick="setModFilter('melbourne', this)">Melbourne</button>
+        <button class="filter-chip"        data-city="sydney"     onclick="setModFilter('sydney',    this)">Sydney</button>
+        <button class="filter-chip"        data-city="brisbane"   onclick="setModFilter('brisbane',  this)">Brisbane</button>
+        <button class="filter-chip"        data-city="adelaide"   onclick="setModFilter('adelaide',  this)">Adelaide</button>
+        <button class="filter-chip"        data-city="perth"      onclick="setModFilter('perth',     this)">Perth</button>
+        <button class="filter-chip"        data-city="canberra"   onclick="setModFilter('canberra',  this)">Canberra</button>
       </div>
-
       <div id="mod-list">
         <div class="loading-row"><span class="spinner"></span>Loading…</div>
       </div>
     </div>
 
-    <!-- ── Flagged listings tab ── -->
-    <div id="tab-flagged" class="tab-panel">
+    <!-- REPORTS TAB -->
+    <div id="tab-reports" class="tab-panel">
       <div class="section-header">
         <div>
-          <div class="section-title">Flagged listings</div>
+          <div class="section-title">Reported listings</div>
           <div class="section-subtitle">Active listings with 3+ community reports</div>
         </div>
         <button class="btn-refresh" onclick="loadFlagged()">↻ Refresh</button>
       </div>
-
       <div class="filter-bar" id="flag-filter-bar">
-        <button class="filter-chip active" data-city="all" onclick="setFlagFilter('all', this)">All cities</button>
-        <button class="filter-chip" data-city="melbourne"  onclick="setFlagFilter('melbourne',  this)">Melbourne</button>
-        <button class="filter-chip" data-city="sydney"     onclick="setFlagFilter('sydney',     this)">Sydney</button>
-        <button class="filter-chip" data-city="brisbane"   onclick="setFlagFilter('brisbane',   this)">Brisbane</button>
-        <button class="filter-chip" data-city="adelaide"   onclick="setFlagFilter('adelaide',   this)">Adelaide</button>
-        <button class="filter-chip" data-city="perth"      onclick="setFlagFilter('perth',      this)">Perth</button>
-        <button class="filter-chip" data-city="canberra"   onclick="setFlagFilter('canberra',   this)">Canberra</button>
+        <button class="filter-chip active" data-city="all"        onclick="setFlagFilter('all',       this)">All cities</button>
+        <button class="filter-chip"        data-city="melbourne"  onclick="setFlagFilter('melbourne', this)">Melbourne</button>
+        <button class="filter-chip"        data-city="sydney"     onclick="setFlagFilter('sydney',    this)">Sydney</button>
+        <button class="filter-chip"        data-city="brisbane"   onclick="setFlagFilter('brisbane',  this)">Brisbane</button>
+        <button class="filter-chip"        data-city="adelaide"   onclick="setFlagFilter('adelaide',  this)">Adelaide</button>
+        <button class="filter-chip"        data-city="perth"      onclick="setFlagFilter('perth',     this)">Perth</button>
+        <button class="filter-chip"        data-city="canberra"   onclick="setFlagFilter('canberra',  this)">Canberra</button>
       </div>
-
       <div id="flag-list">
         <div class="loading-row"><span class="spinner"></span>Loading…</div>
       </div>
@@ -716,92 +407,41 @@
   </main>
 </div>
 
-<!-- Toast notification -->
 <div id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════════════════════
-let _token = null;
-let _modFilter  = 'all';
-let _flagFilter = 'all';
-let _modData    = [];
-let _flagData   = [];
-let _sessionExp = null;
-let _timerInt   = null;
+var _token = null, _modFilter = 'all', _flagFilter = 'all';
+var _modData = [], _flagData = [];
+var _sessionExp = null, _timerInt = null;
+var _analyticsCache = null;
+var SESSION_KEY = 'ur_admin_token', SESSION_EXP = 'ur_admin_exp';
 
-const SESSION_KEY = 'ur_admin_token';
-const SESSION_EXP = 'ur_admin_exp';
-
-// ══════════════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════════════
 (function init() {
-  const stored = sessionStorage.getItem(SESSION_KEY);
-  const exp    = parseInt(sessionStorage.getItem(SESSION_EXP) || '0', 10);
-
-  if (stored && exp > Date.now()) {
-    _token      = stored;
-    _sessionExp = exp;
-    showApp();
-  }
-
-  // Allow Enter key on password field
-  document.getElementById('pw-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') doLogin();
-  });
+  var stored = sessionStorage.getItem(SESSION_KEY);
+  var exp = parseInt(sessionStorage.getItem(SESSION_EXP) || '0', 10);
+  if (stored && exp > Date.now()) { _token = stored; _sessionExp = exp; showApp(); }
+  document.getElementById('pw-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
 })();
 
-// ══════════════════════════════════════════════════════
-//  AUTH
-// ══════════════════════════════════════════════════════
 async function doLogin() {
-  const pw  = document.getElementById('pw-input').value.trim();
-  const btn = document.getElementById('btn-login');
-  const err = document.getElementById('login-error');
-
+  var pw = document.getElementById('pw-input').value.trim();
+  var btn = document.getElementById('btn-login');
+  var err = document.getElementById('login-error');
   if (!pw) { err.textContent = 'Please enter your password.'; return; }
-
-  btn.disabled = true;
-  btn.textContent = 'Signing in…';
-  err.textContent = '';
-
+  btn.disabled = true; btn.textContent = 'Signing in…'; err.textContent = '';
   try {
-    const res  = await fetch('/api/admin/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw })
-    });
-    const data = await res.json();
-
-    if (!data.ok) {
-      err.textContent = 'Incorrect password. Try again.';
-      btn.disabled = false;
-      btn.textContent = 'Sign in';
-      document.getElementById('pw-input').value = '';
-      document.getElementById('pw-input').focus();
-      return;
-    }
-
-    _token      = data.token;
-    _sessionExp = Date.now() + 8 * 60 * 60 * 1000;
-    sessionStorage.setItem(SESSION_KEY, _token);
-    sessionStorage.setItem(SESSION_EXP, String(_sessionExp));
+    var res = await fetch('/api/admin/auth', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({password: pw}) });
+    var data = await res.json();
+    if (!data.ok) { err.textContent = 'Incorrect password. Try again.'; btn.disabled = false; btn.textContent = 'Sign in'; document.getElementById('pw-input').value = ''; document.getElementById('pw-input').focus(); return; }
+    _token = data.token; _sessionExp = Date.now() + 8*60*60*1000;
+    sessionStorage.setItem(SESSION_KEY, _token); sessionStorage.setItem(SESSION_EXP, String(_sessionExp));
     showApp();
-
-  } catch(e) {
-    err.textContent = 'Network error — check connection and try again.';
-    btn.disabled = false;
-    btn.textContent = 'Sign in';
-  }
+  } catch(e) { err.textContent = 'Network error — try again.'; btn.disabled = false; btn.textContent = 'Sign in'; }
 }
 
 function doLogout() {
-  sessionStorage.removeItem(SESSION_KEY);
-  sessionStorage.removeItem(SESSION_EXP);
-  _token = null;
-  clearInterval(_timerInt);
+  sessionStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SESSION_EXP);
+  _token = null; clearInterval(_timerInt);
   document.getElementById('app').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('pw-input').value = '';
@@ -811,390 +451,300 @@ function doLogout() {
 function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-  startSessionTimer();
-  loadAnalytics();
-  loadModeration();
-  loadFlagged();
+  startSessionTimer(); loadAll();
 }
 
-// ══════════════════════════════════════════════════════
-//  SESSION TIMER
-// ══════════════════════════════════════════════════════
 function startSessionTimer() {
   function tick() {
     if (!_sessionExp) return;
-    const remaining = _sessionExp - Date.now();
-    if (remaining <= 0) { doLogout(); return; }
-    const h = Math.floor(remaining / 3600000);
-    const m = Math.floor((remaining % 3600000) / 60000);
-    document.getElementById('session-timer').textContent =
-      `Session: ${h}h ${m}m remaining`;
+    var r = _sessionExp - Date.now();
+    if (r <= 0) { doLogout(); return; }
+    document.getElementById('session-timer').textContent = Math.floor(r/3600000) + 'h ' + Math.floor((r%3600000)/60000) + 'm remaining';
   }
-  tick();
-  _timerInt = setInterval(tick, 30000);
+  tick(); _timerInt = setInterval(tick, 30000);
 }
 
-// ══════════════════════════════════════════════════════
-//  TAB SWITCHING
-// ══════════════════════════════════════════════════════
 function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
 }
 
-// ══════════════════════════════════════════════════════
-//  API HELPER
-// ══════════════════════════════════════════════════════
-async function apiFetch(url, opts = {}) {
-  const headers = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${_token}`,
-    ...(opts.headers || {})
-  };
-  const res = await fetch(url, { ...opts, headers });
+async function apiFetch(url, opts) {
+  opts = opts || {};
+  var headers = Object.assign({'Content-Type':'application/json','Authorization':'Bearer '+_token}, opts.headers||{});
+  var res = await fetch(url, Object.assign({}, opts, {headers: headers}));
   if (res.status === 401) { doLogout(); throw new Error('Session expired'); }
   return res.json();
 }
 
-// ══════════════════════════════════════════════════════
-//  ANALYTICS
-// ══════════════════════════════════════════════════════
+function loadAll() { loadAnalytics(); loadStats(); loadModeration(); loadFlagged(); }
+
 async function loadAnalytics() {
   try {
-    const data = await apiFetch('/api/admin/analytics');
+    var data = await apiFetch('/api/admin/analytics');
     if (!data.ok) throw new Error(data.error);
+    _analyticsCache = data;
     renderKPIs(data.kpis);
     renderCityTable(data.city_breakdown);
     renderActivityFeed(data.recent_activity);
-    // Update tab counts and nav badge
     updateBadges(data.kpis);
-  } catch(e) {
-    showToast('Could not load analytics — ' + e.message, 'error');
-  }
+    renderBarChart('city-chart', (data.city_breakdown||[]).map(function(c) {
+      return {label: cap(c.city), val: c.profiles || 0, color: 'var(--brand-blue)'};
+    }));
+    // If features tab already rendered, refresh its listings chart
+    if (data.city_breakdown) {
+      renderBarChart('listings-city-chart', data.city_breakdown.map(function(c) {
+        return {label: cap(c.city), val: c.active_listings || 0, color: 'var(--brand-yellow)'};
+      }));
+    }
+  } catch(e) { showToast('Analytics error: ' + e.message, 'error'); }
 }
 
 function renderKPIs(kpis) {
-  const cards = [
-    { label: 'Total profiles',        value: kpis.total_profiles,        cls: '' },
-    { label: 'Active listings',        value: kpis.active_listings,       cls: 'success' },
-    { label: 'Pending review',         value: kpis.pending_review,        cls: kpis.pending_review  > 0 ? 'alert' : '' },
-    { label: 'Flagged listings',       value: kpis.flagged_listings,      cls: kpis.flagged_listings > 0 ? 'alert' : '' },
-    { label: 'Handovers in progress',  value: kpis.handovers_in_progress, cls: 'info' },
-    { label: 'Handovers complete',     value: kpis.handovers_complete,    cls: 'success' },
-    { label: 'Total listings ever',    value: kpis.total_listings,        cls: '' },
+  var cards = [
+    {label:'Total profiles',       value:kpis.total_profiles,        cls:''},
+    {label:'Active listings',       value:kpis.active_listings,       cls:'success'},
+    {label:'Pending review',        value:kpis.pending_review,        cls:kpis.pending_review>0?'alert':''},
+    {label:'Flagged listings',      value:kpis.flagged_listings,      cls:kpis.flagged_listings>0?'alert':''},
+    {label:'Handovers in progress', value:kpis.handovers_in_progress, cls:'info'},
+    {label:'Handovers complete',    value:kpis.handovers_complete,    cls:'success'},
+    {label:'Total listings ever',   value:kpis.total_listings,        cls:''},
   ];
-  document.getElementById('kpi-grid').innerHTML = cards.map(c => `
-    <div class="kpi-card ${c.cls}">
-      <div class="kpi-label">${c.label}</div>
-      <div class="kpi-value">${c.value}</div>
-    </div>
-  `).join('');
+  document.getElementById('kpi-grid').innerHTML = cards.map(function(c) {
+    return '<div class="kpi-card '+c.cls+'"><div class="kpi-label">'+c.label+'</div><div class="kpi-value">'+c.value+'</div></div>';
+  }).join('');
 }
 
 function renderCityTable(cities) {
-  const tbody = document.getElementById('city-tbody');
-  if (!cities || !cities.length) {
-    tbody.innerHTML = '<tr><td colspan="5" class="loading-row" style="color:var(--text-muted)">No data</td></tr>';
-    return;
-  }
-  tbody.innerHTML = cities.map(c => `
-    <tr>
-      <td><span class="city-name">${c.city}</span></td>
-      <td>${c.profiles}</td>
-      <td>${c.active_listings}</td>
-      <td>${c.pending > 0 ? `<span class="status-pill pill-pending">${c.pending}</span>` : '—'}</td>
-      <td>${c.flagged > 0 ? `<span class="status-pill pill-rejected">${c.flagged}</span>` : '—'}</td>
-    </tr>
-  `).join('');
+  var tbody = document.getElementById('city-tbody');
+  if (!cities || !cities.length) { tbody.innerHTML = '<tr><td colspan="5" class="loading-row" style="color:var(--text-muted)">No data</td></tr>'; return; }
+  tbody.innerHTML = cities.map(function(c) {
+    return '<tr><td><span class="city-name">'+c.city+'</span></td><td>'+c.profiles+'</td><td>'+(c.active_listings||0)+'</td>'+
+      '<td>'+(c.pending>0?'<span class="status-pill pill-pending">'+c.pending+'</span>':'—')+'</td>'+
+      '<td>'+(c.flagged>0?'<span class="status-pill pill-rejected">'+c.flagged+'</span>':'—')+'</td></tr>';
+  }).join('');
 }
 
 function renderActivityFeed(items) {
-  const el = document.getElementById('activity-feed');
-  if (!items || !items.length) {
-    el.innerHTML = '<div class="empty-state"><div class="icon">📭</div><div class="msg">No recent activity</div><div class="sub">New signups and listings will appear here</div></div>';
-    return;
-  }
-  el.innerHTML = items.map(a => `
-    <div class="activity-item">
-      <div class="activity-dot ${a.type === 'signup' ? 'dot-signup' : 'dot-listing'}"></div>
-      <div class="activity-label">${a.label}</div>
-      <div class="activity-time">${relativeTime(a.time)}</div>
-    </div>
-  `).join('');
+  var el = document.getElementById('activity-feed');
+  if (!items||!items.length) { el.innerHTML='<div class="empty-state"><div class="icon">📭</div><div class="msg">No recent activity</div><div class="sub">New signups and listings will appear here</div></div>'; return; }
+  el.innerHTML = items.map(function(a) {
+    return '<div class="activity-item"><div class="activity-dot '+(a.type==='signup'?'dot-signup':'dot-listing')+'"></div><div class="activity-label">'+esc(a.label)+'</div><div class="activity-time">'+relTime(a.time)+'</div></div>';
+  }).join('');
 }
 
 function updateBadges(kpis) {
-  const total = (kpis.pending_review || 0) + (kpis.flagged_listings || 0);
+  var total = (kpis.pending_review||0) + (kpis.flagged_listings||0);
+  var nb = document.getElementById('nav-alert-badge');
+  if (total > 0) { nb.textContent = total+' action'+(total>1?'s':'')+' needed'; nb.classList.add('visible'); } else { nb.classList.remove('visible'); }
+  var mc = document.getElementById('mod-count'); var fc = document.getElementById('flag-count');
+  if (kpis.pending_review>0) { mc.textContent=kpis.pending_review; mc.classList.add('show'); } else { mc.classList.remove('show'); }
+  if (kpis.flagged_listings>0) { fc.textContent=kpis.flagged_listings; fc.classList.add('show'); } else { fc.classList.remove('show'); }
+}
 
-  // Nav badge
-  const navBadge = document.getElementById('nav-alert-badge');
-  if (total > 0) {
-    navBadge.textContent = `${total} action${total > 1 ? 's' : ''} needed`;
-    navBadge.classList.add('visible');
-  } else {
-    navBadge.classList.remove('visible');
-  }
-
-  // Tab counts
-  const modCount  = document.getElementById('mod-count');
-  const flagCount = document.getElementById('flag-count');
-
-  if (kpis.pending_review > 0) {
-    modCount.textContent = kpis.pending_review;
-    modCount.classList.add('show');
-  } else {
-    modCount.classList.remove('show');
-  }
-
-  if (kpis.flagged_listings > 0) {
-    flagCount.textContent = kpis.flagged_listings;
-    flagCount.classList.add('show');
-  } else {
-    flagCount.classList.remove('show');
+async function loadStats() {
+  try {
+    var data = await apiFetch('/api/admin/stats');
+    if (!data.ok) throw new Error(data.error);
+    renderUsersTab(data.demographics);
+    renderFeaturesTab(data.features);
+    renderSparkline(data.demographics.signup_trend);
+  } catch(e) {
+    document.getElementById('user-kpi-grid').innerHTML = '<div class="loading-row" style="grid-column:1/-1;color:var(--brand-coral)">Could not load user stats — '+esc(e.message)+'</div>';
+    document.getElementById('feature-grid').innerHTML = '<div class="loading-row" style="grid-column:1/-1;color:var(--brand-coral)">Could not load feature stats</div>';
   }
 }
 
-// ══════════════════════════════════════════════════════
-//  MODERATION QUEUE
-// ══════════════════════════════════════════════════════
+function renderUsersTab(demo) {
+  var total = demo.total_profiles || 0;
+  var pct = function(n) { return total>0?Math.round((n/total)*100):0; };
+  var kpis = [
+    {label:'Total profiles',      value:total,                      cls:''},
+    {label:'Uni email verified',  value:demo.uni_verified_count||0, cls:'success', sub:pct(demo.uni_verified_count||0)+'% of total'},
+    {label:'Vibe quizzes done',   value:demo.vibe_count||0,         cls:'yellow',  sub:pct(demo.vibe_count||0)+'% of total'},
+    {label:'Sleep mode on',       value:demo.sleep_mode_count||0,   cls:'info'},
+    {label:'Email unsubscribed',  value:demo.unsubscribed_count||0, cls:''},
+    {label:'Match emails sent',   value:demo.match_email_count||0,  cls:'info'},
+  ];
+  document.getElementById('user-kpi-grid').innerHTML = kpis.map(function(c) {
+    return '<div class="kpi-card '+c.cls+'"><div class="kpi-label">'+c.label+'</div><div class="kpi-value">'+c.value+'</div>'+(c.sub?'<div class="kpi-sub">'+c.sub+'</div>':'')+'</div>';
+  }).join('');
+
+  var statusLabels = {heading_to:'Heading to city', enrolled:'Enrolled & studying', finished:'Finished — still need housing', other:'Other'};
+  var genLabels    = {gen_z:'Gen Z (born 1997–2012)', millennial:'Millennial (1981–1996)', gen_x:'Gen X (1965–1980)', other:'Other'};
+  renderHorizBars('student-status-rows', demo.student_status||{}, statusLabels, 'var(--brand-blue)');
+  renderHorizBars('generation-rows',     demo.generation||{},     genLabels,    'var(--brand-yellow)');
+  renderBarChart('user-city-chart', (demo.city_profiles||[]).map(function(c) {
+    return {label:cap(c.city), val:c.count, color:'var(--brand-green)'};
+  }));
+}
+
+function renderHorizBars(elId, dataMap, labelMap, color) {
+  var el = document.getElementById(elId);
+  var entries = Object.entries(dataMap).sort(function(a,b){return b[1]-a[1];});
+  if (!entries.length) { el.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:8px 0;">No data yet</div>'; return; }
+  var maxVal = Math.max.apply(null, entries.map(function(e){return e[1];}));
+  el.innerHTML = entries.map(function(entry) {
+    var key=entry[0], count=entry[1], label=labelMap[key]||key, pct=maxVal>0?Math.round((count/maxVal)*100):0;
+    return '<div class="stat-row"><div class="stat-row-label">'+esc(label)+'</div><div class="stat-row-bar-wrap"><div class="stat-row-bar" style="width:'+pct+'%;background:'+color+';"></div></div><div class="stat-row-val">'+count+'</div></div>';
+  }).join('');
+}
+
+function renderFeaturesTab(features) {
+  var cards = [
+    {icon:'🔀', name:'Break lease listings', value:features.break_lease_total||0,   sub:(features.break_lease_active||0)+' active · '+(features.break_lease_filled||0)+' filled'},
+    {icon:'🤝', name:'Handovers',             value:features.handover_total||0,       sub:(features.handover_complete||0)+' complete'},
+    {icon:'📋', name:'Lease companion',       value:features.lease_companion||0,      sub:'tenancies tracked'},
+    {icon:'🏠', name:'Household hubs',        value:features.households||0,           sub:'households created'},
+    {icon:'🎭', name:'Vibe quizzes',          value:features.vibe_quizzes||0,         sub:'personality summaries'},
+    {icon:'📧', name:'Match emails sent',     value:features.match_emails_sent||0,    sub:'post-match nudges'},
+    {icon:'🏢', name:'Agent leads',           value:features.agent_leads_total||0,    sub:(features.agent_leads_open||0)+' open'},
+  ];
+  document.getElementById('feature-grid').innerHTML = cards.map(function(c) {
+    return '<div class="feature-card"><div class="feature-icon">'+c.icon+'</div><div class="feature-name">'+c.name+'</div><div class="feature-value">'+c.value+'</div><div class="feature-sub">'+c.sub+'</div></div>';
+  }).join('');
+  renderBarChart('leads-city-chart', (features.agent_leads_by_city||[]).map(function(c) {
+    return {label:cap(c.city), val:c.count, color:'var(--brand-coral)'};
+  }));
+}
+
+function renderBarChart(elId, items) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  if (!items||!items.length) { el.innerHTML='<div style="color:var(--text-muted);font-size:12px;text-align:center;width:100%">No data</div>'; return; }
+  var maxVal = Math.max.apply(null, items.map(function(i){return i.val||0;})) || 1;
+  el.innerHTML = items.map(function(item) {
+    var h = Math.round(((item.val||0)/maxVal)*100);
+    return '<div class="bar-col"><div class="bar-fill" style="height:calc('+h+'% - 18px);background:'+item.color+';max-height:100px;" data-val="'+item.val+'"></div><div class="bar-label">'+esc(item.label)+'</div></div>';
+  }).join('');
+}
+
+function renderSparkline(trend) {
+  var svg = document.getElementById('signup-sparkline');
+  if (!svg||!trend||!trend.length) return;
+  var w=400, h=80;
+  var maxVal = Math.max.apply(null, trend.map(function(t){return t.count;})) || 1;
+  var n = trend.length;
+  var pts = trend.map(function(t,i) {
+    var x = (i/(n-1))*w, y = h-(t.count/maxVal)*(h-10)-5;
+    return x.toFixed(1)+','+y.toFixed(1);
+  }).join(' ');
+  var areaPts = '0,'+h+' '+pts+' '+w+','+h;
+  var total30 = trend.reduce(function(s,t){return s+t.count;},0);
+  svg.innerHTML = '<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4BBFE0" stop-opacity="0.3"/><stop offset="100%" stop-color="#4BBFE0" stop-opacity="0"/></linearGradient></defs>'+
+    '<polygon points="'+areaPts+'" fill="url(#sg)"/>'+
+    '<polyline points="'+pts+'" fill="none" stroke="#4BBFE0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+  var lbl = document.getElementById('signup-total-label');
+  if (lbl) lbl.textContent = total30+' signups in last 30 days';
+}
+
 async function loadModeration() {
   document.getElementById('mod-list').innerHTML = '<div class="loading-row"><span class="spinner"></span>Loading…</div>';
   try {
-    const data = await apiFetch('/api/admin/listings?queue=pending_review');
+    var data = await apiFetch('/api/admin/listings?queue=pending_review');
     if (!data.ok) throw new Error(data.error);
     _modData = data.listings || [];
     renderModList();
-  } catch(e) {
-    document.getElementById('mod-list').innerHTML = `<div class="empty-state"><div class="msg">Could not load</div><div class="sub">${e.message}</div></div>`;
-  }
+  } catch(e) { document.getElementById('mod-list').innerHTML='<div class="empty-state"><div class="msg">Could not load</div><div class="sub">'+esc(e.message)+'</div></div>'; }
 }
 
 function setModFilter(city, btn) {
   _modFilter = city;
-  document.querySelectorAll('#mod-filter-bar .filter-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('#mod-filter-bar .filter-chip').forEach(function(c){c.classList.remove('active');});
   btn.classList.add('active');
   renderModList();
 }
 
 function renderModList() {
-  const filtered = _modFilter === 'all' ? _modData : _modData.filter(l => l.city === _modFilter);
-  const el = document.getElementById('mod-list');
-
-  if (!filtered.length) {
-    el.innerHTML = `<div class="empty-state">
-      <div class="icon">✅</div>
-      <div class="msg">Queue is clear</div>
-      <div class="sub">No listings waiting for review${_modFilter !== 'all' ? ' in ' + _modFilter : ''}</div>
-    </div>`;
-    return;
-  }
-
-  el.innerHTML = filtered.map(l => buildListingCard(l, 'pending')).join('');
+  var filtered = _modFilter==='all' ? _modData : _modData.filter(function(l){return l.city===_modFilter;});
+  var el = document.getElementById('mod-list');
+  if (!filtered.length) { el.innerHTML='<div class="empty-state"><div class="icon">✅</div><div class="msg">Queue is clear</div><div class="sub">No listings waiting for review'+(_modFilter!=='all'?' in '+_modFilter:'')+'</div></div>'; return; }
+  el.innerHTML = filtered.map(function(l){return buildCard(l,'pending');}).join('');
 }
 
-// ══════════════════════════════════════════════════════
-//  FLAGGED LISTINGS
-// ══════════════════════════════════════════════════════
 async function loadFlagged() {
   document.getElementById('flag-list').innerHTML = '<div class="loading-row"><span class="spinner"></span>Loading…</div>';
   try {
-    const data = await apiFetch('/api/admin/listings?queue=flagged');
+    var data = await apiFetch('/api/admin/listings?queue=flagged');
     if (!data.ok) throw new Error(data.error);
     _flagData = data.listings || [];
     renderFlagList();
-  } catch(e) {
-    document.getElementById('flag-list').innerHTML = `<div class="empty-state"><div class="msg">Could not load</div><div class="sub">${e.message}</div></div>`;
-  }
+  } catch(e) { document.getElementById('flag-list').innerHTML='<div class="empty-state"><div class="msg">Could not load</div><div class="sub">'+esc(e.message)+'</div></div>'; }
 }
 
 function setFlagFilter(city, btn) {
   _flagFilter = city;
-  document.querySelectorAll('#flag-filter-bar .filter-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('#flag-filter-bar .filter-chip').forEach(function(c){c.classList.remove('active');});
   btn.classList.add('active');
   renderFlagList();
 }
 
 function renderFlagList() {
-  const filtered = _flagFilter === 'all' ? _flagData : _flagData.filter(l => l.city === _flagFilter);
-  const el = document.getElementById('flag-list');
-
-  if (!filtered.length) {
-    el.innerHTML = `<div class="empty-state">
-      <div class="icon">🏳️</div>
-      <div class="msg">No flagged listings</div>
-      <div class="sub">Listings with 3+ reports will appear here${_flagFilter !== 'all' ? ' for ' + _flagFilter : ''}</div>
-    </div>`;
-    return;
-  }
-
-  el.innerHTML = filtered.map(l => buildListingCard(l, 'flagged')).join('');
+  var filtered = _flagFilter==='all' ? _flagData : _flagData.filter(function(l){return l.city===_flagFilter;});
+  var el = document.getElementById('flag-list');
+  if (!filtered.length) { el.innerHTML='<div class="empty-state"><div class="icon">🏳️</div><div class="msg">No reported listings</div><div class="sub">Listings with 3+ reports will appear here'+(_flagFilter!=='all'?' for '+_flagFilter:'')+'</div></div>'; return; }
+  el.innerHTML = filtered.map(function(l){return buildCard(l,'flagged');}).join('');
 }
 
-// ══════════════════════════════════════════════════════
-//  CARD BUILDER
-// ══════════════════════════════════════════════════════
-function buildListingCard(l, type) {
-  const signals = tryParseSignals(l.scam_signals);
-  const signalHtml = signals.length
-    ? `<div class="signal-list">${signals.map(s => `<span class="signal-chip">⚠ ${esc(s)}</span>`).join('')}</div>`
-    : '';
-
-  const reportHtml = l.report_count >= 3
-    ? `<div class="report-badge">🚩 ${l.report_count} reports</div>`
-    : '';
-
-  const actions = type === 'pending'
-    ? `<button class="btn-action btn-approve"  onclick="moderate('${l.id}', 'approve')">✓ Approve</button>
-       <button class="btn-action btn-reject"   onclick="moderate('${l.id}', 'reject')">✕ Reject</button>`
-    : `<button class="btn-action btn-resolve"  onclick="moderate('${l.id}', 'resolve')">↺ Clear reports</button>
-       <button class="btn-action btn-reject"   onclick="moderate('${l.id}', 'reject')">✕ Reject</button>`;
-
-  return `
-    <div class="listing-card ${type}" id="card-${l.id}">
-      <div class="listing-row">
-        <div class="listing-meta">
-          <div class="listing-ref">${esc(l.ref || l.id)}</div>
-          <div class="listing-detail">
-            <strong style="text-transform:capitalize">${esc(l.city)}</strong> · ${esc(l.suburb || '—')} · ${formatPropertyType(l.property_type)} · $${l.weekly_rent || '—'}/wk<br>
-            <span style="color:var(--text-muted)">${esc(l.poster_email || '—')}</span> · Listed ${relativeTime(l.created_at)}
-            ${l.expires_at ? ' · Expires ' + relativeTime(l.expires_at) : ''}
-          </div>
-          ${signalHtml}
-          ${reportHtml}
-        </div>
-        <div class="listing-actions">
-          ${actions}
-        </div>
-      </div>
-    </div>`;
+function buildCard(l, type) {
+  var signals = tryParseSignals(l.scam_signals);
+  var sigHtml = signals.length ? '<div class="signal-list">'+signals.map(function(s){return '<span class="signal-chip">⚠ '+esc(s)+'</span>';}).join('')+'</div>' : '';
+  var repHtml = l.report_count>=3 ? '<div class="report-badge">🚩 '+l.report_count+' reports</div>' : '';
+  var acts = type==='pending'
+    ? '<button class="btn-action btn-approve" onclick="moderate(\''+l.id+'\',\'approve\')">✓ Approve</button><button class="btn-action btn-reject" onclick="moderate(\''+l.id+'\',\'reject\')">✕ Reject</button>'
+    : '<button class="btn-action btn-resolve" onclick="moderate(\''+l.id+'\',\'resolve\')">↺ Clear reports</button><button class="btn-action btn-reject" onclick="moderate(\''+l.id+'\',\'reject\')">✕ Reject</button>';
+  return '<div class="listing-card '+type+'" id="card-'+l.id+'"><div class="listing-row"><div class="listing-meta">'+
+    '<div class="listing-ref">'+esc(l.ref||l.id)+'</div>'+
+    '<div class="listing-detail"><strong style="text-transform:capitalize">'+esc(l.city)+'</strong> · '+esc(l.suburb||'—')+' · '+fmtType(l.property_type)+' · $'+(l.weekly_rent||'—')+'/wk<br>'+
+    '<span style="color:var(--text-muted)">'+esc(l.poster_email||'—')+'</span> · Listed '+relTime(l.created_at)+(l.expires_at?' · Expires '+relTime(l.expires_at):'')+'</div>'+
+    sigHtml+repHtml+'</div><div class="listing-actions">'+acts+'</div></div></div>';
 }
 
-// ══════════════════════════════════════════════════════
-//  MODERATE ACTION
-// ══════════════════════════════════════════════════════
-async function moderate(listingId, action) {
-  const card = document.getElementById(`card-${listingId}`);
-  const btns = card ? card.querySelectorAll('.btn-action') : [];
-  btns.forEach(b => b.disabled = true);
-
+async function moderate(lid, action) {
+  var card = document.getElementById('card-'+lid);
+  var btns = card ? card.querySelectorAll('.btn-action') : [];
+  btns.forEach(function(b){b.disabled=true;});
   try {
-    const data = await apiFetch('/api/admin/listings-moderate', {
-      method: 'POST',
-      body: JSON.stringify({ listing_id: listingId, action })
-    });
-
+    var data = await apiFetch('/api/admin/listings-moderate', {method:'POST', body:JSON.stringify({listing_id:lid, action:action})});
     if (!data.ok) throw new Error(data.error);
-
-    const labels = { approve: 'Approved ✓', reject: 'Rejected ✕', resolve: 'Reports cleared ↺' };
-    showToast(labels[action] || 'Done', 'success');
-
-    // Fade out and remove card
+    var labels = {approve:'Approved ✓', reject:'Rejected ✕', resolve:'Reports cleared ↺'};
+    showToast(labels[action]||'Done', 'success');
     if (card) {
       card.style.transition = 'opacity 0.4s, transform 0.4s';
-      card.style.opacity = '0';
-      card.style.transform = 'translateX(20px)';
-      setTimeout(() => {
+      card.style.opacity = '0'; card.style.transform = 'translateX(20px)';
+      setTimeout(function() {
         card.remove();
-        // Remove from local data arrays
-        _modData  = _modData.filter(l => l.id !== listingId);
-        _flagData = _flagData.filter(l => l.id !== listingId);
-        // Re-check empty states
-        checkEmptyStates();
+        _modData  = _modData.filter(function(l){return l.id!==lid;});
+        _flagData = _flagData.filter(function(l){return l.id!==lid;});
+        checkEmpty();
       }, 400);
     }
-
-    // Refresh analytics counts
     loadAnalytics();
-
-  } catch(e) {
-    showToast('Action failed — ' + e.message, 'error');
-    btns.forEach(b => b.disabled = false);
-  }
+  } catch(e) { showToast('Action failed — '+e.message,'error'); btns.forEach(function(b){b.disabled=false;}); }
 }
 
-function checkEmptyStates() {
-  const modFiltered  = _modFilter  === 'all' ? _modData  : _modData.filter( l => l.city === _modFilter);
-  const flagFiltered = _flagFilter === 'all' ? _flagData : _flagData.filter(l => l.city === _flagFilter);
-
-  if (!modFiltered.length) {
-    document.getElementById('mod-list').innerHTML = `<div class="empty-state">
-      <div class="icon">✅</div><div class="msg">Queue is clear</div>
-      <div class="sub">No listings waiting for review</div></div>`;
-  }
-  if (!flagFiltered.length) {
-    document.getElementById('flag-list').innerHTML = `<div class="empty-state">
-      <div class="icon">🏳️</div><div class="msg">No flagged listings</div>
-      <div class="sub">Listings with 3+ reports will appear here</div></div>`;
-  }
+function checkEmpty() {
+  var mf = _modFilter==='all'?_modData:_modData.filter(function(l){return l.city===_modFilter;});
+  var ff = _flagFilter==='all'?_flagData:_flagData.filter(function(l){return l.city===_flagFilter;});
+  if (!mf.length) document.getElementById('mod-list').innerHTML='<div class="empty-state"><div class="icon">✅</div><div class="msg">Queue is clear</div><div class="sub">No listings waiting for review</div></div>';
+  if (!ff.length) document.getElementById('flag-list').innerHTML='<div class="empty-state"><div class="icon">🏳️</div><div class="msg">No reported listings</div><div class="sub">Listings with 3+ reports will appear here</div></div>';
 }
 
-// ══════════════════════════════════════════════════════
-//  UTILITIES
-// ══════════════════════════════════════════════════════
-function esc(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+function esc(s) { if(!s)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function cap(s) { if(!s)return''; return s.charAt(0).toUpperCase()+s.slice(1); }
+function tryParseSignals(raw) { if(!raw)return[]; try{var a=typeof raw==='string'?JSON.parse(raw):raw;return Array.isArray(a)?a:[];}catch(e){return[];} }
+function fmtType(t) { var m={private_room_share_house:'Private room (share house)',private_room_share_apartment:'Private room (apartment)',share_room:'Share room',studio:'Studio','1br_apartment':'1BR','2br_apartment':'2BR','3br_plus':'3BR+',whole_property:'Whole property'}; return m[t]||(t||'—'); }
+function relTime(iso) {
+  if(!iso)return'—';
+  var d=Date.now()-new Date(iso).getTime();
+  if(d<0){var a=Math.abs(d);if(a<60000)return'in a moment';if(a<3600000)return'in '+Math.round(a/60000)+'m';if(a<86400000)return'in '+Math.round(a/3600000)+'h';return'in '+Math.round(a/86400000)+'d';}
+  if(d<60000)return'just now'; if(d<3600000)return Math.round(d/60000)+'m ago'; if(d<86400000)return Math.round(d/3600000)+'h ago'; if(d<604800000)return Math.round(d/86400000)+'d ago';
+  return new Date(iso).toLocaleDateString('en-AU',{day:'numeric',month:'short'});
 }
-
-function tryParseSignals(raw) {
-  if (!raw) return [];
-  try {
-    const arr = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    return Array.isArray(arr) ? arr : [];
-  } catch { return []; }
-}
-
-function formatPropertyType(t) {
-  const map = {
-    private_room_share_house:      'Private room (share house)',
-    private_room_share_apartment:  'Private room (apartment)',
-    share_room:                    'Share room',
-    studio:                        'Studio',
-    '1br_apartment':               '1BR apartment',
-    '2br_apartment':               '2BR apartment',
-    '3br_plus':                    '3BR+ apartment',
-    whole_property:                'Whole property',
-  };
-  return map[t] || (t || '—');
-}
-
-function relativeTime(iso) {
-  if (!iso) return '—';
-  const diff = Date.now() - new Date(iso).getTime();
-  if (diff < 0) {
-    const abs = Math.abs(diff);
-    if (abs < 60000)    return 'in a moment';
-    if (abs < 3600000)  return `in ${Math.round(abs/60000)}m`;
-    if (abs < 86400000) return `in ${Math.round(abs/3600000)}h`;
-    return `in ${Math.round(abs/86400000)}d`;
-  }
-  if (diff < 60000)    return 'just now';
-  if (diff < 3600000)  return `${Math.round(diff/60000)}m ago`;
-  if (diff < 86400000) return `${Math.round(diff/3600000)}h ago`;
-  if (diff < 604800000)return `${Math.round(diff/86400000)}d ago`;
-  return new Date(iso).toLocaleDateString('en-AU', { day:'numeric', month:'short' });
-}
-
-let _toastTimer = null;
-function showToast(msg, type = '') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'show ' + type;
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => { el.className = ''; }, 3500);
-}
+var _tt=null;
+function showToast(msg,type){var el=document.getElementById('toast');el.textContent=msg;el.className='show '+(type||'');clearTimeout(_tt);_tt=setTimeout(function(){el.className='';},3500);}
 </script>
-
-  <span style="display:block;margin-top:12px;font-size:10px;opacity:0;transition:opacity 0.3s;" onmouseover="this.style.opacity='0.35'" onmouseout="this.style.opacity='0'">
-    <a href="/admin" style="color:inherit;text-decoration:none;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">Admin</a>
-    &nbsp;·&nbsp;
-    <a href="/agent" style="color:inherit;text-decoration:none;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">Agent</a>
-  </span>
 </body>
 </html>
