@@ -216,12 +216,32 @@
       "destination": "/unirenter-agent.html"
     },
     {
+      "source": "/agent-portal",
+      "destination": "/unirenter-agent-portal.html"
+    },
+    {
       "source": "/legal",
       "destination": "/unirenter-legal.html"
     },
     {
       "source": "/landlords",
       "destination": "/unirenter-landlords.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/unirenter-admin.html"
+    },
+    {
+      "source": "/accounting",
+      "destination": "/unirenter-accounting.html"
+    },
+    {
+      "source": "/review",
+      "destination": "/unirenter-review.html"
+    },
+    {
+      "source": "/unsubscribe",
+      "destination": "/unirenter-unsubscribe.html"
     },
     {
       "source": "/vibe",
