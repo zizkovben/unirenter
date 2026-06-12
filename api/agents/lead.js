@@ -2,26 +2,26 @@
 // Receives "Free housing assistance" tick box submission from city pages.
 // Creates agent_leads row + fires agent notification email + student confirmation email.
 // CommonJS — S49
- 
+
 const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
- 
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 const resend = new Resend(process.env.RESEND_API_KEY);
- 
+
 // City → agent assignment.
 // Each entry maps a city to the agent email stored in the agents table.
 // We look up the matching agent by city at runtime so this stays data-driven.
 const VALID_CITIES = ['melbourne', 'sydney', 'brisbane', 'adelaide', 'perth', 'canberra'];
- 
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
- 
+
   try {
     const {
       student_email,
@@ -31,38 +31,38 @@ module.exports = async function handler(req, res) {
       budget_max,
       move_in_date
     } = req.body || {};
- 
+
     // Validate required fields
     if (!student_email || !city) {
       return res.status(400).json({ error: 'student_email and city are required' });
     }
- 
+
     const normCity = (city || '').toLowerCase().trim();
     if (!VALID_CITIES.includes(normCity)) {
       return res.status(400).json({ error: 'Invalid city' });
     }
- 
+
     // Look up the active agent for this city
     const { data: agents, error: agentErr } = await supabase
       .from('agents')
       .select('id, name, email, cities, free_access_until')
       .eq('active', true)
       .contains('cities', [normCity]);
- 
+
     if (agentErr) {
       console.error('Agent lookup error:', agentErr);
       return res.status(500).json({ error: 'Could not find housing partner' });
     }
- 
+
     if (!agents || agents.length === 0) {
       // No active partner for this city — log and return success silently
       // (student experience must not break if no agent assigned)
       console.log('No active housing partner for city:', normCity);
       return res.status(200).json({ ok: true, note: 'no_partner' });
     }
- 
+
     const agent = agents[0];
- 
+
     // Create lead row
     const { data: lead, error: leadErr } = await supabase
       .from('agent_leads')
@@ -78,18 +78,18 @@ module.exports = async function handler(req, res) {
       })
       .select()
       .single();
- 
+
     if (leadErr) {
       console.error('Lead insert error:', leadErr);
       return res.status(500).json({ error: 'Could not save lead' });
     }
- 
+
     const cityLabel = normCity.charAt(0).toUpperCase() + normCity.slice(1);
     const displayName = student_name || 'a student';
     const displayBudget = budget_max ? '$' + budget_max + '/wk' : 'Not specified';
     const displayMoveIn = move_in_date || 'Not specified';
     const displayUni = university || 'Not specified';
- 
+
     // Fire both emails in parallel — don't let email failure block response
     const emailPromises = [
       // Agent notification email
@@ -122,22 +122,22 @@ module.exports = async function handler(req, res) {
         })
       })
     ];
- 
+
     // Fire and forget — don't await in the response path
     Promise.all(emailPromises).catch(err => {
       console.error('Email send error:', err);
     });
- 
+
     return res.status(200).json({ ok: true, leadId: lead.id });
- 
+
   } catch (err) {
     console.error('Unexpected error in /api/agents/lead:', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
- 
+
 // ─── Email templates ──────────────────────────────────────────────────────────
- 
+
 function agentEmailHtml({ agentName, studentName, studentEmail, city, university, budget, moveIn, leadId }) {
   const name = studentName || 'A student';
   return `<!DOCTYPE html>
@@ -216,7 +216,7 @@ function agentEmailHtml({ agentName, studentName, studentEmail, city, university
 </body>
 </html>`;
 }
- 
+
 function studentEmailHtml({ studentName, partnerName, city }) {
   const firstName = studentName ? studentName.split(' ')[0] : 'there';
   return `<!DOCTYPE html>
