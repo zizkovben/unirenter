@@ -6765,6 +6765,13 @@ function updateUniVerifyCard(profile) {
   if (!profile) return;
   const verified = profile.uni_email_verified || localStorage.getItem('ur_uni_email_verified') === '1';
   const uniEmail = profile.uni_email || localStorage.getItem('ur_uni_email') || '';
+  const status   = profile.student_status || localStorage.getItem('ur_student_status') || '';
+
+  // Hide entire card for community members / professionals — uni email not applicable
+  const card = document.getElementById('uni-verify-card');
+  if (card) {
+    card.style.display = (status === 'other') ? 'none' : 'block';
+  }
 
   const notDone = document.getElementById('uni-verify-not-done');
   const done    = document.getElementById('uni-verify-done');
@@ -6786,6 +6793,7 @@ window.addEventListener('DOMContentLoaded', function() {
   updateUniVerifyCard({
     uni_email_verified: localStorage.getItem('ur_uni_email_verified') === '1',
     uni_email: localStorage.getItem('ur_uni_email') || '',
+    student_status: localStorage.getItem('ur_student_status') || '',
   });
   // Close modal on overlay click
   const overlay = document.getElementById('uni-verify-modal');
