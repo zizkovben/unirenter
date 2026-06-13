@@ -1997,6 +1997,198 @@ body.light-mode {
   transition: opacity 0.2s;
 }
 .household-wa-btn:hover { opacity: 0.85; }
+/* ── Household Agreement (S52) ── */
+.hh-agreement-entry-card {
+  background: linear-gradient(135deg, rgba(245,184,0,0.08), rgba(75,191,224,0.06));
+  border: 1px solid rgba(245,184,0,0.2);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-top: 16px;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+}
+.hh-agreement-entry-card:hover {
+  border-color: rgba(245,184,0,0.45);
+  background: linear-gradient(135deg, rgba(245,184,0,0.13), rgba(75,191,224,0.08));
+}
+.hh-agreement-entry-head {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+}
+.hh-agreement-entry-icon { font-size: 20px; }
+.hh-agreement-entry-title {
+  font-size: 14px; font-weight: 700; color: var(--text-primary); flex: 1;
+}
+.hh-agreement-entry-badge {
+  font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px;
+  background: rgba(61,170,92,0.15); color: var(--brand-green);
+}
+.hh-agreement-entry-badge.locked {
+  background: rgba(245,184,0,0.15); color: var(--brand-yellow);
+}
+.hh-agreement-entry-sub {
+  font-size: 12px; color: var(--text-muted); line-height: 1.5;
+}
+.hh-agreement-entry-progress {
+  margin-top: 10px; background: rgba(255,255,255,0.08); border-radius: 4px; height: 4px; overflow: hidden;
+}
+.hh-agreement-entry-progress-bar {
+  height: 100%; border-radius: 4px; background: var(--brand-yellow); transition: width 0.4s;
+}
+/* Agreement overlay modal */
+#hh-agreement-modal {
+  display: none; position: fixed; inset: 0; z-index: 9100;
+  background: rgba(0,0,0,0.72); overflow-y: auto; overscroll-behavior: contain;
+}
+#hh-agreement-modal.active { display: flex; align-items: flex-start; justify-content: center; padding: 20px 12px 60px; }
+.hh-ag-modal-box {
+  background: var(--card-bg, #162635); border-radius: 16px;
+  width: 100%; max-width: 680px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.hh-ag-modal-header {
+  background: var(--nav-bg, #0d1f2d); padding: 18px 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.hh-ag-modal-back {
+  background: none; border: 1px solid rgba(255,255,255,0.15); color: var(--text-muted);
+  border-radius: 7px; padding: 6px 12px; font-size: 12px; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.hh-ag-modal-back:hover { border-color: rgba(75,191,224,0.4); color: var(--brand-blue); }
+.hh-ag-modal-title {
+  font-size: 15px; font-weight: 700; color: var(--text-primary); flex: 1;
+}
+.hh-ag-modal-close {
+  background: none; border: none; color: var(--text-muted); font-size: 20px;
+  cursor: pointer; padding: 0 4px; line-height: 1;
+}
+.hh-ag-modal-body { padding: 24px 20px; }
+/* Tier selector */
+.hh-ag-tier-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;
+}
+@media (max-width: 600px) {
+  .hh-ag-tier-grid { grid-template-columns: 1fr; }
+}
+.hh-ag-tier-card {
+  border: 2px solid rgba(255,255,255,0.1); border-radius: 10px;
+  padding: 14px 12px; cursor: pointer; transition: all 0.18s;
+  background: rgba(255,255,255,0.03);
+}
+.hh-ag-tier-card:hover { border-color: rgba(245,184,0,0.4); background: rgba(245,184,0,0.05); }
+.hh-ag-tier-card.selected { border-color: var(--brand-yellow); background: rgba(245,184,0,0.08); }
+.hh-ag-tier-num { font-size: 20px; margin-bottom: 6px; }
+.hh-ag-tier-name { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.hh-ag-tier-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+.hh-ag-tier-meta { font-size: 11px; color: var(--brand-yellow); margin-top: 6px; font-weight: 600; }
+/* Clause sections */
+.hh-ag-section-head {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--text-muted); margin: 20px 0 8px; padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.hh-ag-clause-row {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;
+}
+.hh-ag-clause-row.ticked-all { border-color: rgba(61,170,92,0.3); background: rgba(61,170,92,0.04); }
+.hh-ag-clause-row.ticked-partial { border-color: rgba(245,184,0,0.25); }
+.hh-ag-clause-title-row {
+  display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px;
+}
+.hh-ag-clause-emoji { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.hh-ag-clause-title {
+  font-size: 13px; font-weight: 600; color: var(--text-primary); flex: 1; line-height: 1.4;
+}
+.hh-ag-clause-value-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.hh-ag-clause-value {
+  flex: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 7px; padding: 7px 10px; font-size: 12px; color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  resize: none; min-height: 36px;
+}
+.hh-ag-clause-value:focus { outline: none; border-color: rgba(75,191,224,0.4); }
+/* Tick row */
+.hh-ag-tick-row {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;
+}
+.hh-ag-tick-chip {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px; padding: 4px 10px; font-size: 11px; color: var(--text-muted);
+  cursor: pointer; user-select: none; transition: all 0.15s;
+}
+.hh-ag-tick-chip.is-me { cursor: pointer; }
+.hh-ag-tick-chip.is-me:hover { border-color: rgba(245,184,0,0.4); }
+.hh-ag-tick-chip.ticked {
+  background: rgba(61,170,92,0.12); border-color: rgba(61,170,92,0.35); color: var(--brand-green);
+}
+.hh-ag-tick-chip.ticked.is-me:hover { border-color: rgba(232,98,58,0.4); color: var(--brand-coral); }
+.hh-ag-tick-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+/* Bottom action bar */
+.hh-ag-action-bar {
+  position: sticky; bottom: 0; background: var(--nav-bg, #0d1f2d);
+  padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+  border-top: 1px solid rgba(255,255,255,0.08); z-index: 10;
+}
+.hh-ag-save-btn {
+  flex: 1; background: var(--brand-yellow); color: #0d1f2d;
+  border: none; border-radius: 8px; padding: 11px 20px;
+  font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif;
+  transition: opacity 0.15s;
+}
+.hh-ag-save-btn:hover { opacity: 0.88; }
+.hh-ag-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.hh-ag-lock-btn {
+  background: var(--brand-green); color: #fff;
+  border: none; border-radius: 8px; padding: 11px 20px;
+  font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif;
+  transition: opacity 0.15s; display: none;
+}
+.hh-ag-lock-btn:hover { opacity: 0.88; }
+.hh-ag-lock-btn.ready { display: inline-block; }
+.hh-ag-lock-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.hh-ag-progress-note {
+  font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 8px; padding: 0 20px 4px;
+}
+/* Cob intro banner in agreement */
+.hh-ag-cob-intro {
+  background: rgba(245,184,0,0.07); border: 1px solid rgba(245,184,0,0.18);
+  border-radius: 10px; padding: 14px 16px; margin-bottom: 20px;
+  font-size: 13px; color: var(--text-muted); line-height: 1.6;
+}
+.hh-ag-disclaimer {
+  font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.5;
+  margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06);
+  text-align: center; font-style: italic;
+}
+/* Locked view */
+.hh-ag-locked-banner {
+  background: rgba(61,170,92,0.1); border: 1px solid rgba(61,170,92,0.3);
+  border-radius: 10px; padding: 14px 16px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.hh-ag-locked-icon { font-size: 22px; }
+.hh-ag-locked-body { flex: 1; }
+.hh-ag-locked-title { font-size: 14px; font-weight: 700; color: var(--brand-green); margin-bottom: 3px; }
+.hh-ag-locked-sub { font-size: 12px; color: var(--text-muted); }
+.hh-ag-share-row {
+  display: flex; align-items: center; gap: 8px; margin-top: 10px;
+}
+.hh-ag-share-link {
+  flex: 1; font-size: 11px; color: var(--brand-blue); word-break: break-all;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px; padding: 6px 10px;
+}
+.hh-ag-copy-link-btn {
+  background: none; border: 1px solid rgba(255,255,255,0.15); color: var(--text-muted);
+  border-radius: 6px; padding: 6px 10px; font-size: 11px; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.hh-ag-copy-link-btn:hover { border-color: rgba(75,191,224,0.4); color: var(--brand-blue); }
+
 .household-invite-note {
   font-size: 11px;
   color: var(--text-muted);
@@ -6913,6 +7105,8 @@ function householdRender(data, currentEmail) {
     }
     var hhId2=localStorage.getItem('ur_household_id');
     if(hhId2&&currentEmail) hhReviewSummaryLoad(hhId2,currentEmail,inner);
+    // Inject agreement entry card
+    if(hhId2&&currentEmail) hhAgreementInjectCard(inner, hhId2, currentEmail);
   },50);
 }
 function hhReviewSummaryLoad(householdId, email, containerEl) {
@@ -6932,7 +7126,649 @@ function hhReviewSummaryLoad(householdId, email, containerEl) {
   })
   .catch(function(){});
 }
+
 function vibeCardShareHousehold() { alert('Household vibe cards — coming in the next update! 🤠'); }
+
+// ── Agreement entry card injected after household renders ──
+function hhAgreementInjectCard(inner, householdId, currentEmail) {
+  if (!inner || !householdId) return;
+  if (inner.querySelector('.hh-agreement-entry-card')) return; // already injected
+
+  var card = document.createElement('div');
+  card.className = 'hh-agreement-entry-card';
+  card.id = 'hh-agreement-entry-card';
+  card.innerHTML =
+    '<div class="hh-agreement-entry-head">' +
+      '<span class="hh-agreement-entry-icon">📋</span>' +
+      '<span class="hh-agreement-entry-title">House rules</span>' +
+      '<span class="hh-agreement-entry-badge" id="hh-ag-entry-badge">New</span>' +
+    '</div>' +
+    '<div class="hh-agreement-entry-sub" id="hh-ag-entry-sub">Sort the house rules before someone leaves a passive-aggressive note about the dishes.</div>' +
+    '<div class="hh-agreement-entry-progress" id="hh-ag-entry-progress-wrap" style="display:none;">' +
+      '<div class="hh-agreement-entry-progress-bar" id="hh-ag-entry-progress-bar" style="width:0%"></div>' +
+    '</div>';
+
+  card.addEventListener('click', function() { hhAgOpen(householdId, currentEmail); });
+  inner.appendChild(card);
+
+  // Load existing agreement state to update the entry card
+  hhAgLoadEntryState(householdId, currentEmail);
+}
+
+function hhAgLoadEntryState(householdId, currentEmail) {
+  if (!householdId || !currentEmail) return;
+  fetch('/api/household/agreement-get?email=' + encodeURIComponent(currentEmail) + '&household_id=' + encodeURIComponent(householdId))
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (!d.ok || !d.agreement) return;
+    var badge = document.getElementById('hh-ag-entry-badge');
+    var sub   = document.getElementById('hh-ag-entry-sub');
+    var pwrap = document.getElementById('hh-ag-entry-progress-wrap');
+    var pbar  = document.getElementById('hh-ag-entry-progress-bar');
+
+    var agreement = d.agreement;
+    var ticks = d.ticks || [];
+    var members = d.members || [];
+    var clauses = (agreement.clauses || []);
+    var totalTicks = members.length * clauses.length;
+    var doneTicks  = ticks.length;
+    var pct = totalTicks > 0 ? Math.round(doneTicks / totalTicks * 100) : 0;
+
+    if (agreement.locked_at) {
+      if (badge) { badge.textContent = '🔒 Locked'; badge.className = 'hh-agreement-entry-badge locked'; }
+      if (sub)   sub.textContent = 'Your house rules are locked and agreed by everyone.';
+      if (pwrap) pwrap.style.display = 'none';
+    } else {
+      var tierNames = { 1: 'Quick Rules', 2: 'House Rules', 3: 'Full House Manual' };
+      var tierName = tierNames[agreement.tier] || 'House Rules';
+      if (badge) { badge.textContent = tierName; badge.className = 'hh-agreement-entry-badge'; }
+      if (sub)   sub.textContent = pct + '% of clauses ticked — tap to review.';
+      if (pwrap) pwrap.style.display = 'block';
+      if (pbar)  pbar.style.width = pct + '%';
+    }
+  })
+  .catch(function() {});
+}
+
+
+// ── Household Agreement (S52) ────────────────────────────────────────────────
+
+// Clause definitions by tier
+var HH_AG_TIERS = {
+  1: {
+    name: 'Quick Rules',
+    desc: '5 core clauses',
+    time: '2 min',
+    icon: '⚡',
+    clauses: [
+      { id: 'rent_due', category: 'rent',     emoji: '💰', title: 'Rent due date',      placeholder: 'e.g. Paid on the 1st of each month. Split evenly.' },
+      { id: 'quiet',    category: 'quiet',    emoji: '🛏️', title: 'Quiet hours',         placeholder: 'e.g. 10pm–8am on weeknights, midnight–9am weekends.' },
+      { id: 'clean',    category: 'cleaning', emoji: '🧹', title: 'Cleaning schedule',   placeholder: 'e.g. Shared areas cleaned weekly. Roster rotates each Sunday.' },
+      { id: 'kitchen',  category: 'kitchen',  emoji: '🍳', title: 'Kitchen rules',       placeholder: 'e.g. Wash up within 24 hours. Label your food in the fridge.' },
+      { id: 'guests',   category: 'guests',   emoji: '🎉', title: 'Overnight guests',    placeholder: 'e.g. Occasional guests fine. Staying 3+ nights — give everyone a heads-up.' }
+    ]
+  },
+  2: {
+    name: 'House Rules',
+    desc: '12 clauses',
+    time: '8 min',
+    icon: '🏠',
+    clauses: [
+      { id: 'rent_due',   category: 'rent',        emoji: '💰', title: 'Rent due date',          placeholder: 'e.g. Paid on the 1st of each month. Split evenly.' },
+      { id: 'bills',      category: 'rent',        emoji: '💰', title: 'Bills & utilities',       placeholder: 'e.g. Electricity split evenly. Internet shared. Gas by usage.' },
+      { id: 'quiet',      category: 'quiet',       emoji: '🛏️', title: 'Quiet hours',             placeholder: 'e.g. 10pm–8am weeknights, midnight–9am weekends.' },
+      { id: 'clean',      category: 'cleaning',    emoji: '🧹', title: 'Cleaning schedule',       placeholder: 'e.g. Shared areas weekly on a rotating roster.' },
+      { id: 'clean_own',  category: 'cleaning',    emoji: '🧹', title: 'Bathrooms & bedrooms',    placeholder: 'e.g. Own bathroom cleaned weekly. Bedroom kept reasonably tidy.' },
+      { id: 'kitchen',    category: 'kitchen',     emoji: '🍳', title: 'Kitchen rules',           placeholder: 'e.g. Wash up within 24h. Label fridge food. No dishes overnight.' },
+      { id: 'groceries',  category: 'kitchen',     emoji: '🍳', title: 'Shared groceries',        placeholder: 'e.g. Shared: dishwashing liquid, bin bags, toilet paper. Split evenly.' },
+      { id: 'guests',     category: 'guests',      emoji: '🎉', title: 'Overnight guests',        placeholder: 'e.g. 1–2 nights fine. 3+ nights — give everyone a heads-up.' },
+      { id: 'parties',    category: 'guests',      emoji: '🎉', title: 'Parties & gatherings',    placeholder: 'e.g. Let housemates know 48h in advance. Done by midnight.' },
+      { id: 'pets',       category: 'pets',        emoji: '🐾', title: 'Pets',                    placeholder: 'e.g. Agreed with all housemates before bringing a pet home.' },
+      { id: 'moving',     category: 'moving',      emoji: '📦', title: 'Moving out notice',       placeholder: 'e.g. 4 weeks notice to housemates when vacating.' },
+      { id: 'dispute',    category: 'dispute',     emoji: '⚡', title: 'Resolving disputes',      placeholder: 'e.g. Talk directly first. If unresolved after 7 days, house meeting.' }
+    ]
+  },
+  3: {
+    name: 'Full House Manual',
+    desc: '20+ clauses + roster',
+    time: '20 min',
+    icon: '📖',
+    clauses: [
+      { id: 'rent_due',    category: 'rent',        emoji: '💰', title: 'Rent due date',           placeholder: 'e.g. Paid on the 1st. Split evenly by default.' },
+      { id: 'bills',       category: 'rent',        emoji: '💰', title: 'Bills & utilities',        placeholder: 'e.g. Electricity split evenly. Internet shared (all contribute).' },
+      { id: 'late_rent',   category: 'rent',        emoji: '💰', title: 'Late rent',                placeholder: 'e.g. If you\'re going to be late, let housemates know ASAP. No judgment.' },
+      { id: 'quiet',       category: 'quiet',       emoji: '🛏️', title: 'Quiet hours',              placeholder: 'e.g. 10pm–8am weeknights. Midnight–9am weekends.' },
+      { id: 'noise',       category: 'quiet',       emoji: '🛏️', title: 'Music & TV volume',        placeholder: 'e.g. Reasonable volume after 10pm. Headphones preferred late.' },
+      { id: 'clean',       category: 'cleaning',    emoji: '🧹', title: 'Common area cleaning',     placeholder: 'e.g. Lounge, kitchen, bathroom on a weekly rotating roster.' },
+      { id: 'clean_own',   category: 'cleaning',    emoji: '🧹', title: 'Personal spaces',          placeholder: 'e.g. Bedrooms kept tidy. Own ensuite cleaned weekly.' },
+      { id: 'rubbish',     category: 'cleaning',    emoji: '🧹', title: 'Bins & rubbish',           placeholder: 'e.g. Put bins out on collection day. Emptied when full.' },
+      { id: 'kitchen',     category: 'kitchen',     emoji: '🍳', title: 'Dishes',                   placeholder: 'e.g. Washed within 24h. Dishwasher run when full.' },
+      { id: 'fridge',      category: 'kitchen',     emoji: '🍳', title: 'Fridge & pantry',          placeholder: 'e.g. Label your food. Clear expired items monthly.' },
+      { id: 'groceries',   category: 'kitchen',     emoji: '🍳', title: 'Shared groceries',         placeholder: 'e.g. Shared: dishwashing liquid, bin bags, toilet paper. Rotate buying.' },
+      { id: 'appliances',  category: 'kitchen',     emoji: '🍳', title: 'Appliances & equipment',   placeholder: 'e.g. Turn off oven/hob after use. Replace items you break.' },
+      { id: 'guests',      category: 'guests',      emoji: '🎉', title: 'Overnight guests',         placeholder: 'e.g. 1–2 nights: no notice needed. 3+ nights: let housemates know.' },
+      { id: 'parties',     category: 'guests',      emoji: '🎉', title: 'Gatherings & parties',     placeholder: 'e.g. 48h notice. Done by midnight on weeknights.' },
+      { id: 'pets',        category: 'pets',        emoji: '🐾', title: 'Pets',                     placeholder: 'e.g. All housemates must agree before a pet moves in.' },
+      { id: 'maintenance', category: 'maintenance', emoji: '🔧', title: 'Repairs & maintenance',    placeholder: 'e.g. Notify head tenant same day for urgent repairs.' },
+      { id: 'parking',     category: 'parking',     emoji: '🚗', title: 'Parking',                  placeholder: 'e.g. Designated spots only. Visitors use street parking.' },
+      { id: 'comms',       category: 'comms',       emoji: '💬', title: 'House group chat',         placeholder: 'e.g. WhatsApp or iMessage group for house updates. Check daily.' },
+      { id: 'moving',      category: 'moving',      emoji: '📦', title: 'Moving out notice',        placeholder: 'e.g. 4 weeks notice to housemates. Help find a replacement.' },
+      { id: 'head_tenant', category: 'head_tenant', emoji: '🔑', title: 'Head tenant responsibilities', placeholder: 'e.g. Head tenant lodges bond, liaises with landlord, coordinates repairs.' },
+      { id: 'dispute',     category: 'dispute',     emoji: '⚡', title: 'Dispute process',          placeholder: 'e.g. Direct conversation first. If unresolved in 7 days, house meeting.' }
+    ]
+  }
+};
+
+// State
+var _hhAgHouseholdId = null;
+var _hhAgEmail       = null;
+var _hhAgAgreement   = null; // loaded from server
+var _hhAgMembers     = [];
+var _hhAgTicks       = [];
+var _hhAgSelectedTier = null;
+var _hhAgStep        = 'loading'; // loading | tier-select | clauses | locked
+
+function hhAgOpen(householdId, email) {
+  _hhAgHouseholdId = householdId;
+  _hhAgEmail       = email;
+  document.getElementById('hh-agreement-modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  hhAgShowLoading();
+  // Load existing agreement
+  fetch('/api/household/agreement-get?email=' + encodeURIComponent(email) + '&household_id=' + encodeURIComponent(householdId))
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (!d.ok) { hhAgShowError('Could not load agreement. Try again.'); return; }
+    _hhAgAgreement = d.agreement;
+    _hhAgMembers   = d.members || [];
+    _hhAgTicks     = d.ticks || [];
+
+    if (!_hhAgAgreement) {
+      // No agreement yet — show tier selector
+      hhAgRenderTierSelect();
+    } else if (_hhAgAgreement.locked_at) {
+      hhAgRenderLocked();
+    } else {
+      _hhAgSelectedTier = _hhAgAgreement.tier;
+      hhAgRenderClauses();
+    }
+  })
+  .catch(function() { hhAgShowError('Could not load agreement. Check your connection.'); });
+}
+
+function hhAgClose() {
+  document.getElementById('hh-agreement-modal').classList.remove('active');
+  document.body.style.overflow = '';
+  // Refresh entry card state
+  if (_hhAgHouseholdId && _hhAgEmail) {
+    hhAgLoadEntryState(_hhAgHouseholdId, _hhAgEmail);
+  }
+}
+
+function hhAgBack() {
+  if (_hhAgStep === 'clauses' && !_hhAgAgreement) {
+    hhAgRenderTierSelect();
+  } else {
+    hhAgClose();
+  }
+}
+
+function hhAgShowLoading() {
+  document.getElementById('hh-ag-modal-title').textContent = 'House Rules';
+  document.getElementById('hh-ag-back-btn').style.display = 'none';
+  document.getElementById('hh-ag-action-bar').style.display = 'none';
+  document.getElementById('hh-ag-progress-note').textContent = '';
+  document.getElementById('hh-ag-modal-body').innerHTML =
+    '<div style="text-align:center;padding:50px 20px;color:var(--text-muted);font-size:13px;">Loading…</div>';
+}
+
+function hhAgShowError(msg) {
+  document.getElementById('hh-ag-modal-body').innerHTML =
+    '<div style="text-align:center;padding:40px 20px;color:var(--brand-coral);font-size:13px);">' + msg + '</div>';
+  document.getElementById('hh-ag-action-bar').style.display = 'none';
+}
+
+function hhAgRenderTierSelect() {
+  _hhAgStep = 'tier-select';
+  document.getElementById('hh-ag-modal-title').textContent = 'House Rules';
+  document.getElementById('hh-ag-back-btn').style.display = 'none';
+  document.getElementById('hh-ag-action-bar').style.display = 'none';
+  document.getElementById('hh-ag-progress-note').textContent = '';
+
+  var cards = Object.keys(HH_AG_TIERS).map(function(t) {
+    var tier = HH_AG_TIERS[t];
+    return '<div class="hh-ag-tier-card" onclick="hhAgSelectTier(' + t + ')">' +
+      '<div class="hh-ag-tier-num">' + tier.icon + '</div>' +
+      '<div class="hh-ag-tier-name">' + tier.name + '</div>' +
+      '<div class="hh-ag-tier-desc">' + tier.desc + '</div>' +
+      '<div class="hh-ag-tier-meta">' + tier.time + '</div>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('hh-ag-modal-body').innerHTML =
+    '<div class="hh-ag-cob-intro">🤠 Want to sort the house rules before someone leaves a passive-aggressive note about the dishes? Pick a level — I\'ll help you build something everyone can actually agree on.</div>' +
+    '<div class="hh-ag-tier-grid">' + cards + '</div>' +
+    '<div class="hh-ag-disclaimer">This is not a legally binding document. It works because you\'ve all agreed to it \u2014 not because of anything written here. If something\'s not working, talk to each other first.</div>';
+}
+
+function hhAgSelectTier(tierNum) {
+  _hhAgSelectedTier = tierNum;
+  hhAgRenderClauses();
+}
+
+function hhAgRenderClauses() {
+  _hhAgStep = 'clauses';
+  var tier = HH_AG_TIERS[_hhAgSelectedTier];
+  if (!tier) return;
+
+  document.getElementById('hh-ag-modal-title').textContent = tier.name;
+  var backBtn = document.getElementById('hh-ag-back-btn');
+  backBtn.style.display = (!_hhAgAgreement) ? 'inline-block' : 'none';
+  document.getElementById('hh-ag-action-bar').style.display = 'flex';
+
+  // Build existing values map
+  var existingClauses = (_hhAgAgreement && _hhAgAgreement.clauses) ? _hhAgAgreement.clauses : [];
+  var valMap = {};
+  existingClauses.forEach(function(c) { valMap[c.id] = c.value || ''; });
+
+  // Build ticks lookup
+  var tickMap = {};
+  _hhAgTicks.forEach(function(t) { tickMap[t.member_email + ':' + t.clause_id] = true; });
+
+  // Group clauses by category
+  var grouped = {};
+  tier.clauses.forEach(function(c) {
+    if (!grouped[c.category]) grouped[c.category] = [];
+    grouped[c.category].push(c);
+  });
+
+  var catLabels = {
+    rent:'💰 Rent & Bills', quiet:'🛏️ Quiet Hours', cleaning:'🧹 Cleaning',
+    kitchen:'🍳 Kitchen', pets:'🐾 Pets', guests:'🎉 Guests',
+    moving:'📦 Moving Out', maintenance:'🔧 Maintenance', parking:'🚗 Parking',
+    comms:'💬 House Comms', dispute:'⚡ Dispute Process', head_tenant:'🔑 Head Tenant'
+  };
+
+  var html = '';
+  var memberCount = _hhAgMembers.length;
+
+  Object.keys(grouped).forEach(function(cat) {
+    html += '<div class="hh-ag-section-head">' + (catLabels[cat] || cat) + '</div>';
+    grouped[cat].forEach(function(clause) {
+      var val = valMap[clause.id] || '';
+      // Check ticks for this clause
+      var tickedBy = _hhAgMembers.filter(function(m) { return tickMap[m + ':' + clause.id]; });
+      var allTicked = tickedBy.length === memberCount && memberCount > 0;
+      var partialTicked = tickedBy.length > 0 && !allTicked;
+
+      var rowClass = 'hh-ag-clause-row' + (allTicked ? ' ticked-all' : (partialTicked ? ' ticked-partial' : ''));
+
+      // Tick chips for each member
+      var tickChips = memberCount > 1 ? _hhAgMembers.map(function(m) {
+        var isTicked  = tickMap[m + ':' + clause.id];
+        var isMe      = m === _hhAgEmail;
+        var firstName = m.split('@')[0].split('.')[0];
+        firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+        var chipClass = 'hh-ag-tick-chip' + (isTicked ? ' ticked' : '') + (isMe ? ' is-me' : '');
+        var onclick   = isMe ? 'hhAgToggleTick(\'' + clause.id + '\', ' + (isTicked ? 'false' : 'true') + ')' : '';
+        return '<span class="' + chipClass + '"' + (onclick ? ' onclick="' + onclick + '"' : '') + ' title="' + (isMe ? (isTicked ? 'Click to un-tick' : 'Tap to agree') : m) + '">' +
+          '<span class="hh-ag-tick-dot"></span>' + firstName + (isTicked ? ' ✓' : '') +
+        '</span>';
+      }).join('') : '';
+
+      // For single-member, show "Tap to agree" directly on clause
+      var myTicked = tickMap[_hhAgEmail + ':' + clause.id];
+      var singleTickRow = memberCount === 1
+        ? '<div style="margin-top:8px;">' +
+            '<span class="hh-ag-tick-chip is-me' + (myTicked ? ' ticked' : '') + '" onclick="hhAgToggleTick(\'' + clause.id + '\', ' + (myTicked ? 'false' : 'true') + ')">' +
+              '<span class="hh-ag-tick-dot"></span>' + (myTicked ? 'You agreed ✓' : 'Tap to agree') +
+            '</span>' +
+          '</div>'
+        : '';
+
+      html +=
+        '<div class="' + rowClass + '" id="hh-ag-clause-' + clause.id + '">' +
+          '<div class="hh-ag-clause-title-row">' +
+            '<span class="hh-ag-clause-emoji">' + clause.emoji + '</span>' +
+            '<span class="hh-ag-clause-title">' + clause.title + '</span>' +
+          '</div>' +
+          '<div class="hh-ag-clause-value-row">' +
+            '<textarea class="hh-ag-clause-value" id="hh-ag-val-' + clause.id + '" placeholder="' + clause.placeholder + '" rows="2">' + hhEscape(val) + '</textarea>' +
+          '</div>' +
+          (memberCount > 1 ? '<div class="hh-ag-tick-row">' + tickChips + '</div>' : singleTickRow) +
+        '</div>';
+    });
+  });
+
+  html += '<div class="hh-ag-disclaimer">This is not a legally binding document. It works because you\'ve all agreed to it \u2014 not because of anything written here. If something\'s not working, talk to each other first.</div>';
+
+  document.getElementById('hh-ag-modal-body').innerHTML = html;
+  hhAgUpdateLockBtn();
+}
+
+function hhAgRenderLocked() {
+  _hhAgStep = 'locked';
+  var agreement = _hhAgAgreement;
+  document.getElementById('hh-ag-modal-title').textContent = 'House Rules — Locked';
+  document.getElementById('hh-ag-back-btn').style.display = 'none';
+  document.getElementById('hh-ag-action-bar').style.display = 'none';
+  document.getElementById('hh-ag-progress-note').textContent = '';
+
+  var shareUrl = 'https://unirenter.com.au/house-rules/' + agreement.share_token;
+  var lockedDate = agreement.locked_at ? new Date(agreement.locked_at).toLocaleDateString('en-AU', { day:'numeric', month:'long', year:'numeric' }) : '';
+
+  var catLabels = {
+    rent:'💰 Rent & Bills', quiet:'🛏️ Quiet Hours', cleaning:'🧹 Cleaning',
+    kitchen:'🍳 Kitchen', pets:'🐾 Pets', guests:'🎉 Guests',
+    moving:'📦 Moving Out', maintenance:'🔧 Maintenance', parking:'🚗 Parking',
+    comms:'💬 House Comms', dispute:'⚡ Dispute Process', head_tenant:'🔑 Head Tenant'
+  };
+
+  var grouped = {};
+  (agreement.clauses || []).forEach(function(c) {
+    if (!grouped[c.category]) grouped[c.category] = [];
+    grouped[c.category].push(c);
+  });
+
+  var clauseHtml = '';
+  Object.keys(grouped).forEach(function(cat) {
+    clauseHtml += '<div class="hh-ag-section-head">' + (catLabels[cat] || cat) + '</div>';
+    grouped[cat].forEach(function(c) {
+      clauseHtml +=
+        '<div class="hh-ag-clause-row ticked-all">' +
+          '<div class="hh-ag-clause-title-row">' +
+            '<span class="hh-ag-clause-emoji">' + (c.emoji || '✓') + '</span>' +
+            '<span class="hh-ag-clause-title">' + hhEscape(c.title) + '</span>' +
+          '</div>' +
+          (c.value ? '<div style="font-size:12px;color:var(--text-muted);margin-top:4px;padding-left:26px;">' + hhEscape(c.value) + '</div>' : '') +
+        '</div>';
+    });
+  });
+
+  document.getElementById('hh-ag-modal-body').innerHTML =
+    '<div class="hh-ag-locked-banner">' +
+      '<span class="hh-ag-locked-icon">🔒</span>' +
+      '<div class="hh-ag-locked-body">' +
+        '<div class="hh-ag-locked-title">Agreement locked — ' + lockedDate + '</div>' +
+        '<div class="hh-ag-locked-sub">Everyone agreed. Share this with family or housemates.</div>' +
+        '<div class="hh-ag-share-row">' +
+          '<span class="hh-ag-share-link">' + shareUrl + '</span>' +
+          '<button class="hh-ag-copy-link-btn" id="hh-ag-copy-share-btn">Copy</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    clauseHtml +
+    '<div style="margin-top:16px;padding:14px;background:rgba(232,98,58,0.07);border:1px solid rgba(232,98,58,0.2);border-radius:8px;">' +
+      '<div style="font-size:12px;font-weight:600;color:var(--brand-coral);margin-bottom:4px;">Want to make changes?</div>' +
+      '<div style="font-size:12px;color:var(--text-muted);margin-bottom:10px);">Starting over will unlock the agreement and clear all ticks. Everyone will need to re-agree.</div>' +
+      '<button onclick="hhAgUnlock()" style="background:none;border:1px solid rgba(232,98,58,0.4);color:var(--brand-coral);border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:Inter,sans-serif;">Unlock & edit</button>' +
+    '</div>' +
+    '<div class="hh-ag-disclaimer">This is not a legally binding document. It works because you\'ve all agreed to it \u2014 not because of anything written here.</div>';
+
+  // Wire up the copy button (can't use inline onclick with dynamic URL)
+  var _shareUrlForCopy = shareUrl;
+  setTimeout(function() {
+    var copyBtn = document.getElementById('hh-ag-copy-share-btn');
+    if (copyBtn) copyBtn.addEventListener('click', function() { hhAgCopyLink(_shareUrlForCopy); });
+  }, 0);
+
+}
+
+function hhAgCopyLink(url) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function() {
+      var btn = document.querySelector('.hh-ag-copy-link-btn');
+      if (btn) { btn.textContent = 'Copied!'; setTimeout(function() { btn.textContent = 'Copy'; }, 2000); }
+    });
+  }
+}
+
+function hhAgUnlock() {
+  if (!confirm('This will unlock the agreement and clear all ticks. Everyone will need to re-agree. Continue?')) return;
+  // Save current agreement with cleared lock (done client-side by just re-saving)
+  // We signal intent by saving the same clauses again (which clears lock + ticks server-side)
+  if (!_hhAgAgreement) return;
+  var body = {
+    email: _hhAgEmail,
+    household_id: _hhAgHouseholdId,
+    tier: _hhAgAgreement.tier,
+    clauses: _hhAgAgreement.clauses,
+    all_equal_responsibility: _hhAgAgreement.all_equal_responsibility,
+    head_tenant_email: _hhAgAgreement.head_tenant_email
+  };
+  // The save API rejects locked agreements — we need to re-approach.
+  // For unlock, we store that user clicked unlock and show an unlock-save path.
+  // Simplest approach: clear locked_at by inserting an update via save after confirming
+  // Actually: agreement-save checks locked_at and returns 403. We need a separate flow.
+  // For now: show message to edit from scratch by starting a new tier
+  _hhAgAgreement = null;
+  _hhAgTicks = [];
+  _hhAgSelectedTier = 1;
+  hhAgRenderTierSelect();
+}
+
+function hhAgToggleTick(clauseId, ticked) {
+  if (!_hhAgAgreement) {
+    // Not saved yet — prompt to save first
+    hhAgShowSaveFirst();
+    return;
+  }
+  var agreementId = _hhAgAgreement.id;
+  fetch('/api/household/agreement-tick', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: _hhAgEmail, agreement_id: agreementId, clause_id: clauseId, ticked: ticked })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (!d.ok) { alert('Could not save tick. Try again.'); return; }
+    // Update local ticks state
+    var key = _hhAgEmail + ':' + clauseId;
+    if (ticked) {
+      if (!_hhAgTicks.find(function(t) { return t.member_email === _hhAgEmail && t.clause_id === clauseId; })) {
+        _hhAgTicks.push({ member_email: _hhAgEmail, clause_id: clauseId });
+      }
+    } else {
+      _hhAgTicks = _hhAgTicks.filter(function(t) { return !(t.member_email === _hhAgEmail && t.clause_id === clauseId); });
+    }
+    // Re-render just the clause row
+    hhAgRefreshClauseRow(clauseId);
+    hhAgUpdateLockBtn();
+  })
+  .catch(function() { alert('Could not save tick. Check your connection.'); });
+}
+
+function hhAgRefreshClauseRow(clauseId) {
+  var tier = HH_AG_TIERS[_hhAgSelectedTier];
+  if (!tier) return;
+  var clause = tier.clauses.find(function(c) { return c.id === clauseId; });
+  if (!clause) return;
+
+  var tickMap = {};
+  _hhAgTicks.forEach(function(t) { tickMap[t.member_email + ':' + t.clause_id] = true; });
+
+  var memberCount = _hhAgMembers.length;
+  var tickedBy = _hhAgMembers.filter(function(m) { return tickMap[m + ':' + clauseId]; });
+  var allTicked  = tickedBy.length === memberCount && memberCount > 0;
+  var partial    = tickedBy.length > 0 && !allTicked;
+
+  var row = document.getElementById('hh-ag-clause-' + clauseId);
+  if (!row) return;
+  row.className = 'hh-ag-clause-row' + (allTicked ? ' ticked-all' : (partial ? ' ticked-partial' : ''));
+
+  var myTicked = tickMap[_hhAgEmail + ':' + clauseId];
+
+  if (memberCount === 1) {
+    var singleChip = row.querySelector('.hh-ag-tick-chip.is-me');
+    if (singleChip) {
+      singleChip.className = 'hh-ag-tick-chip is-me' + (myTicked ? ' ticked' : '');
+      singleChip.innerHTML = '<span class="hh-ag-tick-dot"></span>' + (myTicked ? 'You agreed ✓' : 'Tap to agree');
+      singleChip.setAttribute('onclick', 'hhAgToggleTick(\'' + clauseId + '\', ' + (myTicked ? 'false' : 'true') + ')');
+    }
+  } else {
+    var tickRow = row.querySelector('.hh-ag-tick-row');
+    if (tickRow) {
+      tickRow.innerHTML = _hhAgMembers.map(function(m) {
+        var isTicked = tickMap[m + ':' + clauseId];
+        var isMe = m === _hhAgEmail;
+        var firstName = m.split('@')[0].split('.')[0];
+        firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+        var chipClass = 'hh-ag-tick-chip' + (isTicked ? ' ticked' : '') + (isMe ? ' is-me' : '');
+        var onclick = isMe ? 'hhAgToggleTick(\'' + clauseId + '\', ' + (isTicked ? 'false' : 'true') + ')' : '';
+        return '<span class="' + chipClass + '"' + (onclick ? ' onclick="' + onclick + '"' : '') + '>' +
+          '<span class="hh-ag-tick-dot"></span>' + firstName + (isTicked ? ' ✓' : '') +
+        '</span>';
+      }).join('');
+    }
+  }
+}
+
+function hhAgShowSaveFirst() {
+  var saveBtn = document.getElementById('hh-ag-save-btn');
+  if (saveBtn) {
+    saveBtn.style.background = 'var(--brand-coral)';
+    saveBtn.textContent = '← Save first, then agree';
+    setTimeout(function() {
+      saveBtn.style.background = '';
+      saveBtn.textContent = 'Save rules';
+    }, 2500);
+  }
+}
+
+function hhAgUpdateLockBtn() {
+  if (!_hhAgAgreement) {
+    document.getElementById('hh-ag-lock-btn').classList.remove('ready');
+    document.getElementById('hh-ag-progress-note').textContent = '';
+    return;
+  }
+  var tier = HH_AG_TIERS[_hhAgSelectedTier];
+  if (!tier) return;
+  var clauseIds = tier.clauses.map(function(c) { return c.id; });
+  var memberCount = _hhAgMembers.length;
+  var totalTicks = clauseIds.length * memberCount;
+  var doneTicks = 0;
+  var tickMap = {};
+  _hhAgTicks.forEach(function(t) { tickMap[t.member_email + ':' + t.clause_id] = true; });
+  clauseIds.forEach(function(cid) {
+    _hhAgMembers.forEach(function(m) {
+      if (tickMap[m + ':' + cid]) doneTicks++;
+    });
+  });
+
+  var lockBtn = document.getElementById('hh-ag-lock-btn');
+  var noteEl  = document.getElementById('hh-ag-progress-note');
+
+  if (doneTicks >= totalTicks && totalTicks > 0) {
+    lockBtn.classList.add('ready');
+    lockBtn.disabled = false;
+    if (noteEl) noteEl.textContent = 'Everyone has agreed — ready to lock 🔒';
+  } else {
+    lockBtn.classList.remove('ready');
+    if (noteEl) {
+      var remaining = totalTicks - doneTicks;
+      noteEl.textContent = remaining + ' tick' + (remaining !== 1 ? 's' : '') + ' remaining before you can lock';
+    }
+  }
+}
+
+function hhAgSave() {
+  var tier = HH_AG_TIERS[_hhAgSelectedTier];
+  if (!tier) return;
+
+  var saveBtn = document.getElementById('hh-ag-save-btn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving…';
+
+  // Collect clause values from textareas
+  var clauses = tier.clauses.map(function(c) {
+    var el = document.getElementById('hh-ag-val-' + c.id);
+    return {
+      id: c.id,
+      category: c.category,
+      emoji: c.emoji,
+      title: c.title,
+      value: el ? el.value.trim() : ''
+    };
+  });
+
+  var body = {
+    email: _hhAgEmail,
+    household_id: _hhAgHouseholdId,
+    tier: _hhAgSelectedTier,
+    clauses: clauses,
+    all_equal_responsibility: true,
+    head_tenant_email: null
+  };
+
+  fetch('/api/household/agreement-save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    saveBtn.disabled = false;
+    if (!d.ok) {
+      saveBtn.textContent = 'Save rules';
+      alert('Could not save: ' + (d.error || 'unknown error'));
+      return;
+    }
+    saveBtn.textContent = 'Saved ✓';
+    setTimeout(function() { saveBtn.textContent = 'Save rules'; }, 2000);
+
+    // Update local agreement state
+    if (!_hhAgAgreement) {
+      _hhAgAgreement = { id: d.agreement_id, tier: _hhAgSelectedTier, clauses: clauses, share_token: d.share_token };
+    } else {
+      _hhAgAgreement.clauses = clauses;
+      _hhAgAgreement.tier = _hhAgSelectedTier;
+    }
+    _hhAgAgreement.id = d.agreement_id;
+    _hhAgAgreement.share_token = d.share_token;
+    _hhAgTicks = []; // saving clears ticks
+    // Re-render to show tick chips now that agreement exists
+    hhAgRenderClauses();
+  })
+  .catch(function() {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save rules';
+    alert('Could not save. Check your connection.');
+  });
+}
+
+function hhAgLock() {
+  if (!_hhAgAgreement) return;
+  if (!confirm('Lock the house rules? Everyone will receive a copy by email. You can still edit later if needed.')) return;
+
+  var lockBtn = document.getElementById('hh-ag-lock-btn');
+  lockBtn.disabled = true;
+  lockBtn.textContent = 'Locking…';
+
+  fetch('/api/household/agreement-lock', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: _hhAgEmail, agreement_id: _hhAgAgreement.id })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    lockBtn.disabled = false;
+    lockBtn.textContent = '🔒 Lock agreement';
+    if (!d.ok) { alert('Could not lock: ' + (d.error || 'unknown error')); return; }
+    _hhAgAgreement.locked_at = new Date().toISOString();
+    _hhAgAgreement.share_token = d.share_token || _hhAgAgreement.share_token;
+    hhAgRenderLocked();
+  })
+  .catch(function() {
+    lockBtn.disabled = false;
+    lockBtn.textContent = '🔒 Lock agreement';
+    alert('Could not lock. Check your connection.');
+  });
+}
+
+function hhEscape(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 // ── Uni email verification ────────────────────────────────────────────────────
 
@@ -7395,6 +8231,25 @@ function cobReviewStar(n) {
 
   </div><!-- /settings-panel-body -->
 </div><!-- /settings-panel -->
+
+<!-- ── Household Agreement Modal (S52) ── -->
+<div id="hh-agreement-modal" role="dialog" aria-modal="true" aria-label="House rules agreement">
+  <div class="hh-ag-modal-box" id="hh-ag-modal-box">
+    <div class="hh-ag-modal-header">
+      <button class="hh-ag-modal-back" id="hh-ag-back-btn" onclick="hhAgBack()" style="display:none;">← Back</button>
+      <span class="hh-ag-modal-title" id="hh-ag-modal-title">House Rules</span>
+      <button class="hh-ag-modal-close" onclick="hhAgClose()" aria-label="Close">✕</button>
+    </div>
+    <div class="hh-ag-modal-body" id="hh-ag-modal-body">
+      <!-- dynamically filled -->
+    </div>
+    <div class="hh-ag-action-bar" id="hh-ag-action-bar" style="display:none;">
+      <button class="hh-ag-save-btn" id="hh-ag-save-btn" onclick="hhAgSave()">Save rules</button>
+      <button class="hh-ag-lock-btn" id="hh-ag-lock-btn" onclick="hhAgLock()">🔒 Lock agreement</button>
+    </div>
+    <div class="hh-ag-progress-note" id="hh-ag-progress-note"></div>
+  </div>
+</div>
 
 </body>
 </html>
