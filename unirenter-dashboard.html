@@ -5048,8 +5048,7 @@ DM me if you're keen! 😊`;
   };
 })();
 
-loadProfile();
-// renderMatches is called on DOMContentLoaded to ensure DOM is ready
+// loadProfile and renderMatches called on DOMContentLoaded to ensure full DOM is ready
 
 
 
@@ -5948,6 +5947,7 @@ When a student asks about a calculator result or says "I saved a result" — ref
 // ══════════════════════════════════════════════════════════════
 
 window.addEventListener('DOMContentLoaded', function() {
+  loadProfile();
   renderMatches();
   setTimeout(function() {
     tier1CheckDates();
