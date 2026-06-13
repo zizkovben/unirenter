@@ -5953,7 +5953,11 @@ window.addEventListener('DOMContentLoaded', function() {
     calcRenderHistory();
     vibeInit();
     vibeShareInit();
-    householdInit();
+    // Only init household if that tab is currently active (avoids flash on other tabs)
+    var hhPanel = document.getElementById('panel-household');
+    if (hhPanel && hhPanel.classList.contains('active')) {
+      householdInit();
+    }
   }, 300);
 });
 
