@@ -2088,6 +2088,48 @@ body.light-mode {
 .hh-agreement-entry-progress-bar {
   height: 100%; border-radius: 4px; background: var(--brand-yellow); transition: width 0.4s;
 }
+
+/* Inline Lease Companion Modal S55 */
+#lc-inline-modal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);align-items:flex-end;justify-content:center}
+#lc-inline-modal.open{display:flex}
+.lc-modal-box{background:var(--navy-card,#132233);border-radius:16px 16px 0 0;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;padding:0 0 32px;box-shadow:0 -4px 32px rgba(0,0,0,.4)}
+.lc-modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.lc-modal-title{font-family:var(--font-display,Epilogue);font-size:16px;font-weight:700}
+.lc-modal-close{background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px}
+.lc-modal-close:hover{background:rgba(255,255,255,.06);color:var(--text)}
+.lc-modal-body{padding:20px 22px}
+.lc-path-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.lc-path-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px 16px;cursor:pointer;transition:border-color .15s,background .15s;text-align:center}
+.lc-path-card:hover{border-color:rgba(75,191,224,.4);background:rgba(75,191,224,.06)}
+.lc-path-icon{font-size:28px;margin-bottom:8px}
+.lc-path-label{font-size:14px;font-weight:600;margin-bottom:4px}
+.lc-path-sub{font-size:12px;color:var(--text-muted);line-height:1.4}
+.lc-consent-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px;margin-bottom:14px}
+.lc-consent-summary{font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:12px}
+.lc-consent-detail-toggle{font-size:12px;color:var(--brand-blue);cursor:pointer;background:none;border:none;padding:0;margin-bottom:10px;display:block}
+.lc-consent-detail{display:none;font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:10px;background:rgba(0,0,0,.2);padding:10px 12px;border-radius:8px}
+.lc-consent-detail.open{display:block}
+.lc-consent-check-row{display:flex;align-items:flex-start;gap:10px}
+.lc-consent-check-row input[type=checkbox]{width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:var(--brand-blue);cursor:pointer}
+.lc-consent-check-label{font-size:13px;color:var(--text-muted);line-height:1.5;cursor:pointer}
+.lc-modal-btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.lc-modal-btn-primary{background:var(--brand-yellow,#F5B800);color:#000;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;flex:1}
+.lc-modal-btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.lc-modal-btn-primary:not(:disabled):hover{opacity:.88}
+.lc-modal-btn-secondary{background:none;border:1px solid rgba(255,255,255,.15);color:var(--text-muted);border-radius:8px;padding:10px 20px;font-size:13px;cursor:pointer}
+.lc-modal-btn-secondary:hover{border-color:rgba(75,191,224,.3);color:var(--brand-blue)}
+.lc-upload-zone{border:2px dashed rgba(255,255,255,.2);border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:border-color .15s;margin-top:12px}
+.lc-upload-zone:hover{border-color:rgba(75,191,224,.4)}
+.lc-upload-icon{font-size:32px;margin-bottom:10px}
+.lc-upload-label{font-size:14px;font-weight:600;margin-bottom:4px}
+.lc-upload-sub{font-size:12px;color:var(--text-muted)}
+.lc-manual-grid{display:grid;gap:12px;margin-top:12px}
+.lc-manual-field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:600;margin-bottom:5px}
+.lc-manual-field input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;box-sizing:border-box}
+.lc-manual-field input:focus{border-color:var(--brand-blue);outline:none}
+.btn-snooze{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--text-muted);border-radius:8px;padding:9px 16px;font-size:12px;cursor:pointer;margin-top:6px}
+.btn-snooze:hover{border-color:rgba(75,191,224,.3);color:var(--brand-blue)}
+
 /* Agreement overlay modal */
 #hh-agreement-modal {
   display: none; position: fixed; inset: 0; z-index: 9100;
@@ -2981,12 +3023,12 @@ body.light-mode {
           </div>
         </div>
         <div class="lc-photo-row">
-          <a class="lc-entry-btn lc-btn-primary" href="/lease-companion#photo">
+          <button class="lc-entry-btn lc-btn-primary" onclick="lcOpenInline('photo')">
             📸 Photo my lease — Cob will do the rest
-          </a>
-          <a class="lc-entry-btn lc-btn-secondary" href="/lease-companion">
+          </button>
+          <button class="lc-entry-btn lc-btn-secondary" onclick="lcOpenInline('manual')">
             Enter manually ↗
-          </a>
+          </button>
         </div>
       </div>
       <!-- ACTIVE state — shown by lcEntryCardInit when lease dates exist -->
@@ -2999,7 +3041,7 @@ body.light-mode {
           </div>
         </div>
         <div class="lc-entry-next-date" id="lc-entry-next-date" style="display:none;"></div>
-        <a class="lc-entry-btn lc-btn-secondary" href="/lease-companion">Open Lease Companion ↗</a>
+        <button class="lc-entry-btn lc-btn-secondary" onclick="lcOpenInline('manage')">Manage my lease ↗</button>
       </div>
     </div>
 
@@ -3018,7 +3060,7 @@ body.light-mode {
     <div class="cal-cob-nudge" id="cal-cob-nudge" style="display:none;">
       <div class="cal-cob-avatar">🤠</div>
       <div class="cal-cob-text">
-        <strong>Oi! Add your key dates here.</strong> Your lease end date is the big one — once it's in, I can nudge you when things like your bond claim window or lease renewal decision are coming up. Set up your <a href="/lease-companion" style="color:var(--brand-blue);">Lease Companion</a> and they'll all auto-populate.
+        <strong>Oi! Add your key dates here.</strong> Your lease end date is the big one — once it's in, I can nudge you when things like your bond claim window or lease renewal decision are coming up. Set up your <a href="#" onclick="switchTab('tenancy');return false;" style="color:var(--brand-blue);">Lease Companion</a> and they'll all auto-populate.
       </div>
     </div>
 
@@ -3235,7 +3277,7 @@ body.light-mode {
     <!-- ── Manual entry link ── -->
     <div class="lc-manual-link" id="lc-manual-link">
       <span class="lc-manual-label">Prefer to enter manually?</span>
-      <a href="/lease-companion" class="lc-manual-btn">Open full Lease Companion ↗</a>
+      <button class="lc-manual-btn" onclick="lcOpenInline('manage')">Open full Lease Companion ↗</button>
     </div>
 
   </div><!-- /panel-tenancy -->
@@ -5478,7 +5520,7 @@ function calRenderWeekStrip() {
     .sort((a,b) => a.date.localeCompare(b.date));
 
   if (!weekEvs.length) {
-    weekEvEl.innerHTML = '<div class="cal-week-empty">📅 No events this week — <a href="/lease-companion" style="color:var(--brand-blue);">set up your Lease Companion</a> to auto-populate key dates.</div>';
+    weekEvEl.innerHTML = '<div class="cal-week-empty">📅 No events this week — <a href="#" onclick="lcOpenInline(\'photo\');return false;" style="color:var(--brand-blue);">set up your Lease Companion</a> to auto-populate key dates.</div>';
   } else {
     weekEvEl.innerHTML = weekEvs.map(ev => {
       const meta = CAT_META[ev.cat] || CAT_META.other;
@@ -5574,7 +5616,7 @@ function calRenderEvents(events) {
   const listEl = document.getElementById('cal-event-list');
   if (!listEl) return;
   if (!events.length) {
-    listEl.innerHTML = '<div class="cal-empty-state"><div class="cal-empty-icon">📅</div><div>No dates added yet — use the form below to track your lease, rent, and inspection dates. Or <a href="/lease-companion" style="color:var(--brand-blue);">set up your Lease Companion</a> to auto-populate them.</div></div>';
+    listEl.innerHTML = '<div class="cal-empty-state"><div class="cal-empty-icon">📅</div><div>No dates added yet — use the form below to track your lease, rent, and inspection dates. Or <a href="#" onclick="lcOpenInline(\'photo\');return false;" style="color:var(--brand-blue);">set up your Lease Companion</a> to auto-populate them.</div></div>';
     return;
   }
   const now = new Date(); now.setHours(0,0,0,0);
@@ -5617,7 +5659,7 @@ function renderStickyStrip() {
     .slice(0, 5);
 
   if (!events.length) {
-    swsEl.innerHTML = '<span class="sws-empty">No upcoming dates — <a href="/lease-companion" style="color:var(--brand-blue);text-decoration:none;">add your lease details</a></span>';
+    swsEl.innerHTML = '<span class="sws-empty">No upcoming dates — <a href="#" onclick="switchTab(\'tenancy\');return false;" style="color:var(--brand-blue);text-decoration:none;">add your lease details</a></span>';
     return;
   }
   swsEl.innerHTML = events.map(ev => {
@@ -5917,6 +5959,229 @@ function calcRunIncrease(silent) {
 // TIER 1 — Cob FAB pulse + badge on key dates ≤ 7 days
 // ══════════════════════════════════════════════════════════════
 
+
+// Inline Lease Companion S55
+var _lcConsentGranted = false;
+var _lcConsentChecked = false;
+
+function lcB(id){return document.getElementById(id);}
+
+function lcOpenInline(mode) {
+  var modal = lcB('lc-inline-modal');
+  var body  = lcB('lc-modal-body');
+  var title = lcB('lc-modal-title');
+  if (!modal || !body) return;
+  if (mode === 'photo') {
+    if (_lcConsentGranted) lcShowUpload(body, title);
+    else lcShowConsent(body, title);
+  } else if (mode === 'manual') {
+    lcShowManual(body, title, null);
+  } else {
+    lcShowPathChoice(body, title);
+  }
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function lcCloseInline() {
+  var modal = lcB('lc-inline-modal');
+  if (modal) modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function lcShowPathChoice(body, title) {
+  title.textContent = 'Track your lease with Cob';
+  body.innerHTML =
+    '<p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Choose how to enter your lease details:</p>' +
+    '<div class="lc-path-grid">' +
+      '<div class="lc-path-card" onclick="lcShowConsent(lcB(\'lc-modal-body\'),lcB(\'lc-modal-title\'))">' +
+        '<div class="lc-path-icon">&#128248;</div>' +
+        '<div class="lc-path-label">Photo my lease</div>' +
+        '<div class="lc-path-sub">Snap the key pages and Cob reads the dates automatically.</div>' +
+      '</div>' +
+      '<div class="lc-path-card" onclick="lcShowManual(lcB(\'lc-modal-body\'),lcB(\'lc-modal-title\'),null)">' +
+        '<div class="lc-path-icon">&#9998;&#65039;</div>' +
+        '<div class="lc-path-label">Enter manually</div>' +
+        '<div class="lc-path-sub">Type your key dates directly. No upload needed.</div>' +
+      '</div>' +
+    '</div>';
+}
+
+function lcShowConsent(body, title) {
+  title.textContent = 'Privacy note';
+  body.innerHTML =
+    '<div class="lc-consent-box">' +
+      '<p class="lc-consent-summary">To read your lease, Cob needs to see a photo of the relevant pages. Your document is only used to extract key dates &#8212; no personal details are stored. You can delete your data at any time.</p>' +
+      '<button class="lc-consent-detail-toggle" id="lc-det-btn" onclick="lcToggleConsentDetail()">How we handle your document &#9662;</button>' +
+      '<div class="lc-consent-detail" id="lc-consent-detail">' +
+        '<strong>What pages to photograph:</strong> The cover page and the key dates page only.<br><br>' +
+        '<strong>How it works:</strong> Photos are sent to the Anthropic Claude API to extract dates. Your document is not used to train AI models. <a href="https://www.anthropic.com/privacy" target="_blank" style="color:var(--brand-blue);">anthropic.com/privacy</a><br><br>' +
+        '<strong>What we store:</strong> Only the extracted key dates &#8212; not photos or other document content.<br><br>' +
+        '<strong>Delete your data:</strong> Clear your Lease Companion data at any time from Profile settings.' +
+      '</div>' +
+      '<div class="lc-consent-check-row">' +
+        '<input type="checkbox" id="lc-consent-check" onchange="lcConsentToggle(this)">' +
+        '<label class="lc-consent-check-label" for="lc-consent-check">I understand and agree to share photos of my lease for the purpose of setting up my tenancy calendar</label>' +
+      '</div>' +
+    '</div>' +
+    '<div class="lc-modal-btn-row">' +
+      '<button class="lc-modal-btn-primary" id="lc-consent-continue" onclick="lcConsentContinue()" disabled>Continue &#8594;</button>' +
+      '<button class="lc-modal-btn-secondary" onclick="lcShowManual(lcB(\'lc-modal-body\'),lcB(\'lc-modal-title\'),null)">I\'d rather type the dates</button>' +
+    '</div>';
+}
+
+function lcToggleConsentDetail() {
+  var el = lcB('lc-consent-detail'), btn = lcB('lc-det-btn');
+  if (!el) return;
+  el.classList.toggle('open');
+  if (btn) btn.innerHTML = el.classList.contains('open') ? 'How we handle your document &#9652;' : 'How we handle your document &#9662;';
+}
+
+function lcConsentToggle(cb) {
+  _lcConsentChecked = cb.checked;
+  var btn = lcB('lc-consent-continue');
+  if (btn) btn.disabled = !cb.checked;
+}
+
+function lcConsentContinue() {
+  if (!_lcConsentChecked) return;
+  _lcConsentGranted = true;
+  var email = localStorage.getItem('unirenter_email');
+  if (email) {
+    fetch('/api/profile/save', {method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:email,lease_doc_consent:true})}).catch(function(){});
+  }
+  lcShowUpload(lcB('lc-modal-body'), lcB('lc-modal-title'));
+}
+
+function lcShowUpload(body, title) {
+  title.textContent = 'Photo my lease';
+  body.innerHTML =
+    '<p style="font-size:13px;color:var(--text-muted);margin-bottom:4px;">Photograph the <strong>cover page</strong> and the <strong>key dates page</strong> only.</p>' +
+    '<div class="lc-upload-zone" onclick="lcB(\'lc-file-input\').click()">' +
+      '<div class="lc-upload-icon">&#128247;</div>' +
+      '<div class="lc-upload-label">Tap to choose photos or PDF</div>' +
+      '<div class="lc-upload-sub">Cover page + key dates page only</div>' +
+    '</div>' +
+    '<div class="lc-modal-btn-row" style="margin-top:12px;">' +
+      '<button class="lc-modal-btn-secondary" onclick="lcShowManual(lcB(\'lc-modal-body\'),lcB(\'lc-modal-title\'),null)">Enter dates manually instead</button>' +
+    '</div>';
+}
+
+function lcHandleFile(input) {
+  if (!input.files || !input.files[0]) return;
+  var body = lcB('lc-modal-body'), title = lcB('lc-modal-title');
+  if (!body || !title) return;
+  title.textContent = 'Reading your lease...';
+  body.innerHTML = '<p style="font-size:13px;color:var(--text-muted);margin:20px 0;">Cob is reading your lease and extracting key dates. Usually takes 10-20 seconds.</p>';
+  var file = input.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var base64 = e.target.result.split(',')[1];
+    var mt = file.type || 'image/jpeg';
+    var email = localStorage.getItem('unirenter_email') || '';
+    fetch('/api/cob', {method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:email,message:'Extract these key dates from the lease and return ONLY JSON: {"lease_start":"YYYY-MM-DD or null","lease_end":"YYYY-MM-DD or null","rent_review_date":"YYYY-MM-DD or null","rent_amount":"string or null","bond_amount":"string or null","property_address":"string or null"}',image_base64:base64,image_media_type:mt,mode:'lease_extract'})
+    })
+    .then(function(r){return r.json();})
+    .then(function(data) {
+      var text = '';
+      if (data && data.content && Array.isArray(data.content)) {
+        data.content.forEach(function(c){if(c.type==='text') text+=c.text;});
+      } else if (data && data.reply) text = data.reply;
+      try {
+        var parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+        lcShowExtracted(parsed, body, title);
+      } catch(e) { lcShowManual(body, title, 'Cob had trouble reading that page. Please enter the dates below.'); }
+    })
+    .catch(function(){lcShowManual(body, title, 'Something went wrong. Please enter the dates below.');});
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function lcFld(label, id, val) {
+  return '<div class="lc-manual-field"><label>'+label+'</label><input type="text" id="'+id+'" value="'+(val||'')+'" placeholder="--"></div>';
+}
+
+function lcShowExtracted(parsed, body, title) {
+  title.textContent = 'Check your dates';
+  body.innerHTML =
+    '<p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Check these look right, then save to your calendar.</p>' +
+    '<div class="lc-manual-grid">' +
+      lcFld('Lease start date','lc-x-start',parsed.lease_start||'') +
+      lcFld('Lease end date','lc-x-end',parsed.lease_end||'') +
+      lcFld('Rent review date','lc-x-review',parsed.rent_review_date||'') +
+      lcFld('Weekly rent','lc-x-rent',parsed.rent_amount||'') +
+      lcFld('Bond amount','lc-x-bond',parsed.bond_amount||'') +
+      lcFld('Property address','lc-x-addr',parsed.property_address||'') +
+    '</div>' +
+    '<div class="lc-modal-btn-row">' +
+      '<button class="lc-modal-btn-primary" onclick="lcSaveDates(\'x\')">Save to my calendar &#8594;</button>' +
+      '<button class="lc-modal-btn-secondary" onclick="lcB(\'lc-file-input\').click()">Retake photo</button>' +
+    '</div>';
+}
+
+function lcShowManual(body, title, msg) {
+  title.textContent = 'Enter your lease dates';
+  body.innerHTML =
+    (msg ? '<p style="font-size:13px;color:var(--brand-coral);margin-bottom:12px;">'+msg+'</p>' : '') +
+    '<p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Enter your key dates and Cob will set up your tenancy calendar.</p>' +
+    '<div class="lc-manual-grid">' +
+      lcFld('Lease start date','lc-m-start','') +
+      lcFld('Lease end date','lc-m-end','') +
+      lcFld('Rent review date','lc-m-review','') +
+      lcFld('Weekly rent ($)','lc-m-rent','') +
+      lcFld('Bond amount ($)','lc-m-bond','') +
+      lcFld('Property address','lc-m-addr','') +
+    '</div>' +
+    '<div class="lc-modal-btn-row">' +
+      '<button class="lc-modal-btn-primary" onclick="lcSaveDates(\'m\')">Save to my calendar &#8594;</button>' +
+      '<button class="lc-modal-btn-secondary" onclick="lcCloseInline()">Cancel</button>' +
+    '</div>';
+}
+
+function lcSaveDates(prefix) {
+  function v(id){var e=lcB(id);return e?e.value.trim():'';}
+  var p = prefix==='x' ? 'lc-x' : 'lc-m';
+  var data = {lease_start:v(p+'-start'),lease_end:v(p+'-end'),rent_review_date:v(p+'-review'),rent_amount:v(p+'-rent'),bond_amount:v(p+'-bond'),property_address:v(p+'-addr')};
+  var email = localStorage.getItem('unirenter_email') || '';
+  if (!email) { lcCloseInline(); return; }
+  fetch('/api/lease-companion/save', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,data:data})})
+  .then(function(r){return r.json();})
+  .then(function() {
+    if (data.lease_start) lcCalAdd('Lease starts', data.lease_start, 'lease');
+    if (data.lease_end)   lcCalAdd('Lease ends',   data.lease_end,   'lease');
+    if (data.rent_review_date) lcCalAdd('Rent review', data.rent_review_date, 'rent');
+    lcCloseInline();
+    if (typeof lcEntryCardInit==='function') lcEntryCardInit();
+    if (typeof showToast==='function') showToast('Lease dates saved', 'Your tenancy calendar has been updated.');
+  })
+  .catch(function(){lcCloseInline();if(typeof showToast==='function') showToast('Saved','Dates saved.');});
+}
+
+function lcCalAdd(name, dateStr, cat) {
+  if (!dateStr || dateStr==='null') return;
+  try {
+    var evs = JSON.parse(localStorage.getItem('ur_calendar_events')||'[]');
+    evs.push({id:'lc_'+cat+'_'+Date.now(),name:name,date:dateStr,cat:cat,notes:'From Lease Companion'});
+    localStorage.setItem('ur_calendar_events', JSON.stringify(evs));
+  } catch(e){}
+}
+
+function lcSnoozeMode() {
+  var snoozeUntil = new Date();
+  snoozeUntil.setDate(snoozeUntil.getDate() + 7);
+  localStorage.setItem('ur_sleep_snooze_until', snoozeUntil.toISOString());
+  if (typeof closeSettingsPanel === 'function') closeSettingsPanel();
+  if (typeof showToast === 'function') showToast('Snoozed 7 days', 'Your profile is paused for 7 days.');
+}
+
+document.addEventListener('click', function(e) {
+  var modal = lcB('lc-inline-modal');
+  if (modal && e.target===modal) lcCloseInline();
+});
+
 const T1_CRITICAL_CATS = ['lease','inspection','bond','rent'];
 
 function tier1CheckDates() {
@@ -5992,7 +6257,7 @@ function tier2CheckDates() {
 
     if (cat === 'lease' && name.toLowerCase().includes('notice')) {
       title = 'Notice to vacate — ' + daysLabel + ' 🏠';
-      text = 'Just checking in — your notice to vacate deadline is coming up ' + daysLabel + '. Have you sent written notice to your landlord? Getting this wrong can cost you weeks of extra rent. <a href="/lease-companion">Your lease companion ↗</a> has the details.';
+      text = 'Just checking in — your notice to vacate deadline is coming up ' + daysLabel + '. Have you sent written notice to your landlord? Getting this wrong can cost you weeks of extra rent. <a href="#" onclick="switchTab(\'tenancy\');return false;">Your lease companion ↗</a> has the details.';
     } else if (cat === 'lease' && name.toLowerCase().includes('end')) {
       title = 'Lease ending ' + daysLabel + ' 🗓️';
       text = 'Your lease is ending ' + daysLabel + '. Have you sorted your next move? If you\'re renewing, now\'s the time to confirm with your landlord. If you\'re leaving — make sure your bond claim is ready and the property is inspection-ready.';
@@ -8294,7 +8559,9 @@ function cobReviewCopyLink() {
         </div>
       </div>
       <div class="sleep-actions" style="margin-top:14px;">
+        <div id="sp-sleep-current" style="display:none;font-size:12px;color:var(--text-muted);padding:8px 0 4px;"></div>
         <button class="btn-sleep-on" id="sp-btn-sleep-activate" onclick="activateSleep()">Activate sleep mode</button>
+        <button class="btn-snooze" id="sp-btn-snooze" style="display:none;" onclick="lcSnoozeMode()">Snooze 7 days</button>
         <button class="btn-sleep-wake" id="sp-btn-sleep-wake" style="display:none;" onclick="wakeUp()">☀️ Wake up — I'm looking again</button>
       </div>
     </div>
@@ -8441,6 +8708,19 @@ function cobReviewCopyLink() {
 
   </div><!-- /settings-panel-body -->
 </div><!-- /settings-panel -->
+
+
+<!-- Inline Lease Companion Modal S55 -->
+<div id="lc-inline-modal" role="dialog" aria-modal="true" aria-label="Lease Companion">
+  <div class="lc-modal-box" id="lc-modal-box">
+    <div class="lc-modal-header">
+      <span class="lc-modal-title" id="lc-modal-title">Track your lease with Cob</span>
+      <button class="lc-modal-close" onclick="lcCloseInline()" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="lc-modal-body" id="lc-modal-body"></div>
+  </div>
+</div>
+<input type="file" id="lc-file-input" accept="image/*,application/pdf" style="display:none" onchange="lcHandleFile(this)">
 
 <!-- ── Household Agreement Modal (S52) ── -->
 <div id="hh-agreement-modal" role="dialog" aria-modal="true" aria-label="House rules agreement">

@@ -188,10 +188,6 @@
       "destination": "/unirenter-dashboard.html"
     },
     {
-      "source": "/lease-companion",
-      "destination": "/unirenter-lease-companion.html"
-    },
-    {
       "source": "/sydney",
       "destination": "/unirenter-sydney.html"
     },
@@ -266,6 +262,13 @@
     {
       "source": "/listing/:token",
       "destination": "/unirenter-listing.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/lease-companion",
+      "destination": "/dashboard?tab=tenancy",
+      "permanent": true
     }
   ]
 }
