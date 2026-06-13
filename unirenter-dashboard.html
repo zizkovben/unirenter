@@ -6512,6 +6512,8 @@ function householdLoad(householdId) {
       householdRenderEmpty();
       return;
     }
+    // Clear invite token — no longer needed once household is confirmed loaded
+    localStorage.removeItem('ur_household_invite_token');
     householdRender(d.data, email);
   })
   .catch(function() {
