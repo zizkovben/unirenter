@@ -3277,63 +3277,7 @@ body.light-mode {
           </div>
         </div>
 
-        <!-- ── Profile status / sleep mode widget ── -->
-        <div class="sidebar-sleep-widget" id="sidebar-sleep-widget">
-          <!-- Active state -->
-          <div id="ssw-active">
-            <div class="ssw-status-row">
-              <span class="ssw-dot ssw-dot-green"></span>
-              <span class="ssw-label">Active</span>
-              <button class="ssw-pause-btn" onclick="sswTogglePanel()">Pause ▾</button>
-            </div>
-          </div>
-          <!-- Sleeping state -->
-          <div id="ssw-sleeping" style="display:none;">
-            <div class="ssw-status-row ssw-row-sleeping">
-              <span class="ssw-dot ssw-dot-yellow"></span>
-              <span class="ssw-label ssw-label-sleeping" id="ssw-mode-label">Sleep mode</span>
-              <button class="ssw-wake-btn" onclick="sswWakeUp()">☀️ Wake up</button>
-            </div>
-          </div>
-          <!-- Inline mode picker (hidden by default) -->
-          <div id="ssw-panel" class="ssw-panel" style="display:none;">
-            <div class="ssw-panel-title">Pause your profile</div>
-            <div class="ssw-options">
-              <button class="ssw-opt" onclick="sswActivate('study',this)">
-                <span class="ssw-opt-icon">📚</span>
-                <span class="ssw-opt-body"><span class="ssw-opt-name">Study Mode</span><span class="ssw-opt-desc">Exams? Profile paused, chats open.</span></span>
-                <span class="ssw-opt-badge">Messages open</span>
-              </button>
-              <button class="ssw-opt" onclick="sswActivate('sorted',this)">
-                <span class="ssw-opt-icon">🏠</span>
-                <span class="ssw-opt-body"><span class="ssw-opt-name">Sorted!</span><span class="ssw-opt-desc">Found housing — profile hidden.</span></span>
-                <span class="ssw-opt-badge">Fully hidden</span>
-              </button>
-              <button class="ssw-opt" onclick="sswActivate('holiday',this)">
-                <span class="ssw-opt-icon">✈️</span>
-                <span class="ssw-opt-body"><span class="ssw-opt-name">Holiday Mode</span><span class="ssw-opt-desc">Away for a bit — back soon.</span></span>
-                <span class="ssw-opt-badge">Return date shown</span>
-              </button>
-              <button class="ssw-opt" onclick="sswActivate('looking',this)">
-                <span class="ssw-opt-icon">👀</span>
-                <span class="ssw-opt-body"><span class="ssw-opt-name">Just Looking</span><span class="ssw-opt-desc">Early stages — not ready yet.</span></span>
-                <span class="ssw-opt-badge">Still visible</span>
-              </button>
-              <button class="ssw-opt" onclick="sswActivate('exams',this)">
-                <span class="ssw-opt-icon">🤯</span>
-                <span class="ssw-opt-body"><span class="ssw-opt-name">Exam Crunch</span><span class="ssw-opt-desc">Short pause for exams.</span></span>
-                <span class="ssw-opt-badge">Auto-wakes 14 days</span>
-              </button>
-              <button class="ssw-opt" onclick="sswActivate('break',this)">
-                <span class="ssw-opt-icon">😴</span>
-                <span class="ssw-opt-body"><span class="ssw-opt-name">Taking a Break</span><span class="ssw-opt-desc">Pause for now, keep my data.</span></span>
-                <span class="ssw-opt-badge">No auto-wake</span>
-              </button>
-            </div>
-            <a class="ssw-more-detail" href="#" onclick="openSettingsPanel('sleep');return false;">More detail →</a>
-            <button class="ssw-cancel" onclick="sswTogglePanel()">Cancel</button>
-          </div>
-        </div>
+        <!-- sidebar sleep widget removed V64 — sleep mode lives in Settings panel -->
       </div>
       <!-- Detail sections -->
       <div style="display:flex;flex-direction:column;gap:16px;">
