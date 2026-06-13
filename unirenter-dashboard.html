@@ -4160,7 +4160,7 @@ function applyProfileData(p, cobRefinedFields) {
     const uniEl = document.getElementById('profile-big-uni');
     if (uniEl) uniEl.textContent = uni;
     document.getElementById('header-name').textContent = 'Welcome back 👋';
-    const uniVerified = profile && profile.uni_email_verified;
+    const uniVerified = p && p.uni_email_verified;
     document.getElementById('header-badges').innerHTML =
       `<span class="badge badge-verified">✓ Email verified</span><span class="badge badge-uni">${uni}</span>${uniVerified ? '<span class="badge badge-uni-verified">🎓 Uni verified</span>' : ''}`;
     // Update sidebar badges
@@ -4170,7 +4170,7 @@ function applyProfileData(p, cobRefinedFields) {
         (uniVerified ? ' <span class="badge badge-uni-verified">🎓 Uni</span>' : '');
     }
     // Update uni verify card
-    updateUniVerifyCard(profile);
+    updateUniVerifyCard(p);
   }
 
   if (suburbs && Array.isArray(suburbs) && suburbs.length) {
@@ -5049,7 +5049,8 @@ DM me if you're keen! 😊`;
 })();
 
 loadProfile();
-renderMatches();
+// renderMatches is called on DOMContentLoaded to ensure DOM is ready
+
 
 
 function calLoadEvents() {
@@ -5947,6 +5948,7 @@ When a student asks about a calculator result or says "I saved a result" — ref
 // ══════════════════════════════════════════════════════════════
 
 window.addEventListener('DOMContentLoaded', function() {
+  renderMatches();
   setTimeout(function() {
     tier1CheckDates();
     tier2CheckDates();
