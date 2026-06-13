@@ -4560,12 +4560,19 @@ function renderVibeFilterChips() {
   row.appendChild(allChip);
 
   // Emoji chips — only emojis present in pool
+  const VIBE_LABELS = {
+    '🌙':'Night owl','🐦':'Early riser','📚':'Study-focused','🎓':'Postgrad',
+    '💼':'Young professional','🗣️':'Social & outgoing','🚪':'Keeps to themselves',
+    '🧹':'Neat freak','🤷':'Relaxed about mess','🍳':'Home cook','🎮':'Gamer',
+    '🎵':'Musician','🏋️':'Gym regular','🌈':'LGBTQ+ friendly','🌍':'International',
+    '👥':'Loves having guests','🏠':'Homebody','🌿':'Chill vibes'
+  };
   emojis.forEach(emoji => {
     const chip = document.createElement('button');
     const isActive = activeFilters.includes(emoji);
     chip.className = 'vibe-chip' + (isActive ? ' active' : '');
     chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-    chip.title = `Filter by ${emoji}`;
+    chip.title = VIBE_LABELS[emoji] || emoji;
     chip.textContent = emoji;
     chip.onclick = () => {
       const idx = activeFilters.indexOf(emoji);
