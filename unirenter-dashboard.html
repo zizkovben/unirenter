@@ -243,6 +243,49 @@ body.light-mode {
 }
 .cob-review-star:hover { transform: scale(1.2); filter: none; }
 .cob-review-dismiss { background: none; border: none; cursor: pointer; font-size: 16px; color: var(--text-muted); flex-shrink: 0; padding: 0; }
+.cob-review-followup { display: none; }
+.cob-review-followup.active { display: block; }
+.cob-review-thankyou {
+  font-size: 13px; font-weight: 600; color: var(--brand-green); margin-bottom: 10px;
+}
+.cob-review-prompt {
+  font-size: 13px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5;
+}
+.cob-review-input {
+  width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; padding: 9px 12px; font-size: 13px; color: var(--text-primary);
+  font-family: 'Inter', sans-serif; resize: none; margin-bottom: 10px;
+  transition: border-color 0.15s;
+}
+.cob-review-input:focus { outline: none; border-color: rgba(245,184,0,0.4); }
+.cob-review-submit-btn {
+  background: var(--brand-yellow); color: #0d1f2d;
+  border: none; border-radius: 8px; padding: 8px 18px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: opacity 0.15s;
+  margin-right: 8px;
+}
+.cob-review-submit-btn:hover { opacity: 0.88; }
+.cob-review-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.cob-review-skip { font-size: 12px; color: var(--text-muted); background: none; border: none;
+  cursor: pointer; font-family: 'Inter', sans-serif; padding: 0; }
+.cob-review-skip:hover { color: var(--text-primary); }
+.cob-review-share-strip {
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.cob-review-share-label {
+  font-size: 12px; color: var(--text-muted); flex: 1; min-width: 140px; line-height: 1.4;
+}
+.cob-review-share-btn {
+  background: none; border: 1px solid rgba(255,255,255,0.15);
+  color: var(--text-muted); border-radius: 7px; padding: 6px 12px;
+  font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif;
+  transition: all 0.15s; white-space: nowrap;
+}
+.cob-review-share-btn:hover { border-color: rgba(75,191,224,0.4); color: var(--brand-blue); }
+.cob-review-share-btn.copied { border-color: rgba(61,170,92,0.4); color: var(--brand-green); }
 
 /* Uni email verify modal */
 .modal-overlay {
@@ -690,6 +733,17 @@ body.light-mode {
   transition: border-color 0.2s, transform 0.2s;
 }
 .match-card:hover { border-color: rgba(75,191,224,0.2); transform: translateY(-1px); }
+.match-vibe-equation {
+  font-size: 12px; color: var(--text-muted); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.match-vibe-eq-math { font-size: 15px; letter-spacing: 1px; }
+.match-vibe-eq-line { font-size: 11px; color: rgba(255,255,255,0.35); font-style: italic; line-height: 1.4; }
+.match-vibe-eq-nudge {
+  font-size: 11px; color: rgba(245,184,0,0.6); font-style: italic; cursor: pointer;
+  border-bottom: 1px dashed rgba(245,184,0,0.3); transition: color 0.15s;
+}
+.match-vibe-eq-nudge:hover { color: var(--brand-yellow); }
 .match-card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
 .match-avatar {
   width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
@@ -2754,13 +2808,33 @@ body.light-mode {
     <div class="cob-review-card" id="cob-review-card" style="display:none;">
       <div class="cob-review-card-icon">🤠</div>
       <div class="cob-review-card-body">
-        <div class="cob-review-card-msg">You've got matches! Quick one — how would you rate UniRenter so far?</div>
-        <div class="cob-review-stars">
-          <button class="cob-review-star" onclick="cobReviewStar(1)" title="1 star">⭐</button>
-          <button class="cob-review-star" onclick="cobReviewStar(2)" title="2 stars">⭐</button>
-          <button class="cob-review-star" onclick="cobReviewStar(3)" title="3 stars">⭐</button>
-          <button class="cob-review-star" onclick="cobReviewStar(4)" title="4 stars">⭐</button>
-          <button class="cob-review-star" onclick="cobReviewStar(5)" title="5 stars">⭐</button>
+        <!-- Step 1: star rating -->
+        <div id="cob-review-step-stars">
+          <div class="cob-review-card-msg">You've got matches! Quick one — how would you rate UniRenter so far?</div>
+          <div class="cob-review-stars">
+            <button class="cob-review-star" onclick="cobReviewStar(1)" title="1 star">⭐</button>
+            <button class="cob-review-star" onclick="cobReviewStar(2)" title="2 stars">⭐</button>
+            <button class="cob-review-star" onclick="cobReviewStar(3)" title="3 stars">⭐</button>
+            <button class="cob-review-star" onclick="cobReviewStar(4)" title="4 stars">⭐</button>
+            <button class="cob-review-star" onclick="cobReviewStar(5)" title="5 stars">⭐</button>
+          </div>
+        </div>
+        <!-- Step 2: follow-up comment (4-5 stars only) -->
+        <div id="cob-review-step-comment" class="cob-review-followup">
+          <div class="cob-review-thankyou" id="cob-review-thanks">Thanks! 🤠</div>
+          <div class="cob-review-prompt">What's been most useful so far? (optional)</div>
+          <textarea class="cob-review-input" id="cob-review-comment" rows="2" placeholder="e.g. finding housemates, the lease guide…"></textarea>
+          <button class="cob-review-submit-btn" id="cob-review-submit-btn" onclick="cobReviewSubmit()">Submit</button>
+          <button class="cob-review-skip" onclick="cobReviewSkipComment()">Skip</button>
+        </div>
+        <!-- Step 3: share strip (after submit or skip) -->
+        <div id="cob-review-step-share" class="cob-review-followup">
+          <div class="cob-review-thankyou">Done — cheers! 🤠</div>
+          <div class="cob-review-share-strip">
+            <span class="cob-review-share-label">Help a fellow student find UniRenter</span>
+            <button class="cob-review-share-btn" id="cob-share-copy-btn" onclick="cobReviewCopyLink()">Copy link</button>
+            <a class="cob-review-share-btn" id="cob-share-email-btn" href="mailto:?subject=Find%20your%20student%20housemate&body=I%20found%20my%20housemate%20on%20UniRenter%20%F0%9F%A4%A0%20%E2%80%94%20it%27s%20free%20for%20students%3A%20https%3A%2F%2Funirenter.com.au" style="text-decoration:none;display:inline-block;">Share via email</a>
+          </div>
         </div>
       </div>
       <button class="cob-review-dismiss" onclick="dismissCobReviewCard()" title="Dismiss">✕</button>
@@ -4475,6 +4549,53 @@ const DUMMY_MATCHES = [
     vibe_emoji_primary:'🏋️' },
 ];
 
+// ── Emoji equation pairing logic ─────────────────────────────────────────────
+
+var VIBE_PAIRS = {
+  '🌙+🌙': { eq:'😴😴', line:'Two night owls. Nobody\'s getting woken up at 6am.' },
+  '🌙+🐦': { eq:'🎧',   line:'Night owl meets early riser — headphones after 10pm is the classic fix.' },
+  '🐦+🌙': { eq:'🎧',   line:'Early riser meets night owl — headphones after 10pm is the classic fix.' },
+  '🧹+🤷': { eq:'🗓️',  line:'Neat freak meets relaxed — a Sunday reset roster goes a long way.' },
+  '🤷+🧹': { eq:'🗓️',  line:'Relaxed meets neat freak — a Sunday reset roster goes a long way.' },
+  '🍳+🍳': { eq:'🛒',   line:'Two home cooks. Agree on grocery sharing early.' },
+  '📚+📚': { eq:'🤫',   line:'Both study-focused. The house will be quiet. Good quiet.' },
+  '🗣️+🚪': { eq:'🚦',  line:'Social meets private — a heads-up before guests is worth a conversation.' },
+  '🚪+🗣️': { eq:'🚦',  line:'Private meets social — a heads-up before guests is worth a conversation.' },
+  '🏋️+🌙': { eq:'⏰🔇', line:'Gym at 6am, still up at midnight — you\'ll barely overlap.' },
+  '🌙+🏋️': { eq:'⏰🔇', line:'Night owl meets gym regular — you\'ll barely overlap.' },
+  '🌍+🌍': { eq:'🍜🤝', line:'Two internationals. Cob loves this combination.' },
+  '🏠+🏠': { eq:'☕',   line:'Two homebodies. The couch is going to get some mileage.' },
+  '🌿+🌿': { eq:'😌',   line:'Two chill vibes. This house is going to be very zen.' },
+  '🎮+🎮': { eq:'🎮🎮', line:'Two gamers. Just agree on the TV first.' },
+  '🎵+🎵': { eq:'🎶',   line:'Two musicians. Headphones or a jam session — your call.' },
+  '👥+🚪': { eq:'📅',   line:'Social butterfly meets homebody — a shared calendar helps.' },
+  '🚪+👥': { eq:'📅',   line:'Homebody meets social butterfly — a shared calendar helps.' },
+  '🧹+🍳': { eq:'✨🍳', line:'Neat freak and home cook — a clean kitchen every night.' },
+  '🍳+🧹': { eq:'✨🍳', line:'Home cook and neat freak — a clean kitchen every night.' },
+  '📚+💼': { eq:'⏰',   line:'Study-focused meets young professional — both keeping structured hours.' },
+  '💼+📚': { eq:'⏰',   line:'Young professional meets study-focused — both keeping structured hours.' },
+  '🎓+🎓': { eq:'📖📖', line:'Two postgrads. This house is going to be very productive.' },
+  '🌈+🌍': { eq:'🌏🤝', line:'A welcoming home for everyone — Cob is a fan of this combo.' }
+};
+
+function getVibeEquation(myEmoji, matchEmoji) {
+  if (!myEmoji || !matchEmoji) return null;
+  var key = myEmoji + '+' + matchEmoji;
+  if (VIBE_PAIRS[key]) return { myEmoji: myEmoji, matchEmoji: matchEmoji, result: VIBE_PAIRS[key].eq, line: VIBE_PAIRS[key].line };
+  // Generic fallback: same emoji
+  if (myEmoji === matchEmoji) return { myEmoji: myEmoji, matchEmoji: matchEmoji, result: '🤝', line: 'You two are cut from the same cloth.' };
+  // Generic fallback: different emoji
+  return { myEmoji: myEmoji, matchEmoji: matchEmoji, result: '🏠', line: 'Different vibes, one roof — could work really well.' };
+}
+
+function getMyVibeEmoji() {
+  try {
+    var vd = localStorage.getItem('ur_vibe');
+    if (vd) { var p = JSON.parse(vd); return p.primary || null; }
+  } catch(e) {}
+  return null;
+}
+
 function renderMatchCard(p) {
   const card = document.createElement('div');
   card.className = 'match-card';
@@ -4482,6 +4603,28 @@ function renderMatchCard(p) {
   const tags = p.tags.map((t,i) =>
     `<span class="match-tag ${p.tagClass[i] || ''}">${t}</span>`
   ).join('');
+  // Build emoji equation line
+  var myEmoji = getMyVibeEmoji();
+  var matchEmoji = p.vibe_emoji_primary || null;
+  var eqHtml = '';
+  if (myEmoji && matchEmoji) {
+    var eq = getVibeEquation(myEmoji, matchEmoji);
+    if (eq) {
+      eqHtml = '<div class="match-vibe-equation">' +
+        '<span class="match-vibe-eq-math">' + eq.myEmoji + ' + ' + eq.matchEmoji + ' = ' + eq.result + '</span>' +
+        '<span class="match-vibe-eq-line">' + eq.line + '</span>' +
+      '</div>';
+    }
+  } else if (!myEmoji && matchEmoji) {
+    // Match has a vibe, user doesn\'t — nudge them
+    eqHtml = '<div class="match-vibe-equation">' +
+      '<span class="match-vibe-eq-math">' + matchEmoji + ' + ❓ = 🤔</span>' +
+      '<span class="match-vibe-eq-nudge" onclick="switchTab(\'profile\');setTimeout(function(){var v=document.getElementById(\'vibe-card\');if(v)v.scrollIntoView({behavior:\'smooth\'});},300);">' +
+        'Complete your vibe quiz — Cob will work out your equation 🤠' +
+      '</span>' +
+    '</div>';
+  }
+
   card.innerHTML = `
     <div class="match-card-header">
       <div class="match-avatar" style="background:${p.bg};">${p.initials}</div>
@@ -4494,6 +4637,7 @@ function renderMatchCard(p) {
     <div class="match-tags">${tags}</div>
     <div class="match-compat"><div class="match-compat-bar" style="width:${p.score}%"></div></div>
     <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">✓ ${p.reason}</div>
+    ${eqHtml}
     <div class="match-actions">
       <button class="btn-connect" onclick="connectWith('${p.name}')">Connect</button>
       <button class="btn-skip" onclick="skipCard(this)">Skip</button>
@@ -7952,10 +8096,69 @@ function dismissCobReviewCard() {
 }
 
 function cobReviewStar(n) {
-  dismissCobReviewCard();
-  // Navigate to review page with pre-selected rating
-  const email = encodeURIComponent(localStorage.getItem('unirenter_email') || '');
-  window.location.href = '/review?rating=' + n + '&email=' + email;
+  window._cobReviewRating = n;
+  if (n >= 4) {
+    // Stay in-app: show comment follow-up
+    document.getElementById('cob-review-step-stars').style.display = 'none';
+    var thanks = document.getElementById('cob-review-thanks');
+    if (thanks) thanks.textContent = n === 5 ? 'Five stars! 🤠 Cheers!' : 'Thanks for that! 🤠';
+    document.getElementById('cob-review-step-comment').classList.add('active');
+    // Hide dismiss button during follow-up (keep card open)
+    var dismiss = document.querySelector('#cob-review-card .cob-review-dismiss');
+    if (dismiss) dismiss.style.display = 'none';
+  } else {
+    // 1-3 stars: redirect to /review page for detailed feedback
+    dismissCobReviewCard();
+    const email = encodeURIComponent(localStorage.getItem('unirenter_email') || '');
+    window.location.href = '/review?rating=' + n + '&email=' + email;
+  }
+}
+
+function cobReviewSubmit() {
+  var btn = document.getElementById('cob-review-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  var comment = (document.getElementById('cob-review-comment').value || '').trim();
+  var rating  = window._cobReviewRating || 5;
+  var email   = localStorage.getItem('unirenter_email') || '';
+  var city    = localStorage.getItem('ur_city') || 'melbourne';
+
+  fetch('/api/reviews/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ rating: rating, text: comment, city: city, reviewer_name: email.split('@')[0] || 'Student', source: 'in-app-card' })
+  })
+  .then(function(r) { return r.json(); })
+  .catch(function() { return { ok: false }; })
+  .finally(function() {
+    localStorage.setItem('ur_review_submitted', '1');
+    cobReviewShowShare();
+  });
+}
+
+function cobReviewSkipComment() {
+  localStorage.setItem('ur_review_submitted', '1');
+  cobReviewShowShare();
+}
+
+function cobReviewShowShare() {
+  document.getElementById('cob-review-step-comment').classList.remove('active');
+  document.getElementById('cob-review-step-share').classList.add('active');
+}
+
+function cobReviewCopyLink() {
+  var url = 'https://unirenter.com.au';
+  var btn = document.getElementById('cob-share-copy-btn');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function() {
+      if (btn) { btn.textContent = 'Copied!'; btn.classList.add('copied');
+        setTimeout(function() { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000); }
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    if (btn) { btn.textContent = 'Copied!'; setTimeout(function() { btn.textContent = 'Copy link'; }, 2000); }
+  }
 }
 
 </script>
