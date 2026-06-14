@@ -3076,6 +3076,75 @@ body.light-mode {
 .seasonal-banner-dismiss:hover { color: var(--text-primary,#e8edf0); }
 
 
+/* ── Match card cob_summary preview (S64) ── */
+.match-cob-summary {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.45;
+  margin: 6px 0 10px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  opacity: 0.75;
+}
+
+/* ── Dashboard empty state (S64) ── */
+.empty-state-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: rgba(245,184,0,0.06);
+  border: 1px solid rgba(245,184,0,0.2);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.empty-state-avatar { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
+.empty-state-body { flex: 1; }
+.empty-state-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+.empty-state-copy {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+.empty-state-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+.empty-state-step {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.empty-state-step-done { color: var(--brand-green, #3DAA5C); }
+.empty-state-step-todo { color: rgba(245,184,0,0.7); }
+.empty-state-cta {
+  background: var(--brand-yellow, #F5B800);
+  color: var(--navy, #0d1f2d);
+  border: none;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.empty-state-cta:hover { opacity: 0.88; }
+
+
 </style>
 </head>
 <body>
@@ -5385,19 +5454,23 @@ const DUMMY_MATCHES = [
   { name:'Priya R.', initials:'P', bg:'linear-gradient(135deg,#e85d9f,#b83278)', score:96,
     sub:'UniMelb · Commerce/Law · 2nd year', tags:['🌙 Early bird','🧹 Very tidy','Carlton','$320/wk'],
     tagClass:['','green','yellow','yellow'], reason:'Sleep, cleanliness & location match',
-    vibe_emoji_primary:'📚', vibe_emoji_secondary:'☕' },
+    vibe_emoji_primary:'📚', vibe_emoji_secondary:'☕',
+    cob_summary:'Early riser who batch-cooks on Sundays and keeps the kitchen spotless — commerce student with a very structured week.' },
   { name:'Jake S.', initials:'J', bg:'linear-gradient(135deg,#4BBFE0,#2a7a9e)', score:88,
     sub:'RMIT · Engineering · 3rd year', tags:['🌃 Night owl','⚖️ Average clean','Footscray','$280/wk'],
     tagClass:['','','yellow','yellow'], reason:'Budget & suburb match',
-    vibe_emoji_primary:'🎮', vibe_emoji_secondary:'💻' },
+    vibe_emoji_primary:'🎮', vibe_emoji_secondary:'💻',
+    cob_summary:'Night-owl gamer who works from home most days — relaxed about mess but respectful of quiet study time.' },
   { name:'Anika M.', initials:'A', bg:'linear-gradient(135deg,#F5B800,#c4900a)', score:84,
     sub:'Monash · Psychology · 1st year', tags:['🔄 Flexible','🧹 Tidy','St Kilda','$320/wk'],
     tagClass:['','green','yellow','yellow'], reason:'Lifestyle & budget match',
-    vibe_emoji_primary:'🌿', vibe_emoji_secondary:'🪴' },
+    vibe_emoji_primary:'🌿', vibe_emoji_secondary:'🪴',
+    cob_summary:'Chill first-year who loves plants and keeps shared spaces tidy — flexible schedule, very easy to live with.' },
   { name:'Tom O.', initials:'T', bg:'linear-gradient(135deg,#3DAA5C,#1d6b38)', score:79,
     sub:'Melbourne Uni · Arts · 3rd year', tags:['🌙 Early bird','🧹 Very tidy','Brunswick'],
     tagClass:['','green','yellow'], reason:'Sleep schedule match',
-    vibe_emoji_primary:'🏋️', vibe_emoji_secondary:'💪' },
+    vibe_emoji_primary:'🏋️', vibe_emoji_secondary:'💪',
+    cob_summary:'Gym-going arts student who is up early and in bed by 10 — very tidy, prefers a quiet house during the week.' },
 ];
 
 // ── Emoji equation pairing logic ─────────────────────────────────────────────
@@ -5545,6 +5618,9 @@ function renderMatchCard(p) {
     '</div>';
   }
 
+  const cobPreviewHtml = p.cob_summary
+    ? `<div class="match-cob-summary">${p.cob_summary}</div>`
+    : '';
   card.innerHTML = `
     <div class="match-card-header">
       <div class="match-avatar" style="background:${p.bg};">${p.initials}</div>
@@ -5554,6 +5630,7 @@ function renderMatchCard(p) {
       </div>
       <div class="match-score-badge">${p.score}%</div>
     </div>
+    ${cobPreviewHtml}
     <div class="match-tags">${tags}</div>
     <div class="match-compat"><div class="match-compat-bar" style="width:${p.score}%"></div></div>
     <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">✓ ${p.reason}</div>
@@ -5675,16 +5752,67 @@ function applyVibeFilter(activeFilters) {
   });
 }
 
+function renderEmptyState() {
+  // Check profile completeness to give specific guidance
+  const hasSuburbs  = (() => { try { return JSON.parse(localStorage.getItem('ur_suburbs') || '[]').length > 0; } catch(e) { return false; } })();
+  const hasBudget   = !!localStorage.getItem('ur_budget_max');
+  const hasUni      = !!localStorage.getItem('ur_uni');
+  const hasPhoto    = !!localStorage.getItem('ur_photo_url');
+
+  const steps = [
+    { label: 'Add your university',     done: hasUni },
+    { label: 'Set your weekly budget',  done: hasBudget },
+    { label: 'Choose your suburbs',     done: hasSuburbs },
+    { label: 'Upload a profile photo',  done: hasPhoto },
+  ];
+  const remaining = steps.filter(s => !s.done).length;
+  const stepsHtml = steps.map(s =>
+    `<div class="empty-state-step ${s.done ? 'empty-state-step-done' : 'empty-state-step-todo'}">
+      ${s.done ? '✓' : '→'} ${s.label}
+    </div>`
+  ).join('');
+
+  const city = (localStorage.getItem('ur_city') || 'your city');
+  const cityLabel = city.charAt(0).toUpperCase() + city.slice(1);
+
+  return `<div class="empty-state-card">
+    <div class="empty-state-avatar">🤠</div>
+    <div class="empty-state-body">
+      <div class="empty-state-title">No matches yet — let's fix that.</div>
+      <div class="empty-state-copy">
+        ${remaining > 0
+          ? `Cob needs a bit more info to find your matches in ${cityLabel}. ${remaining} thing${remaining > 1 ? 's' : ''} left to add:`
+          : `Your profile looks good — matches in ${cityLabel} update daily. Check back soon!`
+        }
+      </div>
+      ${remaining > 0 ? `<div class="empty-state-steps">${stepsHtml}</div>
+      <button class="empty-state-cta" onclick="switchTab('profile')">Finish my profile →</button>` : ''}
+    </div>
+  </div>`;
+}
+
 function renderMatches() {
   const grid = document.getElementById('match-grid');
   if (!grid) return;
   grid.innerHTML = '';
 
   const email = localStorage.getItem('unirenter_email');
+  const isVerified = localStorage.getItem('unirenter_email_verified') === '1';
 
-  // Show dummy/real matches
+  // Show dummy/real matches — or empty state for signed-in users with no matches
   maybeShowCobReviewCard();
-  DUMMY_MATCHES.forEach(p => grid.appendChild(renderMatchCard(p)));
+
+  if (isVerified && window._lastMatchCount === 0) {
+    // Signed in, profile returned 0 real matches — show empty state
+    const emptyEl = document.createElement('div');
+    emptyEl.innerHTML = renderEmptyState();
+    grid.appendChild(emptyEl.firstElementChild);
+  } else {
+    // Not signed in or has matches — show dummy cards
+    DUMMY_MATCHES.forEach(p => grid.appendChild(renderMatchCard(p)));
+  }
+  // Track match count for Cob context
+  if (typeof window._lastMatchCount === 'undefined') window._lastMatchCount = DUMMY_MATCHES.length;
 
   // Add card at end — profile CTA if no email, referral if signed in
   const cs = document.createElement('div');
