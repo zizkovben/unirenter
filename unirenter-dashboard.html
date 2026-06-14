@@ -2061,6 +2061,17 @@ body.light-mode {
 .settings-collapse-body { background: var(--navy-card); }
 .settings-collapse-body .settings-layout { padding: 0 0 8px; }
 
+/* ── Household vibe equation (S60) ── */
+.hh-vibe-equation { background: rgba(245,184,0,0.04); border: 1px solid rgba(245,184,0,0.12); border-radius: 10px; padding: 14px 16px; margin: 12px 0; }
+.hh-vibe-eq-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 8px; }
+.hh-vibe-eq-row { margin-bottom: 4px; }
+.hh-vibe-eq-emojis { font-size: 20px; letter-spacing: 4px; }
+.hh-vibe-eq-line { font-size: 13px; color: var(--text-muted); font-style: italic; margin-top: 2px; }
+.hh-vibe-eq-second { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); }
+.hh-vibe-eq-second-label { font-size: 10px; color: rgba(255,255,255,0.3); margin-right: 4px; }
+.hh-vibe-eq-second-emojis { font-size: 14px; letter-spacing: 3px; }
+.hh-vibe-eq-second-line { font-size: 12px; color: rgba(255,255,255,0.4); font-style: italic; margin-top: 3px; }
+
 /* ── Household Hub (S45) ── */
 .household-section {
   background: var(--navy-card);
@@ -7891,9 +7902,13 @@ function householdRender(data, currentEmail) {
   var invitePanelHtml = inviteToken ?
     '<div id="hh-invite-panel-wrap" style="display:none;margin-top:12px;">' + householdInvitePanel(inviteToken) + '</div>' : '';
 
+  // Vibe equation (primary + secondary)
+  var vibeEqHtml = householdVibeEquation(members);
+
   var html =
     '<div class="household-members-row">' + chipsHtml + '</div>' +
     (barsHtml ? '<div class="household-compat-grid">' + barsHtml + '</div>' : '') +
+    (vibeEqHtml || '') +
     (cobTip ? '<div class="household-cob-tip">🤠 ' + cobTip + '</div>' : '') +
     actionsHtml +
     invitePanelHtml;
@@ -7939,6 +7954,55 @@ function householdCalcCompat(members) {
     guests:  scoreField(guestVals),
     kitchen: scoreField(kitchenVals)
   };
+}
+
+function householdVibeEquation(members) {
+  // Only render when >=2 members both have vibe set
+  var withVibe = members.filter(function(m){ return m.vibe_emoji_primary; });
+  if (withVibe.length < 2) return '';
+  
+  // Build primary equation for first two vibe-having members
+  var a = withVibe[0], b = withVibe[1];
+  var pa = a.vibe_emoji_primary, pb = b.vibe_emoji_primary;
+  var nameA = (a.display_name || 'Flatmate 1').split(' ')[0];
+  var nameB = (b.display_name || 'Flatmate 2').split(' ')[0];
+
+  // Look up primary pair
+  var primaryEq = null;
+  if (typeof VIBE_PAIRS !== 'undefined') {
+    var key = pa + '+' + pb;
+    if (VIBE_PAIRS[key]) primaryEq = VIBE_PAIRS[key];
+    else if (pa === pb && VIBE_PAIRS[pa + '+' + pa]) primaryEq = VIBE_PAIRS[pa + '+' + pa];
+  }
+
+  var html = '<div class="hh-vibe-equation">';
+  html += '<div class="hh-vibe-eq-label">Vibe equation</div>';
+  
+  // Primary equation line
+  html += '<div class="hh-vibe-eq-row">';
+  html += '<span class="hh-vibe-eq-emojis">' + pa + ' + ' + pb + ' = ' + (primaryEq ? primaryEq.result : '🤠') + '</span>';
+  html += '</div>';
+  if (primaryEq) {
+    html += '<div class="hh-vibe-eq-line">' + primaryEq.line + '</div>';
+  } else {
+    html += '<div class="hh-vibe-eq-line">Cob reckons ' + nameA + ' and ' + nameB + ' have something going on. 🤠</div>';
+  }
+  
+  // Secondary equation (if both have secondary)
+  var sa = a.vibe_emoji_secondary, sb = b.vibe_emoji_secondary;
+  if (sa && sb && typeof VIBE_SECONDARY_PAIRS !== 'undefined' && typeof getSecondaryEquation === 'function') {
+    var secEq = getSecondaryEquation(sa, sb);
+    if (secEq) {
+      html += '<div class="hh-vibe-eq-second">';
+      html += '<span class="hh-vibe-eq-second-label">also: </span>';
+      html += '<span class="hh-vibe-eq-second-emojis">' + sa + ' + ' + sb + ' = ' + secEq.result + '</span>';
+      html += '<div class="hh-vibe-eq-second-line">' + secEq.line + '</div>';
+      html += '</div>';
+    }
+  }
+  
+  html += '</div>';
+  return html;
 }
 
 function householdCobTip(members, compat) {

@@ -110,7 +110,17 @@
       filter: drop-shadow(0 4px 16px rgba(245,184,0,0.25));
     }
     .vibe-secondary-emoji {
-      font-size: 24px; margin-bottom: 16px; opacity: 0.8;
+      font-size: 24px; margin-bottom: 8px; opacity: 0.8;
+    }
+    .vibe-self-equation {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(245,184,0,0.06); border: 1px solid rgba(245,184,0,0.15);
+      border-radius: 20px; padding: 6px 14px; margin-bottom: 14px;
+      font-size: 16px; letter-spacing: 2px;
+    }
+    .vibe-self-eq-line {
+      font-size: 12px; color: rgba(255,255,255,0.45); font-style: italic;
+      margin-bottom: 14px; padding: 0 4px;
     }
     .vibe-name {
       font-family: 'Epilogue', sans-serif;
@@ -280,6 +290,57 @@
       renderError('Couldn\'t load card', 'Something went wrong. Try refreshing the page.', '😅');
     });
 
+  // Self-equation: how primary + secondary combine for the card owner's "vibe fingerprint"
+  var VIBE_SELF_PAIRS = {
+    '🌙+💻': { result: '🌙💻', line: 'Night owl with a laptop always open.' },
+    '🌙+🍺': { result: '🌙🍻', line: 'Stays up late — and social about it.' },
+    '🌙+🎮': { result: '🌙🎮', line: 'Night gaming sessions are a core personality trait.' },
+    '🌙+🎨': { result: '🌙🎨', line: 'Creates best when the house is quiet.' },
+    '🌙+📖': { result: '🌙📖', line: 'Late-night reader. Very calm house energy.' },
+    '🐦+💪': { result: '🐦💪', line: 'Up early and active. High-energy household.' },
+    '🐦+☕': { result: '🐦☕', line: 'Early riser, coffee in hand. Very morning-person energy.' },
+    '🐦+🧘': { result: '🐦🧘', line: 'Morning routine sorted — alarm goes off, yoga mat comes out.' },
+    '📚+💻': { result: '📚💻', line: 'Studies a lot. Quiet hours matter.' },
+    '📚+☕': { result: '📚☕', line: 'Fuelled by caffeine and deadlines.' },
+    '📚+🧘': { result: '📚🧘', line: 'Hard studier who knows how to decompress.' },
+    '🍳+🌱': { result: '🍳🌱', line: 'Plant-based home cook. The fridge is going to be interesting.' },
+    '🍳+🍖': { result: '🍳🍖', line: 'Home cook and proud of it. Smells good in here.' },
+    '🍳+☕': { result: '🍳☕', line: 'Mornings are for cooking and coffee.' },
+    '🧹+🪴': { result: '🧹🪴', line: 'Tidy house, indoor plants. Very put-together energy.' },
+    '🗣️+🍺': { result: '🗣️🍻', line: 'Social and loves a gathering.' },
+    '🗣️+🎊': { result: '🗣️🎊', line: 'The one who organises the house events.' },
+    '🏋️+💪': { result: '🏋️💪', line: 'Gym is a lifestyle, not a hobby.' },
+    '🏋️+☕': { result: '🏋️☕', line: 'Pre-workout coffee, post-gym protein. Routine driven.' },
+    '🌍+✈️': { result: '🌍✈️', line: 'International student with a travel habit. Life is an adventure.' },
+    '🌍+🗺️': { result: '🌍🗺️', line: 'From somewhere interesting, always curious about the next place.' },
+    '🌿+🧘': { result: '🌿🧘', line: 'Maximum chill vibes. This is the zen flatmate.' },
+    '🌿+🪴': { result: '🌿🪴', line: 'Chill and into plants. Very low-key house energy.' },
+    '🎮+💻': { result: '🎮💻', line: 'Either gaming or working — probably both at the same time.' },
+    '🎵+🎨': { result: '🎵🎨', line: 'Creative soul. The common areas will reflect it.' },
+    '🌈+🗣️': { result: '🌈🗣️', line: 'Outgoing and inclusive. Brings people together.' },
+    '🏠+🪴': { result: '🏠🪴', line: 'Homebody with a love of making the space feel lived in.' },
+    '🏠+☕': { result: '🏠☕', line: 'Content at home with a coffee. Simple pleasures.' },
+    '💼+💻': { result: '💼💻', line: 'Young professional. Work is busy — home is where they recharge.' },
+    '🚪+📖': { result: '🚪📖', line: 'Private and bookish. Very quiet, very self-contained.' },
+  };
+
+  function getVibeCardEquation(primary, secondary) {
+    if (!primary || !secondary) return null;
+    var key = primary + '+' + secondary;
+    if (VIBE_SELF_PAIRS[key]) return VIBE_SELF_PAIRS[key];
+    // Fallback: generate a generic line from both
+    var VIBE_LABELS = {
+      '🌙':'night owl','🐦':'early riser','📚':'study-focused','🎓':'postgrad',
+      '💼':'young professional','🗣️':'social','🚪':'private','🧹':'neat freak',
+      '🤷':'relaxed about mess','🍳':'home cook','🎮':'gamer','🎵':'musician',
+      '🏋️':'gym regular','🌈':'inclusive','🌍':'international','👥':'loves guests',
+      '🏠':'homebody','🌿':'chill'
+    };
+    var pa = VIBE_LABELS[primary] || '', sa = VIBE_LABELS[secondary] || '';
+    if (pa && sa) return { result: primary + secondary, line: capitalise(pa) + ' with ' + sa + ' energy on the side.' };
+    return null;
+  }
+
   function renderCard(card, reviewSummary) {
     var name = card.display_name || 'Your potential flatmate';
     var firstName = name.split(' ')[0];
@@ -309,6 +370,12 @@
           '<div class="vibe-card-brand">Housemate Vibe Card — <span>UniRenter</span></div>' +
           '<div class="vibe-primary-emoji">' + primaryEmoji + '</div>' +
           (secondaryEmoji ? '<div class="vibe-secondary-emoji">' + secondaryEmoji + '</div>' : '') +
+          (function() {
+            var selfEq = (primaryEmoji && secondaryEmoji) ? getVibeCardEquation(primaryEmoji, secondaryEmoji) : null;
+            if (!selfEq) return '';
+            return '<div class="vibe-self-equation">' + primaryEmoji + ' + ' + secondaryEmoji + ' = ' + selfEq.result + '</div>' +
+                   '<div class="vibe-self-eq-line">' + selfEq.line + '</div>';
+          })() +
           '<div class="vibe-name">' + escHtml(firstName) + '</div>' +
           (uni || city ? '<div class="vibe-meta">' + (uni ? '<span>' + escHtml(uni) + '</span>' : '') + (uni && city ? ' · ' : '') + (city ? escHtml(city) : '') + '</div>' : '') +
           '<div class="cob-branding">Powered by <strong>Cob 🤠</strong></div>' +
