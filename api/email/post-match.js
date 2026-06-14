@@ -45,6 +45,51 @@ const EMOJI_PAIRS = {
   '🌿+🌿': { result: '🧘', line: "Two chill ones. No drama. Just good vibes." },
 };
 
+// ── Secondary vibe pairs (S60) ─────────────────────────────────────────────
+const SECONDARY_PAIRS = {
+  // Identical pairs
+  '☕+☕': { eq:'☕☕', line:'Two coffee people. The kitchen kettle is going to work hard.' },
+  '💻+💻': { eq:'💻💻', line:'Both work-from-home types. Call time boundaries will matter.' },
+  '🌱+🌱': { eq:'🥗', line:'Two plant-based housemates. The fridge is sorted.' },
+  '🐶+🐶': { eq:'🐾🐾', line:'Two dog owners. The walk roster writes itself.' },
+  '🐱+🐱': { eq:'🐱🐱', line:'Two cat people. The apartment will be very well supervised.' },
+  '🎨+🎨': { eq:'🎨✨', line:'Two creative types. The place will feel alive.' },
+  '🧘+🧘': { eq:'🧘✨', line:'Two into wellness. Very zen household.' },
+  '🍺+🍺': { eq:'🍻', line:'Both like a beer. Social dynamic sorted.' },
+  '✈️+✈️': { eq:'🗺️', line:'Two travellers. You will understand each other\'s disappearing acts.' },
+  '💑+💑': { eq:'💑💑', line:'Both in relationships. Partners will be around — good to know.' },
+  // Complementary pairs
+  '🌱+🍖': { eq:'🍽️', line:'Plant-based and meat-eater — the kitchen handles both.' },
+  '🍖+🌱': { eq:'🍽️', line:'Meat-eater and plant-based — the kitchen handles both.' },
+  '💻+🌿': { eq:'💻🌿', line:'Work-from-home meets chill vibes. Good energy.' },
+  '🌿+💻': { eq:'🌿💻', line:'Chill energy meets work-from-home. Good energy.' },
+  '☕+🌿': { eq:'☕🌿', line:'Coffee person meets chill one. Slow mornings ahead.' },
+  '🌿+☕': { eq:'🌿☕', line:'Chill one meets coffee person. Slow mornings ahead.' },
+  '🐶+🐱': { eq:'🐾🐱', line:'Dog and cat owner. The house will be lively.' },
+  '🐱+🐶': { eq:'🐱🐾', line:'Cat and dog owner. The house will be lively.' },
+  '🍺+💻': { eq:'🍺💻', line:'One switches off with a beer, one with work. Compatible enough.' },
+  '💻+🍺': { eq:'💻🍺', line:'Work-from-home type meets the after-work beer. Fine balance.' },
+  '✈️+💻': { eq:'✈️💻', line:'Traveller meets remote worker. Both understand flexibility.' },
+  '💻+✈️': { eq:'💻✈️', line:'Remote worker meets traveller. Both understand flexibility.' },
+  '🧘+💑': { eq:'🧘💑', line:'Wellness-focused and couple life. Calm household.' },
+  '💑+🧘': { eq:'💑🧘', line:'Couple life meets wellness-focused. Calm household.' },
+  // Honest tension pairs
+  '🍺+🧘': { eq:'⚖️', line:'Beer and wellness — two very different definitions of unwinding.' },
+  '🧘+🍺': { eq:'⚖️', line:'Wellness and beer — worth a conversation about noise levels.' },
+  '👶+✈️': { eq:'⏳', line:'Baby and a traveller — lifestyles are very different, but workable.' },
+  '✈️+👶': { eq:'⏳', line:'Traveller and a new parent — very different rhythms, but workable.' },
+  '🍺+👶': { eq:'💬', line:'Party mode and baby mode — definitely have the conversation.' },
+  '👶+🍺': { eq:'💬', line:'Baby mode and party mode — definitely have the conversation.' },
+};
+
+function getSecondaryEquation(userSec, matchSec) {
+  if (!userSec || !matchSec) return null;
+  const key = `${userSec}+${matchSec}`;
+  if (SECONDARY_PAIRS[key]) return { result: SECONDARY_PAIRS[key].eq, line: SECONDARY_PAIRS[key].line };
+  if (userSec === matchSec) return { result: userSec + userSec, line: 'You\'ve both got the same secondary vibe.' };
+  return null;
+}
+
 function getEmojiEquation(userEmoji, matchEmoji) {
   if (!userEmoji || !matchEmoji) return null;
   const key = `${userEmoji}+${matchEmoji}`;
@@ -156,7 +201,7 @@ function buildZone2Blocks(profile, matchProfile, cityRoot, skipIndices = []) {
 }
 
 // ── Email 1 HTML builder ──────────────────────────────────────────────────────
-function buildEmail1Html({ name, matchName, matchUni, score, suburb, userEmoji, matchEmoji, zone2Blocks, unsubToken, email }) {
+function buildEmail1Html({ name, matchName, matchUni, score, suburb, userEmoji, matchEmoji, userSecondary, matchSecondary, zone2Blocks, unsubToken, email }) {
   const equation = getEmojiEquation(userEmoji, matchEmoji);
   const vibeLabel = userEmoji ? VIBE_LABELS[userEmoji] || '' : '';
   const matchVibeLabel = matchEmoji ? VIBE_LABELS[matchEmoji] || '' : '';
@@ -165,6 +210,14 @@ function buildEmail1Html({ name, matchName, matchUni, score, suburb, userEmoji, 
     <div style="margin:16px 0;padding:14px 16px;background:rgba(255,255,255,0.03);border-radius:8px;border-left:2px solid rgba(245,184,0,0.3);">
       <div style="font-size:22px;letter-spacing:4px;margin-bottom:6px;">${equation.userEmoji} + ${equation.matchEmoji} = ${equation.result}</div>
       <div style="font-size:13px;color:#a0bccf;font-style:italic;">${equation.line}</div>
+    </div>` : '';
+
+  const secEq = getSecondaryEquation(userSecondary || null, matchSecondary || null);
+  const secondaryEquationBlock = (secEq && equation) ? `
+    <div style="margin:-8px 0 16px;padding:10px 16px;background:rgba(255,255,255,0.02);border-radius:8px;border-left:2px solid rgba(255,255,255,0.08);">
+      <span style="font-size:10px;color:rgba(255,255,255,0.3);margin-right:4px;">also:</span>
+      <span style="font-size:16px;letter-spacing:3px;">${userSecondary} + ${matchSecondary} = ${secEq.result}</span>
+      <div style="font-size:12px;color:rgba(255,255,255,0.4);font-style:italic;margin-top:3px;">${secEq.line}</div>
     </div>` : '';
 
   const descLine = (vibeLabel && matchVibeLabel)
@@ -196,6 +249,7 @@ function buildEmail1Html({ name, matchName, matchUni, score, suburb, userEmoji, 
         You matched with <strong style="color:#F5B800;">${matchName}</strong> from ${matchUni} — <strong>${score}%</strong> compatibility. ${descLine} Cob reckons you'll get along.
       </div>
       ${equationBlock}
+      ${secondaryEquationBlock}
       <a href="https://unirenter.com.au/dashboard?tab=matches" style="display:block;text-align:center;background:#F5B800;color:#0d1f2d;font-size:14px;font-weight:700;padding:12px 24px;border-radius:8px;text-decoration:none;margin-top:20px;">View my match →</a>
     </div>
 
@@ -447,12 +501,14 @@ module.exports = async function handler(req, res) {
     const zone2Blocks = buildZone2Blocks(profileRow, { name: match_name }, '', []);
     const html = buildEmail1Html({
       name: firstName,
-      matchName:  match_name  || 'your match',
-      matchUni:   match_uni   || 'their uni',
-      score:      score       || '—',
-      suburb:     suburb      || '',
-      userEmoji:  profileRow.vibe_emoji_primary  || null,
-      matchEmoji: null,
+      matchName:    match_name  || 'your match',
+      matchUni:     match_uni   || 'their uni',
+      score:        score       || '—',
+      suburb:       suburb      || '',
+      userEmoji:    profileRow.vibe_emoji_primary    || null,
+      matchEmoji:   null,
+      userSecondary:  profileRow.vibe_emoji_secondary || null,
+      matchSecondary: null,
       zone2Blocks,
       unsubToken,
       email,
