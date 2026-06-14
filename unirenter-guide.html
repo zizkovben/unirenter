@@ -766,20 +766,9 @@ body.light-mode .rr-list li { border-bottom-color: rgba(0,0,0,0.07); color: #1a2
   </div>
 </div>
 <!-- ── Review Slider ── -->
-<section class="review-section">
+<section class="review-section" id="reviewSection" style="display:none">
   <div class="review-section-title">What students are saying <span>🤠</span></div>
-  <div class="review-track-wrap"><div class="review-track" id="reviewTrack">
-    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Found my housemate in 3 days — Cob warned me the first listing looked dodgy."</div><div class="review-author">PRIYA S. · UNIMELB · CARLTON</div></div>
-    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Arrived from China with no contacts. UniRenter matched me with someone from my faculty."</div><div class="review-author">WEI L. · MONASH · CLAYTON</div></div>
-    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"The guide explained VCAT in plain English. No other site does that for international students."</div><div class="review-author">JAKE T. · RMIT · FITZROY</div></div>
-    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"The pet section saved me — almost lost my bond before I read this."</div><div class="review-author">ANIKA M. · LA TROBE · BUNDOORA</div></div>
-    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Free, no spam, actually helpful. Sent it to my whole cohort."</div><div class="review-author">RAHUL K. · DEAKIN · BURWOOD</div></div>
-    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Found my housemate in 3 days — Cob warned me the first listing looked dodgy."</div><div class="review-author">PRIYA S. · UNIMELB · CARLTON</div></div>
-    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Arrived from China with no contacts. UniRenter matched me with someone from my faculty."</div><div class="review-author">WEI L. · MONASH · CLAYTON</div></div>
-    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"The guide explained VCAT in plain English. No other site does that for international students."</div><div class="review-author">JAKE T. · RMIT · FITZROY</div></div>
-    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"The pet section saved me — almost lost my bond before I read this."</div><div class="review-author">ANIKA M. · LA TROBE · BUNDOORA</div></div>
-    <div class="review-card"><div class="review-stars">⭐⭐⭐⭐⭐</div><div class="review-text">"Free, no spam, actually helpful. Sent it to my whole cohort."</div><div class="review-author">RAHUL K. · DEAKIN · BURWOOD</div></div>
-  </div></div>
+  <div class="review-track-wrap"><div class="review-track" id="reviewTrack"></div></div>
 </section>
 
 <!-- ── City Switcher ── -->
@@ -873,6 +862,34 @@ function copyReferralLink() {
     showToast('🔗 Link copied!','Share it with your uni friends.');
   }).catch(()=>showToast('🔗','unirenter.vercel.app/guide'));
 }
+
+// ── Review Slider ──
+(function initReviewSlider() {
+  var city = document.documentElement.dataset.city || '';
+  var url = '/api/reviews/public' + (city ? '?city=' + city : '');
+  fetch(url)
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(data) {
+      if (!data || data.gated || !data.reviews.length) return;
+      var track = document.getElementById('reviewTrack');
+      var section = document.getElementById('reviewSection');
+      if (!track || !section) return;
+      var doubled = data.reviews.concat(data.reviews);
+      track.innerHTML = doubled.map(function(rv) {
+        var stars = '';
+        for (var s = 0; s < Math.min(5, Math.max(1, rv.rating)); s++) stars += '\u2B50';
+        var author = [rv.reviewer_name, rv.reviewer_uni, rv.reviewer_city]
+          .filter(Boolean).join(' \u00B7 ').toUpperCase();
+        return '<div class="review-card">'
+          + '<div class="review-stars">' + stars + '</div>'
+          + '<div class="review-text">\u201C' + (rv.review_text || '') + '\u201D</div>'
+          + '<div class="review-author">' + author + '</div>'
+          + '</div>';
+      }).join('');
+      section.style.display = '';
+    })
+    .catch(function(){}); // silent fail
+})();
 </script>
 </body>
 </html>
