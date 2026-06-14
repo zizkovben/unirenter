@@ -3077,6 +3077,52 @@ body.light-mode {
 .badges-save-status { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 4px; min-height: 14px; }
 .extras-select { margin-bottom: 0 !important; }
 
+/* ── Seasonal banner card (S63) ── */
+.seasonal-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(245,184,0,0.07);
+  border: 1px solid rgba(245,184,0,0.28);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 0 0 16px;
+  position: relative;
+  animation: seasonal-in 0.25s ease;
+}
+@keyframes seasonal-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.seasonal-banner-avatar { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+.seasonal-banner-body { flex: 1; min-width: 0; }
+.seasonal-banner-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--brand-yellow,#F5B800);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.seasonal-banner-copy {
+  font-size: 13px;
+  color: var(--text-primary,#e8edf0);
+  line-height: 1.5;
+}
+.seasonal-banner-dismiss {
+  position: absolute;
+  top: 10px; right: 12px;
+  background: none; border: none;
+  color: var(--text-muted,#8899a6);
+  font-size: 16px; cursor: pointer;
+  padding: 2px 4px; line-height: 1;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+.seasonal-banner-dismiss:hover { color: var(--text-primary,#e8edf0); }
+
+
 </style>
 </head>
 <body>
@@ -3220,7 +3266,9 @@ body.light-mode {
       </div>
       <button class="section-action" onclick="refreshMatches()">🔄 Refresh</button>
     </div>
-    <!-- Vibe emoji filter chips — rendered by JS when ≥10% of matches have a vibe -->
+    <!-- Seasonal academic calendar banner (S63) — rendered by JS -->
+    <div id="seasonal-banner-wrap"></div>
+        <!-- Vibe emoji filter chips — rendered by JS when ≥10% of matches have a vibe -->
     <!-- Cob review card — shown when real matches load, suppressed if ur_review_submitted -->
     <div class="cob-review-card" id="cob-review-card" style="display:none;">
       <div class="cob-review-card-icon">🤠</div>
@@ -4243,6 +4291,9 @@ function switchTab(name) {
   btn.classList.add('active');
   panel.classList.add('active');
 
+  if (name === 'matches') {
+    renderSeasonalBanner();
+  }
   if (name === 'messages') {
     var badge = document.getElementById('msg-badge');
     if (badge) badge.style.display = 'none';
@@ -8462,28 +8513,73 @@ function checkSeasonalNudges() {
   const cal  = ACADEMIC_CAL[city] || ACADEMIC_CAL['melbourne'];
   if (!cal) return;
 
-  const now    = new Date();
-  const year   = now.getFullYear();
-  const nowTs  = now.getTime();
+  const now   = new Date();
+  const year  = now.getFullYear();
+  const nowTs = now.getTime();
+
+  let bestBanner = null; // most imminent undismissed milestone
 
   for (const milestone of cal) {
     const gateKey = 'ur_seasonal_' + city + '_' + milestone.id + '_' + year;
-    if (localStorage.getItem(gateKey) === '1') continue; // Already shown this year
+    if (localStorage.getItem(gateKey) === '1') continue; // Dismissed this year
 
-    // Build milestone date for this year
     const mDate = new Date(year, milestone.md[0] - 1, milestone.md[1]);
     const diff  = Math.floor((mDate.getTime() - nowTs) / (24*60*60*1000));
 
     if (diff >= 0 && diff <= 14) {
-      // Within 14-day window — fire Cob nudge via panel
-      // We'll queue this to fire as Cob's opening message if panel is first opened
+      // Queue for Cob panel (only if not already queued this session)
       window._cobSeasonalNudge = window._cobSeasonalNudge || [];
-      window._cobSeasonalNudge.push({
-        label: milestone.label,
-        copy:  milestone.copy,
-        diff:  diff
-      });
-      localStorage.setItem(gateKey, '1');
+      const alreadyQueued = window._cobSeasonalNudge.some(n => n.label === milestone.label);
+      if (!alreadyQueued) {
+        window._cobSeasonalNudge.push({ label: milestone.label, copy: milestone.copy, diff });
+      }
+
+      // Track most imminent for banner (lowest diff wins)
+      if (!bestBanner || diff < bestBanner.diff) {
+        bestBanner = { label: milestone.label, copy: milestone.copy, diff, gateKey };
+      }
+    }
+  }
+
+  // Store banner candidate for renderSeasonalBanner()
+  window._seasonalBanner = bestBanner || null;
+}
+
+function renderSeasonalBanner() {
+  const wrap = document.getElementById('seasonal-banner-wrap');
+  if (!wrap) return;
+
+  const b = window._seasonalBanner;
+  if (!b) { wrap.innerHTML = ''; return; }
+
+  const dayLabel = b.diff === 0 ? 'today' : b.diff === 1 ? 'in 1 day' : 'in ' + b.diff + ' days';
+
+  wrap.innerHTML = `
+    <div class="seasonal-banner" id="seasonal-banner-card">
+      <div class="seasonal-banner-avatar">🤠</div>
+      <div class="seasonal-banner-body">
+        <div class="seasonal-banner-label">📅 ${b.label} — ${dayLabel}</div>
+        <div class="seasonal-banner-copy">${b.copy}</div>
+      </div>
+      <button class="seasonal-banner-dismiss" onclick="dismissSeasonalBanner()" title="Dismiss">×</button>
+    </div>
+  `;
+}
+
+function dismissSeasonalBanner() {
+  const b = window._seasonalBanner;
+  if (b && b.gateKey) {
+    localStorage.setItem(b.gateKey, '1');
+  }
+  window._seasonalBanner = null;
+  const wrap = document.getElementById('seasonal-banner-wrap');
+  if (wrap) {
+    const card = wrap.querySelector('.seasonal-banner');
+    if (card) {
+      card.style.transition = 'opacity 0.2s, transform 0.2s';
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(-4px)';
+      setTimeout(() => { wrap.innerHTML = ''; }, 220);
     }
   }
 }
@@ -8508,8 +8604,9 @@ window.addEventListener('DOMContentLoaded', function() {
     // Email fallback reminders (events ≤3 days, push not available)
     sendEmailReminders();
 
-    // Seasonal academic calendar nudges (queued for Cob panel)
+    // Seasonal academic calendar nudges — banner + Cob panel queue
     checkSeasonalNudges();
+    renderSeasonalBanner();
   }, 800);
 });
 
