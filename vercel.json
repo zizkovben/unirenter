@@ -248,14 +248,6 @@
       "destination": "/unirenter-vibe.html"
     },
     {
-      "source": "/find",
-      "destination": "/unirenter-find.html"
-    },
-    {
-      "source": "/find/:token",
-      "destination": "/unirenter-find.html"
-    },
-    {
       "source": "/house-rules/:token",
       "destination": "/unirenter-house-rules.html"
     },

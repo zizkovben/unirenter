@@ -7388,10 +7388,40 @@ let cobPanelHistory = []; // {role, content}
 let cobPanelInFlight = false;
 
 function buildCobContext() {
-  // Gather key context for a date-aware opening message
   const lines = [];
 
-  // Upcoming dates from Tier 1 check
+  // City
+  const city = localStorage.getItem('ur_city');
+  if (city) lines.push('Student city: ' + city.charAt(0).toUpperCase() + city.slice(1));
+
+  // University & student status
+  const uni = localStorage.getItem('ur_uni');
+  const studentStatus = localStorage.getItem('ur_student_status');
+  if (uni) lines.push('University: ' + uni);
+  if (studentStatus) {
+    const statusMap = { incoming: 'Incoming student (not yet arrived)', enrolled: 'Currently enrolled', graduate: 'Graduate / finished studying', other: 'Non-student' };
+    lines.push('Student status: ' + (statusMap[studentStatus] || studentStatus));
+  }
+
+  // Budget
+  const budgetMin = localStorage.getItem('ur_budget_min');
+  const budgetMax = localStorage.getItem('ur_budget_max');
+  if (budgetMax) lines.push('Weekly budget: $' + (budgetMin || '0') + '–$' + budgetMax);
+
+  // Preferred suburbs
+  const suburbsRaw = localStorage.getItem('ur_suburbs');
+  if (suburbsRaw) {
+    try {
+      const suburbs = JSON.parse(suburbsRaw);
+      if (suburbs && suburbs.length) lines.push('Preferred suburbs: ' + suburbs.join(', '));
+    } catch(e) {}
+  }
+
+  // Match count (so Cob can reference "you have X matches")
+  const matchCount = window._lastMatchCount;
+  if (typeof matchCount === 'number') lines.push('Current match count: ' + matchCount);
+
+  // Upcoming lease dates
   const upcoming = window._cobUpcomingDates || [];
   if (upcoming.length) {
     const dateLines = upcoming.map(e => {
@@ -7400,23 +7430,24 @@ function buildCobContext() {
       const label = daysUntil === 0 ? 'today' : daysUntil === 1 ? 'tomorrow' : 'in ' + daysUntil + ' days';
       return (e.title || e.name || 'Event') + ' (' + (e.cat || e.category || 'other') + ') — ' + label;
     });
-    lines.push('Upcoming dates within 7 days:\n' + dateLines.join('\n'));
+    lines.push('Upcoming lease dates within 7 days:\n' + dateLines.join('\n'));
   }
 
-  // Lease companion context
+  // Lease dates
   const lcStart = localStorage.getItem('ur_lc_start');
   const lcEnd = localStorage.getItem('ur_lc_end');
   if (lcStart) lines.push('Lease start: ' + lcStart);
   if (lcEnd) lines.push('Lease end: ' + lcEnd);
 
-  // City
-  const city = localStorage.getItem('ur_city');
-  if (city) lines.push('City: ' + city);
-
   // Recent calculator result
   const calcHist = calcLoadHistory();
   if (calcHist.length) {
     lines.push('Most recent calculator result: ' + calcHist[0].result_summary);
+  }
+
+  // Seasonal nudge active
+  if (window._seasonalBanner) {
+    lines.push('Active academic calendar alert: ' + window._seasonalBanner.label + ' (' + window._seasonalBanner.diff + ' days away)');
   }
 
   return lines.length ? lines.join('\n') : '';
@@ -7537,12 +7568,47 @@ async function cobPanelSend() {
 
   // Build system prompt with context
   const ctx = buildCobContext();
-  const systemPrompt = `You are Cob (short for Cobber) — a warm, knowledgeable Australian student housing assistant for UniRenter. You help students with tenancy law, lease questions, housemate situations, budgeting, and anything housing-related. You are NOT a lawyer — frame advice as general guidance. Be specific about Australian tenancy law when relevant (state-specific rules, notice periods, bond rules, repair timeframes). Keep replies concise and warm — 2-4 short paragraphs max unless detail is needed.
+  const systemPrompt = `You are Cob (short for Cobber) — a warm, straight-talking Australian student housing and settlement companion for UniRenter. You know Australian student life inside out.
+
+WHAT YOU HELP WITH:
+- Finding a housemate, reading listings, spotting red flags in ads
+- Tenancy questions: bond, repairs, inspections, notice periods, break leases — always state-specific
+- Lease dates and deadlines (use the student's context below when available)
+- Cost of living and budgeting for student life in Australia
+- Settling into Australia: banking (Big 4 banks vs. neobanks like Up/ING), SIM cards (Woolworths Mobile, Aldi Mobile, Circles.Life for value), Medicare eligibility for international students, public transport (Myki/Opal/GoCard etc by city), finding community
+- Work rights for international students (20 hour/week rule during semester, full-time in breaks — always direct to Fair Work Australia for specifics)
+- Housemate dynamics and household communication
+- Proactively referencing the student's lease dates, match count, budget, and city when relevant
+
+TONE & VOICE:
+- Warm, direct, and genuinely helpful — a knowledgeable mate, not a chatbot
+- Australian expressions welcome (reckon, arvo, no worries, sorted, dodgy, keen, heaps, fair enough, sweet) — use them naturally but don't overdo it
+- "Oi" is used sparingly — only for genuine emphasis, not as a greeting
+- Keep replies to 2–4 short paragraphs unless the student needs detail
+- End with a practical next step or a follow-up question
+
+HARD LIMITS:
+- Never give legal advice. Never use the words "legal advice", "legally required", or "your legal rights"
+- For tenancy law specifics, frame as general guidance and direct to the relevant state authority:
+  VIC → Consumer Affairs Victoria (consumer.vic.gov.au)
+  NSW → NSW Fair Trading (fairtrading.nsw.gov.au)
+  QLD → RTA Queensland (rta.qld.gov.au)
+  SA → Consumer and Business Services SA (cbs.sa.gov.au)
+  WA → DMIRS (dmirs.wa.gov.au)
+  ACT → ACAT (acat.act.gov.au)
+- For work rights specifics, direct to Fair Work Australia (fairwork.gov.au)
+- For Medicare, direct to Services Australia (servicesaustralia.gov.au)
+- Never recommend a specific property, agent, or landlord
+- Never discuss anything unrelated to student housing, settlement, or Australian student life — redirect warmly: "That one's outside my lane — ask me anything about finding a place, your lease, or settling into [city]."
+
+WHEN YOU DON'T KNOW SOMETHING:
+- Be upfront: "Reckon that one's worth checking with [authority] directly — I don't want to steer you wrong."
+- Never guess at specific figures (bond caps, exact notice periods) — always verify with the relevant authority
 
 Student context:
-${ctx || 'No additional context available.'}
+${ctx || 'No profile context available yet.'}
 
-When a student asks about a calculator result or says "I saved a result" — refer to the most recent calculator result in context if available. Always end with a practical next step or question to keep things moving.`;
+When a student mentions a calculator result or saved figure, refer to the most recent calculator result in context if available.`;
 
   try {
     const res = await fetch('/api/cob', {
