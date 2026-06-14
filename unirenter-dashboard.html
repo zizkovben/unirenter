@@ -4879,7 +4879,18 @@ function renderMatches() {
         📋 Copy referral link
       </button>`;
   }
-  grid.appendChild(cs);
+  // Unsigned: "Build my profile" goes at end of match grid (above fw-card)
+  // Signed: referral goes after fw-card (Flatmate Wanted first, referral second)
+  if (!email) {
+    grid.appendChild(cs);
+  } else {
+    const fwCard = document.getElementById('fw-card');
+    if (fwCard && fwCard.parentNode) {
+      fwCard.parentNode.insertBefore(cs, fwCard.nextSibling);
+    } else {
+      grid.appendChild(cs);
+    }
+  }
   // Render vibe emoji filter chips after match cards are in the DOM
   renderVibeFilterChips();
 }
