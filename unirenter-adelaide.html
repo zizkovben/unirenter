@@ -1440,6 +1440,44 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           <div class="info-note" style="margin-top:10px;">🐾 <strong>SA pet law:</strong> Under the Residential Tenancies Act 1995, landlords cannot unreasonably refuse a pet. <a href="/adelaide/guide" target="_blank" style="color:var(--brand-blue);">See our Pets &amp; Rentals guide →</a></div>
         </div>
 
+        
+
+        <div class="form-group" style="margin-top:18px;">
+          <label>🗣️ Preferred language at home</label>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Helps Cob match you with housemates you'll actually be comfortable living with</div>
+          <div class="chips" id="chips-lang-home">
+            <div class="chip" onclick="toggleSingle(this,'chips-lang-home')">🇦🇺 English only</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-lang-home')">🤝 Mix is fine</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-lang-home')">🌍 Happy with any language</div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:18px;">
+          <label>🌐 Languages I speak</label>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Select all that apply</div>
+          <div class="chips" id="chips-languages">
+            <div class="chip" onclick="toggle(this)">🇦🇺 English</div>
+            <div class="chip" onclick="toggle(this)">🇨🇳 Mandarin</div>
+            <div class="chip" onclick="toggle(this)">🇮🇳 Hindi</div>
+            <div class="chip" onclick="toggle(this)">🇳🇵 Nepali</div>
+            <div class="chip" onclick="toggle(this)">🇻🇳 Vietnamese</div>
+            <div class="chip" onclick="toggle(this)">🇧🇩 Bengali</div>
+            <div class="chip" onclick="toggle(this)">🇮🇩 Indonesian</div>
+            <div class="chip" onclick="toggle(this)">🇵🇭 Filipino</div>
+            <div class="chip" onclick="toggle(this)">🇪🇸 Spanish</div>
+            <div class="chip" onclick="toggle(this)">🇱🇰 Sinhala / Tamil</div>
+            <div class="chip" onclick="toggle(this)">🇵🇰 Urdu</div>
+            <div class="chip" onclick="toggle(this)">🇧🇷 Portuguese</div>
+            <div class="chip" onclick="toggle(this)">🇹🇭 Thai</div>
+            <div class="chip" onclick="toggle(this)">🇰🇷 Korean</div>
+            <div class="chip" onclick="toggle(this)">🇭🇰 Cantonese</div>
+            <div class="chip" onclick="toggle(this)">🇯🇵 Japanese</div>
+            <div class="chip" onclick="toggle(this)">🇸🇦 Arabic</div>
+            <div class="chip" onclick="toggle(this)">🇫🇷 French</div>
+            <div class="chip" onclick="toggle(this)">➕ Other</div>
+          </div>
+        </div>
+
         <div class="form-group" style="margin-top:18px;"><label>Anything else we should know?</label><textarea placeholder="e.g. I play guitar occasionally, work part-time weekends, or anything else relevant…"></textarea></div>
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(4)">← Back</button>
@@ -1619,7 +1657,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
     <a href="/canberra" class="city-sw-btn">📍 Canberra</a>
   </div>
   </div>
-<div style="margin-top:12px;font-size:11px;opacity:0.5;">© 2025 UniRenter · All rights reserved · <a href="/legal" style="color:var(--brand-blue)">Terms & Privacy</a></div>
+<div style="margin-top:12px;font-size:11px;opacity:0.5;">© 2025 UniRenter · All rights reserved · <a href="/legal" style="color:var(--brand-blue)">Terms & Privacy</a> · <a href="/agent-portal" style="color:var(--brand-blue)">Partner login</a></div>
 </footer>
 
 <script>
@@ -1640,6 +1678,12 @@ function goStep(n) {
   updateCompleteness(n);
 }
 
+function toggleSingle(el, groupId) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  group.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
 function toggle(el) { el.classList.toggle('selected'); }
 function toggleAccom(el) { el.classList.toggle('selected'); }
 
@@ -2293,6 +2337,8 @@ async function saveProfileToSupabase() {
                   moveInDate, householdType, sleepSchedule, cleanliness,
                   budgetMin, budgetMax].filter(Boolean).length;
   const profileComplete = Math.round((filled / 10) * 100);
+  const languageHome = (document.querySelector('#chips-lang-home .chip.selected') || {textContent: ''}).textContent.trim() || null;
+  const languagesSpoken = Array.from(document.querySelectorAll('#chips-languages .chip.selected')).map(c => c.textContent.trim());
   const profileData = {
     display_name: displayName, university, student_status: studentStatus,
     year_of_study: yearOfStudy, field_of_study: fieldOfStudy, uni_email: uniEmail,
@@ -2301,6 +2347,7 @@ async function saveProfileToSupabase() {
     budget_min: budgetMin, budget_max: budgetMax,
     sleep_schedule: sleepSchedule, cleanliness, study_location: studyLocation,
     guests, substances, dietary, pets, city: 'adelaide', profile_complete: profileComplete,
+    language_home: languageHome, languages_spoken: languagesSpoken.length > 0 ? languagesSpoken : null,
   };
   const savedEmail = localStorage.getItem('unirenter_email');
   if (savedEmail) profileData.email = savedEmail;
