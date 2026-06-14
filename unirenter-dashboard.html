@@ -2870,6 +2870,8 @@ body.light-mode {
     <div class="nav-dropdown-wrap">
       <button class="nav-explore-btn" onclick="toggleSettingsDropdown()">⚙️ Settings ▾</button>
       <div class="nav-dropdown" id="settings-dropdown">
+        <a class="nav-dd-item" href="#" onclick="snooze24h();return false;">💤 Snooze 24 hours</a>
+        <div class="nav-dd-divider"></div>
         <a class="nav-dd-item" href="#" onclick="openSettingsPanel('sleep');return false;">🌙 Sleep mode</a>
         <a class="nav-dd-item" href="#" onclick="openSettingsPanel('notifications');return false;">🔔 Notifications</a>
         <a class="nav-dd-item" href="#" onclick="openSettingsPanel('display');return false;">🎨 Display</a>
@@ -5694,38 +5696,152 @@ function selectSleep(el, mode) {
   document.querySelectorAll('.sleep-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   selectedSleep = mode;
+  // Show holiday date picker when Holiday Mode selected
+  var dateWrap = document.getElementById('sp-holiday-date-wrap');
+  if (dateWrap) dateWrap.style.display = (mode === 'holiday') ? 'block' : 'none';
 }
 
 function activateSleep() {
   if (!selectedSleep) { showToast('⚠️ Select a mode', 'Choose a sleep mode first.'); return; }
-  const names = { study:'Study Mode 📚', sorted:'Sorted! 🏠', holiday:'Holiday Mode ✈️',
-    looking:'Just Looking 👀', break:'Taking a Break 😴', exams:'Exam Crunch 😰' };
+  const names = {
+    inspecting: 'Inspecting a place 🏠',
+    study: 'Study Mode 📚',
+    holiday: 'Holiday Mode ✈️',
+    looking: 'Just Looking 👀',
+    break: 'Taking a Break 😴',
+    sorted: 'Sorted! 🏡'
+  };
+
+  // Holiday mode — require return date
+  if (selectedSleep === 'holiday') {
+    var dateInput = document.getElementById('sp-holiday-date');
+    if (!dateInput || !dateInput.value) {
+      showToast('⚠️ Return date needed', 'Set your return date so matches know when you\'re back.');
+      return;
+    }
+    localStorage.setItem('ur_sleep_holiday_return', dateInput.value);
+    // Schedule Cob nudge 2 days before return
+    var returnDate = new Date(dateInput.value);
+    var nudgeDate = new Date(returnDate);
+    nudgeDate.setDate(nudgeDate.getDate() - 2);
+    localStorage.setItem('ur_sleep_holiday_nudge', nudgeDate.toISOString());
+  }
+
+  // Auto-wake modes — set expiry
+  var autoWakeDays = { inspecting: 2, study: 14 };
+  if (autoWakeDays[selectedSleep]) {
+    var wakeAt = new Date();
+    wakeAt.setDate(wakeAt.getDate() + autoWakeDays[selectedSleep]);
+    localStorage.setItem('ur_sleep_auto_wake', wakeAt.toISOString());
+  } else {
+    localStorage.removeItem('ur_sleep_auto_wake');
+  }
+
   const pill = document.getElementById('status-pill');
-  pill.textContent = '💤 ' + names[selectedSleep];
-  pill.className = 'status-pill sleeping';
-  document.getElementById('btn-sleep-activate').style.display = 'none';
-  document.getElementById('btn-sleep-wake').style.display = '';
+  if (pill) { pill.textContent = '💤 ' + names[selectedSleep]; pill.className = 'status-pill sleeping'; }
+  document.getElementById('sp-btn-sleep-activate').style.display = 'none';
+  document.getElementById('sp-btn-sleep-wake').style.display = '';
+
   // Mark selected card
   document.querySelectorAll('.sleep-card').forEach(c => c.classList.remove('active-sleep'));
   document.querySelectorAll('.sleep-card').forEach(c => {
-    if (c.querySelector('.sleep-card-name').textContent.toLowerCase().includes(selectedSleep)) {
+    if (c.getAttribute('onclick') && c.getAttribute('onclick').includes(selectedSleep)) {
       c.classList.add('active-sleep');
     }
   });
+
   showToast('💤 Sleep mode on', names[selectedSleep] + ' — your profile is paused.');
   localStorage.setItem('ur_sleep_mode', selectedSleep);
+  localStorage.setItem('ur_sleep_activated', new Date().toISOString());
+
+  // Check re-engagement schedule
+  sleepReengagementSchedule(selectedSleep);
+}
+
+function sleepReengagementSchedule(mode) {
+  // Store activation timestamp for re-engagement checks on next load
+  // Actual check-ins fire via cobSleepCheckIn() on page load
+  var checkInDays = { looking: 30, break: 60, sorted: 180 };
+  if (checkInDays[mode]) {
+    var checkIn = new Date();
+    checkIn.setDate(checkIn.getDate() + checkInDays[mode]);
+    localStorage.setItem('ur_sleep_checkin', checkIn.toISOString());
+    localStorage.setItem('ur_sleep_checkin_mode', mode);
+  }
+}
+
+function cobSleepCheckIn() {
+  var mode = localStorage.getItem('ur_sleep_mode');
+  var checkIn = localStorage.getItem('ur_sleep_checkin');
+  var autoWake = localStorage.getItem('ur_sleep_auto_wake');
+  var holidayNudge = localStorage.getItem('ur_sleep_holiday_nudge');
+  var now = new Date();
+
+  // Auto-wake for inspecting/study modes
+  if (autoWake && now >= new Date(autoWake) && (mode === 'inspecting' || mode === 'study')) {
+    localStorage.removeItem('ur_sleep_mode');
+    localStorage.removeItem('ur_sleep_auto_wake');
+    var pill = document.getElementById('status-pill');
+    if (pill) { pill.textContent = '🟢 Active'; pill.className = 'status-pill'; }
+    var msgs = {
+      inspecting: "Back in the game 🏠 — Cob kept your matches warm.",
+      study: "Exams done? Cob's kept your matches warm 🤠"
+    };
+    showToast('☀️ Welcome back!', msgs[mode] || 'Your profile is active again.');
+    return;
+  }
+
+  // Holiday mode — 2-day nudge before return
+  if (mode === 'holiday' && holidayNudge && now >= new Date(holidayNudge)) {
+    var alreadyNudged = localStorage.getItem('ur_sleep_holiday_nudged');
+    if (!alreadyNudged) {
+      localStorage.setItem('ur_sleep_holiday_nudged', '1');
+      showToast('Back soon? 🤠', "Your matches are waiting — Cob's keeping an eye on things.");
+    }
+  }
+
+  // Snooze auto-resume
+  var snoozeUntil = localStorage.getItem('ur_sleep_snooze_until');
+  if (mode === 'snooze' && snoozeUntil && now >= new Date(snoozeUntil)) {
+    localStorage.removeItem('ur_sleep_mode');
+    localStorage.removeItem('ur_sleep_snooze_until');
+    var pill2 = document.getElementById('status-pill');
+    if (pill2) { pill2.textContent = '🟢 Active'; pill2.className = 'status-pill'; }
+    showToast('☀️ Back in action!', 'Your snooze is up — profile is active again.');
+    return;
+  }
+
+  // Cob check-in for longer modes
+  if (checkIn && now >= new Date(checkIn)) {
+    var alreadyChecked = localStorage.getItem('ur_sleep_checkin_done');
+    if (!alreadyChecked) {
+      localStorage.setItem('ur_sleep_checkin_done', '1');
+      var checkInMsgs = {
+        looking: "Still hunting? Cob's spotted some new students in your area 👀",
+        break: "No pressure — just checking your housing situation hasn't changed 🤠",
+        sorted: "Hey — lease ending soon? Cob's here when you need us again 🤠"
+      };
+      var m = localStorage.getItem('ur_sleep_checkin_mode');
+      if (checkInMsgs[m]) showToast('Oi, from Cob 🤠', checkInMsgs[m]);
+    }
+  }
 }
 
 function wakeUp() {
   selectedSleep = null;
   const pill = document.getElementById('status-pill');
-  pill.textContent = '🟢 Active';
-  pill.className = 'status-pill';
-  document.getElementById('btn-sleep-activate').style.display = '';
-  document.getElementById('btn-sleep-wake').style.display = 'none';
+  if (pill) { pill.textContent = '🟢 Active'; pill.className = 'status-pill'; }
+  var btnOn = document.getElementById('sp-btn-sleep-activate');
+  var btnWake = document.getElementById('sp-btn-sleep-wake');
+  if (btnOn) btnOn.style.display = '';
+  if (btnWake) btnWake.style.display = 'none';
   document.querySelectorAll('.sleep-card').forEach(c => {
     c.classList.remove('selected', 'active-sleep');
   });
+  // Clear all sleep state
+  ['ur_sleep_mode','ur_sleep_auto_wake','ur_sleep_holiday_return','ur_sleep_holiday_nudge',
+   'ur_sleep_holiday_nudged','ur_sleep_checkin','ur_sleep_checkin_mode','ur_sleep_checkin_done',
+   'ur_sleep_activated','ur_sleep_snooze_until'].forEach(k => localStorage.removeItem(k));
   showToast('☀️ Welcome back!', 'Your profile is active — checking for new matches…');
   localStorage.removeItem('ur_sleep_mode');
 }
@@ -6763,10 +6879,33 @@ function lcCalAdd(name, dateStr, cat) {
 
 function lcSnoozeMode() {
   var snoozeUntil = new Date();
-  snoozeUntil.setDate(snoozeUntil.getDate() + 7);
+  snoozeUntil.setHours(snoozeUntil.getHours() + 24);
   localStorage.setItem('ur_sleep_snooze_until', snoozeUntil.toISOString());
-  if (typeof closeSettingsPanel === 'function') closeSettingsPanel();
-  if (typeof showToast === 'function') showToast('Snoozed 7 days', 'Your profile is paused for 7 days.');
+  localStorage.setItem('ur_sleep_mode', 'snooze');
+  var pill = document.getElementById('status-pill');
+  if (pill) { pill.textContent = '💤 Snoozed'; pill.className = 'status-pill sleeping'; }
+  // Close settings dropdown if open
+  var dd = document.getElementById('settings-dropdown');
+  if (dd) dd.classList.remove('open');
+  if (typeof showToast === 'function') showToast('Snoozed for 24 hours 💤', 'Your profile is paused until tomorrow. Auto-resumes then.');
+  // Schedule auto-resume check
+  setTimeout(function() { snoozeAutoCheck(); }, 1000 * 60 * 60 * 24);
+}
+
+function snooze24h() {
+  lcSnoozeMode();
+}
+
+function snoozeAutoCheck() {
+  var until = localStorage.getItem('ur_sleep_snooze_until');
+  var mode = localStorage.getItem('ur_sleep_mode');
+  if (mode === 'snooze' && until && new Date() >= new Date(until)) {
+    localStorage.removeItem('ur_sleep_mode');
+    localStorage.removeItem('ur_sleep_snooze_until');
+    var pill = document.getElementById('status-pill');
+    if (pill) { pill.textContent = '🟢 Active'; pill.className = 'status-pill'; }
+    showToast('☀️ Back in action!', 'Your snooze is up — profile is active again.');
+  }
 }
 
 document.addEventListener('click', function(e) {
@@ -7168,6 +7307,7 @@ When a student asks about a calculator result or says "I saved a result" — ref
 window.addEventListener('DOMContentLoaded', function() {
   loadProfile();
   renderMatches();
+  cobSleepCheckIn();
   setTimeout(function() {
     tier1CheckDates();
     tier2CheckDates();
@@ -7261,6 +7401,8 @@ window.addEventListener('DOMContentLoaded', function() {
     if (spPush) spPush.checked = localStorage.getItem('ur_push_subscribed') === '1';
     // Sync sleep grid active state
     spSleepSyncActive();
+    // Run Cob re-engagement / auto-wake checks
+    cobSleepCheckIn();
   }
 
   function closeSettingsPanel() {
@@ -7271,11 +7413,8 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   function switchSettingsSection(sec) {
-    document.querySelectorAll('.sp-tab').forEach(function(t) { t.classList.remove('active'); });
     document.querySelectorAll('.sp-section').forEach(function(s) { s.classList.remove('active'); });
-    var tab = document.getElementById('sp-tab-' + sec);
     var section = document.getElementById('sp-' + sec);
-    if (tab) tab.classList.add('active');
     if (section) section.classList.add('active');
   }
 
@@ -7285,12 +7424,13 @@ window.addEventListener('DOMContentLoaded', function() {
     var btnOn = document.getElementById('sp-btn-sleep-activate');
     var btnWake = document.getElementById('sp-btn-sleep-wake');
     if (!grid) return;
-    grid.querySelectorAll('.sleep-card').forEach(function(c) { c.classList.remove('active'); });
-    if (mode) {
-      var modeMap = { study:'study', sorted:'sorted', holiday:'holiday', looking:'looking', exams:'exams', break:'break' };
-      var cards = grid.querySelectorAll('.sleep-card');
-      var modeIdx = ['study','sorted','holiday','looking','exams','break'].indexOf(mode);
-      if (modeIdx >= 0 && cards[modeIdx]) cards[modeIdx].classList.add('active');
+    grid.querySelectorAll('.sleep-card').forEach(function(c) { c.classList.remove('active-sleep'); });
+    if (mode && mode !== 'snooze') {
+      grid.querySelectorAll('.sleep-card').forEach(function(c) {
+        if (c.getAttribute('onclick') && c.getAttribute('onclick').includes("'" + mode + "'")) {
+          c.classList.add('active-sleep');
+        }
+      });
       if (btnOn) btnOn.style.display = 'none';
       if (btnWake) btnWake.style.display = '';
     } else {
@@ -9232,60 +9372,57 @@ function cobReviewCopyLink() {
     <div class="settings-panel-title">⚙️ Settings</div>
     <button class="settings-panel-close" onclick="closeSettingsPanel()">✕</button>
   </div>
-  <div class="settings-panel-tabs">
-    <button class="sp-tab active" id="sp-tab-sleep" onclick="switchSettingsSection('sleep')">🌙 Sleep</button>
-    <button class="sp-tab" id="sp-tab-notifications" onclick="switchSettingsSection('notifications')">🔔 Notifications</button>
-    <button class="sp-tab" id="sp-tab-display" onclick="switchSettingsSection('display')">🎨 Display</button>
-    <button class="sp-tab" id="sp-tab-sound" onclick="switchSettingsSection('sound')">🔊 Sound</button>
-    <button class="sp-tab" id="sp-tab-account" onclick="switchSettingsSection('account')">👤 Account</button>
-  </div>
+
   <div class="settings-panel-body">
 
     <!-- Sleep mode section -->
     <div class="sp-section active" id="sp-sleep">
       <div class="settings-card-head" style="margin-bottom:14px;">💤 Sleep Mode — pause your profile</div>
       <div class="sleep-grid" id="sp-sleep-grid">
+        <div class="sleep-card" onclick="selectSleep(this,'inspecting')">
+          <div class="sleep-card-icon">🏠</div>
+          <div class="sleep-card-name">Inspecting a place</div>
+          <div class="sleep-card-desc">You've got a viewing lined up. Profile hidden from new matches for 48 hours — existing matches can still message you. Auto-resumes after 2 days.</div>
+          <div class="sleep-card-badge">Hidden 48hrs · messages open · auto-resumes</div>
+        </div>
         <div class="sleep-card" onclick="selectSleep(this,'study')">
           <div class="sleep-card-icon">📚</div>
           <div class="sleep-card-name">Study Mode</div>
-          <div class="sleep-card-desc">Pause while you focus on exams or a heavy workload. Your profile is hidden from new matches but existing matches can still message you.</div>
-          <div class="sleep-card-badge">Profile hidden · messages open</div>
-        </div>
-        <div class="sleep-card" onclick="selectSleep(this,'sorted')">
-          <div class="sleep-card-icon">🏠</div>
-          <div class="sleep-card-name">Sorted! Found a place</div>
-          <div class="sleep-card-desc">You've found your place! Profile hidden completely. Come back when your situation changes.</div>
-          <div class="sleep-card-badge">Fully hidden · no return date</div>
+          <div class="sleep-card-desc">Crunch time. Profile hidden from new matches for 14 days while you focus — existing matches can still reach you. Cob checks in when it's over.</div>
+          <div class="sleep-card-badge">Hidden 14 days · messages open · auto-resumes</div>
         </div>
         <div class="sleep-card" onclick="selectSleep(this,'holiday')">
           <div class="sleep-card-icon">✈️</div>
           <div class="sleep-card-name">Holiday Mode</div>
-          <div class="sleep-card-desc">Travelling or heading home. Your profile is paused and your return date is shown to existing matches so they know when you're back.</div>
-          <div class="sleep-card-badge">Profile hidden · return date shown</div>
+          <div class="sleep-card-desc">Away for a bit? Set your return date and we'll show it to your existing matches. Cob will nudge you 2 days before you're back.</div>
+          <div class="sleep-card-badge">Profile hidden · return date shown · manual wake</div>
+        </div>
+        <div id="sp-holiday-date-wrap" style="display:none;padding:4px 0 8px;">
+          <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:4px;">Return date</label>
+          <input type="date" id="sp-holiday-date" style="background:var(--navy-card,#182f42);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--text);font-size:13px;padding:7px 10px;width:100%;box-sizing:border-box;" />
         </div>
         <div class="sleep-card" onclick="selectSleep(this,'looking')">
           <div class="sleep-card-icon">👀</div>
           <div class="sleep-card-name">Just Looking</div>
-          <div class="sleep-card-desc">You're not quite ready to commit. Profile stays visible but your status shows "just looking" so matches know you're early stage.</div>
-          <div class="sleep-card-badge">Profile visible · status shown</div>
-        </div>
-        <div class="sleep-card" onclick="selectSleep(this,'exams')">
-          <div class="sleep-card-icon">🤯</div>
-          <div class="sleep-card-name">Exam Crunch</div>
-          <div class="sleep-card-desc">A quick pause — profile hidden for up to 2 weeks. No decisions needed, just come back when exams are done.</div>
-          <div class="sleep-card-badge">Auto-wakes after 14 days</div>
+          <div class="sleep-card-desc">Not quite ready to commit. Your profile stays visible with a "just looking" status so matches know you're early stage. Cob checks in at 30 days.</div>
+          <div class="sleep-card-badge">Profile visible · status shown · indefinite</div>
         </div>
         <div class="sleep-card" onclick="selectSleep(this,'break')">
           <div class="sleep-card-icon">😴</div>
           <div class="sleep-card-name">Taking a Break</div>
-          <div class="sleep-card-desc">Step away without losing anything. Profile paused, data preserved. Wake up whenever you're ready.</div>
-          <div class="sleep-card-badge">Profile hidden · no auto-wake</div>
+          <div class="sleep-card-desc">Step away without losing anything. Profile fully hidden, data preserved. Come back whenever you're ready. Cob checks in at 60 days.</div>
+          <div class="sleep-card-badge">Fully hidden · no auto-wake · 60-day check-in</div>
+        </div>
+        <div class="sleep-card" onclick="selectSleep(this,'sorted')">
+          <div class="sleep-card-icon">🏡</div>
+          <div class="sleep-card-name">Sorted! Found a place</div>
+          <div class="sleep-card-desc">Congrats! Profile hidden completely. Cob will check in at 6 months — leases end, situations change, and we'll be here when you need us again.</div>
+          <div class="sleep-card-badge">Fully hidden · 6-month check-in</div>
         </div>
       </div>
       <div class="sleep-actions" style="margin-top:14px;">
         <div id="sp-sleep-current" style="display:none;font-size:12px;color:var(--text-muted);padding:8px 0 4px;"></div>
         <button class="btn-sleep-on" id="sp-btn-sleep-activate" onclick="activateSleep()">Activate sleep mode</button>
-        <button class="btn-snooze" id="sp-btn-snooze" style="display:none;" onclick="lcSnoozeMode()">Snooze 7 days</button>
         <button class="btn-sleep-wake" id="sp-btn-sleep-wake" style="display:none;" onclick="wakeUp()">☀️ Wake up — I'm looking again</button>
       </div>
     </div>
