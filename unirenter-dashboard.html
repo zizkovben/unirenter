@@ -1418,6 +1418,46 @@ body.light-mode {
 }
 .welfare-card-dismiss:hover { color: var(--text); }
 
+/* ── From Cob collapsible section (Messages tab) ── */
+.from-cob-section {
+  margin-bottom: 20px;
+  border: 1px solid rgba(245,184,0,0.2);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.from-cob-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 16px; cursor: pointer;
+  background: rgba(245,184,0,0.05);
+  user-select: none; transition: background 0.2s;
+}
+.from-cob-header:hover { background: rgba(245,184,0,0.09); }
+.from-cob-icon { font-size: 20px; flex-shrink: 0; }
+.from-cob-label { font-family: var(--font-display); font-size: 14px; font-weight: 700; flex: 1; }
+.from-cob-badge {
+  background: var(--brand-yellow); color: #0d1f2d;
+  font-size: 11px; font-weight: 700; font-family: var(--font-body);
+  border-radius: 50%; width: 18px; height: 18px;
+  display: none; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.from-cob-badge.show { display: flex; }
+.from-cob-chevron {
+  font-size: 11px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0;
+}
+.from-cob-section.open .from-cob-chevron { transform: rotate(180deg); }
+.from-cob-body {
+  display: none; padding: 12px 14px 14px;
+  border-top: 1px solid rgba(245,184,0,0.12);
+}
+.from-cob-section.open .from-cob-body { display: block; }
+.from-cob-body .tier2-card { margin-bottom: 10px; }
+.from-cob-body .tier2-card:last-child,
+.from-cob-body .welfare-card:last-child { margin-bottom: 0; }
+.from-cob-empty {
+  font-size: 13px; color: var(--text-muted); text-align: center;
+  padding: 8px 0 4px; line-height: 1.55;
+}
+
 /* ── Push permission prompt card ── */
 .push-prompt-card {
   display: none;
@@ -2772,34 +2812,7 @@ body.light-mode {
 
   </div>
 
-  <!-- Tier 2 check-in card — date-aware Cob nudge -->
-  <div class="tier2-card" id="tier2-card">
-    <div class="tier2-card-avatar">🤠</div>
-    <div class="tier2-card-body">
-      <div class="tier2-card-title" id="tier2-title">Checking in 👋</div>
-      <div class="tier2-card-text" id="tier2-text"></div>
-      <div class="tier2-card-actions" id="tier2-actions">
-        <button class="tier2-card-btn primary" onclick="switchTab('tenancy');switchTenancySection('calendar')">View calendar ↗</button>
-        <button class="tier2-card-btn" onclick="openCobDashboard()">Talk to Cob 🤠</button>
-      </div>
-    </div>
-    <button class="tier2-card-dismiss" id="tier2-dismiss" onclick="dismissTier2()" title="Dismiss">✕</button>
-  </div>
-
-
-  <!-- Welfare check-in card (Tier 3 — shown after 7-day absence) -->
-  <div class="welfare-card" id="welfare-card">
-    <div class="welfare-card-avatar">🤠</div>
-    <div class="welfare-card-body">
-      <div class="welfare-card-title" id="welfare-title">Hey, it's been a while</div>
-      <div class="welfare-card-text" id="welfare-text"></div>
-      <div class="welfare-card-actions">
-        <button class="welfare-card-btn primary" onclick="switchTab('tenancy');switchTenancySection('calendar')">View calendar ↗</button>
-        <button class="welfare-card-btn" onclick="openCobDashboard()">Talk to Cob 🤠</button>
-      </div>
-    </div>
-    <button class="welfare-card-dismiss" onclick="dismissWelfare()" title="Dismiss">✕</button>
-  </div>
+  
 
   <!-- Push permission prompt card -->
   <div class="push-prompt-card" id="push-prompt-card">
@@ -2930,6 +2943,49 @@ body.light-mode {
         <div class="section-sub">Chat with your housemate connections</div>
       </div>
     </div>
+
+    <!-- From Cob collapsible section -->
+    <div class="from-cob-section" id="from-cob-section">
+      <div class="from-cob-header" onclick="toggleFromCob()">
+        <div class="from-cob-icon">🤠</div>
+        <div class="from-cob-label">From Cob</div>
+        <div class="from-cob-badge" id="from-cob-badge"></div>
+        <div class="from-cob-chevron">▾</div>
+      </div>
+      <div class="from-cob-body" id="from-cob-body">
+        <!-- tier2-card: date-aware Cob nudge -->
+        <div class="tier2-card" id="tier2-card">
+          <div class="tier2-card-avatar">🤠</div>
+          <div class="tier2-card-body">
+            <div class="tier2-card-title" id="tier2-title">Checking in 👋</div>
+            <div class="tier2-card-text" id="tier2-text"></div>
+            <div class="tier2-card-actions" id="tier2-actions">
+              <button class="tier2-card-btn primary" onclick="switchTab('tenancy');switchTenancySection('calendar')">View calendar ↗</button>
+              <button class="tier2-card-btn" onclick="openCobDashboard()">Talk to Cob 🤠</button>
+            </div>
+          </div>
+          <button class="tier2-card-dismiss" id="tier2-dismiss" onclick="dismissTier2()" title="Dismiss">✕</button>
+        </div>
+        <!-- welfare-card: 7-day absence check-in -->
+        <div class="welfare-card" id="welfare-card">
+          <div class="welfare-card-avatar">🤠</div>
+          <div class="welfare-card-body">
+            <div class="welfare-card-title" id="welfare-title">Hey, it's been a while</div>
+            <div class="welfare-card-text" id="welfare-text"></div>
+            <div class="welfare-card-actions">
+              <button class="welfare-card-btn primary" onclick="switchTab('tenancy');switchTenancySection('calendar')">View calendar ↗</button>
+              <button class="welfare-card-btn" onclick="openCobDashboard()">Talk to Cob 🤠</button>
+            </div>
+          </div>
+          <button class="welfare-card-dismiss" onclick="dismissWelfare()" title="Dismiss">✕</button>
+        </div>
+        <!-- Empty state when no active check-ins -->
+        <div class="from-cob-empty" id="from-cob-empty" style="display:none;">
+          All good — Cob will check in when something needs your attention 🤠
+        </div>
+      </div>
+    </div>
+
     <div class="msg-layout">
       <!-- Sidebar -->
       <div class="msg-sidebar">
@@ -3273,12 +3329,6 @@ body.light-mode {
       </div>
     </div>
     <!-- /tenancy-calculator-section -->
-
-    <!-- ── Manual entry link ── -->
-    <div class="lc-manual-link" id="lc-manual-link">
-      <span class="lc-manual-label">Prefer to enter manually?</span>
-      <button class="lc-manual-btn" onclick="lcOpenInline('manage')">Open full Lease Companion ↗</button>
-    </div>
 
   </div><!-- /panel-tenancy -->
 
@@ -6292,7 +6342,81 @@ function tier2CheckDates() {
 
     // Store for Cob context
     window._cobTier2Event = soonest;
+
+    // Update From Cob section in Messages tab
+    updateFromCobSection();
   } catch(e) {}
+}
+
+// ══════════════════════════════════════════════════════════════
+// FROM COB SECTION — Messages tab collapsible
+// ══════════════════════════════════════════════════════════════
+
+function updateFromCobSection() {
+  const section   = document.getElementById('from-cob-section');
+  const badge     = document.getElementById('from-cob-badge');
+  const emptyMsg  = document.getElementById('from-cob-empty');
+  const t2Card    = document.getElementById('tier2-card');
+  const wfCard    = document.getElementById('welfare-card');
+  if (!section || !badge) return;
+
+  const t2Active = t2Card && t2Card.classList.contains('show');
+  const wfActive = wfCard && wfCard.classList.contains('show');
+  const activeCount = (t2Active ? 1 : 0) + (wfActive ? 1 : 0);
+
+  // Badge
+  if (activeCount > 0) {
+    badge.textContent = activeCount;
+    badge.classList.add('show');
+  } else {
+    badge.classList.remove('show');
+  }
+
+  // Also bump the Messages tab unread badge
+  const msgBadge = document.getElementById('msg-badge');
+  if (msgBadge) {
+    if (activeCount > 0) {
+      msgBadge.style.display = '';
+      // Don't overwrite conversation count — add to it if badge already shows a number
+      const current = parseInt(msgBadge.textContent || '0');
+      // Only set to cobCount if tab badge isn't already reflecting conversation unread
+      // Use data attribute to track cob contribution separately
+      const prevCob = parseInt(msgBadge.dataset.cobCount || '0');
+      const convoCount = current - prevCob;
+      msgBadge.textContent = convoCount + activeCount;
+      msgBadge.dataset.cobCount = activeCount;
+    } else {
+      // Remove cob contribution
+      const current = parseInt(msgBadge.textContent || '0');
+      const prevCob = parseInt(msgBadge.dataset.cobCount || '0');
+      const newCount = Math.max(0, current - prevCob);
+      msgBadge.dataset.cobCount = '0';
+      if (newCount === 0) {
+        msgBadge.style.display = 'none';
+      } else {
+        msgBadge.textContent = newCount;
+      }
+    }
+  }
+
+  // Empty state
+  if (emptyMsg) emptyMsg.style.display = activeCount === 0 ? '' : 'none';
+
+  // Auto-open section if there are active check-ins
+  if (activeCount > 0 && !section.classList.contains('open')) {
+    section.classList.add('open');
+  }
+}
+
+function toggleFromCob() {
+  const section = document.getElementById('from-cob-section');
+  if (!section) return;
+  section.classList.toggle('open');
+  // Clear badge on open (user has seen it)
+  if (section.classList.contains('open')) {
+    const badge = document.getElementById('from-cob-badge');
+    if (badge) badge.classList.remove('show');
+  }
 }
 
 function dismissTier2() {
@@ -6301,6 +6425,7 @@ function dismissTier2() {
   const key = card.dataset.dismissKey;
   if (key) localStorage.setItem(key, '1');
   card.classList.remove('show');
+  updateFromCobSection();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -6868,12 +6993,16 @@ function checkWelfare() {
     ". Just making sure everything's on your radar. Want to check in?";
 
   card.classList.add('show');
+
+  // Update From Cob section in Messages tab
+  updateFromCobSection();
 }
 
 function dismissWelfare() {
   localStorage.setItem(WELFARE_KEY, new Date().toISOString());
   const card = document.getElementById('welfare-card');
   if (card) card.classList.remove('show');
+  updateFromCobSection();
 }
 
 // Update last-visit timestamp every load
