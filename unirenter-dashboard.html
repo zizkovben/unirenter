@@ -3025,6 +3025,58 @@ body.light-mode {
   padding: 14px 16px 14px !important;
 }
 
+
+/* ── Profile badges card ── */
+.badges-card {
+  background: var(--navy-card); border: 1px solid var(--navy-border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.badges-card-head {
+  padding: 12px 16px 10px;
+  font-family: var(--font-display); font-weight: 700; font-size: 13px;
+  border-bottom: 1px solid var(--navy-border);
+}
+.badges-card-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.badges-uni-row { display: flex; flex-direction: column; gap: 6px; }
+.badges-uni-label { font-size: 11px; color: var(--text-muted); }
+.badges-divider {
+  font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text-muted); padding: 2px 0 0;
+}
+/* Completed badge pill — yellow accent */
+.badge-pill-done {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(245,184,0,0.12);
+  border: 1px solid rgba(245,184,0,0.3);
+  border-radius: 20px;
+  padding: 5px 10px 5px 8px;
+  font-size: 12px; font-weight: 600; color: var(--brand-yellow,#F5B800);
+  cursor: pointer; transition: all 0.15s; width: 100%; box-sizing: border-box;
+  position: relative;
+}
+.badge-pill-done:hover { background: rgba(245,184,0,0.2); border-color: rgba(245,184,0,0.5); }
+.badge-pill-done .badge-pill-check { font-size: 10px; margin-left: auto; opacity: 0.7; }
+/* Tooltip on hover */
+.badge-pill-done[title]:hover::after {
+  content: attr(title);
+  position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: #0d1f2d; border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text); font-size: 11px; font-weight: 400;
+  padding: 4px 8px; border-radius: 6px; white-space: nowrap;
+  pointer-events: none; z-index: 10;
+}
+/* Pending badge row — just the select */
+.badge-select-row { display: flex; flex-direction: column; gap: 0; }
+.badges-save-btn {
+  width: 100%; background: var(--brand-yellow,#F5B800); color: var(--navy,#0d1f2d);
+  border: none; font-family: var(--font-body); font-weight: 700;
+  font-size: 12px; padding: 9px; border-radius: 8px; cursor: pointer;
+  transition: background 0.15s; margin-top: 2px;
+}
+.badges-save-btn:hover { background: #e0a800; }
+.badges-save-status { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 4px; min-height: 14px; }
+.extras-select { margin-bottom: 0 !important; }
+
 </style>
 </head>
 <body>
@@ -3925,66 +3977,109 @@ body.light-mode {
           <button class="profile-edit-btn" onclick="window.location.href='/'">✏️ Update profile</button>
         </div>
 
-        <!-- Uni email verification — compact sidebar card -->
-        <div class="sidebar-uni-card" id="uni-verify-card">
-          <div id="uni-verify-not-done">
-            <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;line-height:1.5;">
-              🎓 Verify your uni email (.edu.au) to earn the verified badge.
-            </div>
-            <button class="profile-edit-btn" onclick="openUniVerifyModal()" style="font-size:12px;padding:8px;">Verify uni email</button>
-            <span id="uni-verify-inline-status" style="font-size:11px;color:var(--text-muted);display:block;margin-top:6px;min-height:14px;"></span>
-          </div>
-          <div id="uni-verify-done" style="display:none;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span style="font-size:18px;">🎓</span>
-              <div>
-                <div style="font-size:12px;font-weight:600;color:var(--brand-blue);">Uni verified</div>
-                <div style="font-size:11px;color:var(--text-muted);" id="uni-verify-email-display">—</div>
+        <!-- Profile badges card — uni verify + optional extras -->
+        <div class="badges-card" id="uni-verify-card">
+          <div class="badges-card-head">🏅 Profile badges</div>
+          <div class="badges-card-body">
+
+            <!-- Uni email — trust badge -->
+            <div class="badges-uni-row">
+              <div id="uni-verify-not-done">
+                <div class="badges-uni-label">🎓 Uni email — earn your verified badge</div>
+                <button class="profile-edit-btn" onclick="openUniVerifyModal()" style="font-size:12px;padding:8px;margin-top:6px;">Verify uni email</button>
+                <span id="uni-verify-inline-status" style="font-size:11px;color:var(--text-muted);display:block;margin-top:6px;min-height:14px;"></span>
+              </div>
+              <div id="uni-verify-done" style="display:none;">
+                <button class="badge-pill-done" onclick="openUniVerifyModal()" title="University email verified">
+                  🎓 Uni verified
+                  <span class="badge-pill-check">✓</span>
+                </button>
+                <div style="font-size:10px;color:var(--text-muted);margin-top:4px;padding-left:4px;" id="uni-verify-email-display">—</div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- About me extras card -->
-        <div class="extras-card" id="about-me-extras-card">
-          <select class="extras-select" id="extras-star-select" onchange="extrasSelectChange('star', this.value)">
-            <option value="">♈ Star sign</option>
-            <option value="aries">♈ Aries</option>
-            <option value="taurus">♉ Taurus</option>
-            <option value="gemini">♊ Gemini</option>
-            <option value="cancer">♋ Cancer</option>
-            <option value="leo">♌ Leo</option>
-            <option value="virgo">♍ Virgo</option>
-            <option value="libra">♎ Libra</option>
-            <option value="scorpio">♏ Scorpio</option>
-            <option value="sagittarius">♐ Sagittarius</option>
-            <option value="capricorn">♑ Capricorn</option>
-            <option value="aquarius">♒ Aquarius</option>
-            <option value="pisces">♓ Pisces</option>
-          </select>
-          <select class="extras-select" id="extras-zodiac-select" onchange="extrasSelectChange('zodiac', this.value)">
-            <option value="">🐉 Chinese zodiac</option>
-            <option value="rat">🐭 Rat · 2020</option>
-            <option value="ox">🐮 Ox · 2021</option>
-            <option value="tiger">🐯 Tiger · 2022</option>
-            <option value="rabbit">🐰 Rabbit · 2023</option>
-            <option value="dragon">🐲 Dragon · 2024</option>
-            <option value="snake">🐍 Snake · 2025</option>
-            <option value="horse">🐴 Horse · 2014</option>
-            <option value="goat">🐏 Goat · 2015</option>
-            <option value="monkey">🐵 Monkey · 2016</option>
-            <option value="rooster">🐔 Rooster · 2017</option>
-            <option value="dog">🐶 Dog · 2018</option>
-            <option value="pig">🐷 Pig · 2019</option>
-          </select>
-          <select class="extras-select" id="extras-gen-select" onchange="extrasSelectChange('gen', this.value)" style="margin-bottom:14px;">
-            <option value="">👥 Generation</option>
-            <option value="genz">Gen Z (1997–2012)</option>
-            <option value="millennial">Millennial (1981–1996)</option>
-            <option value="genx">Gen X (1965–1980)</option>
-          </select>
-          <button class="extras-save-btn" onclick="extrasSave()">Save</button>
-          <div class="extras-save-status" id="extras-save-status"></div>
+            <!-- Divider -->
+            <div class="badges-divider">Optional</div>
+
+            <!-- Generation -->
+            <div id="badge-gen-row">
+              <div id="badge-gen-done" style="display:none;">
+                <button class="badge-pill-done" id="badge-gen-pill" onclick="badgePillEdit('gen')" title="Generation">
+                  <span id="badge-gen-pill-text">👥</span>
+                  <span class="badge-pill-check">✓</span>
+                </button>
+              </div>
+              <div id="badge-gen-edit">
+                <select class="extras-select" id="extras-gen-select" onchange="extrasSelectChange('gen', this.value)" style="margin-bottom:0;">
+                  <option value="">👥 Generation</option>
+                  <option value="genz">Gen Z (1997–2012)</option>
+                  <option value="millennial">Millennial (1981–1996)</option>
+                  <option value="genx">Gen X (1965–1980)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Star sign -->
+            <div id="badge-star-row">
+              <div id="badge-star-done" style="display:none;">
+                <button class="badge-pill-done" id="badge-star-pill" onclick="badgePillEdit('star')" title="Star sign">
+                  <span id="badge-star-pill-text">♈</span>
+                  <span class="badge-pill-check">✓</span>
+                </button>
+              </div>
+              <div id="badge-star-edit">
+                <select class="extras-select" id="extras-star-select" onchange="extrasSelectChange('star', this.value)" style="margin-bottom:0;">
+                  <option value="">♈ Star sign</option>
+                  <option value="aries">♈ Aries</option>
+                  <option value="taurus">♉ Taurus</option>
+                  <option value="gemini">♊ Gemini</option>
+                  <option value="cancer">♋ Cancer</option>
+                  <option value="leo">♌ Leo</option>
+                  <option value="virgo">♍ Virgo</option>
+                  <option value="libra">♎ Libra</option>
+                  <option value="scorpio">♏ Scorpio</option>
+                  <option value="sagittarius">♐ Sagittarius</option>
+                  <option value="capricorn">♑ Capricorn</option>
+                  <option value="aquarius">♒ Aquarius</option>
+                  <option value="pisces">♓ Pisces</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Chinese zodiac -->
+            <div id="badge-zodiac-row">
+              <div id="badge-zodiac-done" style="display:none;">
+                <button class="badge-pill-done" id="badge-zodiac-pill" onclick="badgePillEdit('zodiac')" title="Chinese zodiac">
+                  <span id="badge-zodiac-pill-text">🐉</span>
+                  <span class="badge-pill-check">✓</span>
+                </button>
+              </div>
+              <div id="badge-zodiac-edit">
+                <select class="extras-select" id="extras-zodiac-select" onchange="extrasSelectChange('zodiac', this.value)" style="margin-bottom:0;">
+                  <option value="">🐉 Chinese zodiac</option>
+                  <option value="rat">🐭 Rat · 2020</option>
+                  <option value="ox">🐮 Ox · 2021</option>
+                  <option value="tiger">🐯 Tiger · 2022</option>
+                  <option value="rabbit">🐰 Rabbit · 2023</option>
+                  <option value="dragon">🐲 Dragon · 2024</option>
+                  <option value="snake">🐍 Snake · 2025</option>
+                  <option value="horse">🐴 Horse · 2014</option>
+                  <option value="goat">🐏 Goat · 2015</option>
+                  <option value="monkey">🐵 Monkey · 2016</option>
+                  <option value="rooster">🐔 Rooster · 2017</option>
+                  <option value="dog">🐶 Dog · 2018</option>
+                  <option value="pig">🐷 Pig · 2019</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Save button — hidden when all saved, shown when pending changes -->
+            <div id="badges-save-wrap" style="display:none;">
+              <button class="badges-save-btn" onclick="extrasSave()">Save badges</button>
+              <div class="badges-save-status" id="extras-save-status"></div>
+            </div>
+
+          </div>
         </div>
 
         <!-- sidebar sleep widget removed V64 — sleep mode lives in Settings panel -->
@@ -4812,10 +4907,12 @@ var _vibeExtrasTimer = null;
 // ── About me extras card ─────────────────────────────────────────────────────
 
 function extrasSelectChange(group, val) {
-  // Just store locally; full save happens via Save button
+  // Store locally immediately; full save via Save button
   if (group === 'star')   localStorage.setItem('ur_extras_star',   val);
   if (group === 'zodiac') localStorage.setItem('ur_extras_zodiac', val);
   if (group === 'gen')    localStorage.setItem('ur_extras_gen',    val);
+  if (typeof _badgePendingChanges !== 'undefined') _badgePendingChanges[group] = !!val;
+  if (typeof badgeSyncSaveBtn === 'function') badgeSyncSaveBtn();
 }
 
 function extrasPickPill(el) {
@@ -4840,12 +4937,16 @@ function extrasLoadSaved() {
   var zodiac = localStorage.getItem('ur_extras_zodiac') || '';
   var gen    = localStorage.getItem('ur_extras_gen')    || '';
 
+  // Pre-populate selects (in case they're in edit mode)
   var starSel   = document.getElementById('extras-star-select');
   var zodiacSel = document.getElementById('extras-zodiac-select');
   var genSel    = document.getElementById('extras-gen-select');
   if (starSel   && star)   starSel.value   = star;
   if (zodiacSel && zodiac) zodiacSel.value = zodiac;
   if (genSel    && gen)    genSel.value    = gen;
+
+  // Render completed pills or pending selects
+  if (typeof badgeRenderAll === 'function') badgeRenderAll();
 }
 
 function extrasLoadFromProfile(profile) {
@@ -4868,6 +4969,8 @@ function extrasLoadFromProfile(profile) {
     var genSel = document.getElementById('extras-gen-select');
     if (genSel) genSel.value = profile.generation;
   }
+  // Re-render badge pills with authoritative data
+  if (typeof badgeRenderAll === 'function') badgeRenderAll();
 }
 
 async function extrasSave() {
@@ -4911,7 +5014,12 @@ async function extrasSave() {
       body:    JSON.stringify(payload)
     });
     if (res.ok) {
-      if (statusEl) { statusEl.textContent = '✓ Saved'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 2500); }
+      if (statusEl) { statusEl.textContent = '✓ Saved'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 1500); }
+      // Reset pending flags and re-render pills
+      if (typeof _badgePendingChanges !== 'undefined') { _badgePendingChanges.star = false; _badgePendingChanges.zodiac = false; _badgePendingChanges.gen = false; }
+      setTimeout(function() {
+        if (typeof badgeRenderAll === 'function') badgeRenderAll();
+      }, 1600);
     } else {
       if (statusEl) { statusEl.textContent = 'Save failed — try again.'; }
     }
@@ -7884,6 +7992,92 @@ document.addEventListener('click', function(e) {
   }
 });
 
+
+// ── Profile badges — pill display logic ──────────────────────────────────────
+
+var BADGE_STAR_LABELS = {
+  aries:'♈ Aries', taurus:'♉ Taurus', gemini:'♊ Gemini', cancer:'♋ Cancer',
+  leo:'♌ Leo', virgo:'♍ Virgo', libra:'♎ Libra', scorpio:'♏ Scorpio',
+  sagittarius:'♐ Sagittarius', capricorn:'♑ Capricorn', aquarius:'♒ Aquarius', pisces:'♓ Pisces'
+};
+var BADGE_ZODIAC_LABELS = {
+  rat:'🐭 Rat', ox:'🐮 Ox', tiger:'🐯 Tiger', rabbit:'🐰 Rabbit',
+  dragon:'🐲 Dragon', snake:'🐍 Snake', horse:'🐴 Horse', goat:'🐏 Goat',
+  monkey:'🐵 Monkey', rooster:'🐔 Rooster', dog:'🐶 Dog', pig:'🐷 Pig'
+};
+var BADGE_GEN_LABELS = {
+  genz:'Gen Z', millennial:'Millennial', genx:'Gen X'
+};
+
+// Render badge pill or show select based on saved value
+function badgeRenderField(group) {
+  var val = localStorage.getItem('ur_extras_' + group) || '';
+  var doneEl = document.getElementById('badge-' + group + '-done');
+  var editEl = document.getElementById('badge-' + group + '-edit');
+  var pillText = document.getElementById('badge-' + group + '-pill-text');
+  var pillBtn  = document.getElementById('badge-' + group + '-pill');
+  if (!doneEl || !editEl) return;
+
+  if (val) {
+    var label = '';
+    if (group === 'star')   label = BADGE_STAR_LABELS[val]   || val;
+    if (group === 'zodiac') label = BADGE_ZODIAC_LABELS[val] || val;
+    if (group === 'gen')    label = BADGE_GEN_LABELS[val]    || val;
+    if (pillText) pillText.textContent = label;
+    // Update tooltip with category name
+    var tooltips = { star:'Star sign', zodiac:'Chinese zodiac', gen:'Generation' };
+    if (pillBtn) pillBtn.setAttribute('title', (tooltips[group] || group) + ': ' + label);
+    doneEl.style.display = 'block';
+    editEl.style.display = 'none';
+  } else {
+    doneEl.style.display = 'none';
+    editEl.style.display = 'block';
+  }
+}
+
+function badgeRenderAll() {
+  badgeRenderField('gen');
+  badgeRenderField('star');
+  badgeRenderField('zodiac');
+  badgeSyncSaveBtn();
+}
+
+// Show/hide save button based on whether any select has an unsaved pending value
+var _badgePendingChanges = { star: false, zodiac: false, gen: false };
+
+function badgeSyncSaveBtn() {
+  var wrap = document.getElementById('badges-save-wrap');
+  if (!wrap) return;
+  var anyPending = _badgePendingChanges.star || _badgePendingChanges.zodiac || _badgePendingChanges.gen;
+  // Also show if any select is visible AND has a value selected (unsaved first-time pick)
+  var starSel   = document.getElementById('extras-star-select');
+  var zodiacSel = document.getElementById('extras-zodiac-select');
+  var genSel    = document.getElementById('extras-gen-select');
+  var starEdit   = document.getElementById('badge-star-edit');
+  var zodiacEdit = document.getElementById('badge-zodiac-edit');
+  var genEdit    = document.getElementById('badge-gen-edit');
+  var anyVisible =
+    (starEdit   && starEdit.style.display   !== 'none' && starSel   && starSel.value)   ||
+    (zodiacEdit && zodiacEdit.style.display !== 'none' && zodiacSel && zodiacSel.value) ||
+    (genEdit    && genEdit.style.display    !== 'none' && genSel    && genSel.value);
+  wrap.style.display = (anyPending || anyVisible) ? 'block' : 'none';
+}
+
+// Called when user clicks a completed pill to edit it
+function badgePillEdit(group) {
+  var doneEl = document.getElementById('badge-' + group + '-done');
+  var editEl = document.getElementById('badge-' + group + '-edit');
+  if (doneEl) doneEl.style.display = 'none';
+  if (editEl) editEl.style.display = 'block';
+  // Pre-select current value in the select
+  var val = localStorage.getItem('ur_extras_' + group) || '';
+  var selId = group === 'gen' ? 'extras-gen-select' : group === 'star' ? 'extras-star-select' : 'extras-zodiac-select';
+  var sel = document.getElementById(selId);
+  if (sel && val) sel.value = val;
+  _badgePendingChanges[group] = true;
+  badgeSyncSaveBtn();
+}
+
 function openSettingsPanel(section) {
     var panel = document.getElementById('settings-panel');
     var backdrop = document.getElementById('settings-panel-backdrop');
@@ -9684,10 +9878,16 @@ function updateUniVerifyCard(profile) {
   const uniEmail = profile.uni_email || localStorage.getItem('ur_uni_email') || '';
   const status   = profile.student_status || localStorage.getItem('ur_student_status') || '';
 
-  // Hide entire card for community members / professionals — uni email not applicable
-  const card = document.getElementById('uni-verify-card');
-  if (card) {
-    card.style.display = (status === 'other') ? 'none' : 'block';
+  // Hide just the uni email section for community members / professionals (not applicable)
+  // Badges card stays visible — optional badges (star sign, zodiac, generation) still relevant
+  const uniSection = document.getElementById('uni-verify-not-done');
+  const uniDone    = document.getElementById('uni-verify-done');
+  if (status === 'other') {
+    if (uniSection) uniSection.style.display = 'none';
+    if (uniDone)    uniDone.style.display    = 'none';
+    // Hide the divider label too if uni is hidden
+    var divLabel = document.querySelector('.badges-uni-row');
+    if (divLabel) divLabel.style.display = 'none';
   }
 
   const notDone = document.getElementById('uni-verify-not-done');
