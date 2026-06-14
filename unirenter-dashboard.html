@@ -1746,6 +1746,35 @@ body.light-mode {
 .vibe-inline-extras { margin-bottom: 12px; padding-top: 10px; border-top: 1px solid var(--navy-border); }
 .vibe-inline-extras-row { display:flex; gap:12px; flex-wrap:wrap; }
 
+/* ── Vibe quiz Q1 emoji grid ── */
+.vibe-q1-grid { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+.vibe-q1-emoji { font-size:26px; cursor:pointer; padding:8px; border-radius:10px; border:2px solid transparent; background:rgba(255,255,255,0.04); transition:all 0.15s; user-select:none; }
+.vibe-q1-emoji:hover { background:rgba(245,184,0,0.1); border-color:rgba(245,184,0,0.3); transform:scale(1.08); }
+.vibe-q1-emoji.selected { background:rgba(245,184,0,0.15); border-color:var(--brand-yellow); transform:scale(1.12); }
+.vibe-q1-selected-label { font-size:13px; color:var(--brand-yellow); margin-bottom:4px; min-height:18px; }
+
+/* ── Vibe quiz shortcuts ── */
+.vibe-shortcuts-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+.vibe-shortcut { font-size:12px; padding:5px 10px; background:rgba(255,255,255,0.05); border:1px solid var(--navy-border); border-radius:20px; cursor:pointer; color:var(--text-muted); transition:all 0.15s; white-space:nowrap; }
+.vibe-shortcut:hover { background:rgba(245,184,0,0.1); border-color:rgba(245,184,0,0.35); color:var(--text); }
+.vibe-textarea-wrap { position:relative; }
+.vibe-mic-btn { position:absolute; right:8px; bottom:8px; background:none; border:none; font-size:16px; cursor:pointer; opacity:0.5; transition:opacity 0.2s; padding:2px; }
+.vibe-mic-btn:hover { opacity:1; }
+.vibe-mic-btn.active { opacity:1; animation:micPulse 1s ease-in-out infinite; }
+@keyframes micPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+
+/* ── Vibe quiz pet multi-select ── */
+.vibe-pet-grid { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+.vibe-pet-option { display:flex; align-items:center; gap:6px; padding:8px 12px; background:rgba(255,255,255,0.04); border:2px solid transparent; border-radius:10px; cursor:pointer; transition:all 0.15s; }
+.vibe-pet-option:hover { background:rgba(245,184,0,0.08); border-color:rgba(245,184,0,0.25); }
+.vibe-pet-option.selected { background:rgba(245,184,0,0.12); border-color:var(--brand-yellow); }
+.vibe-pet-emoji { font-size:20px; }
+.vibe-pet-label { font-size:12px; color:var(--text-muted); }
+.vibe-pet-option.selected .vibe-pet-label { color:var(--text); }
+
+/* ── Second equation label ── */
+.match-vibe-eq-second-label { display:block; font-size:10px; color:rgba(255,255,255,0.3); font-style:normal; margin-top:5px; margin-bottom:2px; }
+
 /* ── Sidebar sleep widget ── */
 .sidebar-sleep-widget {
   background: var(--navy-card);
@@ -3476,7 +3505,7 @@ body.light-mode {
       <div id="vibe-card-quiz" style="display:none;">
         <div class="vibe-quiz-progress">
           <div class="vibe-quiz-bar"><div class="vibe-quiz-fill" id="vibe-quiz-fill" style="width:20%"></div></div>
-          <span class="vibe-quiz-step" id="vibe-quiz-step">1 of 5</span>
+          <span class="vibe-quiz-step" id="vibe-quiz-step">1 of 6</span>
         </div>
         <div class="vibe-quiz-questions" id="vibe-quiz-questions">
           <!-- injected by JS -->
@@ -3898,39 +3927,65 @@ function openSettingsCollapse() {
 // ══════════════════════════════════════════════════════════════
 
 const VIBE_PRIMARY_PALETTE = ['🌙','🐦','📚','🎓','💼','🗣️','🚪','🧹','🤷','🍳','🎮','🎵','🏋️','🌈','🌍','👥','🏠','🌿'];
-const VIBE_SECONDARY_EXTRAS = ['☕','🎉','💻','📺','🍷','🌱','🐕','🐈','🎤','🧘','🛫','🌶️','🍜','🏄','🎨','📷','🍕','🧁','🌊','🎯','🎲','🛋️','🌻','🍣'];
+const VIBE_SECONDARY_EXTRAS = ['💻','🌙','💪','🧘','🎨','📖','🎬','📺','🌳','🪴','🔥','🚿','🚬','📦','🌱','🍖','☕','🍺','🥡','🛒','🐱','🐶','🐦','🐠','💑','👨‍👩‍👧','🤝','🗺️','🍽️','🌍','✈️','🎊','👶','♿'];
 
 const VIBE_QUESTIONS = [
   {
-    q: 'How would you describe your typical day at home — morning to night?',
-    hint: 'Think about when you wake up, how you use the space, when you go to bed.',
-    max: 300
+    type: 'emoji-grid',
+    q: 'Pick the emoji that best captures how you live as a housemate.',
+    hint: 'This becomes your primary vibe — the first thing potential housemates see.',
+    emojis: VIBE_PRIMARY_PALETTE
   },
   {
-    q: 'What matters most to you in a shared living situation?',
-    hint: 'Cleanliness, quiet time, social energy, kitchen rules — anything that makes or breaks it.',
-    max: 300
+    type: 'text-shortcuts',
+    q: 'Describe your typical day at home — morning to night.',
+    hint: 'When do you wake up? How do you use the space? When do you go to bed?',
+    max: 300,
+    shortcuts: ['Early riser 🐦', 'Night owl 🌙', 'Gym mornings 💪', 'Work from home 💻', 'Quiet evenings 🌿', 'Batch cook Sundays 🍳']
   },
   {
-    q: 'How do you handle shared spaces like the kitchen, bathroom, and living room?',
-    hint: 'E.g. I clean as I go, I batch-cook on Sundays, I prefer a quiet common area.',
-    max: 300
+    type: 'text-shortcuts',
+    q: 'What\'s your kitchen & food situation?',
+    hint: 'How often do you cook? Fridge-sharing? Any dietary needs worth knowing?',
+    max: 200,
+    shortcuts: ['Cook most nights 🍳', 'Mostly takeaway 🥡', 'Plant-based 🌱', 'Meat-eater 🍖', 'Coffee addict ☕', 'No fridge sharing 🛒']
   },
   {
-    q: 'What kind of social vibe are you bringing to the household?',
-    hint: 'Do you host friends? Keep to yourself? Somewhere in between?',
-    max: 300
+    type: 'multi-emoji',
+    q: 'Any pets — or pet dealbreakers?',
+    hint: 'Select all that apply. Pick what describes you.',
+    emojis: [
+      { e: '🐱', label: 'I have a cat' },
+      { e: '🐶', label: 'I have a dog' },
+      { e: '🐦', label: 'I have a bird' },
+      { e: '🐠', label: 'I have fish' },
+      { e: '🐾', label: 'Love all pets' },
+      { e: '🚫🐱', label: 'Allergic to cats' },
+      { e: '🚫🐶', label: 'No dogs please' },
+      { e: '🙅', label: 'No pets at all' },
+      { e: '✅', label: 'Happy with any pet' }
+    ]
   },
   {
-    q: 'Anything else you want potential housemates to know about you?',
-    hint: 'Hobbies, quirks, dealbreakers, or just something that makes you you.',
-    max: 300
+    type: 'text-shortcuts',
+    q: 'How do you handle shared spaces — kitchen, bathroom, living room?',
+    hint: 'Clean as you go? Roster? What matters to you day-to-day?',
+    max: 200,
+    shortcuts: ['Clean as I go 🧹', 'Weekly roster 🗓️', 'Pretty relaxed 🤷', 'Strict about kitchen ✨', 'Need my own shelf 🛒', 'Bathroom schedule ⏰']
+  },
+  {
+    type: 'text-shortcuts',
+    q: 'What kind of social vibe are you bringing to the house?',
+    hint: 'This is the most important one — be honest. Do you host friends? Keep to yourself? Somewhere in between?',
+    max: 300,
+    shortcuts: ['Mostly keep to myself 🚪', 'Occasional friends over 👥', 'Host regularly 🎊', 'Study house vibes 📚', 'Up for house dinners 🍽️', 'Need quiet after 10pm 🌙']
   }
 ];
 
 var _vibeStep      = 0;
-var _vibeAnswers   = ['','','','',''];
-var _vibePending   = { primary:'', secondary:'', summary:'' };
+var _vibeAnswers   = ['','','','','',''];
+var _vibePetEmojis = [];
+var _vibePending   = { primary:'', secondary:'', summary:'', lifestyle:{}, quiz_answers:{} };
 
 function vibeInit() {
   // Load saved vibe from localStorage
@@ -3972,8 +4027,9 @@ function _vibeSaveLocal(primary, secondary, summary) {
 function vibeStartQuiz() {
   var verified = localStorage.getItem('unirenter_email_verified') === '1';
   if (!verified) { showToast('🔒 Verify your email first', 'Complete your profile to unlock this.'); return; }
-  _vibeStep    = 0;
-  _vibeAnswers = ['','','','',''];
+  _vibeStep      = 0;
+  _vibeAnswers   = ['','','','','',''];
+  _vibePetEmojis = [];
   document.getElementById('vibe-card-empty').style.display    = 'none';
   document.getElementById('vibe-card-done').style.display     = 'none';
   document.getElementById('vibe-retake-confirm').style.display= 'none';
@@ -3990,26 +4046,149 @@ function _vibeRenderStep() {
   if (stepLabel) stepLabel.textContent = (_vibeStep + 1) + ' of ' + VIBE_QUESTIONS.length;
 
   var container = document.getElementById('vibe-quiz-questions');
-  var existing  = _vibeAnswers[_vibeStep] || '';
+  var backBtn = document.getElementById('vibe-btn-back');
+  var nextBtn = document.getElementById('vibe-btn-next');
+  if (backBtn) backBtn.style.display = _vibeStep > 0 ? 'inline-flex' : 'none';
+  var isLast = _vibeStep === VIBE_QUESTIONS.length - 1;
+  if (nextBtn) nextBtn.textContent = isLast ? 'Generate vibe →' : 'Next →';
+
+  if (q.type === 'emoji-grid') {
+    _vibeRenderEmojiGrid(container, q);
+  } else if (q.type === 'multi-emoji') {
+    _vibeRenderMultiEmoji(container, q);
+  } else {
+    _vibeRenderTextShortcuts(container, q);
+  }
+}
+
+function _vibeRenderEmojiGrid(container, q) {
+  var existing = _vibeAnswers[_vibeStep] || '';
+  var gridHtml = q.emojis.map(function(e) {
+    return '<span class="vibe-q1-emoji' + (e === existing ? ' selected' : '') + '" onclick="_vibeSelectPrimaryEmoji(\''  + e + '\')" title="' + e + '">' + e + '</span>';
+  }).join('');
   container.innerHTML =
     '<div class="vibe-question-block">' +
     '<div class="vibe-question-text">' + q.q + '</div>' +
     '<div class="vibe-question-hint">' + q.hint + '</div>' +
+    '<div class="vibe-q1-grid" id="vibe-q1-grid">' + gridHtml + '</div>' +
+    (existing ? '<div class="vibe-q1-selected-label">Selected: ' + existing + '</div>' : '<div class="vibe-q1-selected-label" id="vibe-q1-selected-label"></div>') +
+    '</div>';
+}
+
+function _vibeSelectPrimaryEmoji(e) {
+  _vibeAnswers[_vibeStep] = e;
+  var spans = document.querySelectorAll('.vibe-q1-emoji');
+  spans.forEach(function(s) { s.classList.toggle('selected', s.textContent === e); });
+  var lbl = document.querySelector('.vibe-q1-selected-label');
+  if (lbl) lbl.textContent = 'Selected: ' + e;
+}
+
+function _vibeRenderTextShortcuts(container, q) {
+  var existing = _vibeAnswers[_vibeStep] || '';
+  var shortcutsHtml = (q.shortcuts || []).map(function(s) {
+    return '<span class="vibe-shortcut" onclick="_vibeAppendShortcut(\''  + s.replace(/'/g, "\\'") + '\')">' + s + '</span>';
+  }).join('');
+  var hasMic = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  var micBtn = hasMic ? '<button class="vibe-mic-btn" id="vibe-mic-btn" onclick="_vibeMicToggle()" title="Speak your answer">🎤</button>' : '';
+  container.innerHTML =
+    '<div class="vibe-question-block">' +
+    '<div class="vibe-question-text">' + q.q + '</div>' +
+    '<div class="vibe-question-hint">' + q.hint + '</div>' +
+    (shortcutsHtml ? '<div class="vibe-shortcuts-row">' + shortcutsHtml + '</div>' : '') +
+    '<div class="vibe-textarea-wrap">' +
     '<textarea class="vibe-question-textarea" id="vibe-answer-input" maxlength="' + q.max + '" ' +
     'placeholder="Your answer…" oninput="_vibeCharCount(this,' + q.max + ')">' + existing + '</textarea>' +
+    micBtn +
+    '</div>' +
     '<div class="vibe-char-count" id="vibe-char-count">' + existing.length + ' / ' + q.max + '</div>' +
     '</div>';
-
-  var backBtn = document.getElementById('vibe-btn-back');
-  var nextBtn = document.getElementById('vibe-btn-next');
-  if (backBtn) backBtn.style.display = _vibeStep > 0 ? 'inline-flex' : 'none';
-  if (nextBtn) nextBtn.textContent = _vibeStep < VIBE_QUESTIONS.length - 1 ? 'Next →' : 'Generate vibe →';
-
-  // Focus textarea
   setTimeout(function() {
     var ta = document.getElementById('vibe-answer-input');
     if (ta) ta.focus();
   }, 50);
+}
+
+function _vibeAppendShortcut(s) {
+  var ta = document.getElementById('vibe-answer-input');
+  if (!ta) return;
+  var cur = ta.value.trim();
+  ta.value = cur ? cur + ', ' + s : s;
+  var max = parseInt(ta.getAttribute('maxlength')) || 300;
+  _vibeCharCount(ta, max);
+  ta.focus();
+}
+
+function _vibeRenderMultiEmoji(container, q) {
+  var optionsHtml = q.emojis.map(function(item) {
+    var sel = _vibePetEmojis.indexOf(item.e) > -1 ? ' selected' : '';
+    return '<div class="vibe-pet-option' + sel + '" onclick="_vibePetToggle(\''  + item.e.replace(/'/g, "\\'") + '\', this)">' +
+      '<span class="vibe-pet-emoji">' + item.e + '</span>' +
+      '<span class="vibe-pet-label">' + item.label + '</span>' +
+    '</div>';
+  }).join('');
+  container.innerHTML =
+    '<div class="vibe-question-block">' +
+    '<div class="vibe-question-text">' + q.q + '</div>' +
+    '<div class="vibe-question-hint">' + q.hint + '</div>' +
+    '<div class="vibe-pet-grid">' + optionsHtml + '</div>' +
+    '</div>';
+}
+
+function _vibePetToggle(emoji, el) {
+  var idx = _vibePetEmojis.indexOf(emoji);
+  if (idx > -1) {
+    _vibePetEmojis.splice(idx, 1);
+    el.classList.remove('selected');
+  } else {
+    _vibePetEmojis.push(emoji);
+    el.classList.add('selected');
+  }
+  if (_vibePetEmojis.length === 0) {
+    _vibeAnswers[_vibeStep] = 'No preference';
+  } else {
+    _vibeAnswers[_vibeStep] = _vibePetEmojis.join(' ');
+  }
+}
+
+var _vibeMicRecognition = null;
+var _vibeMicActive = false;
+function _vibeMicToggle() {
+  if (_vibeMicActive) {
+    if (_vibeMicRecognition) _vibeMicRecognition.stop();
+    return;
+  }
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  _vibeMicRecognition = new SR();
+  _vibeMicRecognition.continuous = false;
+  _vibeMicRecognition.interimResults = false;
+  _vibeMicRecognition.lang = 'en-AU';
+  _vibeMicRecognition.onstart = function() {
+    _vibeMicActive = true;
+    var btn = document.getElementById('vibe-mic-btn');
+    if (btn) { btn.classList.add('active'); btn.title = 'Listening… tap to stop'; }
+  };
+  _vibeMicRecognition.onresult = function(e) {
+    var transcript = e.results[0][0].transcript;
+    var ta = document.getElementById('vibe-answer-input');
+    if (ta) {
+      var cur = ta.value.trim();
+      ta.value = cur ? cur + ' ' + transcript : transcript;
+      var max = parseInt(ta.getAttribute('maxlength')) || 300;
+      _vibeCharCount(ta, max);
+    }
+  };
+  _vibeMicRecognition.onend = function() {
+    _vibeMicActive = false;
+    var btn = document.getElementById('vibe-mic-btn');
+    if (btn) { btn.classList.remove('active'); btn.title = 'Speak your answer'; }
+  };
+  _vibeMicRecognition.onerror = function() {
+    _vibeMicActive = false;
+    var btn = document.getElementById('vibe-mic-btn');
+    if (btn) { btn.classList.remove('active'); btn.title = 'Speak your answer'; }
+  };
+  _vibeMicRecognition.start();
 }
 
 function _vibeCharCount(el, max) {
@@ -4018,11 +4197,17 @@ function _vibeCharCount(el, max) {
 }
 
 function vibeNavNext() {
-  var ta  = document.getElementById('vibe-answer-input');
-  var val = ta ? ta.value.trim() : '';
-  if (!val) { showToast('🤠 Add a few words', 'Cob needs something to work with!'); return; }
-  _vibeAnswers[_vibeStep] = val;
-
+  var q = VIBE_QUESTIONS[_vibeStep];
+  if (q.type === 'emoji-grid') {
+    if (!_vibeAnswers[_vibeStep]) { showToast('🤠 Pick an emoji', 'Tap the emoji that best describes you as a housemate.'); return; }
+  } else if (q.type === 'multi-emoji') {
+    if (_vibePetEmojis.length === 0) _vibeAnswers[_vibeStep] = 'No preference';
+  } else {
+    var ta = document.getElementById('vibe-answer-input');
+    var val = ta ? ta.value.trim() : '';
+    if (!val) { showToast('🤠 Add a few words', 'Cob needs something to work with!'); return; }
+    _vibeAnswers[_vibeStep] = val;
+  }
   if (_vibeStep < VIBE_QUESTIONS.length - 1) {
     _vibeStep++;
     _vibeRenderStep();
@@ -4032,14 +4217,16 @@ function vibeNavNext() {
 }
 
 function vibeNavBack() {
-  var ta  = document.getElementById('vibe-answer-input');
-  if (ta) _vibeAnswers[_vibeStep] = ta.value.trim();
+  var q = VIBE_QUESTIONS[_vibeStep];
+  if (q.type === 'text-shortcuts' || q.type === undefined) {
+    var ta = document.getElementById('vibe-answer-input');
+    if (ta) _vibeAnswers[_vibeStep] = ta.value.trim();
+  }
   if (_vibeStep > 0) {
     _vibeStep--;
     _vibeRenderStep();
   }
 }
-
 async function _vibeGenerate() {
   // Show generating state
   document.getElementById('vibe-card-quiz').style.display      = 'none';
@@ -4053,23 +4240,41 @@ async function _vibeGenerate() {
     if (el) el.textContent = dots[di++ % dots.length];
   }, 500);
 
+  var _vibeQuizData = {
+    primary_picked: _vibeAnswers[0] || '',
+    home_life: _vibeAnswers[1] || '',
+    food_kitchen: _vibeAnswers[2] || '',
+    pets: _vibeAnswers[3] || 'No preference',
+    shared_spaces: _vibeAnswers[4] || '',
+    social_style: _vibeAnswers[5] || ''
+  };
+  _vibePending.lifestyle    = _vibeQuizData;
+  _vibePending.quiz_answers = _vibeQuizData;
+
   var promptBody =
     'You are Cob — a warm AI assistant for UniRenter, an Australian student accommodation platform.\n\n' +
-    'A student has answered 5 questions about themselves as a housemate. Your job is to write a short, honest personality portrait for their profile.\n\n' +
+    'A student has answered 6 questions about themselves as a housemate. Your job is to write a short, honest personality portrait for their profile.\n\n' +
     'LOCKED PRIMARY EMOJI PALETTE (pick exactly one):\n' +
     '🌙 Night owl | 🐦 Early riser | 📚 Study-focused | 🎓 Postgrad | 💼 Young professional | 🗣️ Social & outgoing | 🚪 Keeps to themselves | 🧹 Neat freak | 🤷 Relaxed about mess | 🍳 Home cook | 🎮 Gamer | 🎵 Musician | 🏋️ Gym regular | 🌈 LGBTQ+ friendly | 🌍 International | 👥 Loves having guests | 🏠 Homebody | 🌿 Chill vibes\n\n' +
+    'NOTE: The student picked ' + _vibeQuizData.primary_picked + ' as their primary emoji in Q1. Respect this unless their other answers clearly override it.\n\n' +
+    'SECONDARY EMOJI — pick one that adds personality flavour from this curated set (not restricted to):\n' +
+    '💻 🌙 💪 🧘 🎨 📖 🎬 📺 🌳 🪴 🔥 🛀 🚫 📦 🌱 🍖 ☕ 🍺 🥡 🛍 🐱 🐶 🐦 🐠 💑 👨‍👩‍👧 🤝 🗺 🍽 🌍 ✈ 🎊 👶 ♿\n\n' +
     'RULES:\n' +
-    '- Pick primary emoji = the emoji that best captures how this person IS as a housemate day-to-day\n' +
-    '- Pick secondary emoji = any emoji from the full set that adds personality flavour (be creative)\n' +
+    '- Respect Q1 primary emoji pick unless Q2–6 clearly override it\n' +
+    '- Secondary emoji adds personality flavour — be specific, not generic\n' +
     '- Write summary in third person, 1-2 sentences, warm and specific — not generic. Lead with their strongest coexistence trait.\n' +
     '- Summary format: starts with primary emoji, then a quoted sentence or two. Example: 🧹 "Neat freak who cooks every night and is strict about kitchen cleanliness — total homebody, quiet after 10pm."\n' +
     '- Do NOT give legal advice or housing recommendations. Just write the portrait.\n' +
     '- NEVER use the word "legal"\n\n' +
     'STUDENT ANSWERS:\n' +
-    VIBE_QUESTIONS.map(function(q, i) {
-      return 'Q' + (i+1) + ': ' + q.q + '\nA: ' + (_vibeAnswers[i] || '(skipped)');
-    }).join('\n\n') + '\n\n' +
+    'Q1 (Primary emoji picked): ' + _vibeQuizData.primary_picked + '\n' +
+    'Q2 (Home life): ' + (_vibeQuizData.home_life || '(skipped)') + '\n' +
+    'Q3 (Food & kitchen): ' + (_vibeQuizData.food_kitchen || '(skipped)') + '\n' +
+    'Q4 (Pets): ' + _vibeQuizData.pets + '\n' +
+    'Q5 (Shared spaces): ' + (_vibeQuizData.shared_spaces || '(skipped)') + '\n' +
+    'Q6 (Social style — most important): ' + (_vibeQuizData.social_style || '(skipped)') + '\n\n' +
     'Respond ONLY with a JSON object, no preamble, no markdown fences:\n' +
+    '{"primary":"<emoji>","secondary":"<emoji>","summary":"<primary_emoji> \\"<1-2 sentences>\\""}'
     '{"primary":"<emoji>","secondary":"<emoji>","summary":"<primary_emoji> \\"<1-2 sentences>\\""}';
 
   try {
@@ -4232,7 +4437,9 @@ async function vibeSave() {
         vibe_emoji_secondary: secondary,
         cob_summary:          summary,
         star_sign:            star,
-        generation:           gen
+        generation:           gen,
+        vibe_lifestyle:       _vibePending.lifestyle    || null,
+        vibe_quiz_answers:    _vibePending.quiz_answers || null
       })
     });
   } catch(err) {
@@ -4253,8 +4460,9 @@ function vibeRetakeRequest() {
 
 function vibeConfirmRetake() {
   document.getElementById('vibe-retake-confirm').style.display = 'none';
-  _vibeStep    = 0;
-  _vibeAnswers = ['','','','',''];
+  _vibeStep      = 0;
+  _vibeAnswers   = ['','','','','',''];
+  _vibePetEmojis = [];
   document.getElementById('vibe-card-quiz').style.display     = 'block';
   _vibeRenderStep();
 }
@@ -4626,22 +4834,24 @@ const DUMMY_MATCHES = [
   { name:'Priya R.', initials:'P', bg:'linear-gradient(135deg,#e85d9f,#b83278)', score:96,
     sub:'UniMelb · Commerce/Law · 2nd year', tags:['🌙 Early bird','🧹 Very tidy','Carlton','$320/wk'],
     tagClass:['','green','yellow','yellow'], reason:'Sleep, cleanliness & location match',
-    vibe_emoji_primary:'📚' },
+    vibe_emoji_primary:'📚', vibe_emoji_secondary:'☕' },
   { name:'Jake S.', initials:'J', bg:'linear-gradient(135deg,#4BBFE0,#2a7a9e)', score:88,
     sub:'RMIT · Engineering · 3rd year', tags:['🌃 Night owl','⚖️ Average clean','Footscray','$280/wk'],
     tagClass:['','','yellow','yellow'], reason:'Budget & suburb match',
-    vibe_emoji_primary:'🎮' },
+    vibe_emoji_primary:'🎮', vibe_emoji_secondary:'💻' },
   { name:'Anika M.', initials:'A', bg:'linear-gradient(135deg,#F5B800,#c4900a)', score:84,
     sub:'Monash · Psychology · 1st year', tags:['🔄 Flexible','🧹 Tidy','St Kilda','$320/wk'],
     tagClass:['','green','yellow','yellow'], reason:'Lifestyle & budget match',
-    vibe_emoji_primary:'🌿' },
+    vibe_emoji_primary:'🌿', vibe_emoji_secondary:'🪴' },
   { name:'Tom O.', initials:'T', bg:'linear-gradient(135deg,#3DAA5C,#1d6b38)', score:79,
     sub:'Melbourne Uni · Arts · 3rd year', tags:['🌙 Early bird','🧹 Very tidy','Brunswick'],
     tagClass:['','green','yellow'], reason:'Sleep schedule match',
-    vibe_emoji_primary:'🏋️' },
+    vibe_emoji_primary:'🏋️', vibe_emoji_secondary:'💪' },
 ];
 
 // ── Emoji equation pairing logic ─────────────────────────────────────────────
+
+// ── Emoji equation pairing logic — Primary pairs ————————————————————
 
 var VIBE_PAIRS = {
   '🌙+🌙': { eq:'😴😴', line:'Two night owls. Nobody\'s getting woken up at 6am.' },
@@ -4649,7 +4859,7 @@ var VIBE_PAIRS = {
   '🐦+🌙': { eq:'🎧',   line:'Early riser meets night owl — headphones after 10pm is the classic fix.' },
   '🧹+🤷': { eq:'🗓️',  line:'Neat freak meets relaxed — a Sunday reset roster goes a long way.' },
   '🤷+🧹': { eq:'🗓️',  line:'Relaxed meets neat freak — a Sunday reset roster goes a long way.' },
-  '🍳+🍳': { eq:'🛒',   line:'Two home cooks. Agree on grocery sharing early.' },
+  '🍳+🍳': { eq:'🛍',   line:'Two home cooks. Agree on grocery sharing early.' },
   '📚+📚': { eq:'🤫',   line:'Both study-focused. The house will be quiet. Good quiet.' },
   '🗣️+🚪': { eq:'🚦',  line:'Social meets private — a heads-up before guests is worth a conversation.' },
   '🚪+🗣️': { eq:'🚦',  line:'Private meets social — a heads-up before guests is worth a conversation.' },
@@ -4667,23 +4877,80 @@ var VIBE_PAIRS = {
   '📚+💼': { eq:'⏰',   line:'Study-focused meets young professional — both keeping structured hours.' },
   '💼+📚': { eq:'⏰',   line:'Young professional meets study-focused — both keeping structured hours.' },
   '🎓+🎓': { eq:'📖📖', line:'Two postgrads. This house is going to be very productive.' },
-  '🌈+🌍': { eq:'🌏🤝', line:'A welcoming home for everyone — Cob is a fan of this combo.' }
+  '🌈+🌍': { eq:'🌏🤝', line:'A welcoming home for everyone — Cob is a fan of this combo.' },
+  '🌙+📚': { eq:'🌙📚', line:'Night owl who studies late — the house will be quiet after midnight.' },
+  '📚+🌙': { eq:'🌙📚', line:'Study-focused night owl — quiet after midnight guaranteed.' },
+  '🌍+🍳': { eq:'🍜✨', line:'International student and home cook — the kitchen is going to be excellent.' },
+  '🍳+🌍': { eq:'🍜✨', line:'Home cook meets international student — expect some great food aromas.' },
+  '🎓+📚': { eq:'📖📖', line:'Postgrad meets study-focused — peak productivity household.' },
+  '📚+🎓': { eq:'📖📖', line:'Study-focused meets postgrad — peak productivity household.' },
+  '🏋️+🐦': { eq:'⏰☀', line:'Gym regular meets early riser — this house is up before sunrise.' },
+  '🐦+🏋️': { eq:'⏰☀', line:'Early riser meets gym regular — mornings are going to be active.' },
+  '🎵+🌍': { eq:'🌍🎶', line:'Musician meets international student — the cultural exchange could be brilliant.' },
+  '🌈+🗣️': { eq:'🌈🎉', line:'LGBTQ+ friendly meets social — this house sounds like a good time.' },
+  '🚪+🚪': { eq:'😎', line:'Two introverts. The vibe in this house is going to be very low-key.' },
+  '💼+💼': { eq:'📅', line:'Two young professionals. Clear routines, structured weeks.' }
+};
+
+// ── Secondary emoji pairs ————————————————————————————————————
+
+var VIBE_SECONDARY_PAIRS = {
+  '☕+☕': { eq:'☕☕', line:'Two coffee people. The kitchen kettle is going to work hard.' },
+  '💻+💻': { eq:'💻💻', line:'Both work-from-home types. Call time boundaries will matter.' },
+  '🌱+🌱': { eq:'🥗', line:'Two plant-based housemates. The fridge is sorted.' },
+  '🐶+🐶': { eq:'🐾🐾', line:'Two dog owners. The walk roster writes itself.' },
+  '🐱+🐱': { eq:'🐱🐱', line:'Two cat people. The apartment will be very well supervised.' },
+  '🎨+🎨': { eq:'🎨✨', line:'Two creative types. Expect the common area to look interesting.' },
+  '🧘+🧘': { eq:'🧘🌿', line:'Two wellness-focused housemates. This will be a very calm household.' },
+  '🍺+🍺': { eq:'🍺🍻', line:'Both into a social drink. Fridge real estate to negotiate.' },
+  '✈+✈': { eq:'🌍', line:'Two travellers. You\'ll both appreciate a tidy space to come back to.' },
+  '💑+💑': { eq:'🗂', line:'Two couples in the house — guest policies worth agreeing on early.' },
+  '🌱+🍖': { eq:'🌏', line:'Plant-based meets meat-eater — kitchen sharing works if you respect each other\'s shelf.' },
+  '🍖+🌱': { eq:'🌏', line:'Meat-eater meets plant-based — different diets, same kitchen, no drama if you\'re cool.' },
+  '💻+🌿': { eq:'✨', line:'Work-from-home meets chill vibes — quiet house, good energy.' },
+  '🌿+💻': { eq:'✨', line:'Chill vibes meets WFH type — a naturally quiet, low-key household.' },
+  '☕+🌿': { eq:'☕🌿', line:'Coffee person meets chill vibes — slow mornings, no stress.' },
+  '🌿+☕': { eq:'☕🌿', line:'Chill vibes meets coffee person — easy mornings together.' },
+  '🐶+🐱': { eq:'🐾', line:'Dog person meets cat person — needs a conversation, but doable.' },
+  '🐱+🐶': { eq:'🐾', line:'Cat person meets dog person — needs a conversation, but doable.' },
+  '🍺+💻': { eq:'🍺💻', line:'Social drinker meets WFH type — Friday nights are fine, just keep it reasonable.' },
+  '👶+🍺': { eq:'🤝', line:'Family-oriented meets social drinker — different life stages, worth a chat.' },
+  '✈+💻': { eq:'🗓️', line:'Traveller meets WFH type — you\'ll appreciate the space when they\'re away.' },
+  '🧘+💑': { eq:'✨🏠', line:'Wellness-focused meets couple — a calm, intentional household.' },
+  '🍺+🧘': { eq:'💬', line:'Social drinker meets wellness type — different Friday night energy, worth discussing.' },
+  '🧘+🍺': { eq:'💬', line:'Wellness type meets social drinker — different energy levels, needs a conversation.' },
+  '👶+✈': { eq:'🗓️', line:'Family-oriented meets frequent traveller — routines are different but it can work.' },
+  '✈+👶': { eq:'🗓️', line:'Frequent traveller meets family-oriented — good to align on bills and absences.' }
 };
 
 function getVibeEquation(myEmoji, matchEmoji) {
   if (!myEmoji || !matchEmoji) return null;
   var key = myEmoji + '+' + matchEmoji;
   if (VIBE_PAIRS[key]) return { myEmoji: myEmoji, matchEmoji: matchEmoji, result: VIBE_PAIRS[key].eq, line: VIBE_PAIRS[key].line };
-  // Generic fallback: same emoji
   if (myEmoji === matchEmoji) return { myEmoji: myEmoji, matchEmoji: matchEmoji, result: '🤝', line: 'You two are cut from the same cloth.' };
-  // Generic fallback: different emoji
   return { myEmoji: myEmoji, matchEmoji: matchEmoji, result: '🏠', line: 'Different vibes, one roof — could work really well.' };
+}
+
+function getSecondaryEquation(mySecondary, matchSecondary) {
+  if (!mySecondary || !matchSecondary) return null;
+  var key = mySecondary + '+' + matchSecondary;
+  if (VIBE_SECONDARY_PAIRS[key]) return { result: VIBE_SECONDARY_PAIRS[key].eq, line: VIBE_SECONDARY_PAIRS[key].line };
+  if (mySecondary === matchSecondary) return { result: mySecondary + mySecondary, line: 'You’ve both got the same secondary vibe.' };
+  return null;
 }
 
 function getMyVibeEmoji() {
   try {
     var vd = localStorage.getItem('ur_vibe');
     if (vd) { var p = JSON.parse(vd); return p.primary || null; }
+  } catch(e) {}
+  return null;
+}
+
+function getMyVibeSecondary() {
+  try {
+    var vd = localStorage.getItem('ur_vibe');
+    if (vd) { var p = JSON.parse(vd); return p.secondary || null; }
   } catch(e) {}
   return null;
 }
@@ -4695,20 +4962,28 @@ function renderMatchCard(p) {
   const tags = p.tags.map((t,i) =>
     `<span class="match-tag ${p.tagClass[i] || ''}">${t}</span>`
   ).join('');
-  // Build emoji equation line
-  var myEmoji = getMyVibeEmoji();
-  var matchEmoji = p.vibe_emoji_primary || null;
+  var myEmoji        = getMyVibeEmoji();
+  var mySecondary    = getMyVibeSecondary();
+  var matchEmoji     = p.vibe_emoji_primary    || null;
+  var matchSecondary = p.vibe_emoji_secondary  || null;
   var eqHtml = '';
   if (myEmoji && matchEmoji) {
     var eq = getVibeEquation(myEmoji, matchEmoji);
     if (eq) {
       eqHtml = '<div class="match-vibe-equation">' +
         '<span class="match-vibe-eq-math">' + eq.myEmoji + ' + ' + eq.matchEmoji + ' = ' + eq.result + '</span>' +
-        '<span class="match-vibe-eq-line">' + eq.line + '</span>' +
-      '</div>';
+        '<span class="match-vibe-eq-line">' + eq.line + '</span>';
+      if (mySecondary && matchSecondary) {
+        var eq2 = getSecondaryEquation(mySecondary, matchSecondary);
+        if (eq2) {
+          eqHtml += '<span class="match-vibe-eq-second-label">also:</span>' +
+            '<span class="match-vibe-eq-math" style="font-size:13px;">' + mySecondary + ' + ' + matchSecondary + ' = ' + eq2.result + '</span>' +
+            '<span class="match-vibe-eq-line">' + eq2.line + '</span>';
+        }
+      }
+      eqHtml += '</div>';
     }
   } else if (!myEmoji && matchEmoji) {
-    // Match has a vibe, user doesn\'t — nudge them
     eqHtml = '<div class="match-vibe-equation">' +
       '<span class="match-vibe-eq-math">' + matchEmoji + ' + ❓ = 🤔</span>' +
       '<span class="match-vibe-eq-nudge" onclick="switchTab(\'profile\');setTimeout(function(){var v=document.getElementById(\'vibe-card\');if(v)v.scrollIntoView({behavior:\'smooth\'});},300);">' +
