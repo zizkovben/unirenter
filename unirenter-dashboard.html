@@ -1772,6 +1772,58 @@ body.light-mode {
 .vibe-pet-label { font-size:12px; color:var(--text-muted); }
 .vibe-pet-option.selected .vibe-pet-label { color:var(--text); }
 
+/* ── About me extras card ── */
+.extras-card {
+  background: var(--navy-card); border: 1px solid var(--navy-border);
+  border-radius: var(--radius); padding: 20px;
+}
+.extras-card-head {
+  font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px;
+}
+.extras-card-sub {
+  font-size: 11px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;
+}
+.extras-section-label {
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px;
+}
+.extras-pill-grid {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;
+}
+.extras-pill {
+  font-size: 11px; padding: 5px 10px; border-radius: 20px;
+  border: 1px solid var(--navy-border); color: var(--text-muted);
+  cursor: pointer; transition: all .15s; background: transparent; white-space: nowrap;
+}
+.extras-pill:hover { border-color: var(--brand-blue); color: var(--text); }
+.extras-pill.selected { background: var(--brand-blue); border-color: var(--brand-blue); color: #fff; }
+.extras-toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-top: 1px solid var(--navy-border); margin-top: 4px; margin-bottom: 12px;
+}
+.extras-toggle-label { font-size: 12px; color: var(--text); line-height: 1.4; }
+.extras-toggle-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.extras-toggle { position:relative; width:38px; height:22px; flex-shrink:0; }
+.extras-toggle input { opacity:0; width:0; height:0; }
+.extras-toggle-slider {
+  position:absolute; cursor:pointer; inset:0; background: var(--navy-border);
+  border-radius:22px; transition:.2s;
+}
+.extras-toggle-slider:before {
+  content:''; position:absolute; height:16px; width:16px;
+  left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.2s;
+}
+.extras-toggle input:checked + .extras-toggle-slider { background: var(--brand-blue); }
+.extras-toggle input:checked + .extras-toggle-slider:before { transform: translateX(16px); }
+.extras-eq-preview { font-size:13px; margin-left:8px; color: var(--brand-yellow); }
+.extras-save-btn {
+  width:100%; padding:9px; border-radius:8px; border:none;
+  background: var(--brand-blue); color:#fff; font-size:13px; font-weight:600;
+  cursor:pointer; transition:opacity .15s;
+}
+.extras-save-btn:hover { opacity:.85; }
+.extras-save-status { font-size:11px; color: var(--green); text-align:center; margin-top:6px; min-height:14px; }
+
 /* ── Second equation label ── */
 .match-vibe-eq-second-label { display:block; font-size:10px; color:rgba(255,255,255,0.3); font-style:normal; margin-top:5px; margin-bottom:2px; }
 
@@ -3664,6 +3716,65 @@ body.light-mode {
           </div>
         </div>
 
+        <!-- About me extras card -->
+        <div class="extras-card" id="about-me-extras-card">
+          <div class="extras-card-head">✨ About me — extras</div>
+          <div class="extras-card-sub">Optional — Cob uses these in your summary. They don't affect your match score.</div>
+
+          <div class="extras-section-label">Star sign</div>
+          <div class="extras-pill-grid" id="extras-star-grid">
+            <button class="extras-pill" data-group="star" data-val="aries" onclick="extrasPickPill(this)">♈ Aries</button>
+            <button class="extras-pill" data-group="star" data-val="taurus" onclick="extrasPickPill(this)">♉ Taurus</button>
+            <button class="extras-pill" data-group="star" data-val="gemini" onclick="extrasPickPill(this)">♊ Gemini</button>
+            <button class="extras-pill" data-group="star" data-val="cancer" onclick="extrasPickPill(this)">♋ Cancer</button>
+            <button class="extras-pill" data-group="star" data-val="leo" onclick="extrasPickPill(this)">♌ Leo</button>
+            <button class="extras-pill" data-group="star" data-val="virgo" onclick="extrasPickPill(this)">♍ Virgo</button>
+            <button class="extras-pill" data-group="star" data-val="libra" onclick="extrasPickPill(this)">♎ Libra</button>
+            <button class="extras-pill" data-group="star" data-val="scorpio" onclick="extrasPickPill(this)">♏ Scorpio</button>
+            <button class="extras-pill" data-group="star" data-val="sagittarius" onclick="extrasPickPill(this)">♐ Sagittarius</button>
+            <button class="extras-pill" data-group="star" data-val="capricorn" onclick="extrasPickPill(this)">♑ Capricorn</button>
+            <button class="extras-pill" data-group="star" data-val="aquarius" onclick="extrasPickPill(this)">♒ Aquarius</button>
+            <button class="extras-pill" data-group="star" data-val="pisces" onclick="extrasPickPill(this)">♓ Pisces</button>
+          </div>
+
+          <div class="extras-section-label">Chinese zodiac</div>
+          <div class="extras-pill-grid" id="extras-zodiac-grid">
+            <button class="extras-pill" data-group="zodiac" data-val="rat" onclick="extrasPickPill(this)">🐭 Rat · 2020</button>
+            <button class="extras-pill" data-group="zodiac" data-val="ox" onclick="extrasPickPill(this)">🐮 Ox · 2021</button>
+            <button class="extras-pill" data-group="zodiac" data-val="tiger" onclick="extrasPickPill(this)">🐯 Tiger · 2022</button>
+            <button class="extras-pill" data-group="zodiac" data-val="rabbit" onclick="extrasPickPill(this)">🐰 Rabbit · 2023</button>
+            <button class="extras-pill" data-group="zodiac" data-val="dragon" onclick="extrasPickPill(this)">🐲 Dragon · 2024</button>
+            <button class="extras-pill" data-group="zodiac" data-val="snake" onclick="extrasPickPill(this)">🐍 Snake · 2025</button>
+            <button class="extras-pill" data-group="zodiac" data-val="horse" onclick="extrasPickPill(this)">🐴 Horse · 2014</button>
+            <button class="extras-pill" data-group="zodiac" data-val="goat" onclick="extrasPickPill(this)">🐏 Goat · 2015</button>
+            <button class="extras-pill" data-group="zodiac" data-val="monkey" onclick="extrasPickPill(this)">🐵 Monkey · 2016</button>
+            <button class="extras-pill" data-group="zodiac" data-val="rooster" onclick="extrasPickPill(this)">🐔 Rooster · 2017</button>
+            <button class="extras-pill" data-group="zodiac" data-val="dog" onclick="extrasPickPill(this)">🐶 Dog · 2018</button>
+            <button class="extras-pill" data-group="zodiac" data-val="pig" onclick="extrasPickPill(this)">🐷 Pig · 2019</button>
+          </div>
+
+          <div class="extras-section-label">Generation</div>
+          <div class="extras-pill-grid" id="extras-gen-grid" style="margin-bottom:16px;">
+            <button class="extras-pill" data-group="gen" data-val="genz" onclick="extrasPickPill(this)">Gen Z (1997–2012)</button>
+            <button class="extras-pill" data-group="gen" data-val="millennial" onclick="extrasPickPill(this)">Millennial (1981–1996)</button>
+            <button class="extras-pill" data-group="gen" data-val="genx" onclick="extrasPickPill(this)">Gen X (1965–1980)</button>
+          </div>
+
+          <div class="extras-toggle-row">
+            <div>
+              <div class="extras-toggle-label">Practising English at home <span class="extras-eq-preview">🌍 + 🗣️ = ✨</span></div>
+              <div class="extras-toggle-sub">Cob will match you with patient conversationalists 🤠</div>
+            </div>
+            <label class="extras-toggle">
+              <input type="checkbox" id="extras-english-toggle" onchange="extrasEnglishChange()">
+              <span class="extras-toggle-slider"></span>
+            </label>
+          </div>
+
+          <button class="extras-save-btn" onclick="extrasSave()">Save extras</button>
+          <div class="extras-save-status" id="extras-save-status"></div>
+        </div>
+
         <!-- sidebar sleep widget removed V64 — sleep mode lives in Settings panel -->
       </div>
       <!-- Detail sections -->
@@ -4483,6 +4594,138 @@ function _vibeExtrasLoad() {
 }
 
 var _vibeExtrasTimer = null;
+// ── About me extras card ─────────────────────────────────────────────────────
+
+function extrasPickPill(el) {
+  var group = el.getAttribute('data-group');
+  // Deselect all in same group
+  var siblings = document.querySelectorAll('.extras-pill[data-group="' + group + '"]');
+  siblings.forEach(function(s) { s.classList.remove('selected'); });
+  // Toggle: if was already selected, clicking again deselects
+  if (el.classList.contains('selected')) {
+    el.classList.remove('selected');
+  } else {
+    el.classList.add('selected');
+  }
+}
+
+function extrasEnglishChange() {
+  // No-op on change — save happens via Save button
+}
+
+function extrasLoadSaved() {
+  var star    = localStorage.getItem('ur_extras_star')    || '';
+  var zodiac  = localStorage.getItem('ur_extras_zodiac')  || '';
+  var gen     = localStorage.getItem('ur_extras_gen')     || '';
+  var english = localStorage.getItem('ur_extras_english') === 'true';
+
+  if (star) {
+    var el = document.querySelector('.extras-pill[data-group="star"][data-val="' + star + '"]');
+    if (el) el.classList.add('selected');
+  }
+  if (zodiac) {
+    var el2 = document.querySelector('.extras-pill[data-group="zodiac"][data-val="' + zodiac + '"]');
+    if (el2) el2.classList.add('selected');
+  }
+  if (gen) {
+    var el3 = document.querySelector('.extras-pill[data-group="gen"][data-val="' + gen + '"]');
+    if (el3) el3.classList.add('selected');
+  }
+  var tog = document.getElementById('extras-english-toggle');
+  if (tog) tog.checked = english;
+}
+
+function extrasLoadFromProfile(profile) {
+  if (!profile) return;
+  // Star sign
+  if (profile.star_sign) {
+    localStorage.setItem('ur_extras_star', profile.star_sign);
+    var el = document.querySelector('.extras-pill[data-group="star"][data-val="' + profile.star_sign + '"]');
+    if (el) {
+      document.querySelectorAll('.extras-pill[data-group="star"]').forEach(function(s){ s.classList.remove('selected'); });
+      el.classList.add('selected');
+    }
+  }
+  // Chinese zodiac
+  if (profile.chinese_zodiac) {
+    localStorage.setItem('ur_extras_zodiac', profile.chinese_zodiac);
+    var el2 = document.querySelector('.extras-pill[data-group="zodiac"][data-val="' + profile.chinese_zodiac + '"]');
+    if (el2) {
+      document.querySelectorAll('.extras-pill[data-group="zodiac"]').forEach(function(s){ s.classList.remove('selected'); });
+      el2.classList.add('selected');
+    }
+  }
+  // Generation
+  if (profile.generation) {
+    localStorage.setItem('ur_extras_gen', profile.generation);
+    var el3 = document.querySelector('.extras-pill[data-group="gen"][data-val="' + profile.generation + '"]');
+    if (el3) {
+      document.querySelectorAll('.extras-pill[data-group="gen"]').forEach(function(s){ s.classList.remove('selected'); });
+      el3.classList.add('selected');
+    }
+  }
+  // English practice
+  if (profile.english_practice !== undefined && profile.english_practice !== null) {
+    localStorage.setItem('ur_extras_english', String(profile.english_practice));
+    var tog = document.getElementById('extras-english-toggle');
+    if (tog) tog.checked = !!profile.english_practice;
+  }
+}
+
+async function extrasSave() {
+  var starEl    = document.querySelector('.extras-pill[data-group="star"].selected');
+  var zodiacEl  = document.querySelector('.extras-pill[data-group="zodiac"].selected');
+  var genEl     = document.querySelector('.extras-pill[data-group="gen"].selected');
+  var tog       = document.getElementById('extras-english-toggle');
+  var statusEl  = document.getElementById('extras-save-status');
+
+  var star    = starEl   ? starEl.getAttribute('data-val')   : '';
+  var zodiac  = zodiacEl ? zodiacEl.getAttribute('data-val') : '';
+  var gen     = genEl    ? genEl.getAttribute('data-val')    : '';
+  var english = tog      ? tog.checked                       : false;
+
+  // Persist locally
+  if (star)   localStorage.setItem('ur_extras_star',    star);
+  if (zodiac) localStorage.setItem('ur_extras_zodiac',  zodiac);
+  if (gen)    localStorage.setItem('ur_extras_gen',     gen);
+  localStorage.setItem('ur_extras_english', String(english));
+
+  // Also keep in sync with legacy vibe extras keys (used by vibe quiz chips)
+  if (star)   localStorage.setItem('ur_star_sign',  star);
+  if (gen)    localStorage.setItem('ur_generation', gen);
+
+  var email = localStorage.getItem('unirenter_email') || '';
+  if (!email) {
+    if (statusEl) { statusEl.textContent = 'Sign in to save.'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 3000); }
+    return;
+  }
+
+  if (statusEl) statusEl.textContent = 'Saving…';
+  try {
+    var payload = {
+      email: email,
+      city:  localStorage.getItem('ur_city') || 'melbourne'
+    };
+    if (star)   payload.star_sign        = star;
+    if (zodiac) payload.chinese_zodiac   = zodiac;
+    if (gen)    payload.generation       = gen;
+    payload.english_practice = english;
+
+    var res = await fetch('/api/profile/save', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload)
+    });
+    if (res.ok) {
+      if (statusEl) { statusEl.textContent = '✓ Saved'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 2500); }
+    } else {
+      if (statusEl) { statusEl.textContent = 'Save failed — try again.'; }
+    }
+  } catch(e) {
+    if (statusEl) { statusEl.textContent = 'Network error — try again.'; }
+  }
+}
+
 function vibeExtrasChange() {
   clearTimeout(_vibeExtrasTimer);
   _vibeExtrasTimer = setTimeout(async function() {
@@ -4764,6 +5007,7 @@ function loadProfile() {
 
   // Fast path — paint immediately from cached localStorage values
   applyProfileData({}, []);
+  extrasLoadSaved();
 
   // Authoritative path — fetch from Supabase and repaint with richer data
   if (email) {
@@ -4778,6 +5022,7 @@ function loadProfile() {
 
         const cobRefined = profile.cob_refined_fields || [];
         applyProfileData(profile, cobRefined);
+        extrasLoadFromProfile(profile);
       }
     });
   }
