@@ -3011,13 +3011,18 @@ body.light-mode {
   font-family: var(--font-body, 'Inter', sans-serif);
   font-size: 13px;
   padding: 9px 12px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   cursor: pointer;
   appearance: auto;
+  box-sizing: border-box;
 }
 .extras-select:focus {
   outline: none;
   border-color: var(--blue, #4BBFE0);
+}
+/* Match extras-card to profile-section-card dimensions */
+.extras-card {
+  padding: 14px 16px 14px !important;
 }
 
 </style>
@@ -3942,12 +3947,8 @@ body.light-mode {
 
         <!-- About me extras card -->
         <div class="extras-card" id="about-me-extras-card">
-          <div class="extras-card-head">✨ About me — extras</div>
-          <div class="extras-card-sub">Optional — Cob uses these in your summary. They don't affect your match score.</div>
-
-          <div class="extras-section-label">Star sign</div>
           <select class="extras-select" id="extras-star-select" onchange="extrasSelectChange('star', this.value)">
-            <option value="">— Select —</option>
+            <option value="">♈ Star sign</option>
             <option value="aries">♈ Aries</option>
             <option value="taurus">♉ Taurus</option>
             <option value="gemini">♊ Gemini</option>
@@ -3961,10 +3962,8 @@ body.light-mode {
             <option value="aquarius">♒ Aquarius</option>
             <option value="pisces">♓ Pisces</option>
           </select>
-
-          <div class="extras-section-label">Chinese zodiac</div>
           <select class="extras-select" id="extras-zodiac-select" onchange="extrasSelectChange('zodiac', this.value)">
-            <option value="">— Select —</option>
+            <option value="">🐉 Chinese zodiac</option>
             <option value="rat">🐭 Rat · 2020</option>
             <option value="ox">🐮 Ox · 2021</option>
             <option value="tiger">🐯 Tiger · 2022</option>
@@ -3978,15 +3977,13 @@ body.light-mode {
             <option value="dog">🐶 Dog · 2018</option>
             <option value="pig">🐷 Pig · 2019</option>
           </select>
-
-          <div class="extras-section-label">Generation</div>
-          <div class="extras-pill-grid" id="extras-gen-grid" style="margin-bottom:16px;">
-            <button class="extras-pill" data-group="gen" data-val="genz" onclick="extrasPickPill(this)">Gen Z (1997–2012)</button>
-            <button class="extras-pill" data-group="gen" data-val="millennial" onclick="extrasPickPill(this)">Millennial (1981–1996)</button>
-            <button class="extras-pill" data-group="gen" data-val="genx" onclick="extrasPickPill(this)">Gen X (1965–1980)</button>
-          </div>
-
-          <button class="extras-save-btn" onclick="extrasSave()">Save extras</button>
+          <select class="extras-select" id="extras-gen-select" onchange="extrasSelectChange('gen', this.value)" style="margin-bottom:14px;">
+            <option value="">👥 Generation</option>
+            <option value="genz">Gen Z (1997–2012)</option>
+            <option value="millennial">Millennial (1981–1996)</option>
+            <option value="genx">Gen X (1965–1980)</option>
+          </select>
+          <button class="extras-save-btn" onclick="extrasSave()">Save</button>
           <div class="extras-save-status" id="extras-save-status"></div>
         </div>
 
@@ -4818,6 +4815,7 @@ function extrasSelectChange(group, val) {
   // Just store locally; full save happens via Save button
   if (group === 'star')   localStorage.setItem('ur_extras_star',   val);
   if (group === 'zodiac') localStorage.setItem('ur_extras_zodiac', val);
+  if (group === 'gen')    localStorage.setItem('ur_extras_gen',    val);
 }
 
 function extrasPickPill(el) {
@@ -4844,13 +4842,10 @@ function extrasLoadSaved() {
 
   var starSel   = document.getElementById('extras-star-select');
   var zodiacSel = document.getElementById('extras-zodiac-select');
+  var genSel    = document.getElementById('extras-gen-select');
   if (starSel   && star)   starSel.value   = star;
   if (zodiacSel && zodiac) zodiacSel.value = zodiac;
-
-  if (gen) {
-    var el3 = document.querySelector('.extras-pill[data-group="gen"][data-val="' + gen + '"]');
-    if (el3) el3.classList.add('selected');
-  }
+  if (genSel    && gen)    genSel.value    = gen;
 }
 
 function extrasLoadFromProfile(profile) {
@@ -4870,23 +4865,20 @@ function extrasLoadFromProfile(profile) {
   // Generation
   if (profile.generation) {
     localStorage.setItem('ur_extras_gen', profile.generation);
-    var el3 = document.querySelector('.extras-pill[data-group="gen"][data-val="' + profile.generation + '"]');
-    if (el3) {
-      document.querySelectorAll('.extras-pill[data-group="gen"]').forEach(function(s){ s.classList.remove('selected'); });
-      el3.classList.add('selected');
-    }
+    var genSel = document.getElementById('extras-gen-select');
+    if (genSel) genSel.value = profile.generation;
   }
 }
 
 async function extrasSave() {
   var starSel   = document.getElementById('extras-star-select');
   var zodiacSel = document.getElementById('extras-zodiac-select');
-  var genEl     = document.querySelector('.extras-pill[data-group="gen"].selected');
+  var genSel    = document.getElementById('extras-gen-select');
   var statusEl  = document.getElementById('extras-save-status');
 
   var star   = starSel   ? starSel.value   : '';
   var zodiac = zodiacSel ? zodiacSel.value : '';
-  var gen    = genEl     ? genEl.getAttribute('data-val') : '';
+  var gen    = genSel    ? genSel.value    : '';
 
   // Persist locally
   if (star)   localStorage.setItem('ur_extras_star',   star);
