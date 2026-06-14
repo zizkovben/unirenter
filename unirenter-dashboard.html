@@ -654,53 +654,6 @@ body.light-mode {
   .cal-weekly-ev { font-size: 9px; }
 }
 
-/* ── Sticky "this week" mini-strip — always visible above tab bar placeholder ── */
-.sticky-week-strip {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: var(--navy-card);
-  border-top: 1px solid var(--navy-border);
-  padding: 10px 16px 10px;
-  z-index: 200;
-  display: flex; align-items: center; gap: 8px;
-  backdrop-filter: blur(8px);
-}
-.sws-label {
-  font-size: 11px; font-weight: 700; color: var(--text-muted);
-  text-transform: uppercase; letter-spacing: 0.05em;
-  flex-shrink: 0; display: flex; align-items: center; gap: 4px;
-}
-.sws-events {
-  flex: 1; display: flex; gap: 8px; overflow: hidden; min-width: 0;
-}
-.sws-event {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 12px; color: var(--text-muted);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  flex-shrink: 0; max-width: 180px;
-}
-.sws-event-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.sws-event-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sws-event-days {
-  font-size: 10px; font-weight: 700; padding: 1px 5px;
-  border-radius: 8px; flex-shrink: 0;
-}
-.sws-event-days.today { background: rgba(245,184,0,0.15); color: var(--brand-yellow); }
-.sws-event-days.soon  { background: rgba(232,98,58,0.12); color: var(--brand-coral); }
-.sws-event-days.ok    { background: rgba(61,170,92,0.12); color: var(--brand-green); }
-.sws-empty {
-  flex: 1; font-size: 12px; color: var(--text-muted);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.sws-link {
-  font-size: 12px; color: var(--brand-blue); text-decoration: none;
-  flex-shrink: 0; font-weight: 600; margin-left: 6px;
-}
-.sws-link:hover { text-decoration: underline; }
-@media (min-width: 700px) {
-  .sticky-week-strip { max-width: 1100px; left: 50%; right: auto;
-    transform: translateX(-50%); width: 100%; border-left: 1px solid var(--navy-border);
-    border-right: 1px solid var(--navy-border); border-radius: var(--radius) var(--radius) 0 0; }
-}
 
 /* ── Section header ── */
 .section-header {
@@ -4307,7 +4260,7 @@ function switchTab(name) {
   if (name === 'household') {
     householdInit();
   }
-  renderStickyStrip();
+  
 }
 
 // ── switchTenancySection (kept for backwards compat — V54: no sub-nav, all visible)
@@ -6531,7 +6484,7 @@ function calRender() {
   else if (view === 'weekly') calRenderWeekly();
   else calRenderMonthly();
   calRenderEvents(calFilterEvents(calLoadEvents()));
-  renderStickyStrip();
+  
 }
 
 // ── This week strip view ──
@@ -6697,33 +6650,6 @@ function calRenderEvents(events) {
 }
 
 // ── Sticky strip renderer ──
-function renderStickyStrip() {
-  const swsEl = document.getElementById('sws-events');
-  if (!swsEl) return;
-  const now = new Date(); now.setHours(0,0,0,0);
-  const cutoff = new Date(now); cutoff.setDate(now.getDate() + 14);
-  const events = calFilterEvents(calLoadEvents())
-    .filter(ev => {
-      const d = new Date(ev.date + 'T00:00:00');
-      return d >= now && d <= cutoff;
-    })
-    .sort((a,b) => a.date.localeCompare(b.date))
-    .slice(0, 5);
-
-  if (!events.length) {
-    swsEl.innerHTML = '<span class="sws-empty">No upcoming dates — <a href="#" onclick="switchTab(\'tenancy\');return false;" style="color:var(--brand-blue);text-decoration:none;">add your lease details</a></span>';
-    return;
-  }
-  swsEl.innerHTML = events.map(ev => {
-    const meta = CAT_META[ev.cat] || CAT_META.other;
-    const dotColor = { yellow:'#F5B800', coral:'#E8623A', blue:'#4BBFE0', green:'#3DAA5C' }[meta.color] || '#7a96aa';
-    const d = new Date(ev.date + 'T00:00:00');
-    const diff = Math.round((d - now) / 86400000);
-    const daysClass = diff === 0 ? 'today' : (diff <= 3 ? 'soon' : 'ok');
-    const daysText = diff === 0 ? 'Today' : (diff + 'd');
-    return '<span class="sws-event"><span class="sws-event-dot" style="background:' + dotColor + ';"></span><span class="sws-event-text">' + ev.name + '</span><span class="sws-event-days ' + daysClass + '">' + daysText + '</span></span>';
-  }).join('');
-}
 
 // ── Save / edit / delete ──
 function calSaveEvent() {
@@ -7698,9 +7624,7 @@ window.addEventListener('DOMContentLoaded', function() {
   });
 })();
 
-// ── Init sticky strip on page load ──
 window.addEventListener('DOMContentLoaded', function() {
-  setTimeout(renderStickyStrip, 200);
   setTimeout(lcEntryCardInit, 300);
 });
 
@@ -10169,11 +10093,6 @@ function cobReviewCopyLink() {
 </div>
 
 <!-- Sticky this-week strip -->
-<div class="sticky-week-strip" id="sticky-week-strip">
-  <span class="sws-label">📅 Next up</span>
-  <div class="sws-events" id="sws-events"><!-- populated by JS --></div>
-  <a class="sws-link" href="#" onclick="switchTab('tenancy');switchTenancySection('calendar');return false;">↗</a>
-</div>
 
 <!-- ── Settings slide-in panel (V54) ── -->
 <div class="settings-panel-backdrop" id="settings-panel-backdrop" onclick="closeSettingsPanel()"></div>
