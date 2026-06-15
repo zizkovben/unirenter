@@ -9,14 +9,14 @@
 <meta name="description" content="Find your perfect student housemate in Perth. Match by sleep schedule, budget, lifestyle and uni. Free for students — no Facebook lottery, no scams.">
 <meta name="keywords" content="student accommodation Perth, housemate finder Perth, student housing Perth, share house Perth, UWA accommodation, Curtin housing, Murdoch University student housing, international student accommodation Perth">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://unirenter.vercel.app/perth">
+<link rel="canonical" href="https://unirenter.com.au/perth">
 
 <!-- ── Open Graph (Facebook, LinkedIn sharing) ── -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://unirenter.vercel.app/perth">
+<meta property="og:url" content="https://unirenter.com.au/perth">
 <meta property="og:title" content="UniRenter — Find Your Perfect Student Housemate in Perth">
 <meta property="og:description" content="Match with compatible housemates by sleep schedule, budget, cleanliness and lifestyle. Free for students. No scams, no Facebook lottery.">
-<meta property="og:image" content="https://unirenter.vercel.app/samo_icon_transparent.png">
+<meta property="og:image" content="https://unirenter.com.au/samo_icon_transparent.png">
 <meta property="og:site_name" content="UniRenter">
 <meta property="og:locale" content="en_AU">
 
@@ -24,7 +24,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="UniRenter — Student Housemate Matching Perth">
 <meta name="twitter:description" content="Find compatible student housemates by lifestyle, budget and location. Free. No scams.">
-<meta name="twitter:image" content="https://unirenter.vercel.app/samo_icon_transparent.png">
+<meta name="twitter:image" content="https://unirenter.com.au/samo_icon_transparent.png">
 
 <!-- ── Schema.org structured data ── -->
 <script type="application/ld+json">
@@ -32,12 +32,12 @@
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "UniRenter",
-  "url": "https://unirenter.vercel.app",
+  "url": "https://unirenter.com.au",
   "description": "Student accommodation matching and settlement platform for Melbourne, Sydney and Brisbane.",
   "applicationCategory": "LifestyleApplication",
   "operatingSystem": "Web",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD" },
-  "areaServed": ["Melbourne", "Sydney", "Brisbane"],
+  "areaServed": ["Melbourne", "Sydney", "Brisbane", "Adelaide", "Perth", "Canberra"],
   "audience": { "@type": "Audience", "audienceType": "University Students" }
 }
 </script>
@@ -2262,7 +2262,7 @@ function shareUniRenter() {
   const shareData = {
     title: 'UniRenter — Find your perfect student housemate',
     text: 'Match with compatible housemates by sleep schedule, budget and lifestyle. Free for students in Melbourne, Sydney and Brisbane.',
-    url: 'https://unirenter.vercel.app',
+    url: 'https://unirenter.com.au',
   };
   if (navigator.share) {
     navigator.share(shareData).catch(() => copyReferralLink());
@@ -2274,11 +2274,11 @@ function shareUniRenter() {
 function copyReferralLink() {
   const email = localStorage.getItem('unirenter_email') || '';
   const ref = email ? `?ref=${encodeURIComponent(email)}` : '';
-  const url = `https://unirenter.vercel.app${ref}`;
+  const url = `https://unirenter.com.au${ref}`;
   navigator.clipboard.writeText(url).then(() => {
     showToast('🔗 Link copied!', 'Share it with your uni friends — the more who join, the better your matches.');
   }).catch(() => {
-    showToast('🔗 Link', 'https://unirenter.vercel.app — share with your uni friends!');
+    showToast('🔗 Link', 'https://unirenter.com.au — share with your uni friends!');
   });
 }
 
