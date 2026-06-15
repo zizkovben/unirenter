@@ -244,6 +244,13 @@
     <button class="tab-btn"        data-tab="reports"     onclick="switchTab('reports')">
       🚩 Reports <span class="tab-count" id="flag-count"></span>
     </button>
+    <button class="tab-btn"        data-tab="reviews"     onclick="switchTab('reviews')">
+      ⭐ Reviews <span class="tab-count" id="review-count"></span>
+    </button>
+    <button class="tab-btn"        data-tab="landlords"   onclick="switchTab('landlords')">
+      🏠 Landlord Flags <span class="tab-count" id="landlord-count"></span>
+    </button>
+    <button class="tab-btn"        data-tab="audit"       onclick="switchTab('audit')">📋 Audit Log</button>
   </div>
 
   <main>
@@ -404,6 +411,54 @@
       </div>
     </div>
 
+    <!-- REVIEWS TAB -->
+    <div id="tab-reviews" class="tab-panel">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Reviews queue</div>
+          <div class="section-subtitle">Pending student reviews — approve to show on site · reject to discard</div>
+        </div>
+        <button class="btn-refresh" onclick="loadReviews()">↻ Refresh</button>
+      </div>
+      <div class="filter-bar" id="reviews-filter-bar">
+        <button class="filter-chip active" onclick="setReviewFilter('all',    this)">All</button>
+        <button class="filter-chip"        onclick="setReviewFilter('pending', this)">Pending</button>
+        <button class="filter-chip"        onclick="setReviewFilter('approved',this)">Approved</button>
+        <button class="filter-chip"        onclick="setReviewFilter('rejected',this)">Rejected</button>
+      </div>
+      <div id="reviews-list">
+        <div class="loading-row"><span class="spinner"></span>Loading…</div>
+      </div>
+    </div>
+
+    <!-- LANDLORD FLAGS TAB -->
+    <div id="tab-landlords" class="tab-panel">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Landlord flags</div>
+          <div class="section-subtitle">Profiles flagged as possible landlords — review and clear or ban</div>
+        </div>
+        <button class="btn-refresh" onclick="loadLandlordFlags()">↻ Refresh</button>
+      </div>
+      <div id="landlord-list">
+        <div class="loading-row"><span class="spinner"></span>Loading…</div>
+      </div>
+    </div>
+
+    <!-- AUDIT LOG TAB -->
+    <div id="tab-audit" class="tab-panel">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Audit log</div>
+          <div class="section-subtitle">Automated link audit runs — populated by GitHub Actions (configured S72)</div>
+        </div>
+        <button class="btn-refresh" onclick="loadAuditLog()">↻ Refresh</button>
+      </div>
+      <div id="audit-list">
+        <div class="loading-row"><span class="spinner"></span>Loading…</div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -479,7 +534,7 @@ async function apiFetch(url, opts) {
   return res.json();
 }
 
-function loadAll() { loadAnalytics(); loadStats(); loadModeration(); loadFlagged(); }
+function loadAll() { loadAnalytics(); loadStats(); loadModeration(); loadFlagged(); loadReviews(); loadLandlordFlags(); loadAuditLog(); }
 
 async function loadAnalytics() {
   try {
@@ -542,6 +597,7 @@ function updateBadges(kpis) {
   var mc = document.getElementById('mod-count'); var fc = document.getElementById('flag-count');
   if (kpis.pending_review>0) { mc.textContent=kpis.pending_review; mc.classList.add('show'); } else { mc.classList.remove('show'); }
   if (kpis.flagged_listings>0) { fc.textContent=kpis.flagged_listings; fc.classList.add('show'); } else { fc.classList.remove('show'); }
+  // Reviews + landlord counts set when those tabs load
 }
 
 async function loadStats() {
@@ -730,6 +786,177 @@ function checkEmpty() {
   var ff = _flagFilter==='all'?_flagData:_flagData.filter(function(l){return l.city===_flagFilter;});
   if (!mf.length) document.getElementById('mod-list').innerHTML='<div class="empty-state"><div class="icon">✅</div><div class="msg">Queue is clear</div><div class="sub">No listings waiting for review</div></div>';
   if (!ff.length) document.getElementById('flag-list').innerHTML='<div class="empty-state"><div class="icon">🏳️</div><div class="msg">No reported listings</div><div class="sub">Listings with 3+ reports will appear here</div></div>';
+}
+
+// ── REVIEWS ───────────────────────────────────────────────────────────────
+var _reviewData = []; var _reviewFilter = 'pending';
+
+async function loadReviews() {
+  document.getElementById('reviews-list').innerHTML = '<div class="loading-row"><span class="spinner"></span>Loading…</div>';
+  try {
+    var data = await apiFetch('/api/admin/reviews');
+    if (!data.ok) throw new Error(data.error);
+    _reviewData = data.reviews || [];
+    // Badge count — pending reviews
+    var pendingCount = _reviewData.filter(function(r){return r.status==='pending';}).length;
+    var rc = document.getElementById('review-count');
+    if (pendingCount>0) { rc.textContent=pendingCount; rc.classList.add('show'); } else { rc.classList.remove('show'); }
+    renderReviews();
+  } catch(e) {
+    document.getElementById('reviews-list').innerHTML='<div class="empty-state"><div class="msg">Could not load reviews</div><div class="sub">'+esc(e.message)+'</div></div>';
+  }
+}
+
+function setReviewFilter(status, btn) {
+  _reviewFilter = status;
+  document.querySelectorAll('#reviews-filter-bar .filter-chip').forEach(function(c){c.classList.remove('active');});
+  btn.classList.add('active');
+  renderReviews();
+}
+
+function renderReviews() {
+  var filtered = _reviewFilter==='all' ? _reviewData : _reviewData.filter(function(r){return r.status===_reviewFilter;});
+  var el = document.getElementById('reviews-list');
+  if (!filtered.length) {
+    var msgs = {all:'No reviews yet', pending:'No pending reviews', approved:'No approved reviews', rejected:'No rejected reviews'};
+    var icons = {all:'⭐', pending:'⏳', approved:'✅', rejected:'❌'};
+    el.innerHTML='<div class="empty-state"><div class="icon">'+(icons[_reviewFilter]||'⭐')+'</div><div class="msg">'+(msgs[_reviewFilter]||'No reviews')+'</div></div>'; return;
+  }
+  el.innerHTML = filtered.map(function(r) {
+    var stars = '★'.repeat(r.rating||0)+'☆'.repeat(5-(r.rating||0));
+    var statusClass = {pending:'pill-pending', approved:'pill-active', rejected:'pill-rejected'}[r.status] || 'pill-pending';
+    var acts = r.status==='pending'
+      ? '<button class="btn-action btn-approve" onclick="reviewAction(&quot;'+r.id+'&quot;,&quot;approve&quot;)">✓ Approve</button><button class="btn-action btn-reject" onclick="reviewAction(&quot;'+r.id+'&quot;,&quot;reject&quot;)">✕ Reject</button>'
+      : (r.status==='rejected'
+        ? '<button class="btn-action btn-approve" onclick="reviewAction(&quot;'+r.id+'&quot;,&quot;approve&quot;)">↺ Approve</button>'
+        : '<button class="btn-action btn-reject" onclick="reviewAction(&quot;'+r.id+'&quot;,&quot;reject&quot;)">✕ Reject</button>');
+    return '<div class="listing-card" id="review-card-'+r.id+'">' +
+      '<div class="listing-row">' +
+        '<div class="listing-meta">' +
+          '<div class="listing-ref"><span style="color:var(--brand-yellow);letter-spacing:1px">'+stars+'</span> <span class="status-pill '+statusClass+'">'+r.status+'</span></div>' +
+          '<div class="listing-detail"><strong>'+esc(r.reviewer_name||'Anonymous')+'</strong> · '+esc(r.reviewer_uni||'—')+' · '+esc(r.city||'—')+'<br>' +
+          '<span style="color:var(--text-muted)">'+relTime(r.created_at)+'</span></div>' +
+          '<div style="margin-top:8px;font-size:13px;color:var(--text);line-height:1.5;max-width:600px">'+esc(r.review_text||'')+'</div>' +
+        '</div>' +
+        '<div class="listing-actions">'+acts+'</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function reviewAction(rid, action) {
+  var card = document.getElementById('review-card-'+rid);
+  if (card) card.querySelectorAll('.btn-action').forEach(function(b){b.disabled=true;});
+  try {
+    var data = await apiFetch('/api/admin/reviews', {method:'POST', body:JSON.stringify({review_id:rid, action:action})});
+    if (!data.ok) throw new Error(data.error);
+    showToast(action==='approve'?'Review approved ✓':'Review rejected ✕', 'success');
+    // Update local state
+    _reviewData = _reviewData.map(function(r){return r.id===rid?Object.assign({},r,{status:action==='approve'?'approved':'rejected'}):r;});
+    var pendingCount = _reviewData.filter(function(r){return r.status==='pending';}).length;
+    var rc = document.getElementById('review-count');
+    if (pendingCount>0) { rc.textContent=pendingCount; rc.classList.add('show'); } else { rc.classList.remove('show'); }
+    renderReviews();
+  } catch(e) { showToast('Action failed — '+e.message,'error'); if (card) card.querySelectorAll('.btn-action').forEach(function(b){b.disabled=false;}); }
+}
+
+// ── LANDLORD FLAGS ────────────────────────────────────────────────────────
+var _landlordData = [];
+
+async function loadLandlordFlags() {
+  document.getElementById('landlord-list').innerHTML = '<div class="loading-row"><span class="spinner"></span>Loading…</div>';
+  try {
+    var data = await apiFetch('/api/admin/landlord-flags');
+    if (!data.ok) throw new Error(data.error);
+    _landlordData = data.profiles || [];
+    var lc = document.getElementById('landlord-count');
+    if (_landlordData.length>0) { lc.textContent=_landlordData.length; lc.classList.add('show'); } else { lc.classList.remove('show'); }
+    renderLandlordFlags();
+  } catch(e) {
+    document.getElementById('landlord-list').innerHTML='<div class="empty-state"><div class="msg">Could not load</div><div class="sub">'+esc(e.message)+'</div></div>';
+  }
+}
+
+function renderLandlordFlags() {
+  var el = document.getElementById('landlord-list');
+  if (!_landlordData.length) {
+    el.innerHTML='<div class="empty-state"><div class="icon">🏠</div><div class="msg">No landlord flags</div><div class="sub">Profiles flagged as possible landlords will appear here</div></div>'; return;
+  }
+  el.innerHTML = _landlordData.map(function(p) {
+    return '<div class="listing-card" id="landlord-card-'+p.email.replace(/[^a-z0-9]/gi,'-')+'">' +
+      '<div class="listing-row">' +
+        '<div class="listing-meta">' +
+          '<div class="listing-ref">'+esc(p.email)+'</div>' +
+          '<div class="listing-detail">'+esc(p.display_name||'—')+' · '+esc(p.city||'—')+' · signed up '+relTime(p.created_at)+'<br>' +
+          '<span style="color:var(--brand-coral)">Reason: '+esc(p.landlord_flag_reason||'—')+'</span></div>' +
+        '</div>' +
+        '<div class="listing-actions">' +
+          '<button class="btn-action btn-resolve" onclick="landlordAction(&quot;'+esc(p.email)+'&quot;,&quot;clear&quot;)">↺ Clear flag</button>' +
+          '<button class="btn-action btn-reject"  onclick="landlordAction(&quot;'+esc(p.email)+'&quot;,&quot;ban&quot;)">🚫 Ban</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function landlordAction(email, action) {
+  try {
+    var data = await apiFetch('/api/admin/landlord-flags', {method:'POST', body:JSON.stringify({email:email, action:action})});
+    if (!data.ok) throw new Error(data.error);
+    showToast(action==='clear'?'Flag cleared ↺':'Profile banned 🚫', 'success');
+    _landlordData = _landlordData.filter(function(p){return p.email!==email;});
+    var lc = document.getElementById('landlord-count');
+    if (_landlordData.length>0) { lc.textContent=_landlordData.length; lc.classList.add('show'); } else { lc.classList.remove('show'); }
+    renderLandlordFlags();
+  } catch(e) { showToast('Action failed — '+e.message,'error'); }
+}
+
+// ── AUDIT LOG ─────────────────────────────────────────────────────────────
+async function loadAuditLog() {
+  document.getElementById('audit-list').innerHTML = '<div class="loading-row"><span class="spinner"></span>Loading…</div>';
+  try {
+    var data = await apiFetch('/api/admin/audit-log');
+    if (!data.ok) throw new Error(data.error);
+    renderAuditLog(data.runs || []);
+  } catch(e) {
+    document.getElementById('audit-list').innerHTML='<div class="empty-state"><div class="msg">Could not load</div><div class="sub">'+esc(e.message)+'</div></div>';
+  }
+}
+
+function renderAuditLog(runs) {
+  var el = document.getElementById('audit-list');
+  if (!runs.length) {
+    el.innerHTML='<div class="empty-state"><div class="icon">📋</div><div class="msg">No audit runs yet</div><div class="sub">GitHub Actions will populate this tab automatically from S72 onwards.<br>To run manually: <code style="font-family:monospace;font-size:12px;color:var(--brand-blue)">python3 unirenter_audit.py --repo-path ./unirenter</code></div></div>'; return;
+  }
+  var tableHtml = '<div class="table-wrap"><table class="data-table"><thead><tr>' +
+    '<th>Date</th><th>Trigger</th><th>Result</th><th>Files</th><th>Internal</th><th>External</th><th>Broken</th>' +
+    '</tr></thead><tbody>' +
+    runs.map(function(r) {
+      var passed = r.passed !== false;
+      var statusHtml = passed
+        ? '<span class="status-pill pill-active">✓ Pass</span>'
+        : (r.internal_broken>0
+          ? '<span class="status-pill pill-rejected">✗ Internal broken</span>'
+          : '<span class="status-pill pill-pending">⚠ External broken</span>');
+      var brokenLinks = r.broken_links || [];
+      var brokenHtml = brokenLinks.length
+        ? '<details><summary style="cursor:pointer;color:var(--brand-coral);font-size:12px">'+brokenLinks.length+' broken</summary><ul style="margin:4px 0 0 16px;padding:0;font-size:11px;color:var(--text-muted)">'
+          + brokenLinks.map(function(b){return '<li>'+esc(b)+'</li>';}).join('') + '</ul></details>'
+        : '—';
+      return '<tr>' +
+        '<td>'+relTime(r.run_date)+'</td>' +
+        '<td><span style="text-transform:capitalize">'+esc(r.trigger||'manual')+'</span></td>' +
+        '<td>'+statusHtml+'</td>' +
+        '<td>'+(r.html_files_checked||'—')+'</td>' +
+        '<td><span style="color:'+(r.internal_broken>0?'var(--brand-coral)':'var(--brand-green)')+'">'+
+          (r.internal_ok||0)+' ok'+(r.internal_broken>0?' · '+r.internal_broken+' broken':'')+'</span></td>' +
+        '<td><span style="color:'+(r.external_broken>0?'var(--brand-coral)':'var(--brand-green)')+'">'+
+          (r.external_ok||0)+' ok'+(r.external_broken>0?' · '+r.external_broken+' broken':'')+'</span></td>' +
+        '<td>'+brokenHtml+'</td>' +
+        '</tr>';
+    }).join('') +
+    '</tbody></table></div>';
+  el.innerHTML = tableHtml;
 }
 
 function esc(s) { if(!s)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
