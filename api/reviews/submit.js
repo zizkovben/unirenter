@@ -1,25 +1,27 @@
 // api/reviews/submit.js
 // Saves a student review to Supabase reviews table.
 // POST body: { city, reviewer_name, reviewer_uni, rating, text, suburb (optional) }
-// Validates input, saves to Supabase, returns { ok: true, id } on success.
- 
+// Auto-approves 4–5★ reviews — they go live immediately and count toward the slider gate.
+// 1–3★ reviews saved as 'pending' for admin review in the Reviews Queue.
+// Returns { ok: true, id } on success.
+
 const { createClient } = require('@supabase/supabase-js');
- 
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
- 
+
 const ALLOWED_CITIES = ['melbourne', 'sydney', 'brisbane', 'adelaide', 'perth', 'canberra'];
- 
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
- 
+
   try {
     const { city, reviewer_name, reviewer_uni, rating, text, suburb } = req.body;
- 
+
     // --- Validation ---
     if (!city || !ALLOWED_CITIES.includes(city)) {
       return res.status(400).json({ error: 'Invalid or missing city' });
@@ -39,35 +41,38 @@ module.exports = async function handler(req, res) {
     if (text.trim().length > 1000) {
       return res.status(400).json({ error: 'Review text must be 1000 characters or fewer' });
     }
- 
+
+    // --- Auto-approve 4–5★, hold 1–3★ for moderation ---
+    const status = rating >= 4 ? 'approved' : 'pending';
+
     // --- Sanitise ---
     const payload = {
-      city: city.toLowerCase().trim(),
+      city:          city.toLowerCase().trim(),
       reviewer_name: reviewer_name.trim().slice(0, 80),
-      reviewer_uni: reviewer_uni.trim().slice(0, 120),
+      reviewer_uni:  reviewer_uni.trim().slice(0, 120),
       rating,
-      text: text.trim().slice(0, 1000),
-      suburb: suburb ? suburb.trim().slice(0, 80) : null,
-      status: 'pending',   // reviews need moderation before showing
-      created_at: new Date().toISOString(),
+      review_text:   text.trim().slice(0, 1000),
+      suburb:        suburb ? suburb.trim().slice(0, 80) : null,
+      status,
+      created_at:    new Date().toISOString(),
     };
- 
+
     // --- Insert ---
     const { data, error } = await supabase
       .from('reviews')
       .insert([payload])
       .select('id')
       .single();
- 
+
     if (error) {
       console.error('[reviews/submit] Supabase error:', error);
       return res.status(500).json({ error: 'Failed to save review' });
     }
- 
-    return res.status(200).json({ ok: true, id: data.id });
- 
+
+    return res.status(200).json({ ok: true, id: data.id, status });
+
   } catch (err) {
     console.error('[reviews/submit] Unexpected error:', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
-}
+};
