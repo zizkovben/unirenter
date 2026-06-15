@@ -1,0 +1,299 @@
+name: Link Audit (Weekly)
+
+on:
+  schedule:
+    # Sunday 11pm AEST = Sunday 13:00 UTC (AEST is UTC+10)
+    - cron: '0 13 * * 0'
+  workflow_dispatch:
+
+jobs:
+  audit-full:
+    name: Full Audit (Internal + External)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install requests for external pinging
+        run: pip install requests --quiet
+
+      - name: Run full audit
+        id: audit
+        env:
+          AUDIT_SECRET: ${{ secrets.ADMIN_TOKEN_SECRET }}
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          AUDIT_SAVE_URL: https://unirenter.vercel.app/api/audit/save
+        run: |
+          python3 - << 'PYEOF'
+          import os, re, json, sys, time
+          import urllib.request, urllib.error
+          try:
+              import requests as req_lib
+              HAS_REQUESTS = True
+          except ImportError:
+              HAS_REQUESTS = False
+
+          REPO_ROOT  = os.getcwd()
+          TRIGGER    = 'weekly'
+          SAVE_URL   = os.environ.get('AUDIT_SAVE_URL', '')
+          SECRET     = os.environ.get('AUDIT_SECRET', '')
+
+          # ── vercel.json rewrite map ─────────────────────────────────────
+          vercel_path = os.path.join(REPO_ROOT, 'vercel.json')
+          rewrite_map = {}
+          if os.path.exists(vercel_path):
+              with open(vercel_path) as f:
+                  vcfg = json.load(f)
+              for rw in vcfg.get('rewrites', []):
+                  src = rw.get('source','')
+                  dst = rw.get('destination','')
+                  key = src.lstrip('/').rstrip('/:*').split('/:')[0]
+                  rewrite_map[key] = dst.lstrip('/')
+
+          # ── resolve internal path ────────────────────────────────────────
+          def file_exists_for_path(path):
+              clean = path.split('?')[0].split('#')[0].lstrip('/')
+              if clean.startswith('api'):
+                  return True
+              candidate = os.path.join(REPO_ROOT, clean)
+              if os.path.isfile(candidate):
+                  return True
+              for key, dst in rewrite_map.items():
+                  if clean == key or clean.startswith(key + '/'):
+                      resolved = os.path.join(REPO_ROOT, dst)
+                      if os.path.isfile(resolved):
+                          return True
+              if not clean.endswith('.html') and os.path.isfile(candidate + '.html'):
+                  return True
+              dynamic_prefixes = [
+                  'vibe/', 'listing/', 'house-rules/', 'review/',
+                  'unsubscribe', 'dashboard', 'agent-portal', 'admin',
+                  'cob', 'about', 'guide', 'lease', 'settled', 'landlords',
+                  'legal', 'auth', 'find',
+              ]
+              for pfx in dynamic_prefixes:
+                  if clean == pfx or clean.startswith(pfx):
+                      return True
+              cities = ['melbourne','sydney','brisbane','adelaide','perth','canberra']
+              parts = clean.split('/')
+              if parts and parts[0] in cities:
+                  return True
+              return False
+
+          # ── check external URL ───────────────────────────────────────────
+          def check_external(url):
+              try:
+                  if HAS_REQUESTS:
+                      r = req_lib.head(url, timeout=8, allow_redirects=True,
+                                       headers={'User-Agent': 'UniRenter-Audit/1.0'})
+                      if r.status_code == 405:
+                          r = req_lib.get(url, timeout=8, allow_redirects=True,
+                                          headers={'User-Agent': 'UniRenter-Audit/1.0'})
+                      return r.status_code < 400
+                  else:
+                      req = urllib.request.Request(url, method='HEAD',
+                            headers={'User-Agent': 'UniRenter-Audit/1.0'})
+                      with urllib.request.urlopen(req, timeout=8) as resp:
+                          return resp.status < 400
+              except Exception:
+                  return False
+
+          # ── scan HTML files ──────────────────────────────────────────────
+          HREF_RE = re.compile(r'''href=['"]([^'"#?][^'"]*?)['"]''')
+          WLOC_RE = re.compile(r'''window\.location\s*=\s*['"]([^'"]+?)['"]''')
+
+          internal_ok = 0; internal_broken = 0
+          external_ok = 0; external_broken = 0
+          broken_links = []
+          html_files = []
+          seen_external = set()
+
+          for dirpath, _, filenames in os.walk(REPO_ROOT):
+              for fname in filenames:
+                  if not fname.endswith('.html'):
+                      continue
+                  rel = os.path.relpath(os.path.join(dirpath, fname), REPO_ROOT)
+                  if 'node_modules' in rel:
+                      continue
+                  html_files.append(rel)
+                  with open(os.path.join(dirpath, fname), encoding='utf-8', errors='ignore') as fh:
+                      content = fh.read()
+
+                  links = set()
+                  for m in HREF_RE.finditer(content):
+                      links.add(m.group(1))
+                  for m in WLOC_RE.finditer(content):
+                      links.add(m.group(1))
+
+                  for link in links:
+                      if (link.startswith('mailto:') or link.startswith('tel:')
+                              or link.startswith('javascript:') or link.startswith('data:')
+                              or link.startswith('#') or '${' in link
+                              or not link.strip()):
+                          continue
+
+                      if link.startswith('http'):
+                          # External
+                          if link in seen_external:
+                              continue
+                          seen_external.add(link)
+                          ok = check_external(link)
+                          if ok:
+                              external_ok += 1
+                          else:
+                              external_broken += 1
+                              broken_links.append(f'[external] {rel} → {link}')
+                          time.sleep(0.3)  # be polite
+                      elif link.startswith('//'):
+                          continue
+                      else:
+                          if file_exists_for_path(link):
+                              internal_ok += 1
+                          else:
+                              internal_broken += 1
+                              broken_links.append(f'[internal] {rel} → {link}')
+
+          passed = (internal_broken == 0 and external_broken == 0)
+
+          # ── print summary ────────────────────────────────────────────────
+          print(f'\nUniRenter Full Link Audit — {TRIGGER}')
+          print(f'HTML files scanned : {len(html_files)}')
+          print(f'Internal OK        : {internal_ok}')
+          print(f'Internal broken    : {internal_broken}')
+          print(f'External OK        : {external_ok}')
+          print(f'External broken    : {external_broken}')
+          if broken_links:
+              print('\nBROKEN:')
+              for b in broken_links:
+                  print(f'  {b}')
+          else:
+              print('\n✅ All links OK')
+
+          # ── save to Supabase via /api/audit/save ─────────────────────────
+          payload = json.dumps({
+              'trigger': TRIGGER,
+              'html_files_checked': len(html_files),
+              'internal_ok': internal_ok,
+              'internal_broken': internal_broken,
+              'external_ok': external_ok,
+              'external_broken': external_broken,
+              'broken_links': broken_links,
+              'passed': passed
+          }).encode()
+
+          if SAVE_URL and SECRET:
+              save_req = urllib.request.Request(
+                  SAVE_URL,
+                  data=payload,
+                  headers={
+                      'Content-Type': 'application/json',
+                      'x-audit-secret': SECRET
+                  }
+              )
+              try:
+                  with urllib.request.urlopen(save_req, timeout=10) as resp:
+                      print(f'\nSaved to audit_log: {resp.status}')
+              except urllib.error.HTTPError as e:
+                  print(f'Save failed: {e.code} {e.read().decode()}')
+              except Exception as e:
+                  print(f'Save error: {e}')
+          else:
+              print('\nSkipping save — AUDIT_SAVE_URL or AUDIT_SECRET not set')
+
+          # ── write broken data for email step ─────────────────────────────
+          with open('/tmp/audit_broken.json', 'w') as f:
+              json.dump({
+                  'html_files_checked': len(html_files),
+                  'internal_ok': internal_ok,
+                  'internal_broken': internal_broken,
+                  'external_ok': external_ok,
+                  'external_broken': external_broken,
+                  'broken_links': broken_links,
+                  'passed': passed
+              }, f)
+
+          if not passed:
+              sys.exit(1)
+          PYEOF
+
+      - name: Send failure email via Resend
+        if: failure() && steps.audit.outcome == 'failure'
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: |
+          python3 - << 'PYEOF'
+          import os, json, urllib.request, urllib.error
+
+          api_key = os.environ.get('RESEND_API_KEY', '')
+          if not api_key:
+              print('No RESEND_API_KEY — skipping email')
+              exit(0)
+
+          data = {}
+          try:
+              with open('/tmp/audit_broken.json') as f:
+                  data = json.load(f)
+          except Exception:
+              pass
+
+          broken_links    = data.get('broken_links', [])
+          html_files      = data.get('html_files_checked', '?')
+          internal_ok     = data.get('internal_ok', '?')
+          internal_broken = data.get('internal_broken', 0)
+          external_ok     = data.get('external_ok', '?')
+          external_broken = data.get('external_broken', 0)
+
+          sev_colour = '#E8623A' if internal_broken > 0 else '#F5B800'
+          sev_label  = '🔴 Internal links broken' if internal_broken > 0 else '🟡 External links broken'
+
+          link_rows = ''.join(
+              f'<tr><td style="padding:5px 10px;border:1px solid #e5e7eb;font-family:monospace;font-size:12px;color:#555">{l}</td></tr>'
+              for l in broken_links
+          )
+
+          body = f"""
+          <div style="font-family:Inter,sans-serif;max-width:600px;margin:0 auto;color:#0d1f2d">
+            <div style="background:#0d1f2d;padding:20px 24px;border-radius:8px 8px 0 0">
+              <span style="color:#F5B800;font-weight:700;font-size:18px">UniRenter</span>
+              <span style="color:#aaa;font-size:14px;margin-left:8px">Weekly Audit Report</span>
+            </div>
+            <div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
+              <h2 style="margin:0 0 8px;color:{sev_colour}">{sev_label}</h2>
+              <p style="color:#555;margin:0 0 20px">Weekly full audit found <strong>{len(broken_links)} broken link(s)</strong> ({internal_broken} internal, {external_broken} external).</p>
+              <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+                <tr><td style="padding:6px 10px;background:#f9fafb;border:1px solid #e5e7eb;font-size:13px">Files scanned</td><td style="padding:6px 10px;background:#f9fafb;border:1px solid #e5e7eb;font-size:13px;font-weight:600">{html_files}</td></tr>
+                <tr><td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:13px">Internal OK</td><td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:13px;color:#3DAA5C;font-weight:600">{internal_ok}</td></tr>
+                <tr><td style="padding:6px 10px;background:#f9fafb;border:1px solid #e5e7eb;font-size:13px">Internal broken</td><td style="padding:6px 10px;background:#f9fafb;border:1px solid #e5e7eb;font-size:13px;color:{'#E8623A' if internal_broken>0 else '#3DAA5C'};font-weight:600">{internal_broken}</td></tr>
+                <tr><td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:13px">External OK</td><td style="padding:6px 10px;border:1px solid #e5e7eb;font-size:13px;color:#3DAA5C;font-weight:600">{external_ok}</td></tr>
+                <tr><td style="padding:6px 10px;background:#f9fafb;border:1px solid #e5e7eb;font-size:13px">External broken</td><td style="padding:6px 10px;background:#f9fafb;border:1px solid #e5e7eb;font-size:13px;color:{'#E8623A' if external_broken>0 else '#3DAA5C'};font-weight:600">{external_broken}</td></tr>
+              </table>
+              <h3 style="font-size:14px;margin:0 0 8px">Broken links:</h3>
+              <table style="width:100%;border-collapse:collapse;margin-bottom:20px">{link_rows}</table>
+              <p style="font-size:12px;color:#888;margin:0">
+                View full run in <a href="https://github.com/zizkovben/unirenter/actions" style="color:#4BBFE0">GitHub Actions</a>
+                · Admin portal <a href="https://unirenter.com.au/admin" style="color:#4BBFE0">Audit Log tab</a>
+              </p>
+            </div>
+          </div>
+          """
+
+          payload = json.dumps({
+              'from': 'UniRenter Audit <noreply@unirenter.com.au>',
+              'to': ['benjcarey75@gmail.com'],
+              'subject': f'{"🔴" if internal_broken>0 else "🟡"} UniRenter weekly audit: {len(broken_links)} broken link(s)',
+              'html': body
+          }).encode()
+
+          req = urllib.request.Request(
+              'https://api.resend.com/emails',
+              data=payload,
+              headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'}
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=10) as resp:
+                  print('Email sent:', resp.status)
+          except urllib.error.HTTPError as e:
+              print('Email failed:', e.code, e.read().decode())
+          PYEOF
