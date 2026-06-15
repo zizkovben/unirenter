@@ -203,6 +203,9 @@
     .feature-grid { grid-template-columns: repeat(2, 1fr); }
     .two-col { grid-template-columns: 1fr; }
   }
+.audit-known-btn { border:1px solid var(--border); background:transparent; color:var(--text-muted); border-radius:4px; }
+.audit-known-btn.known { border-color:var(--brand-green); background:rgba(61,170,92,0.12); color:var(--brand-green); }
+.audit-known-btn:hover { opacity:0.8; }
 </style>
 </head>
 <body>
@@ -450,7 +453,7 @@
       <div class="section-header">
         <div>
           <div class="section-title">Audit log</div>
-          <div class="section-subtitle">Automated link audit runs — populated by GitHub Actions (configured S72)</div>
+          <div class="section-subtitle">Automated link audit runs — populated by GitHub Actions on every push and weekly</div>
         </div>
         <button class="btn-refresh" onclick="loadAuditLog()">↻ Refresh</button>
       </div>
@@ -923,40 +926,67 @@ async function loadAuditLog() {
   }
 }
 
+var _knownIssues = new Set();
+
 function renderAuditLog(runs) {
   var el = document.getElementById('audit-list');
   if (!runs.length) {
-    el.innerHTML='<div class="empty-state"><div class="icon">📋</div><div class="msg">No audit runs yet</div><div class="sub">GitHub Actions will populate this tab automatically from S72 onwards.<br>To run manually: <code style="font-family:monospace;font-size:12px;color:var(--brand-blue)">python3 unirenter_audit.py --repo-path ./unirenter</code></div></div>'; return;
+    el.innerHTML='<div class="empty-state"><div class="icon">&#128203;</div><div class="msg">No audit runs yet</div><div class="sub">GitHub Actions populates this tab on every push and weekly (Sundays 11pm AEST).<br>Each run saves to the <code style="font-family:monospace;font-size:12px;color:var(--brand-blue)">audit_log</code> table in Supabase.</div></div>'; return;
   }
-  var tableHtml = '<div class="table-wrap"><table class="data-table"><thead><tr>' +
-    '<th>Date</th><th>Trigger</th><th>Result</th><th>Files</th><th>Internal</th><th>External</th><th>Broken</th>' +
-    '</tr></thead><tbody>' +
-    runs.map(function(r) {
-      var passed = r.passed !== false;
-      var statusHtml = passed
-        ? '<span class="status-pill pill-active">✓ Pass</span>'
-        : (r.internal_broken>0
-          ? '<span class="status-pill pill-rejected">✗ Internal broken</span>'
-          : '<span class="status-pill pill-pending">⚠ External broken</span>');
-      var brokenLinks = r.broken_links || [];
-      var brokenHtml = brokenLinks.length
-        ? '<details><summary style="cursor:pointer;color:var(--brand-coral);font-size:12px">'+brokenLinks.length+' broken</summary><ul style="margin:4px 0 0 16px;padding:0;font-size:11px;color:var(--text-muted)">'
-          + brokenLinks.map(function(b){return '<li>'+esc(b)+'</li>';}).join('') + '</ul></details>'
-        : '—';
-      return '<tr>' +
-        '<td>'+relTime(r.run_date)+'</td>' +
-        '<td><span style="text-transform:capitalize">'+esc(r.trigger||'manual')+'</span></td>' +
-        '<td>'+statusHtml+'</td>' +
-        '<td>'+(r.html_files_checked||'—')+'</td>' +
-        '<td><span style="color:'+(r.internal_broken>0?'var(--brand-coral)':'var(--brand-green)')+'">'+
-          (r.internal_ok||0)+' ok'+(r.internal_broken>0?' · '+r.internal_broken+' broken':'')+'</span></td>' +
-        '<td><span style="color:'+(r.external_broken>0?'var(--brand-coral)':'var(--brand-green)')+'">'+
-          (r.external_ok||0)+' ok'+(r.external_broken>0?' · '+r.external_broken+' broken':'')+'</span></td>' +
-        '<td>'+brokenHtml+'</td>' +
-        '</tr>';
-    }).join('') +
-    '</tbody></table></div>';
-  el.innerHTML = tableHtml;
+  var html = '<div class="table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>Trigger</th><th>Result</th><th>Files</th><th>Internal</th><th>External</th><th>Issues</th></tr></thead><tbody>';
+  runs.forEach(function(r) {
+    var passed = r.passed !== false;
+    var intBroken = r.internal_broken || 0;
+    var extBroken = r.external_broken || 0;
+    var statusHtml = passed
+      ? '<span class="status-pill pill-active">&#10003; Pass</span>'
+      : (intBroken > 0
+        ? '<span class="status-pill pill-rejected">&#10007; Internal broken</span>'
+        : '<span class="status-pill pill-pending">&#9888; External broken</span>');
+    var brokenLinks = r.broken_links || [];
+    var issuesHtml;
+    if (!brokenLinks.length) {
+      issuesHtml = '&#8212;';
+    } else {
+      var runId = String(r.id || r.run_date || '');
+      var suppressed = brokenLinks.filter(function(b){ return _knownIssues.has(runId+'|'+b); }).length;
+      var active = brokenLinks.length - suppressed;
+      var items = brokenLinks.map(function(b) {
+        var key = runId + '|' + b;
+        var isKnown = _knownIssues.has(key);
+        var safeKey = esc(key);
+        var textStyle = 'font-family:monospace;font-size:11px;flex:1;' + (isKnown ? 'color:var(--text-muted);text-decoration:line-through' : 'color:var(--text-base)');
+        var btnCls = isKnown ? 'audit-known-btn known' : 'audit-known-btn';
+        return '<li style="display:flex;align-items:flex-start;gap:8px;margin:4px 0">' +
+          '<span style="' + textStyle + '">' + esc(b) + '</span>' +
+          '<button class="' + btnCls + '" data-key="' + safeKey + '" style="flex-shrink:0;font-size:10px;padding:2px 6px;border-radius:4px;cursor:pointer;white-space:nowrap">' +
+          (isKnown ? '&#10003; Known' : 'Mark known') + '</button></li>';
+      }).join('');
+      var summaryColour = active > 0 ? 'var(--brand-coral)' : 'var(--text-muted)';
+      var summaryLabel = brokenLinks.length + ' issue' + (brokenLinks.length > 1 ? 's' : '') + (suppressed > 0 ? ' (' + suppressed + ' suppressed)' : '');
+      issuesHtml = '<details><summary style="cursor:pointer;color:' + summaryColour + ';font-size:12px">' + summaryLabel + '</summary><ul style="margin:6px 0 0 0;padding:0;list-style:none">' + items + '</ul></details>';
+    }
+    html += '<tr>' +
+      '<td>' + relTime(r.run_date) + '</td>' +
+      '<td><span style="text-transform:capitalize">' + esc(r.trigger || 'manual') + '</span></td>' +
+      '<td>' + statusHtml + '</td>' +
+      '<td>' + (r.html_files_checked || '&#8212;') + '</td>' +
+      '<td><span style="color:' + (intBroken > 0 ? 'var(--brand-coral)' : 'var(--brand-green)') + '">' +
+        (r.internal_ok || 0) + ' ok' + (intBroken > 0 ? ' &middot; ' + intBroken + ' broken' : '') + '</span></td>' +
+      '<td><span style="color:' + (extBroken > 0 ? 'var(--brand-coral)' : 'var(--brand-green)') + '">' +
+        (r.external_ok || 0) + ' ok' + (extBroken > 0 ? ' &middot; ' + extBroken + ' broken' : '') + '</span></td>' +
+      '<td>' + issuesHtml + '</td></tr>';
+  });
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+  // Wire known-issue toggle buttons via event delegation on the list
+  el.querySelectorAll('.audit-known-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var key = btn.getAttribute('data-key');
+      if (_knownIssues.has(key)) { _knownIssues.delete(key); } else { _knownIssues.add(key); }
+      loadAuditLog();
+    });
+  });
 }
 
 function esc(s) { if(!s)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
