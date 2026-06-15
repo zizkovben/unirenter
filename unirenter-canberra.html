@@ -655,29 +655,6 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
 .save-btn:hover { border-color:rgba(75,191,224,0.3); color:var(--brand-blue); }
 
 
-/* ── Sleep Mode ── */
-.sleep-modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px}
-.sleep-modal-overlay.open{display:flex;animation:fadeIn 0.25s ease}
-.sleep-modal{background:#1a3040;border:1px solid rgba(75,191,224,0.2);border-radius:22px;padding:32px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto}
-.sleep-modal-title{font-family:var(--font-display);font-size:22px;font-weight:800;margin-bottom:6px;letter-spacing:-0.5px}
-.sleep-modal-sub{font-size:13px;color:var(--text-muted);margin-bottom:24px;line-height:1.65}
-.sleep-modes{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
-.sleep-mode-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px 18px;cursor:pointer;transition:all 0.2s;display:flex;align-items:flex-start;gap:14px}
-.sleep-mode-card:hover{border-color:rgba(75,191,224,0.3);background:rgba(75,191,224,0.05)}
-.sleep-mode-card.selected{background:rgba(75,191,224,0.1);border-color:var(--brand-blue)}
-.sleep-mode-icon{font-size:26px;flex-shrink:0}
-.sleep-mode-info{flex:1}
-.sleep-mode-name{font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:3px}
-.sleep-mode-desc{font-size:12px;color:var(--text-muted);line-height:1.55}
-.sleep-mode-duration{font-size:11px;color:var(--brand-blue);margin-top:4px;font-weight:500}
-.sleep-duration-picker{display:none;background:rgba(0,0,0,0.2);border-radius:10px;padding:14px;margin-top:8px}
-.sleep-duration-picker.vis{display:block}
-.sleep-duration-picker label{font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px}
-.sleep-duration-picker input,.sleep-duration-picker select{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text);font-family:var(--font-body);font-size:13px;padding:9px 13px;border-radius:9px;outline:none;appearance:none}
-.sleep-modal-actions{display:flex;gap:10px}
-.btn-sleep-cancel{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text-muted);font-family:var(--font-body);font-size:13px;padding:11px;border-radius:10px;cursor:pointer}
-.btn-sleep-confirm{flex:2;background:var(--brand-blue);border:none;color:var(--navy);font-family:var(--font-body);font-weight:700;font-size:14px;padding:11px;border-radius:10px;cursor:pointer;transition:all 0.2s}
-.btn-sleep-confirm:hover{background:var(--teal-dim)}
 .sleep-active-bar{background:rgba(75,191,224,0.08);border:1px solid rgba(75,191,224,0.2);border-radius:12px;padding:12px 18px;margin-bottom:20px;display:none;align-items:center;gap:12px;flex-wrap:wrap}
 .sleep-active-bar.vis{display:flex}
 .sleep-active-icon{font-size:22px}
@@ -916,6 +893,10 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           <span class="item-icon">🔄</span>
           <div><div class="item-label">Break lease</div><div class="item-desc">List or find a break lease room</div></div>
         </button>
+        <button class="nav-dropdown-item" onclick="window.location='/landlords';closeNavDropdown()">
+          <span class="item-icon">🏠</span>
+          <div><div class="item-label">List your property</div><div class="item-desc">Reach students across Australia</div></div>
+        </button>
         <div class="nav-dropdown-divider"></div>
         <button class="nav-dropdown-item" onclick="window.location='/canberra/guide';closeNavDropdown()">
           <span class="item-icon">📖</span>
@@ -926,9 +907,13 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           <div><div class="item-label">Getting Settled</div><div class="item-desc">Life in Canberra for students</div></div>
         </button>
         <div class="nav-dropdown-divider"></div>
-        <button class="nav-dropdown-item" onclick="openSleepModal();closeNavDropdown()">
-          <span class="item-icon">💤</span>
-          <div><div class="item-label">Sleep Mode</div><div class="item-desc">Pause or update your profile</div></div>
+        <button class="nav-dropdown-item" onclick="window.location='/cob';closeNavDropdown()">
+          <span class="item-icon">🤠</span>
+          <div><div class="item-label">What is Cob?</div><div class="item-desc">Meet your AI housing mate</div></div>
+        </button>
+        <button class="nav-dropdown-item" onclick="window.location='/about';closeNavDropdown()">
+          <span class="item-icon">ℹ️</span>
+          <div><div class="item-label">About UniRenter</div><div class="item-desc">Our mission and story</div></div>
         </button>
         <div class="nav-dropdown-divider"></div>
         <button class="nav-dropdown-item" id="nav-dd-dashboard" style="display:none;" onclick="window.location='/dashboard';closeNavDropdown()">
@@ -1655,7 +1640,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
     <a href="/canberra" class="city-sw-btn active">📍 Canberra</a>
   </div>
   </div>
-<div style="margin-top:12px;font-size:11px;opacity:0.5;">© 2025 UniRenter · All rights reserved · <a href="/legal" style="color:var(--brand-blue)">Terms & Privacy</a> · <a href="/agent-portal" style="color:var(--brand-blue)">Partner login</a></div>
+<div style="margin-top:12px;font-size:11px;opacity:0.5;">© 2025 UniRenter · All rights reserved · <a href="/legal" style="color:var(--brand-blue)">Terms & Privacy</a> · <a href="/agent-portal" style="color:var(--brand-blue)">Partner login</a> · <a href="/about" style="color:var(--brand-blue)">About</a></div>
 </footer>
 
 <script>
@@ -2384,63 +2369,6 @@ function downloadAgreement() {
 
 // goStep includes completeness update directly
 
-
-// ── Sleep Mode ──
-let selectedSleepMode = null;
-
-function openSleepModal() {
-  document.getElementById('sleep-modal').classList.add('open');
-}
-
-function closeSleepModal() {
-  document.getElementById('sleep-modal').classList.remove('open');
-}
-
-function selectSleep(el, mode) {
-  document.querySelectorAll('.sleep-mode-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedSleepMode = mode;
-  // Show duration pickers
-  document.querySelectorAll('.sleep-duration-picker').forEach(d => d.classList.remove('vis'));
-  const dur = document.getElementById('dur-' + mode);
-  if (dur) dur.classList.add('vis');
-}
-
-function confirmSleep() {
-  if (!selectedSleepMode) {
-    showToast('⚠️ Select a mode', 'Please choose a sleep mode first.');
-    return;
-  }
-  closeSleepModal();
-  const modeNames = {
-    study: 'Study Mode 📚', sorted: 'Sorted! 🏠', holiday: 'Holiday Mode ✈️',
-    exams: 'Exam Crunch 😰', looking: 'Just Looking 👀', break: 'Taking a Break 😴'
-  };
-  const modeDescs = {
-    study: 'Your profile is paused. Matches see your return date.',
-    sorted: "Congratulations on finding a place! Your profile is hidden.",
-    holiday: 'Profile paused with your return date shown to matches.',
-    exams: 'Profile paused for your chosen period — auto-wakes when done.',
-    looking: 'Profile visible but marked as early stages.',
-    break: 'Profile paused — your data and matches are safe.'
-  };
-  const bar = document.getElementById('sleep-active-bar');
-  if (bar) {
-    bar.classList.add('vis');
-    const nameEl = document.getElementById('sleep-active-name');
-    const descEl = document.getElementById('sleep-active-desc');
-    if (nameEl) nameEl.textContent = modeNames[selectedSleepMode] || 'Sleep Mode';
-    if (descEl) descEl.textContent = modeDescs[selectedSleepMode] || '';
-  }
-  showToast('💤 Sleep mode activated', modeNames[selectedSleepMode] + ' — wake up anytime.');
-}
-
-function wakeUp() {
-  const bar = document.getElementById('sleep-active-bar');
-  if (bar) bar.classList.remove('vis');
-  selectedSleepMode = null;
-  showToast('☀️ Welcome back!', 'Your profile is active again. Checking for new matches…');
-}
 
 // ── Cob — floating assistant ───────────────────────────────────────────────
 // Cob appears after email verification and stays through all steps
