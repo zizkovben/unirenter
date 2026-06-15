@@ -989,13 +989,13 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
   <div class="setup-container">
     <div class="setup-progress">
-      <div class="step-tab active" id="tab-1">Verify</div>
-      <div class="step-tab" id="tab-2">Profile</div>
-      <div class="step-tab" id="tab-3">Status</div>
-      <div class="step-tab" id="tab-4">Housing</div>
-      <div class="step-tab" id="tab-5">Lifestyle</div>
-      <div class="step-tab" id="tab-6">Location</div>
-      <div class="step-tab" id="tab-7">Budget</div>
+      <div class="step-tab active" id="tab-1" onclick="goStep(1)" style="cursor:pointer;">Verify</div>
+      <div class="step-tab" id="tab-2" onclick="goStep(2)" style="cursor:pointer;">Profile</div>
+      <div class="step-tab" id="tab-3" onclick="goStep(3)" style="cursor:pointer;">Status</div>
+      <div class="step-tab" id="tab-4" onclick="goStep(4)" style="cursor:pointer;">Housing</div>
+      <div class="step-tab" id="tab-5" onclick="goStep(5)" style="cursor:pointer;">Lifestyle</div>
+      <div class="step-tab" id="tab-6" onclick="goStep(6)" style="cursor:pointer;">Location</div>
+      <div class="step-tab" id="tab-7" onclick="goStep(7)" style="cursor:pointer;">Budget</div>
     </div>
     <!-- Save progress bar -->
     <div class="save-progress-bar">
@@ -1022,7 +1022,8 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           </div>
           <div class="verified-badge" id="verified-badge" style="display:none;">✅ Email verified — you're good to go</div>
         </div>
-        <div class="info-note">🔒 We'll send a quick 6-digit code to confirm it's you when you click "Show my matches" — takes 30 seconds.</div>
+        <div class="info-note" style="margin-top:8px;">💡 <strong>Tip:</strong> Using your uni email (e.g. you@student.unimelb.edu.au) earns you a <strong style="color:var(--brand-green);">Verified Student</strong> badge — more matches, more trust.</div>
+<div class="info-note">🔒 We'll send a quick 6-digit code to confirm it's you when you click "Show my matches" — takes 30 seconds.</div>
         <div class="step-nav">
           <div></div>
           <button class="btn-next" onclick="goStep(2)" id="btn-step1-next" style="opacity:0.4;pointer-events:none;">Next: Your profile →</button>
@@ -1204,9 +1205,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           </div>
           <div class="form-row">
             <div class="form-group"><label>Field of study</label><select><option value="">Select…</option><option>Business &amp; Commerce</option><option>Engineering &amp; IT</option><option>Health &amp; Medicine</option><option>Arts &amp; Humanities</option><option>Science &amp; Maths</option><option>Law</option><option>Education</option><option>Architecture &amp; Design</option><option>Other</option></select></div>
-            <div class="form-group"><label>Uni email (optional — earns verified badge)</label><input type="email" placeholder="you@student.unimelb.edu.au" /></div>
           </div>
-          <div class="info-note">✅ A verified uni email earns you a <strong style="color:var(--brand-green)">Verified Student</strong> badge and increases your match rate.</div>
         </div>
         <div class="cond-panel" id="panel-ex">
           <div class="cond-title">Graduate details</div>
@@ -1507,13 +1506,13 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
                   <label>Preferred contact method</label>
                   <div class="chips">
                     <div class="chip selected" onclick="toggle(this)">📧 Email</div>
-                    <div class="chip" onclick="toggle(this)">📱 WhatsApp</div>
                     <div class="chip" onclick="toggle(this)">📞 Phone call</div>
                   </div>
                 </div>
                 <div class="form-group" style="margin-bottom:0">
-                  <label>Email address</label>
-                  <input type="email" id="agent-email" placeholder="your@email.com" />
+                  <label>Contact email</label>
+                  <div id="agent-email-display" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--text);word-break:break-all;min-height:40px;"></div>
+                  <input type="hidden" id="agent-email" />
                 </div>
               </div>
               <div class="agent-privacy-note">🔒 Your details are sent only to our verified housing partner. They will not be shared further or used for marketing.</div>
@@ -1535,37 +1534,28 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
     <div><div class="section-label">Your matches</div><div class="section-title">Top matches in Melbourne.</div></div>
     <div style="font-size:12px;color:var(--text-muted);">Sorted by compatibility</div>
   </div>
-  <div id="dashboard-prompt" style="display:none;background:rgba(75,191,224,0.07);border:1px solid rgba(75,191,224,0.18);border-radius:12px;padding:12px 16px;margin-bottom:16px;">
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Your profile is saved ✅</div>
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-      <span style="font-size:14px;font-weight:600;color:var(--text);">Track your search &amp; update preferences</span>
-      <a href="/dashboard" style="background:var(--brand-yellow);color:#000;font-weight:700;font-size:12px;padding:7px 14px;border-radius:8px;text-decoration:none;white-space:nowrap;">View Dashboard →</a>
-    </div>
-  </div>
+
   <div class="match-grid" id="match-grid"></div>
 
-  <!-- Referral banner — shown after matches load -->
-  <div class="referral-banner" id="referral-banner" style="display:none;">
-    <div class="rb-icon">🏠</div>
-    <div class="rb-body">
-      <div class="rb-title">Know another student looking for a place?</div>
-      <div class="rb-desc">The more students who join, the better your matches get. Share UniRenter with your uni friends.</div>
-      <div class="rb-actions">
-        <button class="btn-share" onclick="shareUniRenter()">📤 Share UniRenter</button>
-        <button class="btn-copy-link" onclick="copyReferralLink()">🔗 Copy link</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Housemate agreement download -->
-  <div class="agreement-banner">
+  <!-- Housemate agreement — shown after matches, inside matches section -->
+  <div class="agreement-banner" id="agreement-banner" style="display:none;">
     <div class="ab-icon">📋</div>
     <div class="ab-body">
       <div class="ab-title">Free housemate agreement template</div>
-      <div class="ab-desc">A simple one-page agreement covering rent, bills, cleaning, guests, and notice. Not legally binding but prevents 90% of housemate conflicts. Fill in together before you move in.</div>
+      <div class="ab-desc">Moving in together? A one-page agreement covering rent, bills, cleaning and notice. Prevents 90% of housemate conflicts. Download from your <a href="/dashboard" style="color:var(--brand-blue);">dashboard</a> once you've matched.</div>
     </div>
-    <button class="btn-download" onclick="downloadAgreement()">⬇ Download PDF</button>
+    <button class="btn-download" onclick="window.location='/dashboard'">Go to dashboard →</button>
   </div>
+
+  <!-- Referral banner — compact, shown after matches load -->
+  <div id="referral-banner" style="display:none;margin:12px 0 0;padding:11px 16px;background:rgba(75,191,224,0.06);border:1px solid rgba(75,191,224,0.15);border-radius:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <span style="font-size:13px;color:var(--text-muted);">🏠 Know another student looking for a place? Share UniRenter — the more who join, the better everyone's matches.</span>
+    <div style="display:flex;gap:8px;flex-shrink:0;">
+      <button class="btn-share" onclick="shareUniRenter()" style="font-size:12px;padding:6px 12px;">📤 Share</button>
+      <button onclick="copyReferralLink()" style="font-size:12px;padding:6px 12px;background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--text-muted);border-radius:8px;cursor:pointer;">🔗 Copy link</button>
+    </div>
+  </div>
+
 </section>
 
 <section class="review-section" id="review-section" style="display:none;">
@@ -1923,6 +1913,9 @@ async function generateMatches() {
 
       const rb = document.getElementById('referral-banner');
       if (rb) rb.style.display = 'flex';
+      const ab = document.getElementById('agreement-banner');
+      if (ab) ab.style.display = 'flex';
+      loadCityReviewGate();
       return;
     }
   } catch (err) {
@@ -1938,6 +1931,7 @@ async function generateMatches() {
   grid.appendChild(note);
   const rb = document.getElementById('referral-banner');
   if (rb) rb.style.display = 'flex';
+  loadCityReviewGate();
 }
 
 // ── Build Coming Soon card ────────────────────────────────────────────────────
@@ -2031,10 +2025,15 @@ function showToast(title, msg) {
 
 function toggleAgentDetail(cb) {
   const detail = document.getElementById('agent-detail');
-  detail.classList.toggle('visible', cb.checked);
-  // Visually update the checkbox
-  const box = cb.parentElement.querySelector('.agent-check-box');
-  if (box) box.innerHTML = cb.checked ? '✓' : '';
+  if (detail) detail.style.display = cb.checked ? 'block' : 'none';
+  if (cb.checked) {
+    // Auto-populate email from stored email
+    const storedEmail = localStorage.getItem('unirenter_email') || '';
+    const display = document.getElementById('agent-email-display');
+    const hidden = document.getElementById('agent-email');
+    if (display) display.textContent = storedEmail || 'Your verified email will appear here after verification';
+    if (hidden) hidden.value = storedEmail;
+  }
 }
 function scrollToSetup() { document.getElementById('setup').scrollIntoView({behavior:'smooth'}); }
 function scrollToMatches() {
@@ -2369,7 +2368,7 @@ const cobNudges = {
   1: null, // fires after OTP verify success instead
   2: "A real photo gets you 3× more connections 📸 — international students especially, it shows you're genuine and builds trust.",
   3: "Just arriving in Australia? Most international students find their first housemate within 2 weeks here. You're doing great — keep going! 🙌",
-  4: "Not sure what to pick? A private room in a share house is the most popular choice — your own space, shared costs. 🏠 Also worth sorting your internet early — NBN takes 1–2 weeks to connect and most share houses need a new plan when tenants change.",
+  4: "Not sure what to pick? A private room in a share house is the most popular choice — your own space, shared costs. 🏠 Once you find a match, grab the free housemate agreement template from your dashboard — it prevents 90% of housemate conflicts.",
   5: "Be honest here — mismatched sleep schedules cause more housemate friction than almost anything else. Pick what's actually true for you.",
   6: "Pick suburbs close to your uni first. A short commute saves 1–2 hours a day — that really adds up during exam season. 📚",
   7: "Melbourne rooms average $220–280/wk for students. If your budget is under $200, options get very tight — worth knowing now."
@@ -2439,6 +2438,25 @@ function showCobTyping() {
 function removeCobTyping() {
   const t = document.getElementById('cob-typing-indicator');
   if (t) t.remove();
+}
+
+async function loadCityReviewGate() {
+  try {
+    const r = await fetch('/api/reviews/public?city=melbourne');
+    if (!r.ok) return;
+    const data = await r.json();
+    if (!data.gated && data.reviews && data.reviews.length >= 3) {
+      const track = document.getElementById('reviewTrack');
+      if (track) {
+        const real = data.reviews.map(rv =>
+          `<div class="review-card"><div class="review-stars">${'⭐'.repeat(rv.rating || 5)}</div><div class="review-text">"${rv.comment}"</div><div class="review-author">${rv.display_name || 'Student'} · Melbourne</div></div>`
+        ).join('');
+        track.innerHTML = real + real;
+      }
+      const rs = document.getElementById('review-section');
+      if (rs) rs.style.display = '';
+    }
+  } catch(e) { /* silent fail */ }
 }
 
 async function sendCobMessage() {
@@ -2604,8 +2622,6 @@ function fireCobPhase2Nudge() {
   function maybeShowReviewNudge() {
     if (reviewNudgeFired || localStorage.getItem('unirenter_review_done') || localStorage.getItem('unirenter_email_verified') !== '1') return;
     reviewNudgeFired = true;
-    const rs = document.getElementById('review-section');
-    if (rs) rs.style.display = '';
     setTimeout(() => {
       showCobNudge("You’re all set 🤠 — your profile is saved and your matches are ready. Check your dashboard to track your search, or leave a quick review if UniRenter helped.");;
       setTimeout(() => {
