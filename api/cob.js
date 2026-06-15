@@ -124,7 +124,7 @@ module.exports = async function handler(req, res) {
       method: 'POST',
       headers: anthropicHeaders,
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 600,
         system: systemPrompt,
         messages: messages
@@ -159,7 +159,7 @@ module.exports = async function handler(req, res) {
           method: 'POST',
           headers: anthropicHeaders,
           body: JSON.stringify({
-            model: 'claude-haiku-4-5-20251001',  // Haiku for speed + cost on extraction
+            model: 'claude-haiku-4-5',  // Haiku for speed + cost on extraction
             max_tokens: 300,
             system: SIGNAL_SYSTEM,
             messages: [{
