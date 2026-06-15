@@ -943,29 +943,6 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
   </div>
 </div>
 
-<!-- Seasonal alert -->
-<div style="position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 24px;">
-  <div class="seasonal-alert" id="seasonal-alert">
-    <div class="sa-icon">📅</div>
-    <div>
-      <div class="sa-title">Semester 1 2026 intake — 6 weeks away</div>
-      <div class="sa-desc">Adelaide's rental market tightens sharply at semester start. International students arriving for February intake should start their search early — affordable rooms near UniSA and Adelaide Uni fill quickly. <a href="#" onclick="scrollToSetup()" style="color:var(--brand-blue)">Start your profile →</a></div>
-    </div>
-    <button class="sa-close" onclick="document.getElementById('seasonal-alert').style.display='none'">✕</button>
-  </div>
-</div>
-
-<section>
-  <div class="section-label">How it works</div>
-  <div class="section-title">Three steps to<br>your housemate.</div>
-  <div class="how-grid">
-    <div class="how-card"><div class="how-num">01</div><div class="how-icon">🎓</div><div class="how-title">Build your profile</div><div class="how-desc">Upload a photo, set your lifestyle preferences, budget, and accommodation type. The more detail, the better your matches.</div></div>
-    <div class="how-card"><div class="how-num">02</div><div class="how-icon">⚡</div><div class="how-title">Get matched</div><div class="how-desc">Our algorithm scores compatibility across lifestyle, accommodation type, location, budget and cultural factors.</div></div>
-    <div class="how-card"><div class="how-num">03</div><div class="how-icon">💬</div><div class="how-title">Connect safely</div><div class="how-desc">Message matches inside UniRenter only. Phone-verified profiles. No personal details shared until you choose.</div></div>
-    <div class="how-card"><div class="how-num">04</div><div class="how-icon">🔄</div><div class="how-title">Broken lease board</div><div class="how-desc">Taking over or transferring an Adelaide lease? Dedicated board with legal guidance, document upload, and mandatory safety checks. <span style="color:var(--brand-coral);">Open board →</span></div></div>
-  </div>
-</section>
-
 <!-- ── Translate bar ── -->
 <div style="position:relative;z-index:1;padding:0 24px;">
   <div class="translate-bar">
@@ -995,6 +972,29 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
   </div>
 </div>
 
+<!-- Seasonal alert -->
+<div style="position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 24px;">
+  <div class="seasonal-alert" id="seasonal-alert">
+    <div class="sa-icon">📅</div>
+    <div>
+      <div class="sa-title">Semester 1 2026 intake — 6 weeks away</div>
+      <div class="sa-desc">Adelaide's rental market tightens sharply at semester start. International students arriving for February intake should start their search early — affordable rooms near UniSA and Adelaide Uni fill quickly. <a href="#" onclick="scrollToSetup()" style="color:var(--brand-blue)">Start your profile →</a></div>
+    </div>
+    <button class="sa-close" onclick="document.getElementById('seasonal-alert').style.display='none'">✕</button>
+  </div>
+</div>
+
+<section>
+  <div class="section-label">How it works</div>
+  <div class="section-title">Three steps to<br>your housemate.</div>
+  <div class="how-grid">
+    <div class="how-card"><div class="how-num">01</div><div class="how-icon">🎓</div><div class="how-title">Build your profile</div><div class="how-desc">Upload a photo, set your lifestyle preferences, budget, and accommodation type. The more detail, the better your matches.</div></div>
+    <div class="how-card"><div class="how-num">02</div><div class="how-icon">⚡</div><div class="how-title">Get matched</div><div class="how-desc">Our algorithm scores compatibility across lifestyle, accommodation type, location, budget and cultural factors.</div></div>
+    <div class="how-card"><div class="how-num">03</div><div class="how-icon">💬</div><div class="how-title">Connect safely</div><div class="how-desc">Message matches inside UniRenter only. Phone-verified profiles. No personal details shared until you choose.</div></div>
+    <div class="how-card"><div class="how-num">04</div><div class="how-icon">🔄</div><div class="how-title">Broken lease board</div><div class="how-desc">Taking over or transferring an Adelaide lease? Dedicated board with legal guidance, document upload, and mandatory safety checks. <span style="color:var(--brand-coral);">Open board →</span></div></div>
+  </div>
+</section>
+
 <section id="setup">
   <div class="section-label">Your profile</div>
   <div class="section-title">Let's find your match.</div>
@@ -1002,13 +1002,13 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
   <div class="setup-container">
     <div class="setup-progress">
-      <div class="step-tab active" id="tab-1">Verify</div>
-      <div class="step-tab" id="tab-2">Profile</div>
-      <div class="step-tab" id="tab-3">Status</div>
-      <div class="step-tab" id="tab-4">Housing</div>
-      <div class="step-tab" id="tab-5">Lifestyle</div>
-      <div class="step-tab" id="tab-6">Location</div>
-      <div class="step-tab" id="tab-7">Budget</div>
+      <div class="step-tab active" id="tab-1" onclick="goStep(1)" style="cursor:pointer;">Verify</div>
+      <div class="step-tab" id="tab-2" onclick="goStep(2)" style="cursor:pointer;">Profile</div>
+      <div class="step-tab" id="tab-3" onclick="goStep(3)" style="cursor:pointer;">Status</div>
+      <div class="step-tab" id="tab-4" onclick="goStep(4)" style="cursor:pointer;">Housing</div>
+      <div class="step-tab" id="tab-5" onclick="goStep(5)" style="cursor:pointer;">Lifestyle</div>
+      <div class="step-tab" id="tab-6" onclick="goStep(6)" style="cursor:pointer;">Location</div>
+      <div class="step-tab" id="tab-7" onclick="goStep(7)" style="cursor:pointer;">Budget</div>
     </div>
     <!-- Save progress bar -->
     <div class="save-progress-bar">
@@ -1026,7 +1026,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
       <!-- STEP 1: Email capture (verification happens at Show my matches) -->
       <div class="step active" id="step-1">
         <div class="step-title">Create your free account</div>
-        <div class="step-sub">Enter your email to get started — we'll verify it when you're ready to see your matches.</div>
+        <div class="step-sub">Enter your email to get started — we'll send a quick 6-digit code to verify it's you.</div>
         <div class="phone-block">
           <div class="phone-block-title">📧 Your email</div>
           <div class="phone-block-sub">Used only for account access and important updates. Never shown on your profile or shared with landlords.</div>
@@ -1035,10 +1035,11 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           </div>
           <div class="verified-badge" id="verified-badge" style="display:none;">✅ Email verified — you're good to go</div>
         </div>
-        <div class="info-note">🔒 We'll send a quick 6-digit code to confirm it's you when you click "Show my matches" — takes 30 seconds.</div>
+        <div class="info-note" style="margin-top:8px;">💡 <strong>Tip:</strong> Using your uni email earns you a <strong style="color:var(--brand-green);">Verified Student</strong> badge — more matches, more trust.</div>
+<div class="info-note">🔒 A 6-digit code will be sent to verify your email before you continue — takes 30 seconds.</div>
         <div class="step-nav">
           <div></div>
-          <button class="btn-next" onclick="goStep(2)" id="btn-step1-next" style="opacity:0.4;pointer-events:none;">Next: Your profile →</button>
+          <button class="btn-next" onclick="triggerStep1Verify()" id="btn-step1-next" style="opacity:0.4;pointer-events:none;">Verify &amp; continue →</button>
         </div>
       </div>
 
@@ -1523,13 +1524,13 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
                   <label>Preferred contact method</label>
                   <div class="chips">
                     <div class="chip selected" onclick="toggle(this)">📧 Email</div>
-                    <div class="chip" onclick="toggle(this)">📱 WhatsApp</div>
                     <div class="chip" onclick="toggle(this)">📞 Phone call</div>
                   </div>
                 </div>
                 <div class="form-group" style="margin-bottom:0">
-                  <label>Email address</label>
-                  <input type="email" id="agent-email" placeholder="your@email.com" />
+                  <label>Contact email</label>
+                  <div id="agent-email-display" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--text);word-break:break-all;min-height:40px;"></div>
+                  <input type="hidden" id="agent-email" />
                 </div>
               </div>
               <div class="agent-privacy-note">🔒 Your details are sent only to our verified housing partner. They will not be shared further or used for marketing.</div>
@@ -1560,28 +1561,25 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
   </div>
   <div class="match-grid" id="match-grid"></div>
 
-  <!-- Referral banner — shown after matches load -->
-  <div class="referral-banner" id="referral-banner" style="display:none;">
-    <div class="rb-icon">🏠</div>
-    <div class="rb-body">
-      <div class="rb-title">Know another student looking for a place?</div>
-      <div class="rb-desc">The more students who join, the better your matches get. Share UniRenter with your uni friends.</div>
-      <div class="rb-actions">
-        <button class="btn-share" onclick="shareUniRenter()">📤 Share UniRenter</button>
-        <button class="btn-copy-link" onclick="copyReferralLink()">🔗 Copy link</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Housemate agreement download -->
-  <div class="agreement-banner">
+  <!-- Housemate agreement — shown after matches, inside matches section -->
+  <div class="agreement-banner" id="agreement-banner" style="display:none;">
     <div class="ab-icon">📋</div>
     <div class="ab-body">
       <div class="ab-title">Free housemate agreement template</div>
-      <div class="ab-desc">A simple one-page agreement covering rent, bills, cleaning, guests, and notice. Not legally binding but prevents 90% of housemate conflicts. Fill in together before you move in.</div>
+      <div class="ab-desc">Moving in together? A one-page agreement covering rent, bills, cleaning and notice. Prevents 90% of housemate conflicts. Download from your <a href="/dashboard" style="color:var(--brand-blue);">dashboard</a> once you've matched.</div>
     </div>
-    <button class="btn-download" onclick="downloadAgreement()">⬇ Download PDF</button>
+    <button class="btn-download" onclick="window.location='/dashboard'">Go to dashboard →</button>
   </div>
+
+  <!-- Referral banner — compact, shown after matches load -->
+  <div id="referral-banner" style="display:none;margin:12px 0 0;padding:11px 16px;background:rgba(75,191,224,0.06);border:1px solid rgba(75,191,224,0.15);border-radius:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <span style="font-size:13px;color:var(--text-muted);">🏠 Know another student looking for a place? Share UniRenter — the more who join, the better everyone's matches.</span>
+    <div style="display:flex;gap:8px;flex-shrink:0;">
+      <button class="btn-share" onclick="shareUniRenter()" style="font-size:12px;padding:6px 12px;">📤 Share</button>
+      <button onclick="copyReferralLink()" style="font-size:12px;padding:6px 12px;background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--text-muted);border-radius:8px;cursor:pointer;">🔗 Copy link</button>
+    </div>
+  </div>
+
 </section>
 
 <section class="review-section" id="review-section" style="display:none;">
@@ -1720,11 +1718,27 @@ function onEmailInput() {
   }
 }
 
+// ── Step 1: Verify email before proceeding to Step 2 ──
+let _verifyDestination = 'step2'; // 'step2' or 'matches'
+function triggerStep1Verify() {
+  const email = document.getElementById('email-input')?.value?.trim() || '';
+  if (!email.includes('@') || !email.includes('.')) return;
+  // If already verified, go straight to step 2
+  if (localStorage.getItem('unirenter_email_verified') === '1') {
+    goStep(2);
+    return;
+  }
+  _verifyDestination = 'step2';
+  triggerMatchesVerify();
+}
+
 // ── "Show my matches" → open verify modal ──
 function triggerMatchesVerify() {
+  _verifyDestination = _verifyDestination || 'matches';
   // If already verified this session, go straight through
   if (localStorage.getItem('unirenter_email_verified') === '1') {
-    showMatches();
+    if (_verifyDestination === 'step2') { _verifyDestination = 'matches'; goStep(2); }
+    else showMatches();
     return;
   }
   // Pre-fill email from Step 1 input
@@ -1815,7 +1829,12 @@ async function vmCheckOTP() {
       badge.classList.add('show');
       setTimeout(() => {
         closeModal('verify-modal');
-        showMatches();
+        if (typeof _verifyDestination !== 'undefined' && _verifyDestination === 'step2') {
+          _verifyDestination = 'matches';
+          goStep(2);
+        } else {
+          showMatches();
+        }
       }, 1200);
     } else {
       status.className = 'verify-status err';
@@ -1935,6 +1954,9 @@ async function generateMatches() {
 
       const rb = document.getElementById('referral-banner');
       if (rb) rb.style.display = 'flex';
+      const ab = document.getElementById('agreement-banner');
+      if (ab) ab.style.display = 'flex';
+      loadCityReviewGate();
       return;
     }
   } catch (err) {
@@ -1949,6 +1971,7 @@ async function generateMatches() {
   grid.appendChild(note);
   const rb = document.getElementById('referral-banner');
   if (rb) rb.style.display = 'flex';
+  loadCityReviewGate();
 }
 
 function buildComingSoonCard(email, city, matchCount) {
@@ -2451,6 +2474,26 @@ function removeCobTyping() {
   if (t) t.remove();
 }
 
+
+async function loadCityReviewGate() {
+  try {
+    const r = await fetch('/api/reviews/public?city=adelaide');
+    if (!r.ok) return;
+    const data = await r.json();
+    if (!data.gated && data.reviews && data.reviews.length >= 3) {
+      const track = document.getElementById('reviewTrack');
+      if (track) {
+        const real = data.reviews.map(rv =>
+          `<div class="review-card"><div class="review-stars">${'⭐'.repeat(rv.rating || 5)}</div><div class="review-text">"${rv.comment}"</div><div class="review-author">${rv.display_name || 'Student'} · Adelaide</div></div>`
+        ).join('');
+        track.innerHTML = real + real;
+      }
+      const rs = document.getElementById('review-section');
+      if (rs) rs.style.display = '';
+    }
+  } catch(e) { /* silent fail */ }
+}
+
 async function sendCobMessage() {
   const input = document.getElementById('cob-input');
   const text = input.value.trim();
@@ -2608,8 +2651,6 @@ function fireCobPhase2Nudge() {
   function maybeShowReviewNudge() {
     if (reviewNudgeFired || localStorage.getItem('unirenter_review_done') || localStorage.getItem('unirenter_email_verified') !== '1') return;
     reviewNudgeFired = true;
-    const rs = document.getElementById('review-section');
-    if (rs) rs.style.display = '';
     setTimeout(() => {
       showCobNudge("You’re all set 🤠 — your profile is saved and your matches are ready. Check your dashboard to track your search, or leave a quick review if UniRenter helped.");;
       setTimeout(() => {
