@@ -553,6 +553,19 @@ a.nav-logo {
   }
   #cob-send:hover { opacity: .88; }
   #cob-send:disabled { opacity: .45; cursor: not-allowed; }
+  #cob-pills {
+    display: flex; flex-wrap: wrap; gap: .4rem;
+    padding: .6rem .75rem .25rem;
+    border-top: 1px solid rgba(255,255,255,.07);
+  }
+  .cob-pill {
+    background: rgba(245,184,0,.1); color: var(--brand-yellow);
+    border: 1px solid rgba(245,184,0,.3); border-radius: 20px;
+    padding: .35rem .75rem; font-size: .76rem; font-weight: 600;
+    cursor: pointer; white-space: nowrap; transition: background .15s, border-color .15s;
+    font-family: var(--font-body);
+  }
+  .cob-pill:hover { background: rgba(245,184,0,.2); border-color: rgba(245,184,0,.6); }
 
   .cob-nudge {
     position: fixed; bottom: 5.5rem; right: 1.5rem;
@@ -1047,6 +1060,12 @@ function closeCobPanel() {
   document.getElementById('cob-panel').classList.remove('open');
 }
 
+function cobAsk(question) {
+  const input = document.getElementById('cob-input');
+  input.value = question;
+  sendCobMessage();
+}
+
 async function sendCobMessage() {
   const input = document.getElementById('cob-input');
   const text = input.value.trim();
@@ -1100,6 +1119,14 @@ setTimeout(() => {
     <button onclick="closeCobPanel()" aria-label="Close">✕</button>
   </div>
   <div id="cob-messages"></div>
+  <div id="cob-pills">
+    <button class="cob-pill" onclick="cobAsk('How do I list my property?')">How do I list?</button>
+    <button class="cob-pill" onclick="cobAsk('How much does it cost?')">How much does it cost?</button>
+    <button class="cob-pill" onclick="cobAsk('What kind of students will enquire?')">What students enquire?</button>
+    <button class="cob-pill" onclick="cobAsk('When do listings go live?')">When do listings go live?</button>
+    <button class="cob-pill" onclick="cobAsk('Do I need to be a licensed agent to list?')">Do I need a licence?</button>
+    <button class="cob-pill" onclick="cobAsk('How does the reputation system work?')">How does reputation work?</button>
+  </div>
   <div id="cob-input-row">
     <input id="cob-input" type="text" placeholder="Ask me anything…" onkeydown="if(event.key==='Enter')sendCobMessage()" />
     <button id="cob-send" onclick="sendCobMessage()">Send</button>
