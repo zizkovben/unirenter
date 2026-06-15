@@ -79,7 +79,7 @@ Output format:
  
 Only extract what the student has explicitly stated or clearly implied. Do not guess. Set has_signals to true only if at least one field is non-null.`;
  
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // CORS headers (allow UniRenter domains)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
