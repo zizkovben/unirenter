@@ -176,9 +176,15 @@
     /* STATS STRIP */
     .stats-strip {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 12px;
       margin-bottom: 28px;
+    }
+    @media (max-width: 900px) {
+      .stats-strip { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .stats-strip { grid-template-columns: repeat(2, 1fr); }
     }
     .stat-card {
       background: var(--card-bg);
@@ -203,7 +209,149 @@
     .stat-card.green .stat-val { color: var(--brand-green); }
     .stat-card.coral .stat-val { color: var(--brand-coral); }
 
-    /* REFERRAL TRACKER */
+    .stat-card.navy-card .stat-val { color: var(--text); }
+    .stat-response-badge {
+      display: inline-block;
+      font-size: 10px;
+      background: var(--brand-green);
+      color: #fff;
+      border-radius: 4px;
+      padding: 1px 5px;
+      vertical-align: middle;
+      font-weight: 700;
+    }
+
+    /* INSIGHTS PANELS */
+    .insights-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 700px) {
+      .insights-grid { grid-template-columns: 1fr; }
+    }
+    .insight-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px 22px;
+    }
+    .insight-panel.full-width {
+      grid-column: 1 / -1;
+    }
+    .insight-panel h3 {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 0 0 16px 0;
+    }
+    .insight-panel .panel-loading {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .suburb-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .suburb-row:last-child { margin-bottom: 0; }
+    .suburb-rank {
+      width: 22px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .suburb-name {
+      font-size: 13px;
+      font-weight: 600;
+      width: 130px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .suburb-bar-wrap {
+      flex: 1;
+      background: var(--navy-mid);
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .suburb-bar-fill {
+      height: 100%;
+      background: var(--brand-blue);
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+    .suburb-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      width: 40px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    #trend-chart { width: 100%; height: 140px; display: block; }
+    #budget-chart { width: 100%; height: 120px; display: block; }
+    .uni-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 9px;
+    }
+    .uni-row:last-child { margin-bottom: 0; }
+    .uni-name {
+      font-size: 12px;
+      width: 170px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .uni-bar-wrap {
+      flex: 1;
+      background: var(--navy-mid);
+      border-radius: 4px;
+      height: 7px;
+      overflow: hidden;
+    }
+    .uni-bar-fill {
+      height: 100%;
+      background: var(--brand-yellow);
+      border-radius: 4px;
+    }
+    .uni-pct {
+      font-size: 12px;
+      color: var(--text-muted);
+      width: 34px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .market-stats {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .market-stat { display: flex; flex-direction: column; gap: 4px; }
+    .market-stat .m-val {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--brand-green);
+    }
+    .market-stat .m-lbl {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+  /* REFERRAL TRACKER */
     .referral-bar {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -488,6 +636,14 @@
         <div class="stat-val" id="stat-closed">—</div>
         <div class="stat-lbl">Closed</div>
       </div>
+      <div class="stat-card blue">
+        <div class="stat-val" id="stat-responded">—</div>
+        <div class="stat-lbl">Contacted or in progress</div>
+      </div>
+      <div class="stat-card navy-card">
+        <div class="stat-val" id="stat-response-time">—</div>
+        <div class="stat-lbl">Avg. response <span id="stat-response-badge"></span></div>
+      </div>
     </div>
 
     <!-- REFERRAL TRACKER -->
@@ -502,6 +658,30 @@
           <div class="ref-progress-fill" id="ref-progress-fill" style="width:0%"></div>
         </div>
         <div class="ref-progress-label" id="ref-progress-label">6-month complimentary access</div>
+      </div>
+    </div>
+
+    <!-- INSIGHTS PANELS -->
+    <div class="insights-grid" id="insights-grid">
+      <div class="insight-panel" id="panel-suburbs">
+        <h3>🔥 Top suburbs students are searching</h3>
+        <div id="suburb-heat-content"><p class="panel-loading">Loading…</p></div>
+      </div>
+      <div class="insight-panel" id="panel-market">
+        <h3>📊 Market context</h3>
+        <div id="market-content"><p class="panel-loading">Loading…</p></div>
+      </div>
+      <div class="insight-panel full-width" id="panel-trend">
+        <h3>📈 Enquiry trend — last 12 weeks</h3>
+        <canvas id="trend-chart"></canvas>
+      </div>
+      <div class="insight-panel" id="panel-budget">
+        <h3>💰 Student budget distribution ($/wk)</h3>
+        <canvas id="budget-chart"></canvas>
+      </div>
+      <div class="insight-panel" id="panel-unis">
+        <h3>🎓 University breakdown</h3>
+        <div id="uni-content"><p class="panel-loading">Loading…</p></div>
       </div>
     </div>
 
@@ -614,6 +794,9 @@
 
     // Render leads
     renderLeads();
+
+    // Load insights panels
+    loadInsights();
   }
 
   // ─── Referral tracker ────────────────────────────────────────────────────────
@@ -647,11 +830,42 @@
     });
     const open = leads.filter(l => l.status !== 'closed');
     const closed = leads.filter(l => l.status === 'closed');
+    const responded = leads.filter(l => l.status === 'contacted' || l.status === 'in_progress');
 
     document.getElementById('stat-total').textContent = leads.length;
     document.getElementById('stat-new').textContent = thisMonth.length;
     document.getElementById('stat-open').textContent = open.length;
     document.getElementById('stat-closed').textContent = closed.length;
+    document.getElementById('stat-responded').textContent = responded.length;
+
+    const contactedLeads = leads.filter(l => l.status === 'contacted' && l.updated_at && l.created_at);
+    const rtEl = document.getElementById('stat-response-time');
+    const badgeEl = document.getElementById('stat-response-badge');
+    if (contactedLeads.length > 0) {
+      const avgHours = contactedLeads.reduce((sum, l) => {
+        const diff = (new Date(l.updated_at) - new Date(l.created_at)) / 3600000;
+        return sum + Math.max(0, diff);
+      }, 0) / contactedLeads.length;
+      if (avgHours < 1) {
+        rtEl.textContent = '<1h';
+        badgeEl.textContent = 'Fast';
+        badgeEl.className = 'stat-response-badge';
+        badgeEl.style.background = 'var(--brand-green)';
+      } else if (avgHours < 24) {
+        rtEl.textContent = Math.round(avgHours) + 'h';
+        badgeEl.textContent = 'Good';
+        badgeEl.className = 'stat-response-badge';
+        badgeEl.style.background = 'var(--brand-blue)';
+      } else {
+        const days = Math.round(avgHours / 24);
+        rtEl.textContent = days + 'd';
+        badgeEl.textContent = 'Slow';
+        badgeEl.className = 'stat-response-badge';
+        badgeEl.style.background = 'var(--brand-coral)';
+      }
+    } else {
+      rtEl.textContent = '—';
+    }
   }
 
   // ─── City filter ─────────────────────────────────────────────────────────────
@@ -762,6 +976,181 @@
     if (!iso) return '—';
     const d = new Date(iso);
     return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  // ─── Insights panels ──────────────────────────────────────────────────────
+  async function loadInsights() {
+    const city = activeCityFilter === 'all' ? null : activeCityFilter;
+    try {
+      const url = '/api/agents/stats' + (city ? '?city=' + encodeURIComponent(city) : '');
+      const res = await fetch(url, { headers: { 'x-agent-token': agentToken } });
+      if (!res.ok) throw new Error('stats ' + res.status);
+      const d = await res.json();
+      renderSuburbHeat(d.suburbs || []);
+      renderMarketContext(d.market || {});
+      renderTrendChart(d.trend || []);
+      renderBudgetChart(d.budgetBands || []);
+      renderUniBreakdown(d.unis || []);
+    } catch (e) {
+      ['suburb-heat-content','market-content','uni-content'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.innerHTML = '<p class="panel-loading">Could not load data.</p>';
+      });
+      ['trend-chart','budget-chart'].forEach(function(id) {
+        var canvas = document.getElementById(id);
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        canvas.width = canvas.offsetWidth || 400;
+        canvas.height = id === 'trend-chart' ? 140 : 120;
+        ctx.fillStyle = '#7a96aa';
+        ctx.font = '13px Inter, sans-serif';
+        ctx.fillText('Could not load data.', 12, 60);
+      });
+    }
+  }
+
+  function renderSuburbHeat(suburbs) {
+    var el = document.getElementById('suburb-heat-content');
+    if (!el) return;
+    if (!suburbs.length) { el.innerHTML = '<p class="panel-loading">No suburb data yet — builds as students sign up.</p>'; return; }
+    var max = suburbs[0].count;
+    el.innerHTML = suburbs.slice(0,5).map(function(s, i) {
+      return '<div class="suburb-row">' +
+        '<span class="suburb-rank">' + (i+1) + '</span>' +
+        '<span class="suburb-name">' + esc(s.suburb) + '</span>' +
+        '<div class="suburb-bar-wrap"><div class="suburb-bar-fill" style="width:' + Math.round(s.count/max*100) + '%"></div></div>' +
+        '<span class="suburb-count">' + s.count + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
+  function renderMarketContext(market) {
+    var el = document.getElementById('market-content');
+    if (!el) return;
+    el.innerHTML = '<div class="market-stats">' +
+      '<div class="market-stat"><span class="m-val">' + (market.newStudentsMonth !== undefined ? market.newStudentsMonth : '—') + '</span><span class="m-lbl">New student registrations this month</span></div>' +
+      '<div class="market-stat"><span class="m-val">' + (market.activeLeaseListings !== undefined ? market.activeLeaseListings : '—') + '</span><span class="m-lbl">Active break lease listings</span></div>' +
+      '<div class="market-stat"><span class="m-val">' + (market.totalProfiles !== undefined ? market.totalProfiles : '—') + '</span><span class="m-lbl">Total students on platform</span></div>' +
+      '</div>';
+  }
+
+  function renderTrendChart(trend) {
+    var canvas = document.getElementById('trend-chart');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var W = canvas.offsetWidth || 600;
+    var H = 140;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, W, H);
+    if (!trend.length) {
+      ctx.fillStyle = '#7a96aa';
+      ctx.font = '13px Inter, sans-serif';
+      ctx.fillText('No trend data yet — builds as leads come in.', 12, H/2);
+      return;
+    }
+    var maxVal = Math.max.apply(null, trend.map(function(t){ return t.count; }).concat([1]));
+    var padL = 28, padR = 8, padT = 10, padB = 38;
+    var chartW = W - padL - padR;
+    var chartH = H - padT - padB;
+    var barW = Math.max(8, chartW / trend.length - 4);
+    var gap = trend.length > 1 ? (chartW - barW * trend.length) / (trend.length - 1) : 0;
+    trend.forEach(function(t, i) {
+      if (t.intakeLabel) {
+        var x = padL + i * (barW + gap);
+        ctx.fillStyle = 'rgba(245,184,0,0.09)';
+        ctx.fillRect(x - 2, padT, barW + 4, chartH);
+        ctx.fillStyle = '#F5B800';
+        ctx.font = '9px Inter, sans-serif';
+        ctx.fillText(t.intakeLabel, x, padT + chartH + 28);
+      }
+    });
+    trend.forEach(function(t, i) {
+      var x = padL + i * (barW + gap);
+      var barH = Math.max(2, (t.count / maxVal) * chartH);
+      var y = padT + chartH - barH;
+      ctx.fillStyle = '#4BBFE0';
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(x, y, barW, barH, [3, 3, 0, 0]);
+      } else {
+        ctx.rect(x, y, barW, barH);
+      }
+      ctx.fill();
+      if (i % 3 === 0 || i === trend.length - 1) {
+        ctx.fillStyle = '#7a96aa';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.fillText(t.label, x, padT + chartH + 14);
+      }
+    });
+    ctx.fillStyle = '#7a96aa';
+    ctx.font = '10px Inter, sans-serif';
+    ctx.fillText(maxVal, 0, padT + 8);
+    ctx.fillText('0', 0, padT + chartH);
+  }
+
+  function renderBudgetChart(bands) {
+    var canvas = document.getElementById('budget-chart');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var W = canvas.offsetWidth || 400;
+    var H = 120;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, W, H);
+    if (!bands.length) {
+      ctx.fillStyle = '#7a96aa';
+      ctx.font = '13px Inter, sans-serif';
+      ctx.fillText('No budget data yet.', 12, H/2);
+      return;
+    }
+    var maxVal = Math.max.apply(null, bands.map(function(b){ return b.count; }).concat([1]));
+    var padL = 28, padR = 8, padT = 8, padB = 28;
+    var chartW = W - padL - padR;
+    var chartH = H - padT - padB;
+    var barW = Math.max(8, chartW / bands.length - 3);
+    var gap = bands.length > 1 ? (chartW - barW * bands.length) / (bands.length - 1) : 0;
+    bands.forEach(function(b, i) {
+      var x = padL + i * (barW + gap);
+      var barH = Math.max(2, (b.count / maxVal) * chartH);
+      var y = padT + chartH - barH;
+      ctx.fillStyle = '#E8623A';
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(x, y, barW, barH, [3, 3, 0, 0]);
+      } else {
+        ctx.rect(x, y, barW, barH);
+      }
+      ctx.fill();
+      if (i % 2 === 0) {
+        ctx.fillStyle = '#7a96aa';
+        ctx.font = '9px Inter, sans-serif';
+        ctx.fillText(b.label, x, padT + chartH + 12);
+      }
+    });
+    ctx.fillStyle = '#7a96aa';
+    ctx.font = '10px Inter, sans-serif';
+    ctx.fillText(maxVal, 0, padT + 8);
+    ctx.fillText('0', 0, padT + chartH);
+  }
+
+  function renderUniBreakdown(unis) {
+    var el = document.getElementById('uni-content');
+    if (!el) return;
+    if (!unis.length) { el.innerHTML = '<p class="panel-loading">No university data yet — builds as students sign up.</p>'; return; }
+    var max = unis[0].count;
+    var total = unis.reduce(function(s, u){ return s + u.count; }, 0);
+    el.innerHTML = unis.slice(0,7).map(function(u) {
+      return '<div class="uni-row">' +
+        '<span class="uni-name">' + esc(u.uni) + '</span>' +
+        '<div class="uni-bar-wrap"><div class="uni-bar-fill" style="width:' + Math.round(u.count/max*100) + '%"></div></div>' +
+        '<span class="uni-pct">' + Math.round(u.count/total*100) + '%</span>' +
+        '</div>';
+    }).join('');
   }
 
   let toastTimer = null;
