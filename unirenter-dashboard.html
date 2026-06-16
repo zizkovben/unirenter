@@ -3492,6 +3492,16 @@ body.light-mode {
         </div>
       </div>
     </div>
+
+    <!-- Housemate agreement template card (S77) -->
+    <div class="hh-agreement-entry-card" id="msg-agreement-card" onclick="msgAgreementCardClick()" style="margin-top:16px;">
+      <div class="hh-agreement-entry-head">
+        <span class="hh-agreement-entry-icon">📋</span>
+        <span class="hh-agreement-entry-title">Housemate agreement</span>
+        <span class="hh-agreement-entry-badge" id="msg-ag-badge">New</span>
+      </div>
+      <div class="hh-agreement-entry-sub" id="msg-ag-sub">Sort out house rules, chores and bills upfront with a simple shared agreement — before someone leaves a passive-aggressive note about the dishes.</div>
+    </div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════ -->
@@ -4053,18 +4063,16 @@ body.light-mode {
           <div class="badges-card-head">🏅 Profile badges</div>
           <div class="badges-card-body">
 
-            <!-- Uni email — trust badge -->
+            <!-- Uni email — trust badge (S77: status display only, no verify action) -->
             <div class="badges-uni-row">
               <div id="uni-verify-not-done">
-                <div class="badges-uni-label">🎓 Uni email — earn your verified badge</div>
-                <button class="profile-edit-btn" onclick="openUniVerifyModal()" style="font-size:12px;padding:8px;margin-top:6px;">Verify uni email</button>
-                <span id="uni-verify-inline-status" style="font-size:11px;color:var(--text-muted);display:block;margin-top:6px;min-height:14px;"></span>
+                <div class="badges-uni-label" style="color:var(--text-muted);">🎓 No uni email added</div>
               </div>
               <div id="uni-verify-done" style="display:none;">
-                <button class="badge-pill-done" onclick="openUniVerifyModal()" title="University email verified">
+                <div class="badge-pill-done" title="University email verified" style="cursor:default;">
                   🎓 Uni verified
                   <span class="badge-pill-check">✓</span>
-                </button>
+                </div>
                 <div style="font-size:10px;color:var(--text-muted);margin-top:4px;padding-left:4px;" id="uni-verify-email-display">—</div>
               </div>
             </div>
@@ -4320,6 +4328,7 @@ function switchTab(name) {
   if (name === 'messages') {
     var badge = document.getElementById('msg-badge');
     if (badge) badge.style.display = 'none';
+    msgAgreementCardInit();
   }
   if (name === 'tenancy') {
     lcEntryCardInit();
@@ -9390,6 +9399,52 @@ function hhReviewSummaryLoad(householdId, email, containerEl) {
 
 function vibeCardShareHousehold() { alert('Household vibe cards — coming in the next update! 🤠'); }
 
+// ── Housemate agreement card in Messages tab (S77) ──
+function msgAgreementCardClick() {
+  var householdId = localStorage.getItem('ur_household_id');
+  var email = localStorage.getItem('unirenter_email') || '';
+  if (householdId && email) {
+    hhAgOpen(householdId, email);
+  } else {
+    switchTab('household');
+  }
+}
+
+function msgAgreementCardInit() {
+  var householdId = localStorage.getItem('ur_household_id');
+  var email = localStorage.getItem('unirenter_email') || '';
+  var sub = document.getElementById('msg-ag-sub');
+  var badge = document.getElementById('msg-ag-badge');
+  if (!householdId || !email) {
+    if (badge) { badge.textContent = 'New'; badge.className = 'hh-agreement-entry-badge'; }
+    if (sub) sub.textContent = 'Sort out house rules, chores and bills upfront with a simple shared agreement — once you join a household.';
+    return;
+  }
+  fetch('/api/household/agreement-get?email=' + encodeURIComponent(email) + '&household_id=' + encodeURIComponent(householdId))
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (!d.ok || !d.agreement) return;
+    var agreement = d.agreement;
+    var ticks = d.ticks || [];
+    var members = d.members || [];
+    var clauses = (agreement.clauses || []);
+    var totalTicks = members.length * clauses.length;
+    var doneTicks  = ticks.length;
+    var pct = totalTicks > 0 ? Math.round(doneTicks / totalTicks * 100) : 0;
+
+    if (agreement.locked_at) {
+      if (badge) { badge.textContent = '🔒 Locked'; badge.className = 'hh-agreement-entry-badge locked'; }
+      if (sub)   sub.textContent = 'Your house rules are locked and agreed by everyone — tap to review.';
+    } else {
+      var tierNames = { 1: 'Quick Rules', 2: 'House Rules', 3: 'Full House Manual' };
+      var tierName = tierNames[agreement.tier] || 'House Rules';
+      if (badge) { badge.textContent = tierName; badge.className = 'hh-agreement-entry-badge'; }
+      if (sub)   sub.textContent = pct + '% of clauses ticked — tap to review.';
+    }
+  })
+  .catch(function() {});
+}
+
 // ── Agreement entry card injected after household renders ──
 function hhAgreementInjectCard(inner, householdId, currentEmail) {
   if (!inner || !householdId) return;
@@ -10031,120 +10086,7 @@ function hhEscape(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Uni email verification ────────────────────────────────────────────────────
-
-let _uniEmailStaged = '';
-
-function openUniVerifyModal() {
-  document.getElementById('uni-verify-modal').style.display = 'flex';
-  document.getElementById('uni-modal-step-email').style.display = 'block';
-  document.getElementById('uni-modal-step-otp').style.display   = 'none';
-  document.getElementById('uni-modal-step-done').style.display  = 'none';
-  document.getElementById('uni-email-error').style.display = 'none';
-  document.getElementById('uni-otp-error').style.display   = 'none';
-  document.getElementById('uni-modal-sub').textContent = 'Enter your .edu.au address and Cob will send you a 6-digit code.';
-  setTimeout(() => { const el = document.getElementById('uni-email-input'); if (el) el.focus(); }, 100);
-}
-
-function closeUniVerifyModal() {
-  document.getElementById('uni-verify-modal').style.display = 'none';
-}
-
-function uniModalBackToEmail() {
-  document.getElementById('uni-modal-step-otp').style.display  = 'none';
-  document.getElementById('uni-modal-step-email').style.display = 'block';
-}
-
-async function uniEmailSend() {
-  const uniEmail = (document.getElementById('uni-email-input').value || '').trim().toLowerCase();
-  const errEl = document.getElementById('uni-email-error');
-  errEl.style.display = 'none';
-
-  if (!uniEmail.endsWith('.edu.au')) {
-    errEl.textContent = 'Must be a valid .edu.au address';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  const email = localStorage.getItem('unirenter_email') || '';
-  if (!email) {
-    errEl.textContent = 'Please sign in first';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  const btn = document.getElementById('uni-send-btn');
-  btn.disabled = true;
-  btn.textContent = '🤠 Sending…';
-
-  try {
-    const res = await fetch('/api/auth/verify-uni-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'send', email, uni_email: uniEmail }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to send');
-
-    _uniEmailStaged = uniEmail;
-    document.getElementById('uni-modal-sub').textContent = `Code sent to ${uniEmail} — check your inbox.`;
-    document.getElementById('uni-modal-step-email').style.display = 'none';
-    document.getElementById('uni-modal-step-otp').style.display   = 'block';
-    setTimeout(() => { const el = document.getElementById('uni-otp-input'); if (el) el.focus(); }, 100);
-  } catch (err) {
-    errEl.textContent = err.message || 'Something went wrong — try again.';
-    errEl.style.display = 'block';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Send verification code';
-  }
-}
-
-async function uniEmailVerify() {
-  const otp = (document.getElementById('uni-otp-input').value || '').trim();
-  const errEl = document.getElementById('uni-otp-error');
-  errEl.style.display = 'none';
-
-  if (otp.length !== 6) {
-    errEl.textContent = 'Enter the 6-digit code';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  const email = localStorage.getItem('unirenter_email') || '';
-  const btn = document.getElementById('uni-verify-btn');
-  btn.disabled = true;
-  btn.textContent = '🤠 Verifying…';
-
-  try {
-    const res = await fetch('/api/auth/verify-uni-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'verify', email, uni_email: _uniEmailStaged, otp }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Verification failed');
-
-    // Success — update localStorage + UI
-    localStorage.setItem('ur_uni_email_verified', '1');
-    localStorage.setItem('ur_uni_email', _uniEmailStaged);
-
-    document.getElementById('uni-modal-step-otp').style.display = 'none';
-    document.getElementById('uni-modal-step-done').style.display = 'block';
-
-    // Update profile sidebar + verify card without closing modal
-    updateUniVerifyCard({ uni_email_verified: true, uni_email: _uniEmailStaged });
-    const sidebarBadges = document.getElementById('profile-sidebar-badges');
-    if (sidebarBadges) {
-      sidebarBadges.innerHTML = '<span class="badge badge-verified">✓ Email</span> <span class="badge badge-uni-verified">🎓 Uni</span>';
-    }
-  } catch (err) {
-    errEl.textContent = err.message || 'Something went wrong — try again.';
-    errEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Verify';
-  }
-}
+// ── Uni email status (S77: display only — verification happens at city-page Step 1) ──
 
 function updateUniVerifyCard(profile) {
   if (!profile) return;
@@ -10179,20 +10121,13 @@ function updateUniVerifyCard(profile) {
   }
 }
 
-// Init uni verify card on load
+// Init uni status display on load
 window.addEventListener('DOMContentLoaded', function() {
   updateUniVerifyCard({
     uni_email_verified: localStorage.getItem('ur_uni_email_verified') === '1',
     uni_email: localStorage.getItem('ur_uni_email') || '',
     student_status: localStorage.getItem('ur_student_status') || '',
   });
-  // Close modal on overlay click
-  const overlay = document.getElementById('uni-verify-modal');
-  if (overlay) {
-    overlay.addEventListener('click', function(e) {
-      if (e.target === overlay) closeUniVerifyModal();
-    });
-  }
 });
 
 // ── Review Cob card ───────────────────────────────────────────────────────────
@@ -10279,40 +10214,6 @@ function cobReviewCopyLink() {
 
 </script>
 
-
-<!-- Uni email verify modal -->
-<div class="modal-overlay" id="uni-verify-modal" style="display:none;">
-  <div class="modal-card">
-    <div style="font-size:26px;margin-bottom:12px;">🎓</div>
-    <div class="modal-title">Verify your uni email</div>
-    <div class="modal-sub" id="uni-modal-sub">
-      Enter your .edu.au address and Cob will send you a 6-digit code.
-    </div>
-
-    <!-- Step 1: email input -->
-    <div id="uni-modal-step-email">
-      <input class="modal-input" type="email" id="uni-email-input" placeholder="you@student.uni.edu.au" autocomplete="email">
-      <p class="modal-error" id="uni-email-error" style="display:none;"></p>
-      <button class="modal-btn" id="uni-send-btn" onclick="uniEmailSend()">Send verification code</button>
-      <button class="modal-btn secondary" onclick="closeUniVerifyModal()">Cancel</button>
-    </div>
-
-    <!-- Step 2: OTP input -->
-    <div id="uni-modal-step-otp" style="display:none;">
-      <input class="modal-input" type="text" id="uni-otp-input" placeholder="6-digit code" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
-      <p class="modal-error" id="uni-otp-error" style="display:none;"></p>
-      <button class="modal-btn" id="uni-verify-btn" onclick="uniEmailVerify()">Verify</button>
-      <button class="modal-btn secondary" onclick="uniModalBackToEmail()">← Change email</button>
-    </div>
-
-    <!-- Success -->
-    <div id="uni-modal-step-done" style="display:none;">
-      <div class="modal-success">🎓 Uni email verified!</div>
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Your badge is now showing on your profile and match cards.</p>
-      <button class="modal-btn" onclick="closeUniVerifyModal()">Done</button>
-    </div>
-  </div>
-</div>
 
 <!-- Cob FAB (dashboard) -->
 <button class="cob-fab-dashboard" id="cob-fab-db" onclick="openCobDashboard()" title="Oi Cob! 🤠">
