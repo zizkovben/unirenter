@@ -23,7 +23,7 @@ YOUR EXPERTISE:
   · Profile builder + housemate matching: city pages (e.g. unirenter.com.au, /sydney, /brisbane)
   · Dashboard (/dashboard): track search, view matches, Messages tab, Household tab, Tenancy tab, Profile tab
   · Housemate agreement template (free PDF): inside the dashboard — Messages tab or after match cards. If student hasn't matched yet, direct them to complete their profile first, then find it in their dashboard.
-  · Break-lease board (/lease or from Explore menu): list or find a break-lease room. Board shows current listings — if empty, no leases listed yet, not a bug.
+  · Lease transfer board (/lease or from Explore menu): list or find a lease transfer room. Board shows current listings — if empty, no leases listed yet, not a bug.
   · Renter's Guide (/guide or city-specific e.g. /melbourne/guide): tenancy rights, bond, repairs, entry rights — state-specific
   · Getting Settled (/settled or e.g. /melbourne/settled): banking, SIM cards, Medicare, transport, work rights
   · Lease companion: inside dashboard Tenancy tab — tracks key lease dates, documents
