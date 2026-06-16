@@ -361,7 +361,7 @@
         </div>
       </div>
       <div class="panel-card">
-        <div class="panel-card-title">Active break lease listings by city</div>
+        <div class="panel-card-title">Active lease transfer listings by city</div>
         <div class="bar-chart" id="listings-city-chart">
           <div class="loading-row" style="width:100%"><span class="spinner"></span></div>
         </div>
@@ -653,7 +653,7 @@ function renderHorizBars(elId, dataMap, labelMap, color) {
 
 function renderFeaturesTab(features) {
   var cards = [
-    {icon:'🔀', name:'Break lease listings', value:features.break_lease_total||0,   sub:(features.break_lease_active||0)+' active · '+(features.break_lease_filled||0)+' filled'},
+    {icon:'🔀', name:'Lease transfer listings', value:features.break_lease_total||0,   sub:(features.break_lease_active||0)+' active · '+(features.break_lease_filled||0)+' filled'},
     {icon:'🤝', name:'Handovers',             value:features.handover_total||0,       sub:(features.handover_complete||0)+' complete'},
     {icon:'📋', name:'Lease companion',       value:features.lease_companion||0,      sub:'tenancies tracked'},
     {icon:'🏠', name:'Household hubs',        value:features.households||0,           sub:'households created'},

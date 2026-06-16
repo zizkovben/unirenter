@@ -3663,7 +3663,7 @@ body.light-mode {
       <!-- Mode tabs -->
       <div class="calc-mode-row">
         <button class="calc-mode-btn active" id="calc-mode-btn-budget" onclick="calcSetMode('budget')">💰 Budget</button>
-        <button class="calc-mode-btn" id="calc-mode-btn-break" onclick="calcSetMode('break')">🔄 Break lease</button>
+        <button class="calc-mode-btn" id="calc-mode-btn-break" onclick="calcSetMode('break')">🔄 Lease transfer</button>
         <button class="calc-mode-btn" id="calc-mode-btn-increase" onclick="calcSetMode('increase')">📈 Rent increase</button>
       </div>
 
@@ -3692,7 +3692,7 @@ body.light-mode {
         </div>
       </div>
 
-      <!-- MODE 2: Break lease cost estimator -->
+      <!-- MODE 2: Lease transfer cost estimator -->
       <div class="calc-section" id="calc-section-break" style="display:none;">
         <div class="calc-field-group">
           <label class="calc-label">Weekly rent ($)</label>
@@ -3713,7 +3713,7 @@ body.light-mode {
             </select>
             <input class="calc-input-field" id="calc-agent-fee-custom" type="number" placeholder="e.g. 550" style="display:none;margin-top:6px;">
           </div>
-          <div class="calc-field-hint">Check your lease agreement for the re-letting or break-lease admin fee charged by your agent.</div>
+          <div class="calc-field-hint">Check your lease agreement for the re-letting or lease-transfer admin fee charged by your agent.</div>
         </div>
         <button class="calc-run-btn" onclick="calcRunBreak()">Calculate exposure</button>
         <div class="calc-result" id="calc-result-break">
@@ -3726,7 +3726,7 @@ body.light-mode {
           <div class="calc-result-note" id="calc-break-note"></div>
           <div class="calc-cob-nudge" id="calc-break-cob" style="display:none;">
             <span class="calc-cob-avatar">🤠</span>
-            <span>That's a significant exposure. Break lease board is free to list — <a href="/lease" style="color:var(--brand-yellow);">post yours</a> and Cob will guide both parties through the handover.</span>
+            <span>That's a significant exposure. Lease transfer board is free to list — <a href="/lease" style="color:var(--brand-yellow);">post yours</a> and Cob will guide both parties through the handover.</span>
           </div>
         </div>
       </div>
@@ -6884,7 +6884,7 @@ function calcRenderHistory() {
     return;
   }
   const modeIcon = { budget: '💰', break: '📋', increase: '📈' };
-  const modeLabel = { budget: 'Budget', break: 'Break lease', increase: 'Rent increase' };
+  const modeLabel = { budget: 'Budget', break: 'Lease transfer', increase: 'Rent increase' };
   list.innerHTML = arr.map(e => {
     const ago = calcRelTime(e.calculated_at);
     return '<div class="calc-history-item" onclick="calcRestoreFromHistory(\'' + e.id + '\')">'
@@ -7707,7 +7707,7 @@ HOUSING & HOUSEMATES
 - Finding a housemate, reading listings, spotting red flags in ads (e.g. "kindly", asking for Western Union, no lease offered, too-good-to-be-true rent)
 - Profile tips: what makes a good profile, how to write a bio, what photos work, how to approach matches
 - The UniRenter vibe system — emoji pairs, how they reflect personality, how matching works
-- Break lease board — how to list, what to include, what incoming tenants look for
+- Lease transfer board — how to list, what to include, what incoming tenants look for
 - Share house dynamics: setting ground rules, household agreements, managing conflicts
 - Sleep modes — when to use them (inspecting a place, study crunch, sorted)
 
@@ -7718,7 +7718,7 @@ TENANCY & LEASES
 - Notice periods: moving out, being asked to leave, breaking a lease early
 - Inspections: how often landlords can inspect (varies by state), what notice they must give
 - Lease types: fixed-term vs periodic, what happens at the end, rent increases and notice required
-- Break lease: costs, how to negotiate, subletting vs assignment, finding a replacement tenant
+- Lease transfer: costs, how to negotiate, subletting vs assignment, finding a replacement tenant
 - Rent in advance: typically 2 weeks max allowed at signing (varies by state)
 - Lease dates and deadlines — use student context data below; be proactive about flagging upcoming dates
 
@@ -7757,7 +7757,7 @@ MEDICARE & HEALTH
 
 UNIRENTER FEATURES — PROMOTE NATURALLY
 - Vibe matching: emoji-based personality system — helps find housemates you'll actually get along with, not just tolerate. If they haven't done their vibe quiz, nudge them
-- Break lease board: best way to find a room mid-semester or exit a lease without paying full break costs
+- Lease transfer board: best way to find a room mid-semester or exit a lease without paying full break costs
 - Household Hub: once in a share house, use it to set up house rules, a shared agreement, and manage the housemate group
 - Renter's Guide (/{city}/guide): full state-specific tenancy breakdown — point students here for rights questions
 - Getting Settled (/{city}/settled): life in their city as a student — banking, transport, community

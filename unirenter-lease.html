@@ -8,7 +8,7 @@
     <meta property="og:url" content="https://unirenter.com.au/lease">
     <meta property="og:image" content="https://unirenter.com.au/samo_icon_transparent.png">
     <meta name="twitter:image" content="https://unirenter.com.au/samo_icon_transparent.png">
-<title>UniRenter — Broken Lease Board · Melbourne</title>
+<title>UniRenter — Lease Transfer Board · Melbourne</title>
 <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -988,7 +988,7 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
     <div class="nav-dropdown-wrap">
       <button class="nav-explore-btn" onclick="toggleNavDropdown()">Explore &#9662;</button>
       <div class="nav-dropdown" id="nav-dropdown">
-        <a class="nav-dd-item" href="/lease">&#128260; Break lease</a>
+        <a class="nav-dd-item" href="/lease">&#128260; Lease transfer</a>
         <a class="nav-dd-item" href="/landlords">&#127968; List your property</a>
         <div class="nav-dd-divider"></div>
         <a class="nav-dd-item" href="/guide">&#128218; Renter's Guide</a>
@@ -1043,7 +1043,7 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
     <div style="font-size:22px;flex-shrink:0;">🎉</div>
     <div style="flex:1;">
       <div style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--brand-green);margin-bottom:3px;">Free during launch</div>
-      <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">List your break lease and connect with incoming tenants at no cost until <strong style="color:var(--text);">31 January 2027</strong>. Fees apply from February.</div>
+      <div style="font-size:12px;color:var(--text-muted);line-height:1.6;">List your lease transfer and connect with incoming tenants at no cost until <strong style="color:var(--text);">31 January 2027</strong>. Fees apply from February.</div>
     </div>
   </div>
 </div>
@@ -1109,7 +1109,7 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
     <div style="max-width:680px;margin:24px auto 0;background:rgba(245,184,0,0.06);border:1px solid rgba(245,184,0,0.2);border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
       <span style="font-size:20px;line-height:1.4;">🤠</span>
       <div style="font-size:13px;color:var(--text-muted);line-height:1.6;">
-        <strong style="color:var(--brand-yellow);">Cob here.</strong> Break lease transfers involve real legal obligations for both sides. I'll walk you through what you need to know before anything else — takes 2 minutes and could save you thousands.
+        <strong style="color:var(--brand-yellow);">Cob here.</strong> Lease transfers involve real legal obligations for both sides. I'll walk you through what you need to know before anything else — takes 2 minutes and could save you thousands.
       </div>
     </div>
   </div>
@@ -1287,7 +1287,7 @@ body.light-mode .good-box { background: rgba(61,170,92,0.08); border-color: rgba
 
   <!-- Post a lease form (shown after outgoing gate) -->
   <div class="post-lease-form" id="post-lease-form">
-    <div class="step-title" style="margin-bottom:6px;">Post your break lease</div>
+    <div class="step-title" style="margin-bottom:6px;">Post your lease transfer</div>
     <div class="step-sub">Tell us about the property — no personal details needed here. We only exchange an inspection address and contact method once a genuine match is confirmed.</div>
 
     <!-- Email display (pre-filled from localStorage if verified) -->
@@ -2340,7 +2340,7 @@ async function loadLeaseListings() {
         <div style="text-align:center;padding:48px 24px;color:var(--text-muted);">
           <div style="font-size:36px;margin-bottom:12px;">🏠</div>
           <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px;">No active listings yet</div>
-          <div style="font-size:13px;line-height:1.7;">Be the first to post a break lease in ${city.charAt(0).toUpperCase()+city.slice(1)}, or check back soon.</div>
+          <div style="font-size:13px;line-height:1.7;">Be the first to post a lease transfer in ${city.charAt(0).toUpperCase()+city.slice(1)}, or check back soon.</div>
         </div>
       `;
       if (countEl) countEl.textContent = 'No active listings in ' + city.charAt(0).toUpperCase() + city.slice(1);
@@ -2984,7 +2984,7 @@ function openCobPanel() {
   if (nudge) nudge.style.display = 'none';
   const msgs = document.getElementById('cob-messages');
   if (msgs && msgs.children.length === 0) {
-    appendCobMessage('assistant', "G'day! I'm Cob — your UniRenter housing mate 🤠 On the break lease board? I can help you understand your rights, what to check before signing, and how the process works. What's on your mind?");
+    appendCobMessage('assistant', "G'day! I'm Cob — your UniRenter housing mate 🤠 On the lease transfer board? I can help you understand your rights, what to check before signing, and how the process works. What's on your mind?");
   }
 }
 function closeCobPanel() {
@@ -3048,7 +3048,7 @@ async function sendCobMessage() {
   if (freeBanner) freeBanner.style.display = 'block';
 
   setTimeout(showCobFab, 1000);
-  setTimeout(() => showCobNudge("On the break lease board? I can walk you through what to check before signing, landlord consent, and your rights as an incoming tenant 🤠"), 4000);
+  setTimeout(() => showCobNudge("On the lease transfer board? I can walk you through what to check before signing, landlord consent, and your rights as an incoming tenant 🤠"), 4000);
 })();
 
 // ── Cob Condition Report Walkthrough (Option B) ──────────────────────────
@@ -3319,7 +3319,7 @@ function toggleTheme() {
   </div>
   <div id="cob-messages" style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;max-height:320px;"></div>
   <div style="padding:10px 12px;border-top:1px solid rgba(255,255,255,0.08);display:flex;gap:8px;">
-    <input id="cob-input" type="text" placeholder="Ask about break leases…" onkeydown="if(event.key==='Enter')sendCobMessage()" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;" />
+    <input id="cob-input" type="text" placeholder="Ask about lease transfers…" onkeydown="if(event.key==='Enter')sendCobMessage()" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;" />
     <button onclick="sendCobMessage()" style="background:var(--brand-yellow);color:#000;border:none;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer;font-size:14px;">↑</button>
   </div>
 </div>
