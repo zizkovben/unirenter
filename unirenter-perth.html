@@ -130,6 +130,11 @@ a.nav-logo {
   transition: opacity 0.2s;
 }
 .nav-cta:hover { opacity: 0.88; }
+.nav-dropdown-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--text-muted); font-family: var(--font-body); font-size: 12px; font-weight: 500; padding: 8px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.nav-dropdown-btn:hover { border-color: rgba(75,191,224,0.3); color: var(--brand-blue); }
+.nav-dropdown-btn .chevron { font-size: 10px; transition: transform 0.2s; }
+.nav-dropdown.open .nav-dropdown-btn .chevron { transform: rotate(180deg); }
+/* Legacy dead class retained harmlessly - unused in HTML */
 .nav-explore-btn {
   background: none;
   border: 1px solid rgba(255,255,255,0.18);
@@ -156,20 +161,16 @@ a.nav-logo {
 }
 /* Dropdown */
 .nav-dropdown-wrap { position: relative; }
-.nav-dropdown {
-  display: none;
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  background: #162535;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
-  padding: 6px;
-  min-width: 210px;
-  z-index: 200;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-}
-.nav-dropdown.open { display: block; }
+.nav-dropdown { position: relative; }
+.nav-dropdown-menu { display: none; position: absolute; top: calc(100% + 8px); right: 0; background: #1a3040; border: 1px solid rgba(75,191,224,0.18); border-radius: 14px; padding: 8px; min-width: 200px; z-index: 200; box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+.nav-dropdown.open .nav-dropdown-menu { display: block; animation: fadeIn 0.15s ease; }
+.nav-dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; cursor: pointer; transition: background 0.15s; font-size: 13px; color: var(--text); text-decoration: none; width: 100%; background: none; border: none; font-family: var(--font-body); text-align: left; }
+.nav-dropdown-item:hover { background: rgba(75,191,224,0.08); color: var(--brand-blue); }
+.nav-dropdown-item .item-icon { font-size: 16px; width: 24px; text-align: center; flex-shrink: 0; }
+.nav-dropdown-item .item-label { font-weight: 500; }
+.nav-dropdown-item .item-desc { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.nav-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 6px 0; }
+/* Legacy dead classes retained harmlessly - unused in HTML, kept to avoid disturbing unrelated rules */
 .nav-dd-item {
   display: block;
   padding: 9px 12px;
@@ -191,6 +192,8 @@ a.nav-logo {
   .nav-explore-btn { font-size: 0; padding: 7px 10px; letter-spacing: 0; }
   .nav-explore-btn::after { content: '▾'; font-size: 14px; }
   .btn-theme { width: 32px; height: 32px; font-size: 14px; }
+  .city-switcher { gap: 6px; padding: 12px 12px 0; }
+  .city-sw-btn { padding: 7px 12px; font-size: 11px; gap: 4px; }
 }
 @media (max-width: 380px) {
   nav { padding: 0 10px; gap: 4px; }
@@ -215,9 +218,9 @@ body.light-mode .hero { background: linear-gradient(135deg, #e8f4ff 0%, #f0f8ff 
 .btn-primary:hover { background: #e0a800; transform: translateY(-1px); }
 .btn-secondary { background: transparent; color: var(--text); font-family: var(--font-body); font-weight: 400; font-size: 15px; border: 1px solid rgba(255,255,255,0.15); padding: 13px 30px; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
 .btn-secondary:hover { border-color: rgba(255,255,255,0.35); }
-.hero-stats { margin-top: 60px; display: flex; gap: 48px; flex-wrap: wrap; justify-content: center; }
+.hero-stats { margin-top: 60px; display: flex; gap: 48px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
 .stat { text-align: center; }
-.stat-num { font-family: var(--font-display); font-size: 34px; font-weight: 800; letter-spacing: -1px; }
+.stat-num { font-family: var(--font-display); font-size: 34px; font-weight: 800; letter-spacing: -1px; line-height: 40px; }
 .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
 
 section { position: relative; z-index: 1; padding: 80px 24px; max-width: 1080px; margin: 0 auto; }
@@ -901,11 +904,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         <div class="nav-dropdown-divider"></div>
         <button class="nav-dropdown-item" onclick="window.location='/cob';closeNavDropdown()">
           <span class="item-icon">🤠</span>
-          <div><div class="item-label">What is Cob?</div><div class="item-desc">Meet your AI housing mate</div></div>
-        </button>
-        <button class="nav-dropdown-item" onclick="window.location='/about';closeNavDropdown()">
-          <span class="item-icon">ℹ️</span>
-          <div><div class="item-label">About UniRenter</div><div class="item-desc">Our mission and story</div></div>
+          <div><div class="item-label">Who is Cob?</div><div class="item-desc">Meet your AI housing mate</div></div>
         </button>
         <div class="nav-dropdown-divider"></div>
         <button class="nav-dropdown-item" id="nav-dd-dashboard" style="display:none;" onclick="window.location='/dashboard';closeNavDropdown()">
@@ -927,7 +926,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
     <button class="btn-secondary" onclick="scrollToMatches()">See example matches</button>
   </div>
   <div class="hero-stats">
-    <div class="stat"><div class="stat-num" style="color:var(--brand-yellow)">34k</div><div class="stat-label">Perth group members</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--brand-yellow)">🤠 Cob</div><div class="stat-label">your AI housing mate</div></div>
     <div class="stat"><div class="stat-num" style="color:var(--brand-coral)">12</div><div class="stat-label">match factors</div></div>
     <div class="stat"><div class="stat-num" style="color:var(--brand-green)">Free</div><div class="stat-label">always, for students</div></div>
   </div>
