@@ -542,6 +542,15 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
 .seasonal-alert .sa-title { font-family:var(--font-display); font-size:14px; font-weight:700; margin-bottom:3px; color:var(--brand-yellow); }
 .seasonal-alert .sa-desc { font-size:12px; color:var(--text-muted); line-height:1.6; }
 .seasonal-alert .sa-close { background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer; margin-left:auto; flex-shrink:0; padding:0; line-height:1; }
+/* ── Seasonal banner (dynamic, S82 seasonal audit) — replaces static .seasonal-alert ── */
+.seasonal-banner { display:flex; align-items:flex-start; gap:12px; background:rgba(245,184,0,0.07); border:1px solid rgba(245,184,0,0.28); border-radius:12px; padding:14px 16px; margin:0 0 16px; position:relative; animation: seasonal-in 0.25s ease; }
+@keyframes seasonal-in { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+.seasonal-banner-avatar { font-size:22px; flex-shrink:0; margin-top:1px; }
+.seasonal-banner-body { flex:1; min-width:0; }
+.seasonal-banner-label { font-family:var(--font-display); font-weight:700; font-size:12px; color:var(--brand-yellow); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px; }
+.seasonal-banner-copy { font-size:13px; color:var(--text-muted); line-height:1.5; }
+.seasonal-banner-dismiss { position:absolute; top:10px; right:12px; background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer; padding:2px 4px; line-height:1; border-radius:4px; transition:color 0.15s; }
+.seasonal-banner-dismiss:hover { color:var(--text); }
 
 /* ── Housemate agreement download ── */
 .agreement-banner { background:rgba(61,170,92,0.06); border:1px solid rgba(61,170,92,0.2); border-radius:12px; padding:16px 18px; display:flex; align-items:center; gap:14px; margin-top:28px; }
@@ -960,16 +969,9 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
   </div>
 </div>
 
-<!-- Seasonal alert -->
+<!-- Seasonal banner (dynamic, S82) -->
 <div style="position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 24px;">
-  <div class="seasonal-alert" id="seasonal-alert">
-    <div class="sa-icon">📅</div>
-    <div>
-      <div class="sa-title">Semester 1 2026 intake — 6 weeks away</div>
-      <div class="sa-desc">Sydney rental demand is extremely tight right now. International students arriving for February intake should start their search immediately — competition is fierce. <a href="#" onclick="scrollToSetup()" style="color:var(--brand-blue)">Start your profile →</a></div>
-    </div>
-    <button class="sa-close" onclick="document.getElementById('seasonal-alert').style.display='none'">✕</button>
-  </div>
+  <div id="seasonal-banner-wrap"></div>
 </div>
 
 <section>
@@ -2690,6 +2692,83 @@ function fireCobPhase2Nudge() {
       if (el) el.style.display = '';
     }
   })();
+
+// ── Seasonal academic-calendar banner (dynamic, S82 — replaces static hardcoded banner) ──
+const ACADEMIC_CAL_SYDNEY = [
+    { id: 'sem1_start',  label: 'Semester 1', md: [2, 17], copy: 'Semester 1 is starting soon for most Sydney universities. If you\'re still searching for accommodation, rooms near USYD and UNSW fill up quickly once lectures begin.' },
+    { id: 'sem1_exam',   label: 'Sem 1 exams', md: [5, 19], copy: 'Exam period is approaching for most Sydney universities. Make sure your accommodation situation is stable so you can focus on study.' },
+    { id: 'sem1_end',    label: 'Sem 1 end',   md: [6, 21], copy: 'Semester 1 is wrapping up in Sydney. If your lease ends in the mid-year break, your notice deadline may be coming up soon.' },
+    { id: 'sem2_start',  label: 'Semester 2', md: [7, 14], copy: 'Semester 2 is around the corner in Sydney. Good time to confirm your lease runs through to the end of the year.' },
+    { id: 'sem2_exam',   label: 'Sem 2 exams', md: [10, 27], copy: 'End-of-year exams are approaching. November is one of the busiest lease-end periods in Sydney — check your notice deadline now.' },
+    { id: 'sem2_end',    label: 'Sem 2 end',   md: [11, 15], copy: 'The Sydney uni year is wrapping up. If you\'re finishing up and moving out, bond claim and condition report timing matters — check your lease companion.' }
+];
+
+function checkSeasonalNudges() {
+  const cal = ACADEMIC_CAL_SYDNEY;
+  const now   = new Date();
+  const year  = now.getFullYear();
+  const nowTs = now.getTime();
+
+  let bestBanner = null; // most imminent undismissed milestone
+
+  for (const milestone of cal) {
+    const gateKey = 'ur_seasonal_sydney_' + milestone.id + '_' + year;
+    if (localStorage.getItem(gateKey) === '1') continue; // Dismissed this year
+
+    const mDate = new Date(year, milestone.md[0] - 1, milestone.md[1]);
+    const diff  = Math.floor((mDate.getTime() - nowTs) / (24*60*60*1000));
+
+    if (diff >= 0 && diff <= 14) {
+      if (!bestBanner || diff < bestBanner.diff) {
+        bestBanner = { label: milestone.label, copy: milestone.copy, diff, gateKey };
+      }
+    }
+  }
+
+  window._seasonalBanner = bestBanner || null;
+}
+
+function renderSeasonalBanner() {
+  const wrap = document.getElementById('seasonal-banner-wrap');
+  if (!wrap) return;
+
+  const b = window._seasonalBanner;
+  if (!b) { wrap.innerHTML = ''; return; }
+
+  const dayLabel = b.diff === 0 ? 'today' : b.diff === 1 ? 'in 1 day' : 'in ' + b.diff + ' days';
+
+  wrap.innerHTML = `
+    <div class="seasonal-banner" id="seasonal-banner-card">
+      <div class="seasonal-banner-avatar">📅</div>
+      <div class="seasonal-banner-body">
+        <div class="seasonal-banner-label">${b.label} — ${dayLabel}</div>
+        <div class="seasonal-banner-copy">${b.copy}</div>
+      </div>
+      <button class="seasonal-banner-dismiss" onclick="dismissSeasonalBanner()" title="Dismiss">✕</button>
+    </div>
+  `;
+}
+
+function dismissSeasonalBanner() {
+  const b = window._seasonalBanner;
+  if (b && b.gateKey) {
+    localStorage.setItem(b.gateKey, '1');
+  }
+  window._seasonalBanner = null;
+  const wrap = document.getElementById('seasonal-banner-wrap');
+  if (wrap) {
+    const card = wrap.querySelector('.seasonal-banner');
+    if (card) {
+      card.style.transition = 'opacity 0.2s, transform 0.2s';
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(-4px)';
+      setTimeout(() => { wrap.innerHTML = ''; }, 220);
+    }
+  }
+}
+
+checkSeasonalNudges();
+renderSeasonalBanner();
 
 
 function translatePage(lang) {
