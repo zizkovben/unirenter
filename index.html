@@ -925,7 +925,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
     <button class="btn-secondary" onclick="scrollToMatches()">See example matches</button>
   </div>
   <div class="hero-stats">
-    <div class="stat"><div class="stat-num" style="color:var(--brand-yellow)">🤠 Cob</div><div class="stat-label">your AI housing mate</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--brand-yellow)">🤠 <span class="notranslate">Cob</span></div><div class="stat-label">your AI housing mate</div></div>
     <div class="stat"><div class="stat-num" style="color:var(--brand-coral)">12</div><div class="stat-label">match factors</div></div>
     <div class="stat"><div class="stat-num" style="color:var(--brand-green)">Free</div><div class="stat-label">always, for students</div></div>
   </div>
@@ -2608,8 +2608,14 @@ function fireCobPhase2Nudge() {
   btn.textContent = 'Good to know 👍';
   btn.onclick = () => {
     nudge.style.display = 'none';
-    // Advance to next near_miss on next trigger (if any)
+    clearTimeout(cobNudgeTimer);
+    // Advance to next near_miss, and surface it shortly after if another exists —
+    // this is what actually makes multiple near-miss types progressively appear
+    // across a session, instead of only ever showing the first/highest-priority one.
     window._cobNearMissIndex++;
+    if (window._cobNearMissIndex < (window._cobNearMisses || []).length) {
+      setTimeout(() => fireCobPhase2Nudge(), 4000);
+    }
   };
   nudge.appendChild(btn);
 
