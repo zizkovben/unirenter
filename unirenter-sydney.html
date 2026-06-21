@@ -1854,6 +1854,11 @@ function renderMatchCard(p) {
   const accomParts = [p.seeking, p.household_type, (p.suburb_preferences||[])[0]].filter(Boolean);
   const accom = accomParts.join(' · ') || 'Looking for accommodation';
   const tags = [];
+  // S81: Active badge — same recency window as the activityBoost scoring tiers in api/matches.js
+  if (p.last_seen) {
+    const daysAgo = (Date.now() - new Date(p.last_seen).getTime()) / 86400000;
+    if (daysAgo <= 7) tags.push('🟢 Active');
+  }
   if (p.sleep_schedule) tags.push(p.sleep_schedule.replace('_',' '));
   if (p.cleanliness) tags.push(p.cleanliness.replace('_',' '));
   if (p.budget_max) tags.push(`$${p.budget_max}/wk`);
@@ -1899,6 +1904,22 @@ const dummyProfiles = [
   { display_name:'Sara C.', university:'UNSW', field_of_study:'Design', year_of_study:'Graduate', seeking:'Share apartment', household_type:'Women only', suburb_preferences:['Surry Hills'], sleep_schedule:'night_owl', cleanliness:'relaxed', budget_max:350, email_verified:false, match_score:74, match_reasons:['sleep','budget'] },
   { display_name:'Rahul K.', university:'University of Sydney', field_of_study:'Science', year_of_study:'PhD', seeking:'Private room', household_type:'Mixed', suburb_preferences:['Camperdown'], sleep_schedule:'early_bird', cleanliness:'very_tidy', budget_max:390, email_verified:true, match_score:71, match_reasons:['sleep','cleanliness','location'] },
 ];
+
+// ── Example matches preview (S80 fix) ───────────────────────────────────────
+// Renders ONLY the static dummyProfiles set — used by the "See example matches"
+// hero CTA before a user has a verified, saved profile. Deliberately never
+// calls /api/matches and never reveals agreement-banner/referral-banner —
+// those are real-data signals that must only appear once a real, verified
+// profile has produced real matches via showMatches() -> generateMatches().
+function renderExampleMatches() {
+  const grid = document.getElementById('match-grid');
+  grid.innerHTML = '';
+  dummyProfiles.forEach(p => grid.appendChild(renderMatchCard(p)));
+  const note = document.createElement('div');
+  note.style.cssText = 'text-align:center;padding:8px 16px 24px;font-size:12px;color:var(--text-muted);';
+  note.textContent = 'Example profiles — complete & verify your profile to see real matches.';
+  grid.appendChild(note);
+}
 
 // ── generateMatches — real API with near_misses + Coming Soon card ─────────────
 // Session 18: added near_misses (Cob Phase 2), upgraded Coming Soon card
@@ -2056,14 +2077,13 @@ function toggleAgentDetail(cb) {
 }
 function scrollToSetup() { document.getElementById('setup').scrollIntoView({behavior:'smooth'}); }
 function scrollToMatches() {
-  generateMatches();
+  renderExampleMatches();
   document.getElementById('matches').classList.add('visible');
   setTimeout(() => document.getElementById('matches').scrollIntoView({behavior:'smooth'}), 100);
   setTimeout(maybeShowReviewNudge, 6000);
   const dp2 = document.getElementById('dashboard-prompt'); if (dp2) dp2.style.display = 'block';
   const dd2 = document.getElementById('nav-dd-dashboard'); if (dd2) dd2.style.display = '';
 }
-generateMatches();
 
 // ── Reporting ──
 let selectedReport = null;
@@ -2562,6 +2582,9 @@ function fireCobPhase2Nudge() {
       break;
     case 'accommodation_type':
       nudgeText = `I found ${miss.unlock} more matches if you open up your accommodation type a little 🏠 — worth considering?`;
+      break;
+    case 'profile_completeness':
+      nudgeText = `Your profile's only ${miss.completeness}% filled in 📝 — finishing it up helps me find your best matches. Want to pick up where you left off?`;
       break;
     default:
       nudgeText = `I found ${miss.unlock} more potential matches — tap me to explore your options 🤠`;

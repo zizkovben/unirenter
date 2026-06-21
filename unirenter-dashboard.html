@@ -5801,36 +5801,108 @@ function renderEmptyState() {
   </div>`;
 }
 
-function renderMatches() {
+// ── Adapter: raw /api/matches response → renderMatchCard's expected shape (S80 fix) ──
+// /api/matches returns flat profile fields (display_name, match_score, match_reasons, etc.)
+// but this dashboard's renderMatchCard() was built against DUMMY_MATCHES' shape
+// (name, initials, bg, score, sub, tags, tagClass, reason). This adapter bridges the two
+// so real Supabase matches render correctly instead of needing a second card renderer.
+const MATCH_BG_PALETTE = [
+  'linear-gradient(135deg,#e85d9f,#b83278)',
+  'linear-gradient(135deg,#4BBFE0,#2a7a9e)',
+  'linear-gradient(135deg,#F5B800,#c4900a)',
+  'linear-gradient(135deg,#3DAA5C,#1f7a3a)',
+  'linear-gradient(135deg,#E8623A,#b8401a)',
+  'linear-gradient(135deg,#9B7EDE,#6b4fae)',
+];
+const SLEEP_LABELS = { early_bird: '🌅 Early bird', night_owl: '🌃 Night owl', flexible: '🔄 Flexible' };
+const CLEAN_LABELS = { very_tidy: '🧹 Very tidy', tidy: '🧹 Tidy', average: '⚖️ Average clean', relaxed: '😌 Relaxed' };
+const MATCH_REASON_LABELS = { budget: 'Budget', sleep: 'Sleep', cleanliness: 'Cleanliness', location: 'Suburb', social: 'Social' };
+
+function adaptApiMatchForCard(p) {
+  const name = p.display_name || 'Student';
+  const initials = name.split(' ').map(w => w[0]).filter(Boolean).join('').slice(0, 2).toUpperCase() || '??';
+  const idx = Math.abs((name.charCodeAt(0) || 0)) % MATCH_BG_PALETTE.length;
+  const subParts = [p.university, p.field_of_study, p.year_of_study].filter(Boolean);
+  const tags = [];
+  const tagClass = [];
+  // S81: "Active" badge — same recency window as the activityBoost scoring tiers in api/matches.js
+  if (p.last_seen) {
+    const daysAgo = (Date.now() - new Date(p.last_seen).getTime()) / 86400000;
+    if (daysAgo <= 7) { tags.push('🟢 Active'); tagClass.push('green'); }
+  }
+  if (p.sleep_schedule && SLEEP_LABELS[p.sleep_schedule]) { tags.push(SLEEP_LABELS[p.sleep_schedule]); tagClass.push(''); }
+  if (p.cleanliness && CLEAN_LABELS[p.cleanliness]) { tags.push(CLEAN_LABELS[p.cleanliness]); tagClass.push('green'); }
+  if (p.suburb_preferences && p.suburb_preferences[0]) { tags.push(p.suburb_preferences[0]); tagClass.push('yellow'); }
+  if (p.budget_max) { tags.push('$' + p.budget_max + '/wk'); tagClass.push('yellow'); }
+  const reasonLabels = (p.match_reasons || []).map(r => MATCH_REASON_LABELS[r]).filter(Boolean);
+  let reason = 'Compatible profile';
+  if (reasonLabels.length === 1) reason = reasonLabels[0] + ' match';
+  else if (reasonLabels.length > 1) reason = reasonLabels.slice(0, -1).join(', ') + ' & ' + reasonLabels[reasonLabels.length - 1] + ' match';
+  return {
+    name, initials,
+    bg: MATCH_BG_PALETTE[idx],
+    sub: subParts.join(' · ') || 'Student',
+    score: p.match_score || 0,
+    tags, tagClass, reason,
+    vibe_emoji_primary: p.vibe_emoji_primary || null,
+    vibe_emoji_secondary: p.vibe_emoji_secondary || null,
+    cob_summary: p.cob_summary || null,
+  };
+}
+
+async function renderMatches() {
   const grid = document.getElementById('match-grid');
   if (!grid) return;
-  grid.innerHTML = '';
+  grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted)">Finding your matches…</div>';
 
   const email = localStorage.getItem('unirenter_email');
   const isVerified = localStorage.getItem('unirenter_email_verified') === '1';
+  const city = localStorage.getItem('ur_city') || 'melbourne';
 
-  // Show dummy/real matches — or empty state for signed-in users with no matches
   maybeShowCobReviewCard();
 
-  if (isVerified && window._lastMatchCount === 0) {
-    // Signed in, profile returned 0 real matches — show empty state
-    const emptyEl = document.createElement('div');
-    emptyEl.innerHTML = renderEmptyState();
-    grid.appendChild(emptyEl.firstElementChild);
-  } else {
-    // Not signed in or has matches — show dummy cards
-    DUMMY_MATCHES.forEach(p => grid.appendChild(renderMatchCard(p)));
+  // ── Try real matches first — only for a verified, signed-in profile ────────
+  let realMatches = null;
+  if (isVerified && email) {
+    try {
+      const res = await fetch('/api/matches', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, city }),
+      });
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.matches)) realMatches = data.matches;
+    } catch (err) {
+      console.warn('Dashboard real matches unavailable, falling back to examples:', err.message);
+    }
   }
-  // Track match count for Cob context
-  if (typeof window._lastMatchCount === 'undefined') window._lastMatchCount = DUMMY_MATCHES.length;
 
-  // Add card at end — profile CTA if no email, referral if signed in
+  grid.innerHTML = '';
+  const showingDummy = (realMatches === null);
+
+  if (showingDummy) {
+    // Not signed in/verified, or the real fetch failed — show example cards only
+    window._lastMatchCount = DUMMY_MATCHES.length;
+    DUMMY_MATCHES.forEach(p => grid.appendChild(renderMatchCard(p)));
+  } else {
+    window._lastMatchCount = realMatches.length;
+    if (realMatches.length === 0) {
+      // Verified profile, genuinely zero real matches yet — show empty state
+      const emptyEl = document.createElement('div');
+      emptyEl.innerHTML = renderEmptyState();
+      grid.appendChild(emptyEl.firstElementChild);
+    } else {
+      realMatches.forEach(p => grid.appendChild(renderMatchCard(adaptApiMatchForCard(p))));
+    }
+  }
+
+  // Add card at end — profile CTA if showing examples, referral if showing real data
   const cs = document.createElement('div');
   cs.className = 'cs-card';
   cs.style.cssText = 'text-align:center;';
-  if (!email) {
+  if (showingDummy) {
     cs.innerHTML = `
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">These are example matches — your real ones appear once you complete your profile.</p>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">These are example matches — your real ones appear once you complete &amp; verify your profile.</p>
       <a href="/" style="display:inline-block;background:var(--brand-yellow);color:var(--navy);
         font-family:var(--font-display);font-weight:700;font-size:13px;padding:10px 24px;
         border-radius:8px;text-decoration:none;">Build my profile →</a>`;
@@ -5846,9 +5918,9 @@ function renderMatches() {
         📋 Copy referral link
       </button>`;
   }
-  // Unsigned: "Build my profile" goes at end of match grid (above fw-card)
-  // Signed: referral goes after fw-card (Flatmate Wanted first, referral second)
-  if (!email) {
+  // Examples: "Build my profile" goes at end of match grid (above fw-card)
+  // Real data: referral goes after fw-card (Flatmate Wanted first, referral second)
+  if (showingDummy) {
     grid.appendChild(cs);
   } else {
     const fwCard = document.getElementById('fw-card');
@@ -5865,7 +5937,10 @@ function renderMatches() {
 function refreshMatches() {
   const grid = document.getElementById('match-grid');
   grid.style.opacity = '0.5';
-  setTimeout(() => { grid.style.opacity = '1'; showToast('🔄 Updated', 'Matches refreshed — checking for new students…'); }, 800);
+  renderMatches().then(() => {
+    grid.style.opacity = '1';
+    showToast('🔄 Updated', 'Matches refreshed — checking for new students…');
+  });
 }
 
 function connectWith(name) {
@@ -7532,6 +7607,11 @@ function buildCobContext() {
   const city = localStorage.getItem('ur_city');
   if (city) lines.push('Student city: ' + city.charAt(0).toUpperCase() + city.slice(1));
 
+  // Profile completeness (S81) — so Cob can give accurate, specific guidance
+  // if asked why match results are limited, rather than vague encouragement.
+  const profilePct = parseInt(localStorage.getItem('unirenter_profile_complete') || '0', 10);
+  if (profilePct > 0) lines.push('Profile completeness: ' + profilePct + '%');
+
   // University & student status
   const uni = localStorage.getItem('ur_uni');
   const studentStatus = localStorage.getItem('ur_student_status');
@@ -7715,6 +7795,7 @@ WHAT YOU HELP WITH
 HOUSING & HOUSEMATES
 - Finding a housemate, reading listings, spotting red flags in ads (e.g. "kindly", asking for Western Union, no lease offered, too-good-to-be-true rent)
 - Profile tips: what makes a good profile, how to write a bio, what photos work, how to approach matches
+- How match quality works: matches are based on genuine compatibility (budget, sleep schedule, cleanliness, suburb preferences, household type) — not paid placement or popularity. Two things a student can control improve their results: completing their profile (thin profiles can't be matched accurately — finishing it up genuinely helps) and staying recently active (logging in within the last couple of weeks keeps a profile visible to others searching). If the student's profile completeness is included in the context below and it's low, you can mention this naturally — framed as practical, encouraging advice, never as a penalty or a sales pitch.
 - The UniRenter vibe system — emoji pairs, how they reflect personality, how matching works
 - Lease transfer board — how to list, what to include, what incoming tenants look for
 - Share house dynamics: setting ground rules, household agreements, managing conflicts
@@ -7836,10 +7917,25 @@ When a student mentions a calculator result or saved figure, refer to the most r
 // INIT — run on load
 // ══════════════════════════════════════════════════════════════
 
+// ── Activity ping (S81) — bumps last_seen for matching/recency purposes on
+// dashboard load, separate from the profile-save path which already does this
+// on edits. Fire-and-forget, never blocks or shows an error to the user.
+function touchActivity() {
+  const email = localStorage.getItem('unirenter_email');
+  const isVerified = localStorage.getItem('unirenter_email_verified') === '1';
+  if (!email || !isVerified) return;
+  fetch('/api/profile/touch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  }).catch(() => {}); // non-fatal — silently ignore
+}
+
 window.addEventListener('DOMContentLoaded', function() {
   soundInit();
   loadProfile();
   renderMatches();
+  touchActivity();
   cobSleepCheckIn();
   setTimeout(function() {
     tier1CheckDates();
