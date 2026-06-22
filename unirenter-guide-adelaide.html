@@ -309,6 +309,51 @@ body.light-mode .rr-list li { border-bottom-color: rgba(0,0,0,0.07); color: #1a2
   color: var(--blue, #4BBFE0);
   font-weight: 700;
 }
+/* ── Cob floating assistant ── */
+.cob-fab{position:fixed;bottom:28px;right:28px;z-index:200;width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,#0d6e8c,var(--yellow,#F5B800));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(75,191,224,0.35);transition:all 0.25s;animation:cobpulse 2.5s ease-in-out infinite}
+.cob-fab:hover{transform:scale(1.08)}
+@keyframes cobpulse{0%,100%{box-shadow:0 4px 24px rgba(75,191,224,0.35)}50%{box-shadow:0 4px 32px rgba(245,184,0,0.5),0 0 0 8px rgba(245,184,0,0.08)}}
+.cob-fab-inner{display:flex;flex-direction:column;align-items:center;line-height:1;gap:1px}
+.cob-fab-emoji{font-size:24px}
+.cob-fab-name{font-family:var(--fd,'Epilogue',sans-serif);font-size:11px;font-weight:800;color:#fff;letter-spacing:1px}
+.cob-label{position:fixed;bottom:104px;right:28px;background:var(--card,#0d2236);border:1px solid rgba(245,184,0,0.3);color:var(--text,#e8f4f8);font-size:12px;font-weight:500;padding:8px 14px;border-radius:10px;z-index:200;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.3);transition:opacity 0.4s}
+.cob-label::after{content:'';position:absolute;bottom:-6px;right:22px;width:10px;height:10px;background:var(--card,#0d2236);border-right:1px solid rgba(245,184,0,0.3);border-bottom:1px solid rgba(245,184,0,0.3);transform:rotate(45deg)}
+.cob-window{position:fixed;bottom:106px;right:28px;z-index:300;width:370px;max-height:560px;background:var(--card,#0d2236);border:1px solid rgba(245,184,0,0.2);border-radius:22px;display:none;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,0.5);overflow:hidden}
+.cob-window.open{display:flex;animation:cobIn 0.28s cubic-bezier(.4,0,.2,1)}
+@keyframes cobIn{from{opacity:0;transform:translateY(14px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:440px){.cob-window{right:10px;left:10px;width:auto}}
+.cob-header{padding:14px 16px;background:linear-gradient(135deg,rgba(139,90,0,0.3),rgba(13,110,140,0.4));border-bottom:1px solid rgba(245,184,0,0.15);display:flex;align-items:center;gap:11px}
+.cob-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--yellow,#F5B800),var(--coral,#E8623A));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;box-shadow:0 2px 10px rgba(245,184,0,0.3)}
+.cob-header-info h4{font-family:var(--fd,'Epilogue',sans-serif);font-size:15px;font-weight:800}
+.cob-header-info p{font-size:11px;color:var(--yellow,#F5B800);margin-top:1px}
+.cob-header-info small{font-size:10px;color:var(--muted,#5a8fa8)}
+.cob-close{margin-left:auto;background:none;border:none;color:var(--muted,#5a8fa8);font-size:20px;cursor:pointer;padding:2px 6px;border-radius:6px;transition:all 0.2s}
+.cob-close:hover{color:var(--text,#e8f4f8);background:rgba(255,255,255,0.08)}
+.cob-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;max-height:300px}
+.cob-msg{max-width:88%}
+.cob-msg.cob{align-self:flex-start}
+.cob-msg.me{align-self:flex-end}
+.cob-bubble{padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.65}
+.cob-msg.cob .cob-bubble{background:rgba(255,255,255,0.07);border-radius:14px 14px 14px 3px}
+.cob-msg.me .cob-bubble{background:rgba(245,184,0,0.14);border-radius:14px 14px 3px 14px}
+.cob-time{font-size:10px;color:var(--muted,#5a8fa8);margin-top:3px;padding:0 2px}
+.cob-msg.me .cob-time{text-align:right}
+.cob-typing{display:none;align-self:flex-start;padding:10px 14px;background:rgba(255,255,255,0.07);border-radius:14px 14px 14px 3px;gap:4px}
+.cob-typing.vis{display:flex}
+.cob-typing span{width:6px;height:6px;border-radius:50%;background:var(--yellow,#F5B800);animation:cobdot 1.2s infinite}
+.cob-typing span:nth-child(2){animation-delay:.2s}
+.cob-typing span:nth-child(3){animation-delay:.4s}
+@keyframes cobdot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+.cob-quick{padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid rgba(255,255,255,0.06)}
+.cobqr{background:rgba(245,184,0,0.08);border:1px solid rgba(245,184,0,0.2);color:var(--yellow,#F5B800);font-family:var(--fb,'Inter',sans-serif);font-size:11px;font-weight:500;padding:6px 11px;border-radius:14px;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.cobqr:hover{background:rgba(245,184,0,0.16)}
+.cob-input-row{padding:10px 12px;border-top:1px solid rgba(255,255,255,0.07);display:flex;gap:8px}
+.cob-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text,#e8f4f8);font-family:var(--fb,'Inter',sans-serif);font-size:13px;padding:9px 12px;border-radius:10px;outline:none;transition:border-color 0.2s}
+.cob-input:focus{border-color:rgba(245,184,0,0.5)}
+.cob-input::placeholder{color:var(--muted,#5a8fa8);opacity:0.6}
+.cob-send{background:linear-gradient(135deg,var(--yellow,#F5B800),var(--coral,#E8623A));color:#1a1000;border:none;padding:9px 14px;border-radius:10px;cursor:pointer;font-size:15px;font-weight:700;transition:all 0.2s}
+.cob-send:hover{transform:scale(1.05)}
+.cob-footer{text-align:center;padding:5px 12px 8px;font-size:10px;color:var(--muted,#5a8fa8);opacity:0.6;border-top:1px solid rgba(255,255,255,0.05)}
 </style>
 </head>
 <body>
@@ -889,6 +934,109 @@ function copyReferralLink() {
     .catch(() => {});
 })();
 
+// ── Cob guide assistant ──────────────────────────────────────────────────
+var cobOpen = false;
+setTimeout(function() {
+  var l = document.getElementById('cob-label');
+  if (l && !cobOpen) l.style.opacity = '0';
+}, 7000);
+
+function toggleCob() {
+  cobOpen = !cobOpen;
+  document.getElementById('cob-window').classList.toggle('open', cobOpen);
+  var l = document.getElementById('cob-label');
+  if (l) l.style.display = 'none';
+  if (cobOpen) document.getElementById('cob-input').focus();
+}
+
+var COB_GUIDE = {
+  bond: "Rental bond is a security deposit — usually 4 weeks rent — paid before you move in. In Victoria, bond is held by Residential Bonds Victoria (not your landlord). When you leave, you should get it all back if you haven't caused damage beyond fair wear and tear and you've paid all rent. To claim your bond back, both you and your landlord submit a claim form online at rentalbondsonline.vic.gov.au. If there's a dispute, VCAT makes the final call. Always photograph every room before moving in and keep a copy of your signed condition report.",
+  rights: "As a renter in Victoria you have strong legal rights under the Residential Tenancies Act. Key rights: your bond must be held by Residential Bonds Victoria; emergency repairs must happen within 24 hours, routine repairs within 14 days of written request; your property partner must give at least 24 hours written notice before entering; they can't end your tenancy without a valid legal reason (no-cause evictions are banned since 2018); you have the right to make minor modifications (like picture hooks) without permission; and you can own a pet unless there's a valid reason to refuse. If your rights are being violated, contact Consumer Affairs Victoria or VCAT.",
+  repairs: "For emergency repairs (no hot water, major leak, broken heater in winter, security issue) — contact your landlord or agent in writing immediately. If they don't respond within 24 hours, you can arrange emergency repairs yourself up to $2,500 and claim it back. For routine repairs, put your request in writing (email or text) and keep a copy. They have 14 days to fix it. If they don't, you can apply to VCAT. Always photograph the problem. Never withhold rent as leverage — it can be used against you. For urgent follow-up, contact Consumer Affairs Victoria: 1300 558 181.",
+  wear: "Fair wear and tear is the normal deterioration that happens from everyday use — faded paint, small scuffs on walls, worn carpet from walking on it. Your landlord cannot charge you for this. What IS your responsibility: holes in walls from furniture, stains, broken fittings, damage caused by you or your guests. The longer you've been there, the more wear is considered 'fair'. Photograph every room on move-in day, sign and return your condition report with any existing damage noted, and photograph again on move-out. This protects you at bond claim time.",
+  pets: "In Victoria, your property partner cannot unreasonably refuse a pet. You apply in writing and they have 14 days to respond — silence counts as approval. They can attach conditions (professional cleaning on exit) but can't charge extra rent for pets. In strata/Owners Corporation buildings you need BOTH the property partner's approval AND the OC's approval — OC rules can lawfully restrict pets, so check before applying. Even with permission, be upfront with housemates — someone with severe allergies has a valid concern. If your pet causes damage, you're responsible for fixing it. UniRenter's lease transfer tool can help if you need to find a pet-friendly share.",
+  lease: "Before signing, check: the rent amount and when it's due; the lease length (6 or 12 months is typical); what's included (water? bills?); the condition report — complete it carefully and photograph everything, return it within 3 business days with any extra notes; bond amount (max 4 weeks rent); property partner's obligations for repairs; break-lease/lease transfer terms. Get a copy of everything signed. If English isn't your first language, use Google Translate's camera feature on the document, or call TIS (131 450) for a free interpreter. Never sign anything you don't understand — ask questions first.",
+  housemate: "Being a great housemate comes down to communication, respect, and shared responsibility. Agree on cleaning rosters, quiet hours, guest policies, and shared expenses before anyone moves in — write it down. Use the UniRenter housemate agreement template to cover the big stuff. Key habits: clean up after yourself in shared spaces, tell housemates before having overnight guests, replace shared items you use up, pay your share on time. If something bothers you, raise it calmly and early before it becomes a big issue. A 5-minute chat beats weeks of tension.",
+  default: "G'day! I'm Cob — I can help with questions about renting in Australia: bond, repairs, your rights, fair wear and tear, pet rules, lease signing, and housemate etiquette. Try one of the quick questions above, or type your question. Note: I provide general guidance — for legal advice specific to your situation, contact Consumer Affairs Victoria (1300 558 181) or VCAT (1800 132 132)."
+};
+
+function cobGuideResponse(msg) {
+  var m = msg.toLowerCase();
+  if (m.includes('bond') || m.includes('deposit') || m.includes('rbv') || m.includes('get back')) return COB_GUIDE.bond;
+  if (m.includes('right') || m.includes('law') || m.includes('legal') || m.includes('act') || m.includes('vcat') || m.includes('consumer affairs')) return COB_GUIDE.rights;
+  if (m.includes('repair') || m.includes('fix') || m.includes('broken') || m.includes('maintenance') || m.includes('hot water') || m.includes('heater') || m.includes('leak')) return COB_GUIDE.repairs;
+  if (m.includes('wear') || m.includes('tear') || m.includes('damage') || m.includes('scuff') || m.includes('clean') || m.includes('condition report')) return COB_GUIDE.wear;
+  if (m.includes('pet') || m.includes('dog') || m.includes('cat') || m.includes('animal')) return COB_GUIDE.pets;
+  if (m.includes('sign') || m.includes('lease') || m.includes('contract') || m.includes('check') || m.includes('before moving')) return COB_GUIDE.lease;
+  if (m.includes('housemate') || m.includes('flatmate') || m.includes('share') || m.includes('living together') || m.includes('agreement')) return COB_GUIDE.housemate;
+  return COB_GUIDE.default;
+}
+
+async function cobSend(preset) {
+  var input = document.getElementById('cob-input');
+  var msg = preset || input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  document.getElementById('cob-quick').style.display = 'none';
+  addCobMsg(msg, 'me');
+  var typing = document.getElementById('cob-typing');
+  typing.classList.add('vis');
+  scrollCob();
+  await new Promise(function(r){ setTimeout(r, 800 + Math.random() * 500); });
+  typing.classList.remove('vis');
+  addCobMsg(cobGuideResponse(msg), 'cob');
+}
+
+function addCobMsg(text, who) {
+  var msgs = document.getElementById('cob-msgs');
+  var d = document.createElement('div');
+  d.className = 'cob-msg ' + who;
+  var now = new Date().toLocaleTimeString('en-AU', {hour:'2-digit', minute:'2-digit'});
+  d.innerHTML = '<div class="cob-bubble">' + text + '</div><div class="cob-time">' + now + '</div>';
+  msgs.appendChild(d);
+  scrollCob();
+}
+
+function scrollCob() {
+  var m = document.getElementById('cob-msgs');
+  setTimeout(function(){ if(m) m.scrollTop = m.scrollHeight; }, 80);
+}
 </script>
+<!-- ── Cob assistant ── -->
+<div class="cob-label" id="cob-label">👋 Ask me about your renter rights</div>
+<button class="cob-fab" onclick="toggleCob()" aria-label="Open Cob assistant">
+  <div class="cob-fab-inner">
+    <span class="cob-fab-emoji">🤠</span>
+    <span class="cob-fab-name">Cob</span>
+  </div>
+</button>
+<div class="cob-window" id="cob-window">
+  <div class="cob-header">
+    <div class="cob-avatar">🤠</div>
+    <div class="cob-header-info">
+      <h4>Oi Cob!</h4>
+      <p>Your tenancy guide assistant</p>
+      <small>General guidance only · Not legal advice</small>
+    </div>
+    <button class="cob-close" onclick="toggleCob()" aria-label="Close">✕</button>
+  </div>
+  <div class="cob-msgs" id="cob-msgs">
+    <div class="cob-msg cob"><div class="cob-bubble">G'day! I'm Cob 🤠 — ask me anything about renting, your rights, repairs, bonds, or living well with housemates. What's on your mind?</div><div class="cob-time">now</div></div>
+  </div>
+  <div class="cob-typing" id="cob-typing"><span></span><span></span><span></span></div>
+  <div class="cob-quick" id="cob-quick">
+    <button class="cobqr" onclick="cobSend('How does rental bond work and how do I get it back?')">💰 How does bond work?</button>
+    <button class="cobqr" onclick="cobSend('What are my rights as a renter in Australia?')">⚖️ My renter rights</button>
+    <button class="cobqr" onclick="cobSend('How do I get urgent repairs done?')">🔧 Getting repairs done</button>
+    <button class="cobqr" onclick="cobSend('What is fair wear and tear?')">🏠 Fair wear &amp; tear</button>
+    <button class="cobqr" onclick="cobSend('Can my property partner refuse a pet?')">🐾 Can I have a pet?</button>
+    <button class="cobqr" onclick="cobSend('What should I check before signing a lease?')">📋 Before signing a lease</button>
+  </div>
+  <div class="cob-input-row">
+    <input class="cob-input" id="cob-input" placeholder="Ask about renting in Australia…" onkeydown="if(event.key==='Enter')cobSend()" />
+    <button class="cob-send" onclick="cobSend()">➤</button>
+  </div>
+  <div class="cob-footer">Powered by Claude · UniRenter · Not legal advice</div>
+</div>
 </body>
 </html>

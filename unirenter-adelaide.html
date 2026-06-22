@@ -753,6 +753,10 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 /* Cob panel */
+/* Cob quick-prompt chips */
+#cob-chips { padding: 8px 10px 4px; display: flex; flex-wrap: wrap; gap: 5px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.cob-chip { background: rgba(245,184,0,0.08); border: 1px solid rgba(245,184,0,0.2); color: var(--brand-yellow); font-size: 11px; font-weight: 500; padding: 5px 10px; border-radius: 12px; cursor: pointer; transition: all 0.15s; white-space: nowrap; line-height: 1.3; }
+.cob-chip:hover { background: rgba(245,184,0,0.16); }
 #cob-panel {
   display: none; position: fixed; bottom: 88px; right: 20px; z-index: 901;
   width: 320px; max-width: calc(100vw - 32px);
@@ -2480,6 +2484,17 @@ function showCobNudge(text) {
   cobNudgeTimer = setTimeout(() => { nudge.style.display = 'none'; }, 17500);
 }
 
+function sendCobChip(btn, text) {
+  var chips = document.getElementById('cob-chips');
+  if (chips) chips.style.display = 'none';
+  if (cobMessages.length === 0) {
+    openCobPanel();
+  }
+  var input = document.getElementById('cob-input');
+  if (input) input.value = text;
+  sendCobMessage();
+}
+
 function openCobPanel() {
   document.getElementById('cob-nudge').style.display = 'none';
   clearTimeout(cobNudgeTimer);
@@ -2547,6 +2562,8 @@ async function loadCityReviewGate() {
 }
 
 async function sendCobMessage() {
+  var chips = document.getElementById('cob-chips');
+  if (chips) chips.style.display = 'none';
   const input = document.getElementById('cob-input');
   const text = input.value.trim();
   if (!text) return;
@@ -3042,6 +3059,15 @@ function translatePage(lang) {
     <button id="cob-panel-close" onclick="closeCobPanel()">✕</button>
   </div>
   <div id="cob-messages"></div>
+  <div id="cob-chips">
+    <button class="cob-chip" onclick="sendCobChip(this,'How does housemate matching work on UniRenter?')">🏠 How does matching work?</button>
+    <button class="cob-chip" onclick="sendCobChip(this,'How do I spot a rental scam in Australia?')">⚠️ Spot a scam</button>
+    <button class="cob-chip" onclick="sendCobChip(this,'How does a lease transfer work and how can UniRenter help?')">📋 Lease transfer</button>
+    <button class="cob-chip" onclick="sendCobChip(this,'What is the Verified Student badge and how do I get it?')">🎓 Verified Student badge</button>
+    <button class="cob-chip" onclick="sendCobChip(this,'What makes a good housemate match on UniRenter?')">🔍 What makes a good match?</button>
+    <button class="cob-chip" onclick="sendCobChip(this,'How do I complete my UniRenter profile to get better matches?')">✅ Complete my profile</button>
+  </div>
+
   <div id="cob-input-row">
     <input id="cob-input" type="text" placeholder="Ask me anything about housing…" onkeydown="if(event.key==='Enter')sendCobMessage()" />
     <button id="cob-send" onclick="sendCobMessage()">↑</button>
