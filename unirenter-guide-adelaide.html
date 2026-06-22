@@ -346,7 +346,9 @@ body.light-mode .rr-list li { border-bottom-color: rgba(0,0,0,0.07); color: #1a2
 @keyframes cobdot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
 .cob-quick{padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid rgba(255,255,255,0.06)}
 .cobqr{background:rgba(245,184,0,0.08);border:1px solid rgba(245,184,0,0.2);color:var(--yellow,#F5B800);font-family:var(--fb,'Inter',sans-serif);font-size:11px;font-weight:500;padding:6px 11px;border-radius:14px;cursor:pointer;transition:all 0.15s;white-space:nowrap}
-.cobqr:hover{background:rgba(245,184,0,0.16)}
+.cobqr:hover{background:rgba(245,184,0,0.16)}.cobqr.used { opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+#cob-chips-close { background: none; border: none; color: var(--muted, #5a8fa8); font-size: 14px; cursor: pointer; padding: 2px 4px; border-radius: 4px; line-height: 1; flex-shrink: 0; opacity: 0.5; }
+#cob-chips-close:hover { opacity: 1; }
 .cob-input-row{padding:10px 12px;border-top:1px solid rgba(255,255,255,0.07);display:flex;gap:8px}
 .cob-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text,#e8f4f8);font-family:var(--fb,'Inter',sans-serif);font-size:13px;padding:9px 12px;border-radius:10px;outline:none;transition:border-color 0.2s}
 .cob-input:focus{border-color:rgba(245,184,0,0.5)}
@@ -972,12 +974,12 @@ function cobGuideResponse(msg) {
   return COB_GUIDE.default;
 }
 
-async function cobSend(preset) {
+async function cobSend(preset, btn) {
+  if (btn) btn.classList.add('used');
   var input = document.getElementById('cob-input');
   var msg = preset || input.value.trim();
   if (!msg) return;
   input.value = '';
-  document.getElementById('cob-quick').style.display = 'none';
   addCobMsg(msg, 'me');
   var typing = document.getElementById('cob-typing');
   typing.classList.add('vis');
@@ -1024,13 +1026,14 @@ function scrollCob() {
     <div class="cob-msg cob"><div class="cob-bubble">G'day! I'm Cob 🤠 — ask me anything about renting, your rights, repairs, bonds, or living well with housemates. What's on your mind?</div><div class="cob-time">now</div></div>
   </div>
   <div class="cob-typing" id="cob-typing"><span></span><span></span><span></span></div>
-  <div class="cob-quick" id="cob-quick">
-    <button class="cobqr" onclick="cobSend('How does rental bond work and how do I get it back?')">💰 How does bond work?</button>
-    <button class="cobqr" onclick="cobSend('What are my rights as a renter in Australia?')">⚖️ My renter rights</button>
-    <button class="cobqr" onclick="cobSend('How do I get urgent repairs done?')">🔧 Getting repairs done</button>
-    <button class="cobqr" onclick="cobSend('What is fair wear and tear?')">🏠 Fair wear &amp; tear</button>
-    <button class="cobqr" onclick="cobSend('Can my property partner refuse a pet?')">🐾 Can I have a pet?</button>
-    <button class="cobqr" onclick="cobSend('What should I check before signing a lease?')">📋 Before signing a lease</button>
+  <div class="cob-quick" id="cob-quick" style="align-items:flex-start;">
+    <button id="cob-chips-close" onclick="document.getElementById('cob-quick').style.display='none'" title="Dismiss suggestions">✕</button>
+    <button class="cobqr" onclick="cobSend('How does rental bond work and how do I get it back?', this)">💰 How does bond work?</button>
+    <button class="cobqr" onclick="cobSend('What are my rights as a renter in Australia?', this)">⚖️ My renter rights</button>
+    <button class="cobqr" onclick="cobSend('How do I get urgent repairs done?', this)">🔧 Getting repairs done</button>
+    <button class="cobqr" onclick="cobSend('What is fair wear and tear?', this)">🏠 Fair wear &amp; tear</button>
+    <button class="cobqr" onclick="cobSend('Can my property partner refuse a pet?', this)">🐾 Can I have a pet?</button>
+    <button class="cobqr" onclick="cobSend('What should I check before signing a lease?', this)">📋 Before signing a lease</button>
   </div>
   <div class="cob-input-row">
     <input class="cob-input" id="cob-input" placeholder="Ask about renting in Australia…" onkeydown="if(event.key==='Enter')cobSend()" />
