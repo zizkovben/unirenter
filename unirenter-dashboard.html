@@ -3210,7 +3210,6 @@ body.light-mode {
       <button class="nav-explore-btn" onclick="toggleSettingsDropdown()">⚙️ Settings ▾</button>
       <div class="nav-dropdown" id="settings-dropdown">
         <a class="nav-dd-item" href="#" onclick="openSettingsPanel('notifications');return false;">🔔 Notifications</a>
-        <a class="nav-dd-item" href="#" onclick="openSettingsPanel('display');return false;">🎨 Display</a>
         <a class="nav-dd-item" href="#" onclick="openSettingsPanel('sound');return false;">🔊 Sound effects</a>
         <a class="nav-dd-item" href="#" onclick="openSettingsPanel('account');return false;">👤 Account</a>
         <div class="nav-dd-divider"></div>
@@ -4063,18 +4062,45 @@ body.light-mode {
           <div class="badges-card-head">🏅 Profile badges</div>
           <div class="badges-card-body">
 
-            <!-- Uni email — trust badge (S77: status display only, no verify action) -->
-            <div class="badges-uni-row">
+            <!-- Uni email — dual-email shape (S86) -->
+            <div class="badges-uni-row" id="badges-uni-row">
+
+              <!-- State A: no email on file -->
               <div id="uni-verify-not-done">
                 <div class="badges-uni-label" style="color:var(--text-muted);">🎓 No uni email added</div>
               </div>
+
+              <!-- State B: one email verified (display only) -->
               <div id="uni-verify-done" style="display:none;">
-                <div class="badge-pill-done" title="University email verified" style="cursor:default;">
-                  🎓 Uni verified
-                  <span class="badge-pill-check">✓</span>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+                  <div>
+                    <div class="badge-pill-done" title="University email verified" style="cursor:default;">
+                      🎓 Uni verified
+                      <span class="badge-pill-check">✓</span>
+                    </div>
+                    <div style="font-size:10px;color:var(--text-muted);margin-top:4px;padding-left:4px;" id="uni-verify-email-display">—</div>
+                  </div>
+                  <!-- + Add uni email — shown when primary email is non-uni domain and no uni email on file yet -->
+                  <button id="btn-add-uni-email" style="display:none;background:transparent;border:1px solid var(--brand-blue);color:var(--brand-blue);border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer;" onclick="showAddUniEmailPrompt()">+ Add uni email</button>
                 </div>
-                <div style="font-size:10px;color:var(--text-muted);margin-top:4px;padding-left:4px;" id="uni-verify-email-display">—</div>
               </div>
+
+              <!-- State C: second (uni) email added — show both with active toggle -->
+              <div id="uni-dual-done" style="display:none;">
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Active email for notifications &amp; OTP:</div>
+                <div id="uni-dual-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+              </div>
+
+            </div>
+
+            <!-- Add uni email inline prompt (hidden by default) -->
+            <div id="add-uni-email-prompt" style="display:none;margin-top:10px;">
+              <input type="email" id="input-new-uni-email" placeholder="you@student.uni.edu.au" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:var(--text-primary);font-size:13px;box-sizing:border-box;" />
+              <div style="display:flex;gap:8px;margin-top:8px;">
+                <button onclick="submitAddUniEmail()" style="flex:1;background:var(--brand-blue);color:#fff;border:none;border-radius:8px;padding:8px;font-size:13px;cursor:pointer;">Send verification →</button>
+                <button onclick="cancelAddUniEmail()" style="background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--text-muted);border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;">Cancel</button>
+              </div>
+              <div id="add-uni-email-msg" style="font-size:12px;margin-top:6px;color:var(--text-muted);"></div>
             </div>
 
             <!-- Divider -->
@@ -4182,6 +4208,10 @@ body.light-mode {
             <div class="profile-row">
               <span class="profile-row-label">Household type</span>
               <span class="profile-row-val" id="prow-household">—</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-row-label">Stay duration</span>
+              <span class="profile-row-val" id="prow-duration">—</span>
             </div>
           </div>
           <div class="profile-chips" id="prow-suburbs"></div>
@@ -5277,7 +5307,8 @@ function applyProfileData(p, cobRefinedFields) {
   const uni       = p.university     || localStorage.getItem('ur_university');
   const status    = p.student_status || localStorage.getItem('ur_student_status');
   const studyloc  = p.study_location || localStorage.getItem('ur_study_location');
-  const suburbs   = p.suburb_preferences || null;
+  const suburbs     = p.suburb_preferences || null;
+  const stayDur     = p.stay_duration || null;
 
   setRow('prow-seeking',   seeking,   'seeking');
   if (budgetMin && budgetMax) {
@@ -5292,6 +5323,7 @@ function applyProfileData(p, cobRefinedFields) {
   setRow('prow-pets',      pets,                   'pets');
   setRow('prow-status',    status,                 'student_status');
   setRow('prow-studyloc',  studyloc,               'study_location');
+  setRow('prow-duration',   stayDur,                'stay_duration');
 
   if (uni) {
     setRow('prow-uni', uni, 'university');
@@ -10186,34 +10218,128 @@ function hhEscape(str) {
 
 function updateUniVerifyCard(profile) {
   if (!profile) return;
-  const verified = profile.uni_email_verified || localStorage.getItem('ur_uni_email_verified') === '1';
-  const uniEmail = profile.uni_email || localStorage.getItem('ur_uni_email') || '';
-  const status   = profile.student_status || localStorage.getItem('ur_student_status') || '';
+  const uniVerified  = profile.uni_email_verified || localStorage.getItem('ur_uni_email_verified') === '1';
+  const uniEmail     = profile.uni_email || localStorage.getItem('ur_uni_email') || '';
+  const primaryEmail = profile.email || localStorage.getItem('unirenter_email') || '';
+  const status       = profile.student_status || localStorage.getItem('ur_student_status') || '';
+  const activeEmail  = localStorage.getItem('ur_active_email') || primaryEmail;
 
-  // Hide just the uni email section for community members / professionals (not applicable)
-  // Badges card stays visible — optional badges (star sign, zodiac, generation) still relevant
-  const uniSection = document.getElementById('uni-verify-not-done');
-  const uniDone    = document.getElementById('uni-verify-done');
+  // Community members: hide uni email section entirely — badges card still shows optional badges
+  const uniRow = document.getElementById('badges-uni-row');
   if (status === 'other') {
-    if (uniSection) uniSection.style.display = 'none';
-    if (uniDone)    uniDone.style.display    = 'none';
-    // Hide the divider label too if uni is hidden
-    var divLabel = document.querySelector('.badges-uni-row');
-    if (divLabel) divLabel.style.display = 'none';
+    if (uniRow) uniRow.style.display = 'none';
+    return;
   }
 
-  const notDone = document.getElementById('uni-verify-not-done');
-  const done    = document.getElementById('uni-verify-done');
-  const display = document.getElementById('uni-verify-email-display');
+  const notDone  = document.getElementById('uni-verify-not-done');
+  const done     = document.getElementById('uni-verify-done');
+  const dualDone = document.getElementById('uni-dual-done');
+  const display  = document.getElementById('uni-verify-email-display');
+  const addBtn   = document.getElementById('btn-add-uni-email');
 
   if (!notDone || !done) return;
-  if (verified) {
-    notDone.style.display = 'none';
-    done.style.display    = 'block';
+
+  const hasDualEmail = uniVerified && uniEmail && primaryEmail && uniEmail !== primaryEmail;
+
+  if (hasDualEmail) {
+    // State C: two emails on file — show active toggle
+    notDone.style.display  = 'none';
+    done.style.display     = 'none';
+    dualDone.style.display = 'block';
+    const list = document.getElementById('uni-dual-list');
+    if (list) {
+      list.innerHTML = [primaryEmail, uniEmail].map(function(em) {
+        var isActive = em === activeEmail;
+        var isUni = em === uniEmail;
+        var activeLabel = isActive
+          ? '<span style="font-size:11px;color:var(--brand-blue);font-weight:600;">Active</span>'
+          : '<button onclick="setActiveEmail(\'' + em + '\')" style="font-size:11px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:var(--text-muted);border-radius:6px;padding:2px 8px;cursor:pointer;">Set active</button>';
+        return '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;background:' + (isActive ? 'rgba(75,191,224,0.12)' : 'rgba(255,255,255,0.04)') + ';border:1px solid ' + (isActive ? 'var(--brand-blue)' : 'transparent') + ';">'
+          + '<span style="flex:1;font-size:13px;">' + em + '</span>'
+          + (isUni ? '<span style="font-size:11px;color:var(--brand-blue);">\uD83C\uDF93 Uni</span>' : '')
+          + activeLabel
+          + '</div>';
+      }).join('');
+    }
+  } else if (uniVerified && uniEmail) {
+    // State B: one uni email verified — display only + offer to add second if primary is non-uni
+    notDone.style.display  = 'none';
+    done.style.display     = 'block';
+    if (dualDone) dualDone.style.display = 'none';
     if (display) display.textContent = uniEmail;
+    // Show "+ Add uni email" only when primary is personal (non-.edu.au) and no second email yet
+    if (addBtn) {
+      var primaryIsPersonal = primaryEmail && primaryEmail.indexOf('.edu.au') === -1;
+      addBtn.style.display = primaryIsPersonal ? 'block' : 'none';
+    }
   } else {
+    // State A: no uni email on file
     notDone.style.display = 'block';
     done.style.display    = 'none';
+    if (dualDone) dualDone.style.display = 'none';
+  }
+}
+
+// Set active email for OTP/notifications (switching never un-earns a badge)
+function setActiveEmail(email) {
+  localStorage.setItem('ur_active_email', email);
+  updateUniVerifyCard({
+    uni_email_verified: localStorage.getItem('ur_uni_email_verified') === '1',
+    uni_email: localStorage.getItem('ur_uni_email') || '',
+    email: localStorage.getItem('unirenter_email') || '',
+    student_status: localStorage.getItem('ur_student_status') || '',
+  });
+}
+
+// Show / cancel add-uni-email inline prompt
+function showAddUniEmailPrompt() {
+  var prompt = document.getElementById('add-uni-email-prompt');
+  var addBtn = document.getElementById('btn-add-uni-email');
+  if (prompt) prompt.style.display = 'block';
+  if (addBtn) addBtn.style.display = 'none';
+}
+function cancelAddUniEmail() {
+  var prompt = document.getElementById('add-uni-email-prompt');
+  var msg    = document.getElementById('add-uni-email-msg');
+  var input  = document.getElementById('input-new-uni-email');
+  if (prompt) prompt.style.display = 'none';
+  if (msg)    msg.textContent = '';
+  if (input)  input.value = '';
+  updateUniVerifyCard({
+    uni_email_verified: localStorage.getItem('ur_uni_email_verified') === '1',
+    uni_email: localStorage.getItem('ur_uni_email') || '',
+    email: localStorage.getItem('unirenter_email') || '',
+    student_status: localStorage.getItem('ur_student_status') || '',
+  });
+}
+
+// Submit additional uni email — sends OTP to the new address
+async function submitAddUniEmail() {
+  var input = document.getElementById('input-new-uni-email');
+  var msg   = document.getElementById('add-uni-email-msg');
+  if (!input || !msg) return;
+  var newEmail = input.value.trim();
+  if (newEmail.indexOf('@') === -1 || newEmail.indexOf('.') === -1) {
+    msg.textContent = 'Please enter a valid email address.';
+    return;
+  }
+  msg.textContent = 'Sending verification\u2026';
+  try {
+    var res = await fetch('/api/auth/send-email-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: newEmail, purpose: 'add_uni_email' }),
+    });
+    var data = await res.json();
+    if (data.success) {
+      msg.style.color = 'var(--brand-blue)';
+      msg.textContent = 'Verification sent to ' + newEmail + ' \u2014 check your inbox.';
+      input.disabled = true;
+    } else {
+      msg.textContent = 'Could not send \u2014 try again.';
+    }
+  } catch (err) {
+    msg.textContent = 'Network error \u2014 please try again.';
   }
 }
 
@@ -10222,9 +10348,11 @@ window.addEventListener('DOMContentLoaded', function() {
   updateUniVerifyCard({
     uni_email_verified: localStorage.getItem('ur_uni_email_verified') === '1',
     uni_email: localStorage.getItem('ur_uni_email') || '',
+    email: localStorage.getItem('unirenter_email') || '',
     student_status: localStorage.getItem('ur_student_status') || '',
   });
 });
+
 
 // ── Review Cob card ───────────────────────────────────────────────────────────
 
