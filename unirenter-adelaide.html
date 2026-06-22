@@ -1454,7 +1454,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           </div>
         </div>
 
-        <div class="form-group" style="margin-top:18px;"><label>Anything else we should know?</label><textarea placeholder="e.g. I play guitar occasionally, work part-time weekends, or anything else relevant…"></textarea></div>
+        <div class="form-group" style="margin-top:18px;"><label>One thing people should know about you</label><textarea id="input-cob-summary" placeholder="e.g. I make great coffee and always pay rent on time 😄"></textarea></div>
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(3)">← Back</button>
           <button class="btn-next" onclick="goStep(5)">Next: Location →</button>
@@ -1502,7 +1502,6 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           </div>
           <div id="chips-duration"></div>
         </div>
-        <div class="form-group"><label>One thing people should know about you</label><input type="text" placeholder="e.g. I make great coffee and always pay rent on time 😄" /></div>
 
         <div class="agent-optin">
           <div class="agent-optin-header">
@@ -2391,6 +2390,8 @@ async function saveProfileToSupabase() {
     .map(c => c.dataset?.suburb || c.textContent.trim()).filter(Boolean);
   const budgetMin = parseInt(document.getElementById('budget-min')?.value) || null;
   const budgetMax = parseInt(document.getElementById('budget-max')?.value) || null;
+  const stayDuration = document.querySelector('#chips-duration .chip.selected')?.textContent.trim() || null;
+  const cobSummary = document.getElementById('input-cob-summary')?.value.trim() || null;
   const filled = [displayName, university, studentStatus, seeking,
                   moveInDate, householdType, sleepSchedule, cleanliness,
                   budgetMin, budgetMax].filter(Boolean).length;
@@ -2406,6 +2407,7 @@ async function saveProfileToSupabase() {
     sleep_schedule: sleepSchedule, cleanliness, study_location: studyLocation,
     guests, substances, dietary, pets, city: 'adelaide', profile_complete: profileComplete,
     language_home: languageHome, languages_spoken: languagesSpoken.length > 0 ? languagesSpoken : null,
+    stay_duration: stayDuration, cob_summary: cobSummary,
   };
   const savedEmail = localStorage.getItem('unirenter_email');
   if (savedEmail) profileData.email = savedEmail;
