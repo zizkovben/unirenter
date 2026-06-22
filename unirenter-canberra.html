@@ -985,7 +985,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
     <div class="how-card"><div class="how-num">01</div><div class="how-icon">🎓</div><div class="how-title">Build your profile</div><div class="how-desc">Upload a photo, set your lifestyle preferences, budget, and accommodation type. The more detail, the better your matches.</div></div>
     <div class="how-card"><div class="how-num">02</div><div class="how-icon">⚡</div><div class="how-title">Get matched</div><div class="how-desc">Our algorithm scores compatibility across lifestyle, accommodation type, location, budget and cultural factors.</div></div>
     <div class="how-card"><div class="how-num">03</div><div class="how-icon">💬</div><div class="how-title">Connect safely</div><div class="how-desc">Message matches inside UniRenter only. Phone-verified profiles. No personal details shared until you choose.</div></div>
-    <div class="how-card"><div class="how-num">04</div><div class="how-icon">🔄</div><div class="how-title">Broken lease board</div><div class="how-desc">Taking over or transferring a Canberra lease? Dedicated board with legal guidance, document upload, and mandatory safety checks. <span style="color:var(--brand-coral);">Open board →</span></div></div>
+    <div class="how-card"><div class="how-num">04</div><div class="how-icon">🔄</div><div class="how-title">Lease transfer board</div><div class="how-desc">Taking over or transferring a Canberra lease? Dedicated board with legal guidance, document upload, and mandatory safety checks. <span style="color:var(--brand-coral);">Open board →</span></div></div>
   </div>
 </section>
 
@@ -996,13 +996,12 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
   <div class="setup-container">
     <div class="setup-progress">
-      <div class="step-tab active" id="tab-1" onclick="goStep(1)" style="cursor:pointer;">Verify</div>
+      <div class="step-tab active" id="tab-1" onclick="goStep(1)" style="cursor:pointer;">Status</div>
       <div class="step-tab" id="tab-2" onclick="goStep(2)" style="cursor:pointer;">Profile</div>
-      <div class="step-tab" id="tab-3" onclick="goStep(3)" style="cursor:pointer;">Status</div>
-      <div class="step-tab" id="tab-4" onclick="goStep(4)" style="cursor:pointer;">Housing</div>
-      <div class="step-tab" id="tab-5" onclick="goStep(5)" style="cursor:pointer;">Lifestyle</div>
-      <div class="step-tab" id="tab-6" onclick="goStep(6)" style="cursor:pointer;">Location</div>
-      <div class="step-tab" id="tab-7" onclick="goStep(7)" style="cursor:pointer;">Budget</div>
+      <div class="step-tab" id="tab-3" onclick="goStep(3)" style="cursor:pointer;">Housing</div>
+      <div class="step-tab" id="tab-4" onclick="goStep(4)" style="cursor:pointer;">Lifestyle</div>
+      <div class="step-tab" id="tab-5" onclick="goStep(5)" style="cursor:pointer;">Location</div>
+      <div class="step-tab" id="tab-6" onclick="goStep(6)" style="cursor:pointer;">Budget</div>
     </div>
     <!-- Save progress bar -->
     <div class="save-progress-bar">
@@ -1019,18 +1018,65 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
       <!-- STEP 1: Email capture (verification happens at Show my matches) -->
       <div class="step active" id="step-1">
-        <div class="step-title">Create your free account</div>
-        <div class="step-sub">Enter your email to get started — we'll send a quick 6-digit code to verify it's you.</div>
-        <div class="phone-block">
-          <div class="phone-block-title">📧 Your email</div>
-          <div class="phone-block-sub">Used only for account access and important updates. Never shown on your profile or shared with landlords.</div>
-          <div class="phone-row">
-            <input type="email" id="email-input" placeholder="you@email.com" style="flex:1;" oninput="onEmailInput()" />
-          </div>
-          <div class="verified-badge" id="verified-badge" style="display:none;">✅ Email verified — you're good to go</div>
+        <div class="step-title">What brings you to Canberra?</div>
+        <div class="step-sub">This helps us personalise your experience — including how you verify your account. Future students welcome — no student ID required to get started.</div>
+        <div class="status-cards">
+          <div class="status-card" onclick="selectStatus('future',this)"><div class="sc-icon">✈️</div><div class="sc-title">Future student</div><div class="sc-desc">Accepted or applying — heading to Canberra soon</div></div>
+          <div class="status-card" onclick="selectStatus('current',this)"><div class="sc-icon">🎓</div><div class="sc-title">Current student</div><div class="sc-desc">Enrolled and studying in Canberra now</div></div>
+          <div class="status-card" onclick="selectStatus('ex',this)"><div class="sc-icon">💼</div><div class="sc-title">Graduate / Alumni</div><div class="sc-desc">Finished studying, still need Canberra accommodation</div></div>
+          <div class="status-card" onclick="selectStatus('other',this)"><div class="sc-icon">🌏</div><div class="sc-title">Community member</div><div class="sc-desc">Not currently a student — working holiday, young professional, or related community</div></div>
         </div>
-        <div class="info-note" style="margin-top:8px;">💡 <strong>Tip:</strong> Using your uni email earns you a <strong style="color:var(--brand-green);">Verified Student</strong> badge — more matches, more trust.</div>
-<div class="info-note">🔒 A 6-digit code will be sent to verify your email before you continue — takes 30 seconds.</div>
+<div class="cond-panel" id="panel-future">
+          <div class="cond-title">Future student details</div>
+          <div class="form-row">
+            <div class="form-group"><label>Institution (enrolled or applying)</label><select><option>ANU — Australian National University</option><option>University of Canberra (UC)</option><option>CIT — Canberra Institute of Technology</option><option>Other</option></select></div>
+            <div class="form-group"><label>Planned start</label><select><option>Sem 2 2025 (Jul)</option><option>Sem 1 2026 (Feb)</option><option>Sem 2 2026 (Jul)</option><option>Not sure yet</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Field of study</label><select><option value="">Select…</option><option>Business &amp; Commerce</option><option>Engineering &amp; IT</option><option>Health &amp; Medicine</option><option>Arts &amp; Humanities</option><option>Science &amp; Maths</option><option>Law</option><option>Education</option><option>Architecture &amp; Design</option><option>Other</option></select></div>
+            <div class="form-group"><label>Study level</label><select><option>Undergraduate</option><option>Postgraduate</option><option>PhD / Research</option><option>Diploma / Certificate</option><option>English language course</option></select></div>
+          </div>
+          <div class="info-note">💡 No student ID yet? Verify with an offer letter later. Your profile goes live right away.</div>
+        </div>
+<div class="cond-panel" id="panel-current">
+          <div class="cond-title">Current student details</div>
+          <div class="form-row">
+            <div class="form-group"><label>University or institution</label><select><option>ANU — Australian National University</option><option>University of Canberra (UC)</option><option>CIT — Canberra Institute of Technology</option><option>Other</option></select></div>
+            <div class="form-group"><label>Year of study</label><select><option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option><option>Postgrad — coursework</option><option>Postgrad — research / PhD</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Field of study</label><select><option value="">Select…</option><option>Business &amp; Commerce</option><option>Engineering &amp; IT</option><option>Health &amp; Medicine</option><option>Arts &amp; Humanities</option><option>Science &amp; Maths</option><option>Law</option><option>Education</option><option>Architecture &amp; Design</option><option>Other</option></select></div>
+            
+          </div>
+          
+        </div>
+<div class="cond-panel" id="panel-ex">
+          <div class="cond-title">Graduate details</div>
+          <div class="form-row">
+            <div class="form-group"><label>University graduated from</label><select><option>ANU</option><option>University of Canberra</option><option>Other Australian university</option><option>Overseas university</option></select></div>
+            <div class="form-group"><label>Year of graduation</label><select><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020 or earlier</option></select></div>
+          </div>
+          <div class="info-note">👋 Graduates and alumni are welcome — matched with others in a similar life stage.</div>
+        </div>
+<div class="cond-panel" id="panel-other">
+          <div class="cond-title">Tell us a bit more</div>
+          <div class="form-group"><label>What brings you to Canberra?</label><div class="chips"><div class="chip" onclick="toggle(this)">Working holiday visa</div><div class="chip" onclick="toggle(this)">Young professional</div><div class="chip" onclick="toggle(this)">Considering studying here</div><div class="chip" onclick="toggle(this)">Family / partner of student</div><div class="chip" onclick="toggle(this)">Other</div></div></div>
+          <div class="info-note">🌏 UniRenter is primarily for students and graduates — other young people in Canberra's communities are welcome too.</div>
+        </div>
+        <!-- Contextual email verification — appears once a status is selected (registration redesign S84) -->
+        <div class="email-ask-block" id="email-ask-block" style="display:none;">
+          <div class="phone-block">
+            <div class="phone-block-title">📧 Verify your email</div>
+            <div class="phone-block-sub" id="email-ask-copy">Select your status above to see what's next.</div>
+            <div class="phone-row">
+              <input type="email" id="email-input" placeholder="you@email.com" style="flex:1;" oninput="onEmailInput()" />
+            </div>
+            <div class="verified-badge" id="verified-badge" style="display:none;">✅ Email verified — you're good to go</div>
+          </div>
+          <div class="info-note">🔒 A 6-digit code will be sent to verify your email before you continue — takes 30 seconds.</div>
+        </div>
+        <div class="email-ask-prompt" id="email-ask-prompt" style="font-size:13px;color:var(--text-muted);padding:6px 0 18px;">👆 Select your status above to continue.</div>
+
         <div class="step-nav">
           <div></div>
           <button class="btn-next" onclick="triggerStep1Verify()" id="btn-step1-next" style="opacity:0.4;pointer-events:none;">Verify &amp; continue →</button>
@@ -1178,65 +1224,12 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(1)">← Back</button>
-          <button class="btn-next" onclick="goStep(3)">Next: Status →</button>
+          <button class="btn-next" onclick="goStep(3)">Next: Housing →</button>
         </div>
       </div>
 
       <!-- STEP 3: Student status -->
       <div class="step" id="step-3">
-        <div class="step-title">Your student status</div>
-        <div class="step-sub">Helps us personalise your experience. Future students welcome — no student ID required to get started.</div>
-        <div class="status-cards">
-          <div class="status-card" onclick="selectStatus('future',this)"><div class="sc-icon">✈️</div><div class="sc-title">Future student</div><div class="sc-desc">Accepted or applying — heading to Canberra soon</div></div>
-          <div class="status-card" onclick="selectStatus('current',this)"><div class="sc-icon">🎓</div><div class="sc-title">Current student</div><div class="sc-desc">Enrolled and studying in Canberra now</div></div>
-          <div class="status-card" onclick="selectStatus('ex',this)"><div class="sc-icon">💼</div><div class="sc-title">Graduate / Alumni</div><div class="sc-desc">Finished studying, still need Canberra accommodation</div></div>
-          <div class="status-card" onclick="selectStatus('other',this)"><div class="sc-icon">🌏</div><div class="sc-title">Community member</div><div class="sc-desc">Not currently a student — working holiday, young professional, or related community</div></div>
-        </div>
-        <div class="cond-panel" id="panel-future">
-          <div class="cond-title">Future student details</div>
-          <div class="form-row">
-            <div class="form-group"><label>Institution (enrolled or applying)</label><select><option>ANU — Australian National University</option><option>University of Canberra (UC)</option><option>CIT — Canberra Institute of Technology</option><option>Other</option></select></div>
-            <div class="form-group"><label>Planned start</label><select><option>Sem 2 2025 (Jul)</option><option>Sem 1 2026 (Feb)</option><option>Sem 2 2026 (Jul)</option><option>Not sure yet</option></select></div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>Field of study</label><select><option value="">Select…</option><option>Business &amp; Commerce</option><option>Engineering &amp; IT</option><option>Health &amp; Medicine</option><option>Arts &amp; Humanities</option><option>Science &amp; Maths</option><option>Law</option><option>Education</option><option>Architecture &amp; Design</option><option>Other</option></select></div>
-            <div class="form-group"><label>Study level</label><select><option>Undergraduate</option><option>Postgraduate</option><option>PhD / Research</option><option>Diploma / Certificate</option><option>English language course</option></select></div>
-          </div>
-          <div class="info-note">💡 No student ID yet? Verify with an offer letter later. Your profile goes live right away.</div>
-        </div>
-        <div class="cond-panel" id="panel-current">
-          <div class="cond-title">Current student details</div>
-          <div class="form-row">
-            <div class="form-group"><label>University or institution</label><select><option>ANU — Australian National University</option><option>University of Canberra (UC)</option><option>CIT — Canberra Institute of Technology</option><option>Other</option></select></div>
-            <div class="form-group"><label>Year of study</label><select><option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option><option>Postgrad — coursework</option><option>Postgrad — research / PhD</option></select></div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>Field of study</label><select><option value="">Select…</option><option>Business &amp; Commerce</option><option>Engineering &amp; IT</option><option>Health &amp; Medicine</option><option>Arts &amp; Humanities</option><option>Science &amp; Maths</option><option>Law</option><option>Education</option><option>Architecture &amp; Design</option><option>Other</option></select></div>
-            <div class="form-group"><label>Uni email (optional — earns verified badge)</label><input type="email" placeholder="you@student.anu.edu.au" /></div>
-          </div>
-          <div class="info-note">✅ A verified uni email earns you a <strong style="color:var(--brand-green)">Verified Student</strong> badge and increases your match rate.</div>
-        </div>
-        <div class="cond-panel" id="panel-ex">
-          <div class="cond-title">Graduate details</div>
-          <div class="form-row">
-            <div class="form-group"><label>University graduated from</label><select><option>ANU</option><option>University of Canberra</option><option>Other Australian university</option><option>Overseas university</option></select></div>
-            <div class="form-group"><label>Year of graduation</label><select><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020 or earlier</option></select></div>
-          </div>
-          <div class="info-note">👋 Graduates and alumni are welcome — matched with others in a similar life stage.</div>
-        </div>
-        <div class="cond-panel" id="panel-other">
-          <div class="cond-title">Tell us a bit more</div>
-          <div class="form-group"><label>What brings you to Canberra?</label><div class="chips"><div class="chip" onclick="toggle(this)">Working holiday visa</div><div class="chip" onclick="toggle(this)">Young professional</div><div class="chip" onclick="toggle(this)">Considering studying here</div><div class="chip" onclick="toggle(this)">Family / partner of student</div><div class="chip" onclick="toggle(this)">Other</div></div></div>
-          <div class="info-note">🌏 UniRenter is primarily for students and graduates — other young people in Canberra's communities are welcome too.</div>
-        </div>
-        <div class="step-nav">
-          <button class="btn-back" onclick="goStep(2)">← Back</button>
-          <button class="btn-next" onclick="goStep(4)">Next: Housing →</button>
-        </div>
-      </div>
-
-      <!-- STEP 4: Housing type -->
-      <div class="step" id="step-4">
         <div class="step-title">Accommodation preferences</div>
         <div class="step-sub">What type of living situation are you looking for? Select all that you'd consider.</div>
 
@@ -1285,6 +1278,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
             <div class="chip" onclick="toggle(this)">👨 Men only</div>
             <div class="chip" onclick="toggle(this)">🤝 Mixed gender — no preference</div>
             <div class="chip" onclick="toggle(this)">🏳️‍🌈 LGBTQ+ friendly important</div>
+            <div class="chip" onclick="toggle(this)">📵 No couples</div>
           </div>
         </div>
 
@@ -1318,13 +1312,13 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         </div>
 
         <div class="step-nav">
-          <button class="btn-back" onclick="goStep(3)">← Back</button>
-          <button class="btn-next" onclick="goStep(5)">Next: Lifestyle →</button>
+          <button class="btn-back" onclick="goStep(2)">← Back</button>
+          <button class="btn-next" onclick="goStep(4)">Next: Lifestyle →</button>
         </div>
       </div>
 
       <!-- STEP 5: Lifestyle -->
-      <div class="step" id="step-5">
+      <div class="step" id="step-4">
         <div class="step-title">Your lifestyle</div>
         <div class="step-sub">The most important matching step — be honest, no wrong answers. We've kept this tight so it's fast to fill in.</div>
 
@@ -1460,13 +1454,13 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-group" style="margin-top:18px;"><label>Anything else we should know?</label><textarea placeholder="e.g. I play guitar occasionally, work part-time weekends, or anything else relevant…"></textarea></div>
         <div class="step-nav">
-          <button class="btn-back" onclick="goStep(4)">← Back</button>
-          <button class="btn-next" onclick="goStep(6)">Next: Location →</button>
+          <button class="btn-back" onclick="goStep(3)">← Back</button>
+          <button class="btn-next" onclick="goStep(5)">Next: Location →</button>
         </div>
       </div>
 
       <!-- STEP 6: Location -->
-      <div class="step" id="step-6">
+      <div class="step" id="step-5">
         <div class="step-title">Where in Canberra?</div>
         <div class="step-sub">Select all areas you'd consider — more flexibility means more matches.</div>
         <div class="form-group"><label>Inner / ANU</label><div class="chips"><div class="chip" onclick="toggle(this)">Acton (ANU)</div><div class="chip" onclick="toggle(this)">Turner</div><div class="chip" onclick="toggle(this)">Reid</div><div class="chip" onclick="toggle(this)">Braddon</div><div class="chip" onclick="toggle(this)">City (Civic)</div><div class="chip" onclick="toggle(this)">Dickson</div></div></div>
@@ -1475,13 +1469,13 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         
         <div class="form-group" style="margin-top:20px;"><label>Maximum commute to campus</label><div class="chips"><div class="chip" onclick="toggle(this)">🚶 20 min walk</div><div class="chip" onclick="toggle(this)">🚌 30 min PT</div><div class="chip" onclick="toggle(this)">🚇 45 min PT</div><div class="chip" onclick="toggle(this)">🚆 Up to 60 min</div><div class="chip" onclick="toggle(this)">Flexible</div></div></div>
         <div class="step-nav">
-          <button class="btn-back" onclick="goStep(5)">← Back</button>
-          <button class="btn-next" onclick="goStep(7)">Next: Budget →</button>
+          <button class="btn-back" onclick="goStep(4)">← Back</button>
+          <button class="btn-next" onclick="goStep(6)">Next: Budget →</button>
         </div>
       </div>
 
       <!-- STEP 7: Budget -->
-      <div class="step" id="step-7">
+      <div class="step" id="step-6">
         <div class="step-title">Budget &amp; final details</div>
         <div class="step-sub">Canberra rent is competitive — realistic budgets get better matches.</div>
         <div class="form-group">
@@ -1494,7 +1488,18 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           <div class="slider-val" id="rent-val" style="margin-top:8px;">$300/wk</div>
         </div>
         <div class="form-group"><label>Move-in timeline</label><div class="chips"><div class="chip" onclick="toggle(this)">ASAP</div><div class="chip" onclick="toggle(this)">Within 1 month</div><div class="chip" onclick="toggle(this)">1–3 months</div><div class="chip" onclick="toggle(this)">Just exploring</div></div></div>
-        <div class="form-group"><label>Preferences &amp; deal-breakers</label><div class="chips"><div class="chip" onclick="toggle(this)">🚬 No smoking indoors</div><div class="chip" onclick="toggle(this)">🐾 Pet-free home</div><div class="chip" onclick="toggle(this)">🍺 No alcohol in house</div><div class="chip" onclick="toggle(this)">🤝 Same gender preferred</div><div class="chip" onclick="toggle(this)">📵 No couples</div><div class="chip" onclick="toggle(this)">🌿 Vegetarian/vegan household</div></div></div>
+        <div class="form-group">
+          <label>Expected stay duration</label>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;line-height:1.5;">Helps match you with housemates planning a similar stay — especially useful for exchange students and short courses.</div>
+          <div class="chips">
+            <div class="chip" onclick="toggleSingle(this,'chips-duration')">1–3 months</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-duration')">3–6 months</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-duration')">6–12 months</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-duration')">12+ months</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-duration')">Flexible / not sure</div>
+          </div>
+          <div id="chips-duration"></div>
+        </div>
         <div class="form-group"><label>One thing people should know about you</label><input type="text" placeholder="e.g. I make great coffee and always pay rent on time 😄" /></div>
 
         <div class="agent-optin">
@@ -1532,7 +1537,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           </div>
         </div>
         <div class="step-nav">
-          <button class="btn-back" onclick="goStep(6)">← Back</button>
+          <button class="btn-back" onclick="goStep(5)">← Back</button>
           <button class="btn-next" onclick="triggerMatchesVerify()" style="background:var(--brand-coral);color:#fff;">🎉 Show my matches</button>
         </div>
       </div>
@@ -1667,10 +1672,12 @@ function toggleAccom(el) { el.classList.toggle('selected'); }
 function selectStatus(type, el) {
   document.querySelectorAll('.status-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
+  el.dataset.type = type; // S84 fix: was never set, so student_status always saved as null
   ['future','current','ex','other'].forEach(t => {
     const p = document.getElementById('panel-' + t);
     if (p) p.classList.toggle('visible', t === type);
   });
+  updateEmailAskCopy(type);
 }
 
 function toggleReligion() {
@@ -1702,11 +1709,37 @@ function previewPhoto(input) {
 }
 
 // ── Step 1 email input — enable Next as soon as @ is typed ──
+// ── Contextual per-status email-ask copy (registration redesign, S84) ──
+const emailAskCopy = {
+  future:  "Verify with your personal email to get started — once you're enrolled, add your uni email from your dashboard to earn the Verified Student badge.",
+  current: "Use your uni email to verify — you'll get the Verified Student badge straight away. Prefer a personal email instead? You can add your uni email anytime from your dashboard.",
+  ex:      "Verify with your personal email to continue. Still have access to a uni email? Add it from your dashboard afterwards to pick up the Verified Student badge.",
+  other:   "Verify with your email to continue. This option doesn't currently earn the Verified Student badge, but you're welcome to browse and connect with student housemates."
+};
+const emailAskPlaceholder = {
+  future: 'you@email.com',
+  current: 'you@student.anu.edu.au',
+  ex: 'you@email.com',
+  other: 'you@email.com'
+};
+function updateEmailAskCopy(type) {
+  const copyEl = document.getElementById('email-ask-copy');
+  const inputEl = document.getElementById('email-input');
+  const blockEl = document.getElementById('email-ask-block');
+  const promptEl = document.getElementById('email-ask-prompt');
+  if (copyEl) copyEl.textContent = emailAskCopy[type] || '';
+  if (inputEl) inputEl.placeholder = emailAskPlaceholder[type] || 'you@email.com';
+  if (blockEl) blockEl.style.display = 'block';
+  if (promptEl) promptEl.style.display = 'none';
+  onEmailInput();
+}
+
 function onEmailInput() {
   const val = document.getElementById('email-input').value.trim();
   const btn = document.getElementById('btn-step1-next');
+  const statusSelected = document.querySelector('.status-card.selected');
   if (btn) {
-    const ok = val.includes('@') && val.includes('.');
+    const ok = val.includes('@') && val.includes('.') && !!statusSelected;
     btn.style.opacity = ok ? '1' : '0.4';
     btn.style.pointerEvents = ok ? 'auto' : 'none';
   }
@@ -1716,7 +1749,8 @@ function onEmailInput() {
 let _verifyDestination = 'step2'; // 'step2' or 'matches'
 function triggerStep1Verify() {
   const email = document.getElementById('email-input')?.value?.trim() || '';
-  if (!email.includes('@') || !email.includes('.')) return;
+  const statusSelected = document.querySelector('.status-card.selected');
+  if (!email.includes('@') || !email.includes('.') || !statusSelected) return;
   // If already verified, go straight to step 2
   if (localStorage.getItem('unirenter_email_verified') === '1') {
     goStep(2);
@@ -1868,6 +1902,7 @@ function renderMatchCard(p) {
     const daysAgo = (Date.now() - new Date(p.last_seen).getTime()) / 86400000;
     if (daysAgo <= 7) tags.push('🟢 Active');
   }
+  if (p.student_status === 'other') tags.push('👤 Not a student');
   if (p.sleep_schedule) tags.push(p.sleep_schedule.replace('_',' '));
   if (p.cleanliness) tags.push(p.cleanliness.replace('_',' '));
   if (p.budget_max) tags.push(`$${p.budget_max}/wk`);
@@ -2232,11 +2267,10 @@ function openChat(who) {
 
 
 // ── Profile completeness ──
-const stepWeights = [14,28,42,56,70,84,100];
+const stepWeights = [17,33,50,67,83,100];
 const stepTips = [
-  'Enter your email to get started',
+  'Select your status and verify your email',
   'Add a profile photo — gets 3× more connections',
-  'Select your student status',
   'Choose your accommodation preferences',
   'Complete your lifestyle preferences',
   'Select your preferred locations',
@@ -2339,7 +2373,7 @@ async function saveProfileToSupabase() {
   const university   = selects[0]?.value || null;
   const yearOfStudy  = selects[1]?.value || null;
   const fieldOfStudy = selects[2]?.value || null;
-  const uniEmail     = activePanel?.querySelector('input[type="email"]')?.value?.trim() || null;
+  const uniEmail     = (studentStatus === 'current') ? (localStorage.getItem('unirenter_email') || null) : null;
   const accomCards = [...document.querySelectorAll('.accom-card.selected')].map(c => c.dataset?.type).filter(Boolean);
   const seeking       = accomCards[0] || null;
   const moveInDate    = document.getElementById('move-in-date')?.value || null;
@@ -2555,7 +2589,7 @@ goStep = function(n) {
     setTimeout(() => showCobNudge(msg), 800);
   }
   // Budget low nudge on step 7
-  if (n === 7) {
+  if (n === 6) {
     setTimeout(() => {
       const rentVal = document.getElementById('rent-val');
       if (rentVal) {
