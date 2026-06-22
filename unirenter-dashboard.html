@@ -4300,6 +4300,13 @@ body.light-mode {
 </div>
 
 <script>
+// ── Auth guard — redirect unauthenticated users before DOM paint ──────────────
+(function() {
+  if (localStorage.getItem('unirenter_email_verified') !== '1') {
+    window.location.replace('/');
+  }
+})();
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function showToast(title, msg) {
   if (title && (title.includes('❌') || title.includes('🚨') || title.includes('⚠️'))) { playSound('error'); }
