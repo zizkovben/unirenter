@@ -48,6 +48,7 @@ module.exports = async function handler(req, res) {
       'star_sign', 'generation', 'vibe_lifestyle', 'vibe_quiz_answers',
       'language_home', 'languages_spoken', 'english_practice',
       'chinese_zodiac', 'sleep_mode', 'listing_token', 'listing_expires_at',
+      'stay_duration',
     ];
  
     for (const f of fields) {
