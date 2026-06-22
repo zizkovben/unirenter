@@ -228,6 +228,7 @@ function scoreCandidate(c, myProfile, city) {
     substances:         c.substances || null,
     email_verified:     c.email_verified || false,
     uni_email_verified: c.uni_email_verified || false,
+    stay_duration:      c.stay_duration || null,
     profile_complete:   c.profile_complete || 0,
     last_seen:          c.last_seen || null,
     match_score:        Math.round(score),
