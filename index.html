@@ -1224,6 +1224,42 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           </div>
         </div>
 
+        <div class="form-group" style="margin-top:18px;">
+          <label>🗣️ Preferred language at home</label>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Helps Cob match you with housemates you'll actually be comfortable living with.</div>
+          <div class="chips" id="chips-lang-home">
+            <div class="chip" onclick="toggleSingle(this,'chips-lang-home')">🇦🇺 English only</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-lang-home')">🤝 Mix is fine</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-lang-home')">🌍 Happy with any language</div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:18px;">
+          <label>🌐 Languages I speak</label>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Select all that apply</div>
+          <div class="chips" id="chips-languages">
+            <div class="chip" onclick="toggle(this)">🇦🇺 English</div>
+            <div class="chip" onclick="toggle(this)">🇨🇳 Mandarin</div>
+            <div class="chip" onclick="toggle(this)">🇮🇳 Hindi</div>
+            <div class="chip" onclick="toggle(this)">🇳🇵 Nepali</div>
+            <div class="chip" onclick="toggle(this)">🇻🇳 Vietnamese</div>
+            <div class="chip" onclick="toggle(this)">🇧🇩 Bengali</div>
+            <div class="chip" onclick="toggle(this)">🇮🇩 Indonesian</div>
+            <div class="chip" onclick="toggle(this)">🇵🇭 Filipino</div>
+            <div class="chip" onclick="toggle(this)">🇪🇸 Spanish</div>
+            <div class="chip" onclick="toggle(this)">🇱🇰 Sinhala / Tamil</div>
+            <div class="chip" onclick="toggle(this)">🇵🇰 Urdu</div>
+            <div class="chip" onclick="toggle(this)">🇧🇷 Portuguese</div>
+            <div class="chip" onclick="toggle(this)">🇹🇭 Thai</div>
+            <div class="chip" onclick="toggle(this)">🇰🇷 Korean</div>
+            <div class="chip" onclick="toggle(this)">🇭🇰 Cantonese</div>
+            <div class="chip" onclick="toggle(this)">🇯🇵 Japanese</div>
+            <div class="chip" onclick="toggle(this)">🇸🇦 Arabic</div>
+            <div class="chip" onclick="toggle(this)">🇫🇷 French</div>
+            <div class="chip" onclick="toggle(this)">➕ Other</div>
+          </div>
+        </div>
+
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(1)">← Back</button>
           <button class="btn-next" onclick="unlockAndGo(3)">Next: Housing →</button>
@@ -1414,42 +1450,6 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
             <div class="chip" onclick="toggle(this)">🤧 Allergic to cats or dogs</div>
           </div>
           <div class="info-note" style="margin-top:10px;">🐾 <strong>Victorian pet law:</strong> Since 2020 landlords cannot unreasonably refuse a pet. Strata buildings require separate Owners Corporation approval. <a href="/guide" target="_blank" style="color:var(--brand-blue);">See our Pets &amp; Rentals guide →</a></div>
-        </div>
-
-        <div class="form-group" style="margin-top:18px;">
-          <label>🗣️ Preferred language at home</label>
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Helps Cob match you with housemates you'll actually be comfortable living with</div>
-          <div class="chips" id="chips-lang-home">
-            <div class="chip" onclick="toggleSingle(this,'chips-lang-home')">🇦🇺 English only</div>
-            <div class="chip" onclick="toggleSingle(this,'chips-lang-home')">🤝 Mix is fine</div>
-            <div class="chip" onclick="toggleSingle(this,'chips-lang-home')">🌍 Happy with any language</div>
-          </div>
-        </div>
-
-        <div class="form-group" style="margin-top:18px;">
-          <label>🌐 Languages I speak</label>
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Select all that apply</div>
-          <div class="chips" id="chips-languages">
-            <div class="chip" onclick="toggle(this)">🇦🇺 English</div>
-            <div class="chip" onclick="toggle(this)">🇨🇳 Mandarin</div>
-            <div class="chip" onclick="toggle(this)">🇮🇳 Hindi</div>
-            <div class="chip" onclick="toggle(this)">🇳🇵 Nepali</div>
-            <div class="chip" onclick="toggle(this)">🇻🇳 Vietnamese</div>
-            <div class="chip" onclick="toggle(this)">🇧🇩 Bengali</div>
-            <div class="chip" onclick="toggle(this)">🇮🇩 Indonesian</div>
-            <div class="chip" onclick="toggle(this)">🇵🇭 Filipino</div>
-            <div class="chip" onclick="toggle(this)">🇪🇸 Spanish</div>
-            <div class="chip" onclick="toggle(this)">🇱🇰 Sinhala / Tamil</div>
-            <div class="chip" onclick="toggle(this)">🇵🇰 Urdu</div>
-            <div class="chip" onclick="toggle(this)">🇧🇷 Portuguese</div>
-            <div class="chip" onclick="toggle(this)">🇹🇭 Thai</div>
-            <div class="chip" onclick="toggle(this)">🇰🇷 Korean</div>
-            <div class="chip" onclick="toggle(this)">🇭🇰 Cantonese</div>
-            <div class="chip" onclick="toggle(this)">🇯🇵 Japanese</div>
-            <div class="chip" onclick="toggle(this)">🇸🇦 Arabic</div>
-            <div class="chip" onclick="toggle(this)">🇫🇷 French</div>
-            <div class="chip" onclick="toggle(this)">➕ Other</div>
-          </div>
         </div>
 
         <div class="form-group" style="margin-top:18px;"><label>One thing people should know about you</label><textarea id="input-cob-summary" placeholder="e.g. I make great coffee and always pay rent on time 😄"></textarea></div>
@@ -1950,6 +1950,12 @@ function renderMatchCard(p) {
   const reasons = (p.match_reasons||[]).map(r => reasonMap[r]).filter(Boolean);
   const card = document.createElement('div');
   card.className = 'match-card';
+  const vibeHtml = (p.vibe_emoji_primary)
+    ? '<div class="card-vibe" style="font-size:18px;letter-spacing:3px;margin:6px 0 2px;opacity:0.85;">' + (p.vibe_emoji_primary || '') + (p.vibe_emoji_secondary ? ' ' + p.vibe_emoji_secondary : '') + '</div>'
+    : '';
+  const cobSummaryHtml = p.cob_summary
+    ? '<div class="card-cob-summary" style="font-size:12px;color:var(--text-muted);font-style:italic;margin:4px 0 8px;line-height:1.45;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + p.cob_summary + '</div>'
+    : '';
   card.innerHTML = `
     <div class="card-header">
       <div class="card-photo-wrap">${photoHtml}</div>
@@ -1961,7 +1967,7 @@ function renderMatchCard(p) {
     <div class="match-reason">${reasons.map(([cls,label])=>`<span class="match-reason-pill ${cls}">${label}</span>`).join('')}</div>
     <div class="card-compat"><div class="compat-bar" style="width:${p.match_score||0}%"></div></div>
     <div class="card-tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
-    <div class="card-footer">
+    ${vibeHtml}${cobSummaryHtml}<div class="card-footer">
       <button class="btn-connect" onclick="connect('${(p.display_name||'Student').replace(/'/g,"\'")}')">Connect</button>
       <button class="btn-skip" onclick="skip(this)">Skip</button>
     </div>
@@ -1974,14 +1980,13 @@ function renderMatchCard(p) {
 
 // ── Dummy fallback profiles ───────────────────────────────────────────────────
 const dummyProfiles = [
-  { display_name:'Priya R.', university:'UniMelb', field_of_study:'Commerce/Law', year_of_study:'2nd year', seeking:'Private room', household_type:'Women only', suburb_preferences:['Carlton'], sleep_schedule:'early_bird', cleanliness:'very_tidy', budget_max:320, email_verified:true, match_score:96, match_reasons:['sleep','cleanliness','budget','location'] },
-  { display_name:'Jake S.', university:'RMIT', field_of_study:'Engineering', year_of_study:'3rd year', seeking:'Share apartment', household_type:'Mixed', suburb_preferences:['Footscray'], sleep_schedule:'night_owl', cleanliness:'average', budget_max:280, email_verified:false, match_score:88, match_reasons:['sleep','budget','location'] },
-  { display_name:'Anika M.', university:'Monash', field_of_study:'Psychology', year_of_study:'1st year', seeking:'Private room', household_type:'Mixed', suburb_preferences:['St Kilda'], sleep_schedule:'flexible', cleanliness:'tidy', budget_max:320, email_verified:true, match_score:84, match_reasons:['cleanliness','budget','social'] },
-  { display_name:'Tom O.', university:'La Trobe', field_of_study:'IT', year_of_study:'3rd year', seeking:'Shared house', household_type:'Mixed', suburb_preferences:['Brunswick'], sleep_schedule:'flexible', cleanliness:'tidy', budget_max:250, email_verified:false, match_score:79, match_reasons:['budget','cleanliness','location'] },
-  { display_name:'Sara C.', university:'Swinburne', field_of_study:'Design', year_of_study:'Graduate', seeking:'Share apartment', household_type:'Women only', suburb_preferences:['Hawthorn'], sleep_schedule:'night_owl', cleanliness:'relaxed', budget_max:300, email_verified:false, match_score:74, match_reasons:['sleep','budget'] },
-  { display_name:'Rahul K.', university:'UniMelb', field_of_study:'Science', year_of_study:'PhD', seeking:'Private room', household_type:'Mixed', suburb_preferences:['Parkville'], sleep_schedule:'early_bird', cleanliness:'very_tidy', budget_max:340, email_verified:true, match_score:71, match_reasons:['sleep','cleanliness','location'] },
+  { display_name:'Priya R.', university:'UniMelb', field_of_study:'Commerce/Law', year_of_study:'2nd year', seeking:'Private room', household_type:'Women only', suburb_preferences:['Carlton'], sleep_schedule:'early_bird', cleanliness:'very_tidy', budget_max:320, email_verified:true, match_score:96, match_reasons:['sleep','cleanliness','budget','location'], vibe_emoji_primary:'📚', vibe_emoji_secondary:'☕', cob_summary:'Early riser who batch-cooks on Sundays — commerce student with a very structured week.' },
+  { display_name:'Jake S.', university:'RMIT', field_of_study:'Engineering', year_of_study:'3rd year', seeking:'Share apartment', household_type:'Mixed', suburb_preferences:['Footscray'], sleep_schedule:'night_owl', cleanliness:'average', budget_max:280, email_verified:false, match_score:88, match_reasons:['sleep','budget','location'], vibe_emoji_primary:'🎮', vibe_emoji_secondary:'💻', cob_summary:'Night-owl gamer who works from home — relaxed about mess but respectful of quiet study time.' },
+  { display_name:'Anika M.', university:'Monash', field_of_study:'Psychology', year_of_study:'1st year', seeking:'Private room', household_type:'Mixed', suburb_preferences:['St Kilda'], sleep_schedule:'flexible', cleanliness:'tidy', budget_max:320, email_verified:true, match_score:84, match_reasons:['cleanliness','budget','social'], vibe_emoji_primary:'🌿', vibe_emoji_secondary:'🪴', cob_summary:'Chill first-year who loves plants and keeps shared spaces tidy.' },
+  { display_name:'Tom O.', university:'La Trobe', field_of_study:'IT', year_of_study:'3rd year', seeking:'Shared house', household_type:'Mixed', suburb_preferences:['Brunswick'], sleep_schedule:'flexible', cleanliness:'tidy', budget_max:250, email_verified:false, match_score:79, match_reasons:['budget','cleanliness','location'], vibe_emoji_primary:'🎵', vibe_emoji_secondary:'🎸', cob_summary:'Music lover who keeps to himself during the week — easygoing housemate.' },
+  { display_name:'Sara C.', university:'Swinburne', field_of_study:'Design', year_of_study:'Graduate', seeking:'Share apartment', household_type:'Women only', suburb_preferences:['Hawthorn'], sleep_schedule:'night_owl', cleanliness:'relaxed', budget_max:300, email_verified:false, match_score:74, match_reasons:['sleep','budget'], vibe_emoji_primary:'🎨', vibe_emoji_secondary:'✏️', cob_summary:'Creative grad student who thrives late at night — very respectful of shared spaces.' },
+  { display_name:'Rahul K.', university:'UniMelb', field_of_study:'Science', year_of_study:'PhD', seeking:'Private room', household_type:'Mixed', suburb_preferences:['Parkville'], sleep_schedule:'early_bird', cleanliness:'very_tidy', budget_max:340, email_verified:true, match_score:71, match_reasons:['sleep','cleanliness','location'], vibe_emoji_primary:'🔬', vibe_emoji_secondary:'📖', cob_summary:'PhD researcher who values a quiet, tidy home and early nights.' },
 ];
-
 // ── Example matches preview (S80 fix) ───────────────────────────────────────
 // Renders ONLY the static dummyProfiles set — used by the "See example matches"
 // hero CTA before a user has a verified, saved profile. Deliberately never
@@ -2501,12 +2506,11 @@ function downloadAgreement() {
 const cobNudges = {
   1: null, // fires after OTP verify success instead
   2: "A real photo gets you 3× more connections 📸 — international students especially, it shows you're genuine and builds trust.",
-  3: "Just arriving in Australia? Most international students find their first housemate within 2 weeks here. You're doing great — keep going! 🙌",
-  4: "Not sure what to pick? A private room in a share house is the most popular choice — your own space, shared costs. 🏠 Once you find a match, grab the free housemate agreement template from your dashboard — it prevents 90% of housemate conflicts.",
-  5: "Be honest here — mismatched sleep schedules cause more housemate friction than almost anything else. Pick what's actually true for you.",
-  6: "Pick suburbs close to your uni first. A short commute saves 1–2 hours a day — that really adds up during exam season. 📚",
-  7: "Melbourne rooms average $220–280/wk for students. If your budget is under $200, options get very tight — worth knowing now."
-};
+  3: "Not sure what to pick? A private room in a share house is the most popular choice — your own space, shared costs. 🏠 Once you find a match, grab the free housemate agreement template from your dashboard.",
+  4: "Be honest here — mismatched sleep schedules cause more housemate friction than almost anything else. Pick what's actually true for you.",
+  5: "Pick suburbs close to your uni first. A short commute saves 1–2 hours a day — that really adds up during exam season. 📚",
+  6: "Melbourne rooms average $220–280/wk for students. If your budget is under $200, options get very tight — worth knowing now."
+}; // keys 1-6 match tabs 1-6 (S92)
 
 let cobPanelOpen = false;
 let cobMessages = []; // conversation history for the API
@@ -2616,7 +2620,7 @@ async function sendCobMessage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: cobMessages,
-        context: 'profile_builder',
+        context: 'tab_' + currentStep,
         city: 'melbourne'
       })
     });
@@ -2649,8 +2653,8 @@ goStep = function(n) {
   if (msg) {
     setTimeout(() => showCobNudge(msg), 800);
   }
-  // Budget low nudge on step 7
-  if (n === 7) {
+  // Budget low nudge on step 6 (Budget tab) — S92 fix
+  if (n === 6) {
     setTimeout(() => {
       const rentVal = document.getElementById('rent-val');
       if (rentVal) {
