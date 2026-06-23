@@ -3145,6 +3145,36 @@ body.light-mode {
 .empty-state-cta:hover { opacity: 0.88; }
 
 
+
+/* ── Preview my card modal (S90) ── */
+#card-preview-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 800;
+  display: none; align-items: center; justify-content: center; padding: 24px;
+}
+#card-preview-backdrop.open { display: flex; }
+#card-preview-panel {
+  background: var(--navy-card); border: 1px solid var(--navy-border);
+  border-radius: 16px; padding: 28px; max-width: 420px; width: 100%;
+  position: relative; max-height: 90vh; overflow-y: auto;
+}
+.card-preview-title {
+  font-family: var(--font-display); font-size: 16px; font-weight: 700;
+  margin-bottom: 6px; color: var(--text);
+}
+.card-preview-sub {
+  font-size: 12px; color: var(--text-muted); margin-bottom: 20px;
+}
+.card-preview-close {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none; color: var(--text-muted);
+  font-size: 20px; cursor: pointer; line-height: 1; padding: 4px;
+}
+.card-preview-close:hover { color: var(--text); }
+#card-preview-card-wrap .match-card {
+  pointer-events: none; /* read-only */
+}
+#card-preview-card-wrap .match-actions { display: none; }
+
 </style>
 </head>
 <body>
@@ -3883,7 +3913,10 @@ body.light-mode {
         <div class="section-title">My Profile</div>
         <div class="section-sub">What other students see when they match with you</div>
       </div>
-      <button class="section-action" onclick="window.location.href=''">✏️ Edit profile</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="section-action" onclick="openCardPreview()" style="background:rgba(75,191,224,0.12);border-color:rgba(75,191,224,0.3);color:var(--brand-blue);">👤 Preview my card</button>
+        <button class="section-action" onclick="window.location.href=''">✏️ Edit profile</button>
+      </div>
     </div>
     <!-- Completion banner — shown when profile < 80% -->
     <div class="profile-completion-banner" id="completion-banner" style="display:none;">
@@ -10443,6 +10476,73 @@ function cobReviewCopyLink() {
   }
 }
 
+
+// ── Preview my card (S90) ──────────────────────────────────────────────────
+function openCardPreview() {
+  var backdrop = document.getElementById('card-preview-backdrop');
+  var wrap = document.getElementById('card-preview-card-wrap');
+  if (!backdrop || !wrap) return;
+
+  // Build a profile object from localStorage + any loaded profile data
+  var email = localStorage.getItem('unirenter_email') || '';
+  var name = localStorage.getItem('unirenter_display_name') || email.split('@')[0] || 'You';
+  var uni = localStorage.getItem('ur_university') || window._loadedProfile && window._loadedProfile.university || '';
+  var field = window._loadedProfile && window._loadedProfile.field_of_study || '';
+  var year = window._loadedProfile && window._loadedProfile.year_of_study || '';
+  var budgetMax = localStorage.getItem('ur_budget_max') || window._loadedProfile && window._loadedProfile.budget_max || '';
+  var sleep = localStorage.getItem('ur_sleep') || window._loadedProfile && window._loadedProfile.sleep_schedule || '';
+  var clean = localStorage.getItem('ur_cleanliness') || window._loadedProfile && window._loadedProfile.cleanliness || '';
+  var suburbs = window._loadedProfile && window._loadedProfile.suburb_preferences || [];
+  var vibeP = localStorage.getItem('ur_vibe_primary') || window._loadedProfile && window._loadedProfile.vibe_emoji_primary || null;
+  var vibeS = localStorage.getItem('ur_vibe_secondary') || window._loadedProfile && window._loadedProfile.vibe_emoji_secondary || null;
+  var cobSummary = window._loadedProfile && window._loadedProfile.cob_summary || null;
+  var status = localStorage.getItem('ur_student_status') || window._loadedProfile && window._loadedProfile.student_status || '';
+  var lastSeen = window._loadedProfile && window._loadedProfile.last_seen || new Date().toISOString();
+
+  // Build the adapted card object (mirrors adaptApiMatchForCard)
+  var initials = name.split(' ').map(function(w){ return w[0]; }).filter(Boolean).join('').slice(0,2).toUpperCase() || '??';
+  var bgIdx = Math.abs((name.charCodeAt(0) || 0)) % MATCH_BG_PALETTE.length;
+  var subParts = [uni, field, year].filter(Boolean);
+  var tags = [];
+  var tagClass = [];
+  if (lastSeen) {
+    var daysAgo = (Date.now() - new Date(lastSeen).getTime()) / 86400000;
+    if (daysAgo <= 7) { tags.push('🟢 Active'); tagClass.push('green'); }
+  }
+  if (sleep && SLEEP_LABELS[sleep]) { tags.push(SLEEP_LABELS[sleep]); tagClass.push(''); }
+  if (clean && CLEAN_LABELS[clean]) { tags.push(CLEAN_LABELS[clean]); tagClass.push('green'); }
+  if (suburbs && suburbs[0]) { tags.push(suburbs[0]); tagClass.push('yellow'); }
+  if (budgetMax) { tags.push('$' + budgetMax + '/wk'); tagClass.push('yellow'); }
+  if (status === 'other') { tags.push('👤 Not a student'); tagClass.push(''); }
+
+  var cardData = {
+    name: name,
+    initials: initials,
+    bg: MATCH_BG_PALETTE[bgIdx],
+    sub: subParts.join(' \u00b7 ') || 'Student',
+    score: 100,
+    tags: tags,
+    tagClass: tagClass,
+    reason: 'Your own profile',
+    vibe_emoji_primary: vibeP,
+    vibe_emoji_secondary: vibeS,
+    cob_summary: cobSummary,
+  };
+
+  wrap.innerHTML = '';
+  var card = renderMatchCard(cardData);
+  // Remove score badge + actions for preview
+  var badge = card.querySelector('.match-score-badge');
+  if (badge) badge.style.display = 'none';
+  wrap.appendChild(card);
+  backdrop.classList.add('open');
+}
+
+function closeCardPreview() {
+  var backdrop = document.getElementById('card-preview-backdrop');
+  if (backdrop) backdrop.classList.remove('open');
+}
+
 </script>
 
 
@@ -10694,6 +10794,17 @@ function cobReviewCopyLink() {
       <button class="hh-ag-lock-btn" id="hh-ag-lock-btn" onclick="hhAgLock()">🔒 Lock agreement</button>
     </div>
     <div class="hh-ag-progress-note" id="hh-ag-progress-note"></div>
+  </div>
+</div>
+
+
+<!-- Preview my card modal (S90) -->
+<div id="card-preview-backdrop" onclick="if(event.target===this)closeCardPreview()">
+  <div id="card-preview-panel">
+    <button class="card-preview-close" onclick="closeCardPreview()">✕</button>
+    <div class="card-preview-title">👤 Your match card</div>
+    <div class="card-preview-sub">This is how your profile appears to other students.</div>
+    <div id="card-preview-card-wrap"></div>
   </div>
 </div>
 
