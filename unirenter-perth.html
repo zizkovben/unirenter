@@ -1453,7 +1453,29 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         
 
-        <div class="form-group" style="margin-top:18px;"><label>One thing people should know about you</label><textarea id="input-cob-summary" placeholder="e.g. I make great coffee and always pay rent on time 😄"></textarea></div>
+        <!-- VIBE QUIZ (S96) — personalised, 5 questions, chips + mic + type -->
+        <div id="vibe-quiz-wrap" style="margin-top:22px;">
+          <div style="margin-bottom:12px;">
+            <label style="display:block;font-weight:600;margin-bottom:3px;">Your vibe</label>
+            <div style="font-size:13px;color:var(--text-muted);">Cob asks you 5 quick questions, then writes your match card summary and assigns your emoji equation 🤠</div>
+          </div>
+          <div id="vibe-chat" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:14px 14px 10px;min-height:80px;max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;"></div>
+          <div id="vibe-chips-tray" style="display:none;padding:8px 0 4px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;"></div>
+          <div id="vibe-input-row" style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+            <button id="vibe-mic-btn" onclick="vibeMicToggle()" title="Speak your answer" style="flex-shrink:0;padding:9px 11px;border-radius:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:var(--text-muted);font-size:16px;cursor:pointer;line-height:1;">&#127908;</button>
+            <input id="vibe-input" type="text" placeholder="Type your answer…" style="flex:1;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#fff;font-size:14px;min-width:0;" onkeydown="if(event.key==='Enter')vibeSubmitAnswer()" />
+            <button onclick="vibeSubmitAnswer()" style="flex-shrink:0;padding:10px 16px;border-radius:8px;background:var(--brand-blue);border:none;color:#fff;font-size:15px;cursor:pointer;font-weight:700;">↑</button>
+          </div>
+          <div id="vibe-result" style="display:none;margin-top:14px;background:rgba(75,191,224,0.08);border:1px solid rgba(75,191,224,0.22);border-radius:12px;padding:15px 16px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--brand-blue);margin-bottom:10px;opacity:0.85;">Your match card vibe</div>
+            <div id="vibe-result-emojis" style="font-size:26px;letter-spacing:5px;margin-bottom:8px;"></div>
+            <div id="vibe-result-summary" style="font-size:13px;color:var(--text-muted);font-style:italic;line-height:1.55;margin-bottom:12px;"></div>
+            <button onclick="vibeReset()" style="background:none;border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:var(--text-muted);font-size:12px;padding:5px 11px;cursor:pointer;">Redo quiz ↺</button>
+          </div>
+          <input type="hidden" id="vibe-primary-val" />
+          <input type="hidden" id="vibe-secondary-val" />
+          <input type="hidden" id="vibe-summary-val" />
+        </div>
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(3)">← Back</button>
           <button class="btn-next" onclick="unlockAndGo(5)">Next: Location →</button>
@@ -1711,7 +1733,9 @@ function saveProfileSteps() {
     });
   });
   var fname = document.getElementById('fname'); if (fname) data['fname'] = fname.value;
-  var cobSum = document.getElementById('input-cob-summary'); if (cobSum) data['cob-summary'] = cobSum.value;
+  var cobSum = document.getElementById('vibe-summary-val'); if (cobSum) data['cob-summary'] = cobSum.value;
+  var vp = document.getElementById('vibe-primary-val'); if (vp) data['vibe-primary'] = vp.value;
+  var vs = document.getElementById('vibe-secondary-val'); if (vs) data['vibe-secondary'] = vs.value;
   var rentRange = document.querySelector('#step-6 input[type=range]'); if (rentRange) data['rent-slider'] = rentRange.value;
   localStorage.setItem(UR_PROFILE_KEY, JSON.stringify(data));
 }
@@ -1737,7 +1761,15 @@ function restoreProfileSteps() {
     }
   });
   if (data['fname']) { var f = document.getElementById('fname'); if (f) f.value = data['fname']; }
-  if (data['cob-summary']) { var cs = document.getElementById('input-cob-summary'); if (cs) cs.value = data['cob-summary']; }
+  if (data['vibe-primary'] || data['cob-summary']) {
+    var rPrim = data['vibe-primary'] || '';
+    var rSec  = data['vibe-secondary'] || '';
+    var rSum  = data['cob-summary'] || '';
+    var vpEl  = document.getElementById('vibe-primary-val');   if (vpEl)  vpEl.value  = rPrim;
+    var vsEl  = document.getElementById('vibe-secondary-val'); if (vsEl)  vsEl.value  = rSec;
+    var vsuEl = document.getElementById('vibe-summary-val');   if (vsuEl) vsuEl.value = rSum;
+    if (rPrim) { vibeShowResult(rPrim, rSec, rSum); }
+  }
   if (data['rent-slider']) {
     var rs = document.querySelector('#step-6 input[type=range]');
     if (rs) { rs.value = data['rent-slider']; var rv = document.getElementById('rent-val'); if (rv) rv.textContent = '$' + data['rent-slider'] + '/wk'; }
@@ -2442,6 +2474,7 @@ function toggleTheme() {
     if (nextBtn) { nextBtn.style.opacity = '1'; nextBtn.style.pointerEvents = 'auto'; }
   }
   restoreProfileSteps(); // S94: restore chip/input selections
+  vibeInit();            // S96: start vibe quiz or restore completed state
 })();
 
 // ── Referral & sharing ──────────────────────────────────────────────────────
@@ -2496,7 +2529,9 @@ async function saveProfileToSupabase() {
   const budgetMin = parseInt(document.getElementById('budget-min')?.value) || null;
   const budgetMax = parseInt(document.getElementById('budget-max')?.value) || null;
   const stayDuration = document.querySelector('#chips-duration .chip.selected')?.textContent.trim() || null;
-  const cobSummary = document.getElementById('input-cob-summary')?.value.trim() || null;
+  const cobSummary = document.getElementById('vibe-summary-val')?.value.trim() || localStorage.getItem('ur_vibe_summary') || null;
+  const vibeEmojiPrimary = document.getElementById('vibe-primary-val')?.value.trim() || localStorage.getItem('ur_vibe_primary') || null;
+  const vibeEmojiSecondary = document.getElementById('vibe-secondary-val')?.value.trim() || localStorage.getItem('ur_vibe_secondary') || null;
   const filled = [displayName, university, studentStatus, seeking,
                   moveInDate, householdType, sleepSchedule, cleanliness,
                   budgetMin, budgetMax].filter(Boolean).length;
@@ -2513,6 +2548,7 @@ async function saveProfileToSupabase() {
     guests, substances, dietary, pets, city: 'perth', profile_complete: profileComplete,
     language_home: languageHome, languages_spoken: languagesSpoken.length > 0 ? languagesSpoken : null,
     stay_duration: stayDuration, cob_summary: cobSummary,
+    vibe_emoji_primary: vibeEmojiPrimary, vibe_emoji_secondary: vibeEmojiSecondary,
   };
   const savedEmail = localStorage.getItem('unirenter_email');
   if (savedEmail) profileData.email = savedEmail;
@@ -2939,6 +2975,397 @@ function translatePage(lang) {
   if(status) status.textContent = 'Opening translation…';
   setTimeout(() => { window.location.href = url; }, 400);
 }
+
+// ── VIBE QUIZ (S96) ───────────────────────────────────────────────────────────
+// Personalised 5-question quiz. Cob assigns emoji equation + cob_summary.
+// Three input modes: type / chip-tap / mic. Client-side reactions between Qs.
+// Single API call after Q5 — all answers sent together to /api/cob.
+
+// ── Per-question chip sets ────────────────────────────────────────────────────
+var VIBE_CHIPS = [
+  [ // Q1 — exam crunch
+    {label:'📚 Library hermit',    title:'I disappear to the library when deadlines hit'},
+    {label:'🏠 Work from home',    title:'I study at my desk at home'},
+    {label:'🔇 Need it quiet',     title:'I need the house calm and quiet during exam time'},
+    {label:'🧹 Stress cleaner',    title:'I clean when I\'m stressed — the house gets spotless'},
+    {label:'🎧 Headphones in',     title:'I block everything out with music or podcasts'},
+    {label:'😴 All-nighters',      title:'I pull late nights and sleep in the next day'},
+    {label:'🗂️ Very structured',   title:'I plan everything well in advance — no last-minute panic'},
+    {label:'🎲 Total chaos mode',  title:'I leave it all to the last minute — but it works for me'},
+  ],
+  [ // Q2 — evenings/weekends
+    {label:'🍳 Cook proper meals', title:'The kitchen is my happy place'},
+    {label:'🎮 Gaming',            title:'Games are how I decompress'},
+    {label:'🎵 Music on',          title:'There\'s always music playing when I\'m home'},
+    {label:'🎬 Movies/TV',         title:'I love a good binge-watch session'},
+    {label:'🏋️ Gym/sport',         title:'I stay active — gym, sport, or outdoor exercise'},
+    {label:'🌿 Pretty chilled',    title:'Low-key evenings — I recharge quietly'},
+    {label:'🎉 People over',       title:'I love having friends or housemates around'},
+    {label:'🛋️ Total decompress',  title:'Home is my sanctuary — I fully switch off here'},
+    {label:'📖 Reading',           title:'Books or articles — I\'m usually in my own world'},
+    {label:'🪴 Pottering around',  title:'Tidying, plants, bits and bobs — I like keeping busy'},
+  ],
+  [ // Q3 — what you're hoping for
+    {label:'🤝 Actual friends',        title:'I want housemates who become real mates'},
+    {label:'✈️ Travel together',       title:'I\'d love to explore with my housemates'},
+    {label:'🍽️ Meals together',        title:'Sharing food and cooking together matters to me'},
+    {label:'🏠 Own thing',             title:'I\'m happy for everyone to do their own thing'},
+    {label:'🌍 Meet each other\'s worlds', title:'I want to experience other cultures and share mine'},
+    {label:'💬 Deep chats',            title:'I love a good conversation — not just small talk'},
+    {label:'🎉 Social house',          title:'I want a fun, social atmosphere at home'},
+    {label:'🚪 Respect my space',      title:'I need my personal space and boundaries respected'},
+  ],
+  [ // Q4 — shared spaces / rhythms
+    {label:'🧹 Tidy as you go',         title:'Clean up after yourself — that\'s the rule'},
+    {label:'⏰ Routines matter',         title:'I like a house that has a rhythm and structure'},
+    {label:'🗣️ Set expectations early', title:'I\'d rather talk about house rules upfront'},
+    {label:'🌊 Figure it out',          title:'I\'m flexible — we\'ll work it out as we go'},
+    {label:'🤐 Pretty private',          title:'I keep to myself and respect others doing the same'},
+    {label:'🏠 Open door',              title:'My door is always open — come say hi anytime'},
+    {label:'🔇 Quiet hours matter',     title:'I need the house to wind down at a reasonable time'},
+  ],
+  [ // Q5 — catch-all
+    {label:'💑 Partner stays over',  title:'My partner visits regularly — good to know upfront'},
+    {label:'👨‍👩‍👧 Family visits',      title:'Family sometimes stays — I\'ll always give notice'},
+    {label:'🥗 Plant-based',          title:'I\'m vegan or vegetarian'},
+    {label:'🧃 Don\'t drink',          title:'I\'m teetotal — alcohol isn\'t part of my home life'},
+    {label:'🚭 Non-smoker',           title:'I\'m a non-smoker and prefer a smoke-free home'},
+    {label:'🕌 Faith is important',   title:'My faith shapes my daily routines at home'},
+    {label:'🏳️‍🌈 LGBTQ+',             title:'I\'m LGBTQ+ — an inclusive house matters to me'},
+    {label:'🌱 Environmentalist',     title:'Sustainability and eco-friendly habits matter to me'},
+    {label:'🤫 Pretty private',       title:'I\'m a private person — I keep my personal life to myself'},
+    {label:'🪬 Superstitious',        title:'I have some superstitions — happy to share!'},
+    {label:'🐾 Pet person',           title:'I have or love pets'},
+  ]
+];
+
+// ── Between-question client-side reactions ────────────────────────────────────
+var VIBE_REACTIONS = [
+  { words:['quiet','silent','silence','noise','library','hermit'],    reply:'Got it — knowing that upfront makes matching so much better \U0001f910' },
+  { words:['cook','cooking','kitchen','meal','bake','curry','food'],  reply:'A housemate who cooks — always a win \U0001f373' },
+  { words:['nervous','scared','anxious','worried','first time'],      reply:'Totally normal — most people feel exactly that \U0001f60a' },
+  { words:['travel','explore','adventure','sightsee','wander'],       reply:'Love that energy \u2708\ufe0f' },
+  { words:['alone','private','space','introvert','myself'],           reply:'Knowing what you need is half the battle \U0001f6aa' },
+  { words:['friend','family','together','close','bond','connection'], reply:'That\u2019s the dream right there \U0001f91d' },
+  { words:['music','guitar','piano','sing','band','concert'],         reply:'A musical house \u2014 that\u2019s a proper vibe \U0001f3b5' },
+  { words:['party','social','people over','gather','host'],           reply:'Sounds like a fun house \U0001f389' },
+  { words:['clean','tidy','organised','spotless','neat'],             reply:'Your future housemates will thank you \U0001f9f9' },
+  { words:['vegan','plant','vegetarian','plant-based'],               reply:'Noted \u2014 and there are great matches for that \U0001f957' },
+  { words:['faith','pray','mosque','church','temple','religious'],    reply:'Thanks for sharing \u2014 really useful for a good match \U0001f64f' },
+  { words:['partner','boyfriend','girlfriend','relationship'],        reply:'Good to be upfront about that \u2014 makes everything easier \U0001f491' },
+  { words:['gay','queer','lgbtq','lesbian','bi','trans','non-binary'],reply:'Appreciate you sharing \u2014 we\u2019ll find you a house where you\u2019re fully yourself \U0001f3f3\ufe0f\u200d\U0001f308' },
+  { words:['stress','anxious','pressure','overwhelm'],                reply:'Uni is a lot sometimes \u2014 good housemates make a real difference \U0001f4aa' },
+  { words:['international','overseas','home country','missing home'], reply:'Moving abroad is huge \u2014 the right housemates make it so much easier \U0001f30f' },
+];
+var VIBE_DEFAULTS = ['Makes sense \U0001f920', 'Good one \U0001f44d', 'Appreciate the honesty \U0001f9e1', 'Love it \u2714\ufe0f'];
+
+function vibeGetReaction(answer) {
+  var lower = answer.toLowerCase();
+  for (var i = 0; i < VIBE_REACTIONS.length; i++) {
+    var r = VIBE_REACTIONS[i];
+    for (var j = 0; j < r.words.length; j++) {
+      if (lower.indexOf(r.words[j]) !== -1) return r.reply;
+    }
+  }
+  return VIBE_DEFAULTS[Math.floor(Math.random() * VIBE_DEFAULTS.length)];
+}
+
+// ── Build personalised questions from localStorage profile data ───────────────
+function buildVibeQuestions() {
+  var name        = (localStorage.getItem('unirenter_display_name') || '').split(' ')[0];
+  var field       = localStorage.getItem('ur_field_of_study') || '';
+  var year        = localStorage.getItem('ur_year_of_study') || '';
+  var status      = localStorage.getItem('ur_student_status') || '';
+  var sleep       = localStorage.getItem('ur_sleep_schedule') || '';
+  var clean       = localStorage.getItem('ur_cleanliness') || '';
+  var langHome    = localStorage.getItem('ur_language_home') || '';
+  var duration    = localStorage.getItem('ur_stay_duration') || '';
+  var moveIn      = localStorage.getItem('ur_move_in_date') || '';
+  var household   = localStorage.getItem('ur_household_type') || '';
+
+  // Q1 — exam crunch, personalised by field + year
+  var q1;
+  if (field && field.toLowerCase().indexOf('law') !== -1) {
+    q1 = 'Law school is famous for its crunch periods \u2014 when assignments or exams hit, how does your home life actually change?';
+  } else if (field && (field.toLowerCase().indexOf('med') !== -1 || field.toLowerCase().indexOf('nurs') !== -1)) {
+    q1 = 'With prac placements and intense exams, med life at home can get interesting \u2014 how do you cope when things get full-on?';
+  } else if (field && (field.toLowerCase().indexOf('engineer') !== -1 || field.toLowerCase().indexOf('it') !== -1 || field.toLowerCase().indexOf('comp') !== -1)) {
+    q1 = 'Engineering and tech degrees can mean some serious deadline crunches \u2014 when that hits, how does it change how you are at home?';
+  } else if (field && (field.toLowerCase().indexOf('art') !== -1 || field.toLowerCase().indexOf('design') !== -1 || field.toLowerCase().indexOf('creat') !== -1)) {
+    q1 = 'Creative degrees have their own rhythm \u2014 studio nights, crits, deadlines. How does that bleed into home life for you?';
+  } else if (year && (year.toLowerCase().indexOf('phd') !== -1 || year.toLowerCase().indexOf('doctor') !== -1)) {
+    q1 = 'PhD life is a marathon, not a sprint \u2014 when you\u2019re deep in research or writing, how does that affect how you are at home?';
+  } else if (year && year.toLowerCase().indexOf('1st') !== -1) {
+    q1 = 'First year exams can feel like a real gear change \u2014 when deadlines hit, how do you cope at home? Library hermit, need quiet, something else?';
+  } else if (field) {
+    q1 = 'Studying ' + field + ' \u2014 when deadlines or exams hit, how does your home life actually change?';
+  } else {
+    q1 = 'When deadlines or exams hit, how does your home life change \u2014 library hermit, need the house quiet, stress-clean, pull all-nighters?';
+  }
+
+  // Q2 — evenings/weekends, personalised by sleep schedule + duration
+  var q2;
+  if (sleep === 'night_owl') {
+    q2 = 'You\u2019re a night owl \u2014 paint me a picture of a typical late evening at home when you\u2019ve got nothing on. What\u2019s actually happening?';
+  } else if (sleep === 'early_bird') {
+    q2 = 'Early riser \u2014 so your evenings probably wind down earlier than most. What does a relaxed night at home actually look like for you?';
+  } else if (duration && (duration.indexOf('1') !== -1 || duration.indexOf('3') !== -1) && duration.indexOf('month') !== -1) {
+    q2 = 'You\u2019re here for a short stint \u2014 what does a weekend at home look like when you\u2019re not out exploring? What do you do in your own space?';
+  } else {
+    q2 = 'Paint me a picture of a typical evening or weekend at home when you\u2019ve got nothing on \u2014 what\u2019s actually happening?';
+  }
+
+  // Q3 — what you're hoping for, personalised by status + move_in
+  var q3;
+  if (status === 'future' || status === 'arriving') {
+    q3 = 'You\u2019re about to arrive in Melbourne for the first time \u2014 what are you genuinely hoping living with other students is going to be like? Beyond just splitting the bills.';
+  } else if (status === 'other') {
+    q3 = 'You\u2019re joining a student share house \u2014 what kind of household dynamic are you hoping for? What would make it actually great?';
+  } else if (langHome && langHome.toLowerCase() !== 'english') {
+    q3 = 'Moving somewhere new and living with people you\u2019ve never met is a big deal. What are you actually hoping this experience is like \u2014 what would make it feel like home?';
+  } else {
+    q3 = 'What are you actually hoping living with other students is like \u2014 beyond just splitting the bills?';
+  }
+
+  // Q4 — shared spaces, personalised by cleanliness
+  var q4;
+  if (clean === 'very_tidy') {
+    q4 = 'You\u2019re someone who values a tidy home \u2014 what does your ideal shared house actually feel like day-to-day? The rhythms, the little things that make it work.';
+  } else if (clean === 'relaxed') {
+    q4 = 'You\u2019re pretty relaxed about how the house runs \u2014 what does your ideal shared home actually feel like? The vibe, the rhythms, what makes it good to live in.';
+  } else {
+    q4 = 'What does your ideal shared house feel like day-to-day \u2014 the little things, the rhythms, what makes it actually work?';
+  }
+
+  // Q5 — catch-all, personalised by household type + language
+  var q5;
+  var langNote = (langHome && langHome.toLowerCase() !== 'english')
+    ? ' Is speaking English at home important to you, or are you happy either way?'
+    : '';
+  if (household === 'women_only' || household === 'same_gender') {
+    q5 = 'Last one \u2014 anything else future housemates should know about how you live?' + langNote + ' Guests, routines, dietary stuff, faith, quirks \u2014 whatever feels honest.';
+  } else {
+    q5 = 'Last one \u2014 guests, a partner who stays over, family visits, dietary stuff, faith practices, things that matter to you, quirks \u2014 whatever feels honest.' + langNote;
+  }
+
+  return [q1, q2, q3, q4, q5];
+}
+
+// ── Render chips for current question ─────────────────────────────────────────
+function vibeRenderChips(qIndex) {
+  var tray = document.getElementById('vibe-chips-tray');
+  if (!tray) return;
+  var chips = VIBE_CHIPS[qIndex] || [];
+  if (!chips.length) { tray.style.display = 'none'; return; }
+  tray.innerHTML = '';
+  chips.forEach(function(c) {
+    var btn = document.createElement('button');
+    btn.textContent = c.label;
+    btn.title = c.title;
+    btn.style.cssText = 'display:inline-block;margin:0 5px 5px 0;padding:6px 11px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#fff;font-size:12px;cursor:pointer;white-space:nowrap;';
+    btn.onclick = function() {
+      var inp = document.getElementById('vibe-input');
+      if (!inp) return;
+      inp.value = inp.value ? inp.value + ', ' + c.label : c.label;
+      inp.focus();
+      btn.style.background = 'rgba(75,191,224,0.18)';
+      btn.style.borderColor = 'rgba(75,191,224,0.4)';
+    };
+    tray.appendChild(btn);
+  });
+  tray.style.display = 'block';
+}
+
+// ── Core quiz state ───────────────────────────────────────────────────────────
+var vibeQuestions  = [];
+var vibeAnswers    = [];
+var vibeQIndex     = 0;
+var vibeComplete   = false;
+var vibeMicActive  = false;
+var vibeSpeech     = null;
+
+function vibeAddMsg(role, text) {
+  var chat = document.getElementById('vibe-chat');
+  if (!chat) return;
+  var div = document.createElement('div');
+  if (role === 'cob') {
+    div.style.cssText = 'font-size:13px;color:#c8e8f5;line-height:1.55;display:flex;gap:8px;align-items:flex-start;';
+    var icon = document.createElement('span');
+    icon.style.cssText = 'font-size:16px;flex-shrink:0;margin-top:1px;';
+    icon.textContent = '\U0001f920';
+    var txt = document.createElement('span');
+    txt.textContent = text;
+    div.appendChild(icon);
+    div.appendChild(txt);
+  } else {
+    div.style.cssText = 'font-size:13px;color:#fff;background:rgba(255,255,255,0.09);border-radius:8px;padding:8px 11px;align-self:flex-end;max-width:88%;line-height:1.45;word-break:break-word;';
+    div.textContent = text;
+  }
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function vibeInit() {
+  vibeQuestions = buildVibeQuestions();
+  vibeAnswers   = [];
+  vibeQIndex    = 0;
+  vibeComplete  = false;
+  var chat = document.getElementById('vibe-chat');
+  if (chat) chat.innerHTML = '';
+  var ir = document.getElementById('vibe-input-row');   if (ir)  ir.style.display  = 'flex';
+  var res= document.getElementById('vibe-result');      if (res) res.style.display = 'none';
+  var inp= document.getElementById('vibe-input');       if (inp) inp.value = '';
+  var vp = document.getElementById('vibe-primary-val'); if (vp)  vp.value  = '';
+  var vs = document.getElementById('vibe-secondary-val');if(vs)  vs.value  = '';
+  var vsu= document.getElementById('vibe-summary-val'); if (vsu) vsu.value = '';
+  // Restore completed state if it exists
+  var savedPrimary = localStorage.getItem('ur_vibe_primary');
+  if (savedPrimary) {
+    vibeShowResult(savedPrimary, localStorage.getItem('ur_vibe_secondary') || '', localStorage.getItem('ur_vibe_summary') || '');
+    return;
+  }
+  // Personalised opener from Cob
+  var name = (localStorage.getItem('unirenter_display_name') || '').split(' ')[0];
+  var opener = name
+    ? 'Hey ' + name + ' \u2014 I\u2019ve got 5 quick questions. Your answers help me write your match card summary and assign your emoji equation. Take your time or just tap the chips below. Let\u2019s go!'
+    : 'Hey \u2014 I\u2019ve got 5 quick questions. Your answers help me write your match card summary and assign your emoji equation. Take your time or just tap the chips below. Let\u2019s go!';
+  setTimeout(function() {
+    vibeAddMsg('cob', opener);
+    setTimeout(function() {
+      vibeAddMsg('cob', vibeQuestions[0]);
+      vibeRenderChips(0);
+    }, 600);
+  }, 300);
+}
+
+function vibeSubmitAnswer() {
+  if (vibeComplete) return;
+  var input = document.getElementById('vibe-input');
+  if (!input) return;
+  var answer = input.value.trim();
+  if (!answer) return;
+  vibeAddMsg('user', answer);
+  input.value = '';
+  vibeAnswers.push(answer);
+  var tray = document.getElementById('vibe-chips-tray');
+  if (tray) tray.style.display = 'none';
+  vibeQIndex++;
+  if (vibeQIndex < vibeQuestions.length) {
+    var reaction = vibeGetReaction(answer);
+    setTimeout(function() {
+      vibeAddMsg('cob', reaction);
+      setTimeout(function() {
+        vibeAddMsg('cob', vibeQuestions[vibeQIndex]);
+        vibeRenderChips(vibeQIndex);
+      }, 500);
+    }, 350);
+  } else {
+    vibeComplete = true;
+    var ir = document.getElementById('vibe-input-row');
+    if (ir) ir.style.display = 'none';
+    setTimeout(function() {
+      vibeAddMsg('cob', vibeGetReaction(answer));
+      setTimeout(function() {
+        vibeAddMsg('cob', 'Nice one \u2014 give me a moment and I\u2019ll work out your vibe \U0001f920');
+        vibeAssign();
+      }, 500);
+    }, 350);
+  }
+}
+
+async function vibeAssign() {
+  try {
+    var questions = vibeQuestions;
+    var answersPayload = vibeAnswers.map(function(a, i) {
+      return 'Q' + (i+1) + ': ' + (questions[i] || '') + '\nAnswer: ' + a;
+    }).join('\n\n');
+    var res = await fetch('/api/cob', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ purpose: 'vibe_assign', answers: vibeAnswers, questions: questions, answersPayload: answersPayload })
+    });
+    var data = await res.json();
+    if (data.vibe_result) {
+      var r = data.vibe_result;
+      localStorage.setItem('ur_vibe_primary',   r.vibe_emoji_primary   || '');
+      localStorage.setItem('ur_vibe_secondary',  r.vibe_emoji_secondary || '');
+      localStorage.setItem('ur_vibe_summary',    r.cob_summary          || '');
+      vibeShowResult(r.vibe_emoji_primary, r.vibe_emoji_secondary, r.cob_summary);
+    } else {
+      vibeAddMsg('cob', 'Hmm, something went wrong \u2014 try again in a sec.');
+      var ir2 = document.getElementById('vibe-input-row'); if (ir2) ir2.style.display = 'flex';
+      vibeComplete = false;
+    }
+  } catch(e) {
+    vibeAddMsg('cob', 'Couldn\u2019t connect right now \u2014 check your internet and try again.');
+    var ir3 = document.getElementById('vibe-input-row'); if (ir3) ir3.style.display = 'flex';
+    vibeComplete = false;
+  }
+}
+
+function vibeShowResult(primary, secondary, summary) {
+  var ir  = document.getElementById('vibe-input-row');    if (ir)  ir.style.display  = 'none';
+  var tray= document.getElementById('vibe-chips-tray');   if(tray) tray.style.display = 'none';
+  var em  = document.getElementById('vibe-result-emojis');if (em)  em.textContent    = (primary||'') + (secondary ? ' '+secondary : '');
+  var su  = document.getElementById('vibe-result-summary');if(su)  su.textContent    = summary || '';
+  var res = document.getElementById('vibe-result');       if (res) res.style.display = 'block';
+  var vp  = document.getElementById('vibe-primary-val');  if (vp)  vp.value          = primary   || '';
+  var vs  = document.getElementById('vibe-secondary-val');if (vs)  vs.value          = secondary || '';
+  var vsu = document.getElementById('vibe-summary-val');  if (vsu) vsu.value         = summary   || '';
+}
+
+function vibeReset() {
+  localStorage.removeItem('ur_vibe_primary');
+  localStorage.removeItem('ur_vibe_secondary');
+  localStorage.removeItem('ur_vibe_summary');
+  vibeInit();
+}
+
+// ── Mic (speech-to-text, desktop only) ───────────────────────────────────────
+function vibeMicToggle() {
+  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    var btn = document.getElementById('vibe-mic-btn');
+    if (btn) { btn.title = 'Voice input not supported in this browser'; btn.style.opacity = '0.3'; }
+    return;
+  }
+  if (vibeMicActive) {
+    if (vibeSpeech) vibeSpeech.stop();
+    vibeMicActive = false;
+    var btn2 = document.getElementById('vibe-mic-btn');
+    if (btn2) { btn2.style.background = 'rgba(255,255,255,0.07)'; btn2.style.color = 'var(--text-muted)'; }
+    return;
+  }
+  vibeSpeech = new SpeechRecognition();
+  vibeSpeech.continuous = false;
+  vibeSpeech.interimResults = false;
+  vibeSpeech.lang = 'en-AU';
+  vibeSpeech.onresult = function(e) {
+    var transcript = e.results[0][0].transcript;
+    var inp = document.getElementById('vibe-input');
+    if (inp) inp.value = transcript;
+    vibeMicActive = false;
+    var btn3 = document.getElementById('vibe-mic-btn');
+    if (btn3) { btn3.style.background = 'rgba(255,255,255,0.07)'; btn3.style.color = 'var(--text-muted)'; }
+  };
+  vibeSpeech.onerror = function() {
+    vibeMicActive = false;
+    var btn4 = document.getElementById('vibe-mic-btn');
+    if (btn4) { btn4.style.background = 'rgba(255,255,255,0.07)'; btn4.style.color = 'var(--text-muted)'; }
+  };
+  vibeSpeech.onend = function() {
+    vibeMicActive = false;
+    var btn5 = document.getElementById('vibe-mic-btn');
+    if (btn5) { btn5.style.background = 'rgba(255,255,255,0.07)'; btn5.style.color = 'var(--text-muted)'; }
+  };
+  vibeSpeech.start();
+  vibeMicActive = true;
+  var btn6 = document.getElementById('vibe-mic-btn');
+  if (btn6) { btn6.style.background = 'rgba(232,98,58,0.25)'; btn6.style.color = '#E8623A'; }
+}
+
+// ── End Vibe Quiz (S96) ───────────────────────────────────────────────────────
+
 </script>
 
 <!-- EMAIL VERIFY MODAL — triggered by "Show my matches" -->
