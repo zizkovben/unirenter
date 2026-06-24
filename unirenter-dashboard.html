@@ -267,6 +267,49 @@ body.light-mode {
 }
 .cob-review-submit-btn:hover { opacity: 0.88; }
 .cob-review-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.cob-review-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.cob-review-chip {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 4px 11px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.cob-review-chip:hover { background: rgba(245,184,0,0.08); border-color: rgba(245,184,0,0.3); color: var(--text-primary); }
+.cob-review-chip.used { background: rgba(245,184,0,0.1); border-color: rgba(245,184,0,0.35); color: var(--brand-yellow); }
+.cob-review-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.cob-review-mic-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  color: var(--text-muted);
+}
+.cob-review-mic-btn:hover { border-color: rgba(232,98,58,0.4); color: var(--brand-coral); }
+.cob-review-mic-btn.active { border-color: var(--brand-coral); color: var(--brand-coral); background: rgba(232,98,58,0.1); }
 .cob-review-skip { font-size: 12px; color: var(--text-muted); background: none; border: none;
   cursor: pointer; font-family: 'Inter', sans-serif; padding: 0; }
 .cob-review-skip:hover { color: var(--text-primary); }
@@ -3346,8 +3389,18 @@ body.light-mode {
         <div id="cob-review-step-comment" class="cob-review-followup">
           <div class="cob-review-thankyou" id="cob-review-thanks">Thanks! 🤠</div>
           <div class="cob-review-prompt">What's been most useful so far? (optional)</div>
+          <div class="cob-review-chips" id="cob-review-chips">
+            <button class="cob-review-chip" onclick="cobReviewChip(this,'Housemate matching')">Housemate matching</button>
+            <button class="cob-review-chip" onclick="cobReviewChip(this,'Cob AI assistant')">Cob AI assistant</button>
+            <button class="cob-review-chip" onclick="cobReviewChip(this,'Lease guide')">Lease guide</button>
+            <button class="cob-review-chip" onclick="cobReviewChip(this,'Profile setup')">Profile setup</button>
+            <button class="cob-review-chip" onclick="cobReviewChip(this,'Easy to use')">Easy to use</button>
+          </div>
           <textarea class="cob-review-input" id="cob-review-comment" rows="2" placeholder="e.g. finding housemates, the lease guide…"></textarea>
-          <button class="cob-review-submit-btn" id="cob-review-submit-btn" onclick="cobReviewSubmit()">Submit</button>
+          <div class="cob-review-actions">
+            <button class="cob-review-submit-btn" id="cob-review-submit-btn" onclick="cobReviewSubmit()" style="flex:1;">Submit</button>
+            <button class="cob-review-mic-btn" id="cob-review-mic-btn" onclick="cobReviewMicToggle()" title="Dictate your review" style="display:none;">🎤</button>
+          </div>
           <button class="cob-review-skip" onclick="cobReviewSkipComment()">Skip</button>
         </div>
         <!-- Step 3: share strip (after submit or skip) -->
@@ -10424,6 +10477,7 @@ function cobReviewStar(n) {
     var thanks = document.getElementById('cob-review-thanks');
     if (thanks) thanks.textContent = n === 5 ? 'Five stars! 🤠 Cheers!' : 'Thanks for that! 🤠';
     document.getElementById('cob-review-step-comment').classList.add('active');
+    cobReviewMicInit();
     // Hide dismiss button during follow-up (keep card open)
     var dismiss = document.querySelector('#cob-review-card .cob-review-dismiss');
     if (dismiss) dismiss.style.display = 'none';
@@ -10433,6 +10487,60 @@ function cobReviewStar(n) {
     const email = encodeURIComponent(localStorage.getItem('unirenter_email') || '');
     window.location.href = '/review?rating=' + n + '&email=' + email;
   }
+}
+
+function cobReviewChip(btn, label) {
+  var ta = document.getElementById('cob-review-comment');
+  if (!ta) return;
+  var current = ta.value.trim();
+  if (btn.classList.contains('used')) {
+    // Deselect — remove label from textarea
+    btn.classList.remove('used');
+    var escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    ta.value = current.replace(new RegExp('(, )?' + escaped + '(, )?', 'g'), '').replace(/^, |, $/g, '').trim();
+  } else {
+    btn.classList.add('used');
+    ta.value = current ? current + ', ' + label : label;
+  }
+}
+
+var _cobReviewMicActive = false;
+var _cobReviewRecognition = null;
+function cobReviewMicInit() {
+  var micBtn = document.getElementById('cob-review-mic-btn');
+  if (!micBtn) return;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return; // browser doesn't support — stays hidden
+  micBtn.style.display = 'flex';
+  _cobReviewRecognition = new SR();
+  _cobReviewRecognition.lang = 'en-AU';
+  _cobReviewRecognition.continuous = false;
+  _cobReviewRecognition.interimResults = false;
+  _cobReviewRecognition.onresult = function(e) {
+    var transcript = e.results[0][0].transcript;
+    var ta = document.getElementById('cob-review-comment');
+    if (ta) ta.value = ta.value ? ta.value + ' ' + transcript : transcript;
+    cobReviewMicOff();
+  };
+  _cobReviewRecognition.onerror = function() { cobReviewMicOff(); };
+  _cobReviewRecognition.onend = function() { cobReviewMicOff(); };
+}
+function cobReviewMicToggle() {
+  if (_cobReviewMicActive) {
+    if (_cobReviewRecognition) _cobReviewRecognition.stop();
+    cobReviewMicOff();
+  } else {
+    if (!_cobReviewRecognition) return;
+    _cobReviewRecognition.start();
+    _cobReviewMicActive = true;
+    var btn = document.getElementById('cob-review-mic-btn');
+    if (btn) btn.classList.add('active');
+  }
+}
+function cobReviewMicOff() {
+  _cobReviewMicActive = false;
+  var btn = document.getElementById('cob-review-mic-btn');
+  if (btn) btn.classList.remove('active');
 }
 
 function cobReviewSubmit() {
@@ -10501,7 +10609,7 @@ function openCardPreview() {
   var suburbs = window._loadedProfile && window._loadedProfile.suburb_preferences || [];
   var vibeP = localStorage.getItem('ur_vibe_primary') || window._loadedProfile && window._loadedProfile.vibe_emoji_primary || null;
   var vibeS = localStorage.getItem('ur_vibe_secondary') || window._loadedProfile && window._loadedProfile.vibe_emoji_secondary || null;
-  var cobSummary = window._loadedProfile && window._loadedProfile.cob_summary || null;
+  var cobSummary = localStorage.getItem('ur_vibe_summary') || window._loadedProfile && window._loadedProfile.cob_summary || null;
   var status = localStorage.getItem('ur_student_status') || window._loadedProfile && window._loadedProfile.student_status || '';
   var lastSeen = window._loadedProfile && window._loadedProfile.last_seen || new Date().toISOString();
 
