@@ -304,6 +304,40 @@
       color: rgba(255,255,255,0.2);
       margin-top: 8px;
     }
+    .hv-nudge {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(75,191,224,0.12);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .hv-nudge-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .hv-nudge-body { flex: 1; }
+    .hv-nudge-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+    .hv-nudge-names {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .hv-nudge-link {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--brand-blue);
+      text-decoration: none;
+      border: 1px solid rgba(75,191,224,0.3);
+      border-radius: 6px;
+      padding: 5px 11px;
+      transition: background 0.15s;
+    }
+    .hv-nudge-link:hover { background: rgba(75,191,224,0.08); }
     @media (max-width: 600px) {
       .ag-header-title { font-size: 18px; }
       .hv-member-eq { font-size: 16px; }
@@ -381,6 +415,9 @@
     var vibeMembers = members.filter(function(m) {
       return m.vibe_emoji_primary || m.vibe_emoji_secondary;
     });
+    var noVibeMembers = members.filter(function(m) {
+      return !m.vibe_emoji_primary && !m.vibe_emoji_secondary;
+    });
     var houseVibeHtml = '';
     if (vibeMembers.length > 0) {
       var eqParts = vibeMembers.map(function(m, i) {
@@ -401,12 +438,39 @@
           eqHtml += '<span class="hv-divider">/</span>';
         }
       });
+      // Nudge for members who haven't done the quiz
+      var nudgeHtml = '';
+      if (noVibeMembers.length > 0) {
+        var missingNames = noVibeMembers.map(function(m) {
+          return (m.display_name || m.email.split('@')[0]).split(' ')[0];
+        });
+        var nameList = missingNames.length === 1
+          ? missingNames[0]
+          : missingNames.slice(0, -1).join(', ') + ' and ' + missingNames[missingNames.length - 1];
+        var plural = missingNames.length > 1;
+        nudgeHtml =
+          '<div class="hv-nudge">' +
+            '<div class="hv-nudge-icon">🤠</div>' +
+            '<div class="hv-nudge-body">' +
+              '<div class="hv-nudge-names">' + escHtml(nameList) +
+                (plural ? ' haven\'t' : ' hasn\'t') + ' done the vibe quiz yet</div>' +
+              '<div class="hv-nudge-text">' +
+                'The vibe quiz takes 2 minutes and helps future housemates understand the house personality before they apply. ' +
+                'It\'s free — Cob asks 5 quick questions and writes ' +
+                (plural ? 'their' : 'their') + ' profile summary.' +
+              '</div>' +
+              '<a class="hv-nudge-link" href="/">Take the quiz →</a>' +
+            '</div>' +
+          '</div>';
+      }
+
       houseVibeHtml =
         '<div class="hv-block" id="hv-block">' +
           '<div class="hv-label">🤠 House vibe</div>' +
           '<div class="hv-equation">' + eqHtml + '</div>' +
           '<div class="hv-summary" id="hv-summary">Asking Cob…</div>' +
           '<div class="hv-cob-credit" id="hv-cob-credit"></div>' +
+          nudgeHtml +
         '</div>';
     }
 
