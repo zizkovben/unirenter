@@ -246,8 +246,67 @@
     }
     .page-footer a { color: rgba(255,255,255,0.35); text-decoration: none; }
 
+    /* House Vibe block */
+    .hv-block {
+      background: linear-gradient(135deg, rgba(75,191,224,0.06), rgba(13,31,45,0.4));
+      border: 1px solid rgba(75,191,224,0.2);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .hv-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--brand-blue);
+      margin-bottom: 12px;
+    }
+    .hv-equation {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .hv-member-eq {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 11px;
+      font-size: 19px;
+      line-height: 1;
+    }
+    .hv-member-name {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-left: 5px;
+      font-weight: 500;
+    }
+    .hv-divider {
+      font-size: 14px;
+      color: var(--text-muted);
+      opacity: 0.4;
+      margin: 0 2px;
+    }
+    .hv-summary {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-style: italic;
+      line-height: 1.5;
+      min-height: 18px;
+    }
+    .hv-cob-credit {
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      margin-top: 8px;
+    }
     @media (max-width: 600px) {
       .ag-header-title { font-size: 18px; }
+      .hv-member-eq { font-size: 16px; }
     }
   </style>
 </head>
@@ -318,6 +377,39 @@
       '</div>';
     }).join('');
 
+    // House vibe equation — only render if at least one member has vibe data
+    var vibeMembers = members.filter(function(m) {
+      return m.vibe_emoji_primary || m.vibe_emoji_secondary;
+    });
+    var houseVibeHtml = '';
+    if (vibeMembers.length > 0) {
+      var eqParts = vibeMembers.map(function(m, i) {
+        var primary   = m.vibe_emoji_primary   || m.vibe_emoji || '🏠';
+        var secondary = m.vibe_emoji_secondary || '';
+        var name      = escHtml((m.display_name || m.email.split('@')[0]).split(' ')[0]);
+        var chip = '<div class="hv-member-eq">' +
+          primary + (secondary ? '+' + secondary : '') +
+          '<span class="hv-member-name">' + name + '</span>' +
+        '</div>';
+        return chip;
+      });
+      // Join chips with a subtle divider between them
+      var eqHtml = '';
+      eqParts.forEach(function(chip, i) {
+        eqHtml += chip;
+        if (i < eqParts.length - 1) {
+          eqHtml += '<span class="hv-divider">/</span>';
+        }
+      });
+      houseVibeHtml =
+        '<div class="hv-block" id="hv-block">' +
+          '<div class="hv-label">🤠 House vibe</div>' +
+          '<div class="hv-equation">' + eqHtml + '</div>' +
+          '<div class="hv-summary" id="hv-summary">Asking Cob…</div>' +
+          '<div class="hv-cob-credit" id="hv-cob-credit"></div>' +
+        '</div>';
+    }
+
     // Group clauses by category
     var grouped = {};
     clauses.forEach(function(c) {
@@ -362,6 +454,8 @@
           : '') +
         (membersHtml ? '<div class="ag-members-row">' + membersHtml + '</div>' : '') +
       '</div>' +
+      // House vibe (if members have vibe data)
+      (houseVibeHtml || '') +
       // Disclaimer
       '<div class="ag-disclaimer">' +
         '<strong>This is not a legally binding document.</strong> It works because everyone agreed to it — not because of anything written here. If something\'s not working, talk to each other first.' +
@@ -386,6 +480,51 @@
       '<div class="page-footer">' +
         '<p>© UniRenter · <a href="/legal">Legal</a> · <a href="/">unirenter.com.au</a></p>' +
       '</div>';
+
+    // House vibe — Cob summary call
+    if (vibeMembers.length > 0) {
+      var summaries = vibeMembers.map(function(m) {
+        var name = (m.display_name || m.email.split('@')[0]).split(' ')[0];
+        var primary   = m.vibe_emoji_primary   || m.vibe_emoji || '';
+        var secondary = m.vibe_emoji_secondary || '';
+        var summary   = m.cob_summary || '';
+        return name + ' (' + primary + (secondary ? '+' + secondary : '') + ')' +
+          (summary ? ': ' + summary : '');
+      }).join(' | ');
+
+      fetch('/api/cob', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          purpose: 'household_vibe',
+          members: vibeMembers.map(function(m) {
+            return {
+              name: (m.display_name || m.email.split('@')[0]).split(' ')[0],
+              vibe_emoji_primary:   m.vibe_emoji_primary   || m.vibe_emoji || '',
+              vibe_emoji_secondary: m.vibe_emoji_secondary || '',
+              cob_summary:          m.cob_summary || ''
+            };
+          })
+        })
+      })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        var el = document.getElementById('hv-summary');
+        var cr = document.getElementById('hv-cob-credit');
+        if (!el) return;
+        var txt = (data && data.household_summary) ? data.household_summary : '';
+        el.textContent = txt || '';
+        if (txt && cr) {
+          cr.textContent = 'Written by Cob 🤠';
+        } else if (el) {
+          el.style.display = 'none';
+        }
+      })
+      .catch(function() {
+        var el = document.getElementById('hv-summary');
+        if (el) el.style.display = 'none';
+      });
+    }
 
     // Wire copy button
     var copyBtn = document.getElementById('ag-copy-btn');
