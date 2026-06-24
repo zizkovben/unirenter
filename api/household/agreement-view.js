@@ -51,14 +51,17 @@ module.exports = async function handler(req, res) {
   if (memberEmails.length > 0) {
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('email, display_name, vibe_emoji_primary')
+      .select('email, display_name, vibe_emoji_primary, vibe_emoji_secondary, cob_summary')
       .in('email', memberEmails);
 
     memberProfiles = (profiles || []).map(function(p) {
       return {
         email: p.email,
         display_name: p.display_name || p.email.split('@')[0],
-        vibe_emoji: p.vibe_emoji_primary || '🏠'
+        vibe_emoji: p.vibe_emoji_primary || '🏠',
+        vibe_emoji_primary:   p.vibe_emoji_primary   || null,
+        vibe_emoji_secondary: p.vibe_emoji_secondary || null,
+        cob_summary:          p.cob_summary          || null
       };
     });
   }
