@@ -2949,8 +2949,14 @@ body.light-mode {
   display: none; transition: all 0.15s;
 }
 .sleep-pop-wake:hover { background: rgba(61,170,92,0.25); }
-@media (max-width: 380px) {
-  .sleep-popover { width: 290px; left: 0; transform: none; }
+@media (max-width: 480px) {
+  .sleep-popover {
+    width: calc(100vw - 24px);
+    max-width: 320px;
+    left: auto;
+    right: 0;
+    transform: none;
+  }
   .sleep-popover::before { display: none; }
 }
 

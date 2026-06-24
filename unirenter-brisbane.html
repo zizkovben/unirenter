@@ -1171,7 +1171,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           </div>
           <div class="form-group">
             <label>I identify as…</label>
-            <div class="chips">
+            <div class="chips" id="chips-gender">
               <div class="chip" onclick="toggle(this)">Woman</div>
               <div class="chip" onclick="toggle(this)">Man</div>
               <div class="chip" onclick="toggle(this)">Non-binary</div>
@@ -1182,7 +1182,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-group">
           <label>I am looking for…</label>
-          <div class="chips">
+          <div class="chips" id="chips-seeking">
             <div class="chip" onclick="toggle(this)">A room in a share house</div>
             <div class="chip" onclick="toggle(this)">A housemate for my place</div>
             <div class="chip" onclick="toggle(this)">Someone to find a place with</div>
@@ -1271,7 +1271,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-group">
           <label>Accommodation type</label>
-          <div class="accom-grid">
+          <div class="accom-grid" id="chips-accom">
             <div class="accom-card" onclick="toggleAccom(this)">
               <div class="ac-icon">🛏️</div>
               <div class="ac-title">Private room</div>
@@ -1309,7 +1309,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-group">
           <label>Household gender preference</label>
-          <div class="chips">
+          <div class="chips" id="chips-hh-gender">
             <div class="chip" onclick="toggle(this)">👩 Women only</div>
             <div class="chip" onclick="toggle(this)">👨 Men only</div>
             <div class="chip" onclick="toggle(this)">🤝 Mixed gender — no preference</div>
@@ -1320,7 +1320,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-group">
           <label>Number of housemates preferred</label>
-          <div class="chips">
+          <div class="chips" id="chips-housemates">
             <div class="chip" onclick="toggle(this)">Just 1 other person</div>
             <div class="chip" onclick="toggle(this)">2–3 housemates</div>
             <div class="chip" onclick="toggle(this)">4–5 housemates</div>
@@ -1330,7 +1330,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-group">
           <label>Lease type preference</label>
-          <div class="chips">
+          <div class="chips" id="chips-lease">
             <div class="chip" onclick="toggle(this)">📋 Fixed-term (6–12 months)</div>
             <div class="chip" onclick="toggle(this)">📅 Month-to-month / periodic</div>
             <div class="chip" onclick="toggle(this)">🔄 Open to broken lease / sublet</div>
@@ -1340,7 +1340,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-group">
           <label>Furnished or unfurnished?</label>
-          <div class="chips">
+          <div class="chips" id="chips-furnished">
             <div class="chip" onclick="toggle(this)">🛋️ Fully furnished preferred</div>
             <div class="chip" onclick="toggle(this)">📦 Unfurnished — I have my own</div>
             <div class="chip" onclick="toggle(this)">Either is fine</div>
@@ -1361,7 +1361,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         <div class="form-group">
           <label>🌙 Sleep &amp; home hours</label>
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">When and how you use the home at night</div>
-          <div class="chips">
+          <div class="chips" id="chips-sleep">
             <div class="chip" onclick="toggle(this)">🌅 Early bird — bed by 10pm, up early</div>
             <div class="chip" onclick="toggle(this)">🌤️ Usually in by midnight</div>
             <div class="chip" onclick="toggle(this)">🌙 Night owl — awake late, home quietly</div>
@@ -1372,7 +1372,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-group">
           <label>🎉 Party &amp; social life at home</label>
-          <div class="chips">
+          <div class="chips" id="chips-social">
             <div class="chip" onclick="toggle(this)">🎉 Party animal — regular late nights, people over often</div>
             <div class="chip" onclick="toggle(this)">🥂 Social house — gatherings occasionally, nothing too wild</div>
             <div class="chip" onclick="toggle(this)">🛋️ Chilled — friends over sometimes, quiet mostly</div>
@@ -1384,7 +1384,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         <div class="form-group">
           <label>👥 Guests &amp; visitors</label>
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Select all that apply</div>
-          <div class="chips">
+          <div class="chips" id="chips-guests">
             <div class="chip" onclick="toggle(this)">👨‍👩‍👧 Family visits regularly</div>
             <div class="chip" onclick="toggle(this)">💑 Partner stays over regularly</div>
             <div class="chip" onclick="toggle(this)">👋 Friends over occasionally</div>
@@ -1395,7 +1395,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-group">
           <label>📚 Study habits</label>
-          <div class="chips">
+          <div class="chips" id="chips-study">
             <div class="chip" onclick="toggle(this)">📚 Study at home — need genuine quiet</div>
             <div class="chip" onclick="toggle(this)">🏫 Go out to study (library / café)</div>
             <div class="chip" onclick="toggle(this)">🎧 Background noise fine when studying</div>
@@ -1405,7 +1405,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-group">
           <label>🧹 Cleanliness — be honest!</label>
-          <div class="chips">
+          <div class="chips" id="chips-clean">
             <div class="chip" onclick="toggle(this)">✨ Very tidy — clean as you go</div>
             <div class="chip" onclick="toggle(this)">🙂 Pretty neat overall</div>
             <div class="chip" onclick="toggle(this)">😐 Average — some mess is fine</div>
@@ -1415,7 +1415,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-group">
           <label>🍳 Kitchen habits</label>
-          <div class="chips">
+          <div class="chips" id="chips-kitchen">
             <div class="chip" onclick="toggle(this)">🍳 Cook most nights — clean as I go</div>
             <div class="chip" onclick="toggle(this)">🥗 Cook occasionally</div>
             <div class="chip" onclick="toggle(this)">🥡 Mostly takeaway / meal prep</div>
@@ -1424,7 +1424,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-group">
           <label>🌡️ Temperature &amp; bills</label>
-          <div class="chips">
+          <div class="chips" id="chips-temp">
             <div class="chip" onclick="toggle(this)">❄️ Keep it cool — AC on when needed</div>
             <div class="chip" onclick="toggle(this)">🪟 Open windows person</div>
             <div class="chip" onclick="toggle(this)">💡 Mindful of power bills</div>
@@ -1433,7 +1433,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-group">
           <label>🚬 Smoking &amp; vaping</label>
-          <div class="chips">
+          <div class="chips" id="chips-smoking">
             <div class="chip" onclick="toggle(this)">🚭 Non-smoker / non-vaper</div>
             <div class="chip" onclick="toggle(this)">🚬 Smoke or vape — outside only</div>
             <div class="chip" onclick="toggle(this)">🏠 Strictly smoke-free household</div>
@@ -1442,7 +1442,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-group">
           <label>🐾 Pets</label>
-          <div class="chips">
+          <div class="chips" id="chips-pets">
             <div class="chip" onclick="toggle(this)">🐾 Have / want a pet</div>
             <div class="chip" onclick="toggle(this)">🚫 No pets please</div>
             <div class="chip" onclick="toggle(this)">🤧 Allergic to cats or dogs</div>
@@ -1461,11 +1461,11 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
       <div class="step" id="step-5">
         <div class="step-title">Where in Brisbane?</div>
         <div class="step-sub">Select all areas you'd consider — more flexibility means more matches.</div>
-        <div class="form-group"><label>Inner city &amp; south</label><div class="chips"><div class="chip" onclick="toggle(this)">CBD / South Brisbane</div><div class="chip" onclick="toggle(this)">West End</div><div class="chip" onclick="toggle(this)">Woolloongabba</div><div class="chip" onclick="toggle(this)">Kangaroo Point</div><div class="chip" onclick="toggle(this)">Fortitude Valley</div><div class="chip" onclick="toggle(this)">New Farm</div></div></div>
-        <div class="form-group" style="margin-top:14px;"><label>Near campus</label><div class="chips"><div class="chip" onclick="toggle(this)">St Lucia (UQ)</div><div class="chip" onclick="toggle(this)">Toowong</div><div class="chip" onclick="toggle(this)">Kelvin Grove (QUT)</div><div class="chip" onclick="toggle(this)">Herston</div><div class="chip" onclick="toggle(this)">Dutton Park</div><div class="chip" onclick="toggle(this)">Greenslopes</div></div></div>
-        <div class="form-group" style="margin-top:14px;"><label>North &amp; outer</label><div class="chips"><div class="chip" onclick="toggle(this)">Chermside</div><div class="chip" onclick="toggle(this)">Nundah</div><div class="chip" onclick="toggle(this)">Windsor</div><div class="chip" onclick="toggle(this)">Paddington (Qld)</div><div class="chip" onclick="toggle(this)">Nathan (Griffith)</div><div class="chip" onclick="toggle(this)">Carindale</div><div class="chip" onclick="toggle(this)">Ipswich</div><div class="chip" onclick="toggle(this)">Springfield (USQ)</div></div></div>
+        <div class="form-group"><label>Inner city &amp; south</label><div class="chips" id="chips-suburb-inner"><div class="chip" onclick="toggle(this)">CBD / South Brisbane</div><div class="chip" onclick="toggle(this)">West End</div><div class="chip" onclick="toggle(this)">Woolloongabba</div><div class="chip" onclick="toggle(this)">Kangaroo Point</div><div class="chip" onclick="toggle(this)">Fortitude Valley</div><div class="chip" onclick="toggle(this)">New Farm</div></div></div>
+        <div class="form-group" style="margin-top:14px;"><label>Near campus</label><div class="chips" id="chips-suburb-east"><div class="chip" onclick="toggle(this)">St Lucia (UQ)</div><div class="chip" onclick="toggle(this)">Toowong</div><div class="chip" onclick="toggle(this)">Kelvin Grove (QUT)</div><div class="chip" onclick="toggle(this)">Herston</div><div class="chip" onclick="toggle(this)">Dutton Park</div><div class="chip" onclick="toggle(this)">Greenslopes</div></div></div>
+        <div class="form-group" style="margin-top:14px;"><label>North &amp; outer</label><div class="chips" id="chips-suburb-west"><div class="chip" onclick="toggle(this)">Chermside</div><div class="chip" onclick="toggle(this)">Nundah</div><div class="chip" onclick="toggle(this)">Windsor</div><div class="chip" onclick="toggle(this)">Paddington (Qld)</div><div class="chip" onclick="toggle(this)">Nathan (Griffith)</div><div class="chip" onclick="toggle(this)">Carindale</div><div class="chip" onclick="toggle(this)">Ipswich</div><div class="chip" onclick="toggle(this)">Springfield (USQ)</div></div></div>
         <div class="form-group" style="margin-top:14px;"><label>Gold Coast</label><div class="chips"><div class="chip" onclick="toggle(this)">Southport</div><div class="chip" onclick="toggle(this)">Robina (Bond)</div><div class="chip" onclick="toggle(this)">Varsity Lakes</div><div class="chip" onclick="toggle(this)">Broadbeach</div><div class="chip" onclick="toggle(this)">Burleigh Heads</div><div class="chip" onclick="toggle(this)">Coolangatta</div></div></div>
-        <div class="form-group" style="margin-top:20px;"><label>Maximum commute to campus</label><div class="chips"><div class="chip" onclick="toggle(this)">🚶 20 min walk</div><div class="chip" onclick="toggle(this)">🚌 30 min PT</div><div class="chip" onclick="toggle(this)">🚇 45 min PT</div><div class="chip" onclick="toggle(this)">🚆 Up to 60 min</div><div class="chip" onclick="toggle(this)">Flexible</div></div></div>
+        <div class="form-group" style="margin-top:20px;"><label>Maximum commute to campus</label><div class="chips" id="chips-commute"><div class="chip" onclick="toggle(this)">🚶 20 min walk</div><div class="chip" onclick="toggle(this)">🚌 30 min PT</div><div class="chip" onclick="toggle(this)">🚇 45 min PT</div><div class="chip" onclick="toggle(this)">🚆 Up to 60 min</div><div class="chip" onclick="toggle(this)">Flexible</div></div></div>
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(4)">← Back</button>
           <button class="btn-next" onclick="unlockAndGo(6)">Next: Budget →</button>
@@ -1485,11 +1485,11 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           </div>
           <div class="slider-val" id="rent-val" style="margin-top:8px;">$300/wk</div>
         </div>
-        <div class="form-group"><label>Move-in timeline</label><div class="chips"><div class="chip" onclick="toggle(this)">ASAP</div><div class="chip" onclick="toggle(this)">Within 1 month</div><div class="chip" onclick="toggle(this)">1–3 months</div><div class="chip" onclick="toggle(this)">Just exploring</div></div></div>
+        <div class="form-group"><label>Move-in timeline</label><div class="chips" id="chips-movein"><div class="chip" onclick="toggle(this)">ASAP</div><div class="chip" onclick="toggle(this)">Within 1 month</div><div class="chip" onclick="toggle(this)">1–3 months</div><div class="chip" onclick="toggle(this)">Just exploring</div></div></div>
         <div class="form-group">
           <label>Expected stay duration</label>
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;line-height:1.5;">Helps match you with housemates planning a similar stay — especially useful for exchange students and short courses.</div>
-          <div class="chips">
+          <div class="chips" id="chips-dur">
             <div class="chip" onclick="toggleSingle(this,'chips-duration')">1–3 months</div>
             <div class="chip" onclick="toggleSingle(this,'chips-duration')">3–6 months</div>
             <div class="chip" onclick="toggleSingle(this,'chips-duration')">6–12 months</div>
@@ -1675,6 +1675,7 @@ function tryGoStep(n) {
 }
 
 function unlockAndGo(n) {
+  saveProfileSteps(); // S94: persist selections before advancing
   if (n > unlockedUpTo) {
     unlockedUpTo = n;
     localStorage.setItem('ur_unlocked_up_to', unlockedUpTo);
@@ -1682,6 +1683,65 @@ function unlockAndGo(n) {
   renderTabLocks();
   goStep(n);
 }
+
+// ── Profile step data persistence (S94) ─────────────────────────────────────
+const UR_PROFILE_KEY = 'ur_profile_steps';
+const CHIP_GROUP_IDS = [
+  'chips-gender','chips-seeking',
+  'chips-accom',
+  'chips-hh-gender','chips-housemates','chips-lease','chips-furnished',
+  'chips-sleep','chips-social','chips-guests','chips-study',
+  'chips-clean','chips-kitchen','chips-temp','chips-smoking','chips-pets',
+  'chips-lang-home','chips-languages',
+  'chips-suburb-inner','chips-suburb-east','chips-suburb-west','chips-commute',
+  'chips-movein','chips-dur'
+];
+function saveProfileSteps() {
+  var data = {};
+  CHIP_GROUP_IDS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var isAccom = el.classList.contains('accom-grid');
+    var sel = isAccom ? el.querySelectorAll('.accom-card.selected') : el.querySelectorAll('.chip.selected');
+    data[id] = Array.from(sel).map(function(c) {
+      return isAccom ? c.querySelector('.ac-title').textContent : c.textContent;
+    });
+  });
+  var fname = document.getElementById('fname'); if (fname) data['fname'] = fname.value;
+  var cobSum = document.getElementById('input-cob-summary'); if (cobSum) data['cob-summary'] = cobSum.value;
+  var rentRange = document.querySelector('#step-6 input[type=range]'); if (rentRange) data['rent-slider'] = rentRange.value;
+  localStorage.setItem(UR_PROFILE_KEY, JSON.stringify(data));
+}
+function restoreProfileSteps() {
+  var raw = localStorage.getItem(UR_PROFILE_KEY);
+  if (!raw) return;
+  var data;
+  try { data = JSON.parse(raw); } catch(e) { return; }
+  CHIP_GROUP_IDS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el || !data[id] || !data[id].length) return;
+    var saved = data[id];
+    var isAccom = el.classList.contains('accom-grid');
+    if (isAccom) {
+      el.querySelectorAll('.accom-card').forEach(function(c) {
+        var title = c.querySelector('.ac-title');
+        if (title && saved.indexOf(title.textContent) !== -1) c.classList.add('selected');
+      });
+    } else {
+      el.querySelectorAll('.chip').forEach(function(c) {
+        if (saved.indexOf(c.textContent) !== -1) c.classList.add('selected');
+      });
+    }
+  });
+  if (data['fname']) { var f = document.getElementById('fname'); if (f) f.value = data['fname']; }
+  if (data['cob-summary']) { var cs = document.getElementById('input-cob-summary'); if (cs) cs.value = data['cob-summary']; }
+  if (data['rent-slider']) {
+    var rs = document.querySelector('#step-6 input[type=range]');
+    if (rs) { rs.value = data['rent-slider']; var rv = document.getElementById('rent-val'); if (rv) rv.textContent = '$' + data['rent-slider'] + '/wk'; }
+  }
+}
+// End profile step persistence
+
 
 function goStep(n) {
   document.getElementById('step-' + currentStep).classList.remove('active');
@@ -2028,7 +2088,7 @@ async function generateMatches() {
 
       data.matches.forEach(p => grid.appendChild(renderMatchCard(p)));
 
-      if (matchCount === 0) {
+      if (matchCount === 0 && localStorage.getItem('unirenter_email_verified') !== '1') {
         dummyProfiles.forEach(p => grid.appendChild(renderMatchCard(p)));
         const note = document.createElement('div');
         note.style.cssText = 'text-align:center;padding:8px 16px 24px;font-size:12px;color:var(--text-muted);';
@@ -2054,11 +2114,13 @@ async function generateMatches() {
   }
   grid.innerHTML = '';
   grid.appendChild(buildComingSoonCard(email, 'brisbane', 0));
-  dummyProfiles.forEach(p => grid.appendChild(renderMatchCard(p)));
-  const note = document.createElement('div');
-  note.style.cssText = 'text-align:center;padding:8px 16px 24px;font-size:12px;color:var(--text-muted);';
-  note.textContent = 'Example profiles — real matches appear as students join.';
-  grid.appendChild(note);
+  if (localStorage.getItem('unirenter_email_verified') !== '1') {
+    dummyProfiles.forEach(p => grid.appendChild(renderMatchCard(p)));
+    const note = document.createElement('div');
+    note.style.cssText = 'text-align:center;padding:8px 16px 24px;font-size:12px;color:var(--text-muted);';
+    note.textContent = 'Example profiles — real matches appear as students join.';
+    grid.appendChild(note);
+  }
   const rb = document.getElementById('referral-banner');
   if (rb) rb.style.display = 'flex';
   loadCityReviewGate();
@@ -2376,6 +2438,7 @@ function toggleTheme() {
     const nextBtn = document.getElementById('btn-step1-next');
     if (nextBtn) { nextBtn.style.opacity = '1'; nextBtn.style.pointerEvents = 'auto'; }
   }
+  restoreProfileSteps(); // S94: restore chip/input selections
 })();
 
 // ── Referral & sharing ──────────────────────────────────────────────────────
@@ -2679,7 +2742,8 @@ function fireCobPhase2Nudge() {
       nudgeText = `I found ${miss.unlock} more matches if you open up your accommodation type a little 🏠 — worth considering?`;
       break;
     case 'profile_completeness':
-      nudgeText = `Your profile's only ${miss.completeness}% filled in 📝 — finishing it up helps me find your best matches. Want to pick up where you left off?`;
+      var liveCompleteness = (typeof stepWeights !== 'undefined' && typeof currentStep !== 'undefined') ? (stepWeights[currentStep-1] || miss.completeness) : miss.completeness;
+      nudgeText = `Your profile's only ${liveCompleteness}% filled in 📝 — finishing it up helps me find your best matches. Want to pick up where you left off?`;
       break;
     default:
       nudgeText = `I found ${miss.unlock} more potential matches — tap me to explore your options 🤠`;
