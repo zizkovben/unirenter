@@ -717,6 +717,22 @@ body.light-mode {
 .section-action:hover { border-color: var(--brand-blue); color: var(--brand-blue); }
 
 /* ── Match cards ── */
+.exam-clash-nudge {
+  background: linear-gradient(135deg, rgba(245,184,0,0.06), rgba(13,31,45,0.4));
+  border: 1px solid rgba(245,184,0,0.2);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.exam-clash-nudge-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+.exam-clash-nudge-body { flex: 1; }
+.exam-clash-nudge-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+.exam-clash-nudge-msg { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+.exam-clash-nudge-dismiss { background: none; border: none; cursor: pointer; font-size: 15px; color: var(--text-muted); flex-shrink: 0; padding: 0; line-height: 1; }
+.exam-clash-nudge-dismiss:hover { color: var(--text); }
 .match-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -5978,7 +5994,51 @@ function adaptApiMatchForCard(p) {
     vibe_emoji_primary: p.vibe_emoji_primary || null,
     vibe_emoji_secondary: p.vibe_emoji_secondary || null,
     cob_summary: p.cob_summary || null,
+    field_of_study: p.field_of_study || null,
   };
+}
+
+function cobExamClashNudge(matches) {
+  // Remove any existing nudge first (e.g. on refresh)
+  var existing = document.getElementById('exam-clash-nudge');
+  if (existing) existing.remove();
+
+  var myField = window._loadedProfile && window._loadedProfile.field_of_study;
+  if (!myField) return; // can't compare without our own field
+
+  // Find matches in the same field
+  var clashMatches = matches.filter(function(m) {
+    return m.field_of_study && m.field_of_study.toLowerCase() === myField.toLowerCase();
+  });
+  if (clashMatches.length === 0) return; // no same-field matches — no nudge
+
+  var clashNames = clashMatches.map(function(m) {
+    return (m.display_name || 'Someone').split(' ')[0];
+  });
+  var nameStr = clashNames.length === 1
+    ? clashNames[0]
+    : clashNames.slice(0, -1).join(', ') + ' and ' + clashNames[clashNames.length - 1];
+  var plural = clashNames.length > 1;
+
+  var nudge = document.createElement('div');
+  nudge.className = 'exam-clash-nudge';
+  nudge.id = 'exam-clash-nudge';
+  nudge.innerHTML =
+    '<span class="exam-clash-nudge-icon">🤠</span>' +
+    '<div class="exam-clash-nudge-body">' +
+      '<div class="exam-clash-nudge-title">Heads up — exam period clash possible</div>' +
+      '<div class="exam-clash-nudge-msg">' +
+        nameStr + (plural ? ' are' : ' is') + ' also studying ' + myField + ', so your exam periods will likely overlap. ' +
+        'Worth discussing study boundaries and quiet hours early — before you move in, not after.' +
+      '</div>' +
+    '</div>' +
+    '<button class="exam-clash-nudge-dismiss" onclick="var n=document.getElementById(\'exam-clash-nudge\');if(n)n.remove();" title="Dismiss">✕</button>';
+
+  // Insert above the match grid
+  var grid = document.getElementById('match-grid');
+  if (grid && grid.parentNode) {
+    grid.parentNode.insertBefore(nudge, grid);
+  }
 }
 
 async function renderMatches() {
@@ -6024,6 +6084,7 @@ async function renderMatches() {
       grid.appendChild(emptyEl.firstElementChild);
     } else {
       realMatches.forEach(p => grid.appendChild(renderMatchCard(adaptApiMatchForCard(p))));
+      cobExamClashNudge(realMatches);
     }
   }
 
