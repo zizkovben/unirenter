@@ -233,6 +233,50 @@ module.exports = async function handler(req, res) {
     }
   }
 
+  // ── HOUSEHOLD VIBE SUMMARY BRANCH ─────────────────────────────────────────
+  if (req.body && req.body.purpose === 'household_vibe') {
+    const members = req.body.members;
+    if (!Array.isArray(members) || members.length === 0) {
+      return res.status(400).json({ error: 'members array required for household_vibe' });
+    }
+    const memberContext = members.map(function(m) {
+      const eq = m.vibe_emoji_primary + (m.vibe_emoji_secondary ? '+' + m.vibe_emoji_secondary : '');
+      return m.name + ' (' + eq + ')' + (m.cob_summary ? ': ' + m.cob_summary : '');
+    }).join('\n');
+
+    const householdSystem =
+      'You write one-sentence household personality summaries for a student housing platform called UniRenter. ' +
+      'You are Cob (short for Cobber) — warm, witty, Australian in tone, never cringe. ' +
+      'You receive the vibe profiles of each household member and write a single sentence (max 18 words) that captures the combined household personality. ' +
+      'Specific and vivid beats generic. Think: what would make a prospective housemate immediately understand the vibe? ' +
+      'Respond ONLY with valid JSON: { "household_summary": "..." } — no preamble, no markdown fences.';
+
+    try {
+      const hvRes = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: anthropicHeaders,
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 120,
+          system: householdSystem,
+          messages: [{ role: 'user', content: 'Write a household summary for these members:\n\n' + memberContext }]
+        })
+      });
+      if (!hvRes.ok) {
+        const errData = await hvRes.json().catch(() => ({}));
+        return res.status(hvRes.status).json({ error: 'AI service error', detail: errData.error?.message || 'Unknown' });
+      }
+      const hvData = await hvRes.json();
+      let raw = hvData.content?.[0]?.text || '';
+      raw = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(raw);
+      return res.status(200).json({ household_summary: parsed.household_summary || '' });
+    } catch (err) {
+      console.error('Household vibe error:', err);
+      return res.status(500).json({ error: 'Household vibe failed', detail: err.message });
+    }
+  }
+
   // ── STANDARD COB CHAT BRANCH ────────────────────────────────────────────────
   const { messages, city, extract_signals, systemPrompt: systemPromptOverride } = req.body;
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
