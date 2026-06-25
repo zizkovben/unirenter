@@ -6230,6 +6230,8 @@ function openConversation(key, el) {
 
   // Store current key for sending
   window._currentConvo = key;
+  // Reset agreement nudge so it can fire once per conversation
+  _msgAgreementNudgeFired = false;
 }
 
 function sendMessage() {

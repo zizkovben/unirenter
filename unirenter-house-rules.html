@@ -181,21 +181,21 @@
     .ag-no-value { color: rgba(255,255,255,0.2); font-style: italic; font-size: 12px; }
 
     /* Share strip */
-    .ag-share-strip {
-      background: rgba(75,191,224,0.06);
-      border: 1px solid rgba(75,191,224,0.18);
-      border-radius: 12px;
-      padding: 16px;
+    .ag-family-showcase {
+      background: linear-gradient(135deg, rgba(75,191,224,0.07) 0%, rgba(245,184,0,0.05) 100%);
+      border: 1px solid rgba(75,191,224,0.2);
+      border-radius: 14px;
+      padding: 20px;
       margin-top: 32px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
     }
-    .ag-share-strip-icon { font-size: 22px; }
-    .ag-share-strip-body { flex: 1; min-width: 180px; }
-    .ag-share-strip-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
-    .ag-share-strip-sub { font-size: 12px; color: var(--text-muted); }
+    .ag-family-header { display:flex; gap:14px; align-items:flex-start; margin-bottom:16px; }
+    .ag-family-icon { font-size:28px; flex-shrink:0; margin-top:2px; }
+    .ag-family-title { font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
+    .ag-family-sub { font-size:13px; color:var(--text-muted); line-height:1.5; }
+    .ag-family-link-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
+    .ag-family-url { flex:1; min-width:160px; font-size:12px; color:var(--text-muted); background:rgba(0,0,0,0.15); border-radius:6px; padding:8px 10px; word-break:break-all; }
+    .ag-family-features { display:flex; gap:8px; flex-wrap:wrap; }
+    .ag-family-feat { font-size:12px; color:var(--text-muted); background:rgba(75,191,224,0.1); border:1px solid rgba(75,191,224,0.2); border-radius:20px; padding:4px 10px; }
     .ag-copy-btn {
       background: none;
       border: 1px solid rgba(75,191,224,0.35);
@@ -356,7 +356,7 @@
     .ag-pdf-btn:hover { opacity: 0.88; }
     /* ── Print styles ── */
     @media print {
-      nav, .hv-nudge, .ag-share-strip, .ag-cta-footer, .ag-pdf-btn { display: none !important; }
+      nav, .hv-nudge, .ag-family-showcase, .ag-cta-footer, .ag-pdf-btn { display: none !important; }
       body { background: #fff; color: #000; font-family: Georgia, serif; }
       .page-wrap { max-width: 100%; padding: 0; }
       .ag-header { background: #f8f8f8; border: 1px solid #ddd; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
@@ -560,14 +560,24 @@
       // Clauses
       clauseHtml +
       // Share strip
-      '<div class="ag-share-strip">' +
-        '<span class="ag-share-strip-icon">📤</span>' +
-        '<div class="ag-share-strip-body">' +
-          '<div class="ag-share-strip-title">Share with family or housemates</div>' +
-          '<div class="ag-share-strip-sub">' + escHtml(publicUrl) + '</div>' +
+      '<div class="ag-family-showcase">' +
+        '<div class="ag-family-header">' +
+          '<span class="ag-family-icon">👨\u200d👩\u200d👧</span>' +
+          '<div>' +
+            '<div class="ag-family-title">Share with family back home</div>' +
+            '<div class="ag-family-sub">Show parents and family who you\'re living with, what everyone agreed to, and how your household vibes compare — all in one link.</div>' +
+          '</div>' +
         '</div>' +
-        '<button class="ag-copy-btn" id="ag-copy-btn">Copy link</button>' +
-        '<button class="ag-pdf-btn" onclick="window.print()">⬇ Download PDF</button>' +
+        '<div class="ag-family-link-row">' +
+          '<div class="ag-family-url" id="ag-family-url">' + escHtml(publicUrl) + '</div>' +
+          '<button class="ag-copy-btn" id="ag-copy-btn">Copy link</button>' +
+          '<button class="ag-pdf-btn" onclick="window.print()">⬇ Save as PDF</button>' +
+        '</div>' +
+        '<div class="ag-family-features">' +
+          '<span class="ag-family-feat">🤠 Household vibe</span>' +
+          '<span class="ag-family-feat">📋 Agreed rules</span>' +
+          '<span class="ag-family-feat">👥 Who you live with</span>' +
+        '</div>' +
       '</div>' +
       // CTA
       '<div class="ag-cta-footer">' +
