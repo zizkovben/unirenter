@@ -3318,8 +3318,8 @@ body.light-mode {
         <div class="nav-dd-divider"></div>
         <a class="nav-dd-item" href="/">🏠 Back to home</a>
         <div class="nav-dd-divider"></div>
-        <a class="nav-dd-item" href="/admin" style="color:var(--brand-yellow)">⚙️ Staff →</a>
-        <a class="nav-dd-item" href="/agent-portal" style="color:var(--brand-blue)">🏡 Agent portal →</a>
+        <a class="nav-dd-item" href="/admin" id="nav-staff-link" style="color:var(--brand-yellow);display:none;">⚙️ Staff →</a>
+        <a class="nav-dd-item" href="/agent-portal" id="nav-agent-link" style="color:var(--brand-blue);display:none;">🏡 Agent portal →</a>
       </div>
     </div>
     <button class="btn-theme" id="mode-toggle" onclick="toggleMode()">🌙</button>
@@ -5548,6 +5548,13 @@ function loadProfile() {
   if (email) {
     document.getElementById('header-email').textContent = email;
     document.getElementById('sp-acct-email').textContent = email;
+    // Admin-only nav links — never visible to regular users
+    if (email === 'benjcarey75@gmail.com') {
+      var sl = document.getElementById('nav-staff-link');
+      var al = document.getElementById('nav-agent-link');
+      if (sl) sl.style.display = 'block';
+      if (al) al.style.display = 'block';
+    }
   } else {
     document.getElementById('header-email').textContent = 'Not signed in';
     document.getElementById('sp-acct-email').textContent = 'Not verified';
