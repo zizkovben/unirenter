@@ -3039,7 +3039,7 @@ async function sendCobMessage() {
     const r = await fetch('/api/cob', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, context: 'break_lease_board', city: detectLeaseCity() }),
+      body: JSON.stringify({ message: text, context: 'lease_transfer_board', city: detectLeaseCity() }),
     });
     removeCobTyping();
     if (r.ok) {
