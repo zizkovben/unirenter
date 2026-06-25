@@ -2195,6 +2195,14 @@ body.light-mode {
   transition: opacity 0.2s;
 }
 .household-wa-btn:hover { opacity: 0.85; }
+/* ── Cob agreement nudge in chat ── */
+.chat-msg.cob-nudge { margin: 8px 0; }
+.cob-nudge-inner { display:flex; gap:10px; align-items:flex-start; background:rgba(75,191,224,0.08); border:1px solid rgba(75,191,224,0.2); border-radius:10px; padding:12px 14px; }
+.cob-nudge-avatar { font-size:20px; flex-shrink:0; margin-top:1px; }
+.cob-nudge-body { flex:1; }
+.cob-nudge-text { font-size:13px; color:var(--text-primary); line-height:1.5; margin-bottom:8px; }
+.cob-nudge-btn { background:var(--brand-yellow); color:#0d1f2d; border:none; border-radius:7px; padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:Inter,sans-serif; }
+.cob-nudge-btn:hover { opacity:0.88; }
 /* ── Household Agreement (S52) ── */
 .hh-agreement-entry-card {
   background: linear-gradient(135deg, rgba(245,184,0,0.08), rgba(75,191,224,0.06));
@@ -3962,8 +3970,19 @@ body.light-mode {
         </div>
 
         <button class="household-setup-btn" onclick="householdSetup()">Set up my household →</button>
+        <div id="household-setup-error" style="display:none;margin-top:10px;font-size:12px;color:var(--brand-coral);text-align:center;padding:0 16px;"></div>
       </div>
     </div>
+    <!-- Housemate agreement entry card — shown in empty state and active household -->
+    <div class="hh-agreement-entry-card" id="hh-ag-empty-card" onclick="hhAgOpenStandalone()" style="display:none;margin-top:12px;">
+      <div class="hh-agreement-entry-head">
+        <span class="hh-agreement-entry-icon">📋</span>
+        <span class="hh-agreement-entry-title">Housemate Agreement</span>
+        <span class="hh-agreement-entry-badge" style="background:rgba(75,191,224,0.15);color:var(--brand-blue);">Optional</span>
+      </div>
+      <div class="hh-agreement-entry-sub">Sort cleaning, guests, quiet hours and bills upfront — before the passive-aggressive notes start. Not legally binding. Between you as equals.</div>
+    </div>
+
     <!-- Review modal -->
     <div id="hh-review-modal" class="hh-review-modal" style="display:none;">
       <div class="hh-review-modal-inner">
@@ -6239,6 +6258,40 @@ function sendMessage() {
   if (key && CONVERSATIONS[key]) {
     CONVERSATIONS[key].messages.push({ from:'me', text, time:'just now' });
   }
+
+  // Keyword nudge — suggest housemate agreement after relevant terms
+  msgCheckAgreementNudge(text);
+}
+
+var _msgAgreementNudgeFired = false;
+function hhAgNudgeAccept() {
+  var n = document.getElementById('msg-ag-nudge');
+  if (n) n.style.display = 'none';
+  hhAgOpenStandalone();
+}
+function msgCheckAgreementNudge(text) {
+  if (_msgAgreementNudgeFired) return;
+  var keywords = /\b(cleaning|cleanliness|clean|quiet hours|quiet|guests|overnight|bills|utilities|rent|chores|rules|move.?in|housemate agreement|flatmate agreement|house rules|groceries|dishes|washing up|noise|parties|pets)\b/i;
+  if (!keywords.test(text)) return;
+  _msgAgreementNudgeFired = true;
+  // Small delay so message appears first
+  setTimeout(function() {
+    var msgs = document.getElementById('msg-messages');
+    if (!msgs) return;
+    var nudge = document.createElement('div');
+    nudge.className = 'chat-msg cob-nudge';
+    nudge.id = 'msg-ag-nudge';
+    nudge.innerHTML =
+      '<div class="cob-nudge-inner">' +
+        '<span class="cob-nudge-avatar">🤠</span>' +
+        '<div class="cob-nudge-body">' +
+          '<div class="cob-nudge-text">Want to sort this properly? A housemate agreement covers all of this — and only takes a couple of minutes.</div>' +
+          '<button class="cob-nudge-btn" onclick="hhAgNudgeAccept()">📋 Start a housemate agreement →</button>' +
+        '</div>' +
+      '</div>';
+    msgs.appendChild(nudge);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 600);
 }
 
 function blockUser() {
@@ -9130,16 +9183,21 @@ function householdRenderEmpty() {
   }
   // Show empty state (sample preview)
   if (emptyState) emptyState.style.display = 'block';
+  // Show agreement entry card
+  var agCard = document.getElementById('hh-ag-empty-card');
+  if (agCard) agCard.style.display = 'block';
 }
 
 function householdSetup() {
   var email = localStorage.getItem('unirenter_email');
   if (!email || localStorage.getItem('unirenter_email_verified') !== '1') {
-    alert('Please verify your email first to set up a household.');
+    householdSetupError('Please verify your email first to set up a household.');
     return;
   }
   var btn = document.querySelector('.household-setup-btn');
+  var errEl = document.getElementById('household-setup-error');
   if (btn) { btn.disabled = true; btn.textContent = 'Setting up…'; }
+  if (errEl) errEl.style.display = 'none';
   fetch('/api/household/create', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -9150,12 +9208,18 @@ function householdSetup() {
     if (!d.ok) throw new Error(d.error || 'Setup failed');
     localStorage.setItem('ur_household_id', d.household_id);
     localStorage.setItem('ur_household_invite_token', d.invite_token);
+    // Keep dummy preview visible momentarily, then load real household
     householdLoad(d.household_id);
   })
   .catch(function(err) {
     if (btn) { btn.disabled = false; btn.textContent = 'Set up my household →'; }
-    alert('Could not set up household: ' + err.message);
+    householdSetupError(err.message);
   });
+}
+
+function householdSetupError(msg) {
+  var errEl = document.getElementById('household-setup-error');
+  if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
 }
 
 function householdJoinConfirm() {
@@ -9334,6 +9398,16 @@ function householdRender(data, currentEmail) {
   inner.innerHTML = html;
 
   if (subtitleEl) subtitleEl.textContent = members.length + ' member' + (members.length !== 1 ? 's' : '') + ' in your household';
+
+  // Show agreement entry card at bottom of active household
+  var agCard = document.getElementById('hh-ag-empty-card');
+  if (agCard) {
+    agCard.style.display = 'block';
+    // Update sub-text and load real state if household exists
+    var agSub = agCard.querySelector('.hh-agreement-entry-sub');
+    if (agSub) agSub.textContent = 'Sort the house rules before someone needs to guess. Tap to start or review your agreement.';
+    hhAgLoadEntryState(localStorage.getItem('ur_household_id'), currentEmail);
+  }
 }
 
 function householdShowInvite() {
@@ -9688,14 +9762,29 @@ function hhReviewSummaryLoad(householdId, email, containerEl) {
 function vibeCardShareHousehold() { alert('Household vibe cards — coming in the next update! 🤠'); }
 
 // ── Housemate agreement card in Messages tab (S77) ──
-function msgAgreementCardClick() {
+function hhAgOpenStandalone() {
+  // Open the agreement builder without requiring a household ID.
+  // If user has a household, use it. Otherwise open in standalone mode.
   var householdId = localStorage.getItem('ur_household_id');
   var email = localStorage.getItem('unirenter_email') || '';
   if (householdId && email) {
     hhAgOpen(householdId, email);
   } else {
-    switchTab('household');
+    // Standalone mode — open tier select directly, save locally
+    _hhAgHouseholdId = null;
+    _hhAgEmail = email || 'guest';
+    _hhAgAgreement = null;
+    _hhAgMembers = email ? [email] : [];
+    _hhAgTicks = [];
+    document.getElementById('hh-agreement-modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    hhAgRenderTierSelect();
   }
+}
+
+function msgAgreementCardClick() {
+  // Use standalone opener — no longer requires household to be set up first
+  hhAgOpenStandalone();
 }
 
 function msgAgreementCardInit() {
@@ -9724,7 +9813,7 @@ function msgAgreementCardInit() {
       if (badge) { badge.textContent = '🔒 Locked'; badge.className = 'hh-agreement-entry-badge locked'; }
       if (sub)   sub.textContent = 'Your house rules are locked and agreed by everyone — tap to review.';
     } else {
-      var tierNames = { 1: 'Quick Rules', 2: 'House Rules', 3: 'Full House Manual' };
+      var tierNames = { 1: 'Quick Agreement', 2: 'Full Agreement', 3: 'Household Manual' };
       var tierName = tierNames[agreement.tier] || 'House Rules';
       if (badge) { badge.textContent = tierName; badge.className = 'hh-agreement-entry-badge'; }
       if (sub)   sub.textContent = pct + '% of clauses ticked — tap to review.';
@@ -9783,7 +9872,7 @@ function hhAgLoadEntryState(householdId, currentEmail) {
       if (sub)   sub.textContent = 'Your house rules are locked and agreed by everyone.';
       if (pwrap) pwrap.style.display = 'none';
     } else {
-      var tierNames = { 1: 'Quick Rules', 2: 'House Rules', 3: 'Full House Manual' };
+      var tierNames = { 1: 'Quick Agreement', 2: 'Full Agreement', 3: 'Household Manual' };
       var tierName = tierNames[agreement.tier] || 'House Rules';
       if (badge) { badge.textContent = tierName; badge.className = 'hh-agreement-entry-badge'; }
       if (sub)   sub.textContent = pct + '% of clauses ticked — tap to review.';
@@ -9800,7 +9889,7 @@ function hhAgLoadEntryState(householdId, currentEmail) {
 // Clause definitions by tier
 var HH_AG_TIERS = {
   1: {
-    name: 'Quick Rules',
+    name: 'Quick Agreement',
     desc: '5 core clauses',
     time: '2 min',
     icon: '⚡',
@@ -9813,7 +9902,7 @@ var HH_AG_TIERS = {
     ]
   },
   2: {
-    name: 'House Rules',
+    name: 'Full Agreement',
     desc: '12 clauses',
     time: '8 min',
     icon: '🏠',
@@ -9833,8 +9922,8 @@ var HH_AG_TIERS = {
     ]
   },
   3: {
-    name: 'Full House Manual',
-    desc: '20+ clauses + roster',
+    name: 'Household Manual',
+    desc: '20+ clauses',
     time: '20 min',
     icon: '📖',
     clauses: [
@@ -9918,7 +10007,7 @@ function hhAgBack() {
 }
 
 function hhAgShowLoading() {
-  document.getElementById('hh-ag-modal-title').textContent = 'House Rules';
+  document.getElementById('hh-ag-modal-title').textContent = 'Housemate Agreement';
   document.getElementById('hh-ag-back-btn').style.display = 'none';
   document.getElementById('hh-ag-action-bar').style.display = 'none';
   document.getElementById('hh-ag-progress-note').textContent = '';
@@ -9934,7 +10023,7 @@ function hhAgShowError(msg) {
 
 function hhAgRenderTierSelect() {
   _hhAgStep = 'tier-select';
-  document.getElementById('hh-ag-modal-title').textContent = 'House Rules';
+  document.getElementById('hh-ag-modal-title').textContent = 'Housemate Agreement';
   document.getElementById('hh-ag-back-btn').style.display = 'none';
   document.getElementById('hh-ag-action-bar').style.display = 'none';
   document.getElementById('hh-ag-progress-note').textContent = '';
@@ -9950,9 +10039,9 @@ function hhAgRenderTierSelect() {
   }).join('');
 
   document.getElementById('hh-ag-modal-body').innerHTML =
-    '<div class="hh-ag-cob-intro">🤠 Want to sort the house rules before someone leaves a passive-aggressive note about the dishes? Pick a level — I\'ll help you build something everyone can actually agree on.</div>' +
+    '<div class="hh-ag-cob-intro">🤠 A housemate agreement isn\'t legally binding — it works because <em>you all agreed to it</em>, not because of anything written. But sorting the basics upfront prevents most of the stuff that turns a good house into a painful one. Totally optional. Pick a level:</div>' +
     '<div class="hh-ag-tier-grid">' + cards + '</div>' +
-    '<div class="hh-ag-disclaimer">This is not a legally binding document. It works because you\'ve all agreed to it \u2014 not because of anything written here. If something\'s not working, talk to each other first.</div>';
+    '<div class="hh-ag-disclaimer">Not legally binding. Works between you as equals — not set by a landlord. If something\'s not working, talk to each other first.</div>';
 }
 
 function hhAgSelectTier(tierNum) {
@@ -10053,7 +10142,7 @@ function hhAgRenderClauses() {
 function hhAgRenderLocked() {
   _hhAgStep = 'locked';
   var agreement = _hhAgAgreement;
-  document.getElementById('hh-ag-modal-title').textContent = 'House Rules — Locked';
+  document.getElementById('hh-ag-modal-title').textContent = 'Housemate Agreement — Locked';
   document.getElementById('hh-ag-back-btn').style.display = 'none';
   document.getElementById('hh-ag-action-bar').style.display = 'none';
   document.getElementById('hh-ag-progress-note').textContent = '';
@@ -10107,7 +10196,8 @@ function hhAgRenderLocked() {
       '<div style="font-size:12px;color:var(--text-muted);margin-bottom:10px);">Starting over will unlock the agreement and clear all ticks. Everyone will need to re-agree.</div>' +
       '<button onclick="hhAgUnlock()" style="background:none;border:1px solid rgba(232,98,58,0.4);color:var(--brand-coral);border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:Inter,sans-serif;">Unlock & edit</button>' +
     '</div>' +
-    '<div class="hh-ag-disclaimer">This is not a legally binding document. It works because you\'ve all agreed to it \u2014 not because of anything written here.</div>';
+    '<div class="hh-ag-cob-tip" style="margin-top:14px;padding:12px 14px;background:rgba(75,191,224,0.07);border:1px solid rgba(75,191,224,0.2);border-radius:8px;display:flex;gap:10px;align-items:flex-start;"><span style="font-size:18px;">🤠</span><div style="font-size:12px;color:var(--text-muted);line-height:1.5;"><strong style="color:var(--text-primary);">Worth revisiting in 6 weeks.</strong> Most houses find the cleaning roster needs a tweak once everyone settles in. Unlock and edit anytime — everyone just needs to re-tick.</div></div>' +
+    '<div class="hh-ag-disclaimer">Not legally binding. Agreed between housemates — not set by a landlord.</div>';
 
   // Wire up the copy button (can't use inline onclick with dynamic URL)
   var _shareUrlForCopy = shareUrl;
@@ -10955,7 +11045,7 @@ function closeCardPreview() {
   <div class="hh-ag-modal-box" id="hh-ag-modal-box">
     <div class="hh-ag-modal-header">
       <button class="hh-ag-modal-back" id="hh-ag-back-btn" onclick="hhAgBack()" style="display:none;">← Back</button>
-      <span class="hh-ag-modal-title" id="hh-ag-modal-title">House Rules</span>
+      <span class="hh-ag-modal-title" id="hh-ag-modal-title">Housemate Agreement</span>
       <button class="hh-ag-modal-close" onclick="hhAgClose()" aria-label="Close">✕</button>
     </div>
     <div class="hh-ag-modal-body" id="hh-ag-modal-body">
