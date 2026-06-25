@@ -267,6 +267,49 @@ body.light-mode {
 }
 .cob-review-submit-btn:hover { opacity: 0.88; }
 .cob-review-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.cob-review-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.cob-review-chip {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 4px 11px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.cob-review-chip:hover { background: rgba(245,184,0,0.08); border-color: rgba(245,184,0,0.3); color: var(--text-primary); }
+.cob-review-chip.used { background: rgba(245,184,0,0.1); border-color: rgba(245,184,0,0.35); color: var(--brand-yellow); }
+.cob-review-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.cob-review-mic-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  color: var(--text-muted);
+}
+.cob-review-mic-btn:hover { border-color: rgba(232,98,58,0.4); color: var(--brand-coral); }
+.cob-review-mic-btn.active { border-color: var(--brand-coral); color: var(--brand-coral); background: rgba(232,98,58,0.1); }
 .cob-review-skip { font-size: 12px; color: var(--text-muted); background: none; border: none;
   cursor: pointer; font-family: 'Inter', sans-serif; padding: 0; }
 .cob-review-skip:hover { color: var(--text-primary); }
@@ -674,6 +717,22 @@ body.light-mode {
 .section-action:hover { border-color: var(--brand-blue); color: var(--brand-blue); }
 
 /* ── Match cards ── */
+.exam-clash-nudge {
+  background: linear-gradient(135deg, rgba(245,184,0,0.06), rgba(13,31,45,0.4));
+  border: 1px solid rgba(245,184,0,0.2);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.exam-clash-nudge-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+.exam-clash-nudge-body { flex: 1; }
+.exam-clash-nudge-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+.exam-clash-nudge-msg { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+.exam-clash-nudge-dismiss { background: none; border: none; cursor: pointer; font-size: 15px; color: var(--text-muted); flex-shrink: 0; padding: 0; line-height: 1; }
+.exam-clash-nudge-dismiss:hover { color: var(--text); }
 .match-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -2136,6 +2195,14 @@ body.light-mode {
   transition: opacity 0.2s;
 }
 .household-wa-btn:hover { opacity: 0.85; }
+/* ── Cob agreement nudge in chat ── */
+.chat-msg.cob-nudge { margin: 8px 0; }
+.cob-nudge-inner { display:flex; gap:10px; align-items:flex-start; background:rgba(75,191,224,0.08); border:1px solid rgba(75,191,224,0.2); border-radius:10px; padding:12px 14px; }
+.cob-nudge-avatar { font-size:20px; flex-shrink:0; margin-top:1px; }
+.cob-nudge-body { flex:1; }
+.cob-nudge-text { font-size:13px; color:var(--text-primary); line-height:1.5; margin-bottom:8px; }
+.cob-nudge-btn { background:var(--brand-yellow); color:#0d1f2d; border:none; border-radius:7px; padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:Inter,sans-serif; }
+.cob-nudge-btn:hover { opacity:0.88; }
 /* ── Household Agreement (S52) ── */
 .hh-agreement-entry-card {
   background: linear-gradient(135deg, rgba(245,184,0,0.08), rgba(75,191,224,0.06));
@@ -3346,8 +3413,18 @@ body.light-mode {
         <div id="cob-review-step-comment" class="cob-review-followup">
           <div class="cob-review-thankyou" id="cob-review-thanks">Thanks! 🤠</div>
           <div class="cob-review-prompt">What's been most useful so far? (optional)</div>
+          <div class="cob-review-chips" id="cob-review-chips">
+            <button class="cob-review-chip" onclick="cobReviewChip(this,'Housemate matching')">Housemate matching</button>
+            <button class="cob-review-chip" onclick="cobReviewChip(this,'Cob AI assistant')">Cob AI assistant</button>
+            <button class="cob-review-chip" onclick="cobReviewChip(this,'Lease guide')">Lease guide</button>
+            <button class="cob-review-chip" onclick="cobReviewChip(this,'Profile setup')">Profile setup</button>
+            <button class="cob-review-chip" onclick="cobReviewChip(this,'Easy to use')">Easy to use</button>
+          </div>
           <textarea class="cob-review-input" id="cob-review-comment" rows="2" placeholder="e.g. finding housemates, the lease guide…"></textarea>
-          <button class="cob-review-submit-btn" id="cob-review-submit-btn" onclick="cobReviewSubmit()">Submit</button>
+          <div class="cob-review-actions">
+            <button class="cob-review-submit-btn" id="cob-review-submit-btn" onclick="cobReviewSubmit()" style="flex:1;">Submit</button>
+            <button class="cob-review-mic-btn" id="cob-review-mic-btn" onclick="cobReviewMicToggle()" title="Dictate your review" style="display:none;">🎤</button>
+          </div>
           <button class="cob-review-skip" onclick="cobReviewSkipComment()">Skip</button>
         </div>
         <!-- Step 3: share strip (after submit or skip) -->
@@ -3893,8 +3970,19 @@ body.light-mode {
         </div>
 
         <button class="household-setup-btn" onclick="householdSetup()">Set up my household →</button>
+        <div id="household-setup-error" style="display:none;margin-top:10px;font-size:12px;color:var(--brand-coral);text-align:center;padding:0 16px;"></div>
       </div>
     </div>
+    <!-- Housemate agreement entry card — shown in empty state and active household -->
+    <div class="hh-agreement-entry-card" id="hh-ag-empty-card" onclick="hhAgOpenStandalone()" style="display:none;margin-top:12px;">
+      <div class="hh-agreement-entry-head">
+        <span class="hh-agreement-entry-icon">📋</span>
+        <span class="hh-agreement-entry-title">Housemate Agreement</span>
+        <span class="hh-agreement-entry-badge" style="background:rgba(75,191,224,0.15);color:var(--brand-blue);">Optional</span>
+      </div>
+      <div class="hh-agreement-entry-sub">Sort cleaning, guests, quiet hours and bills upfront — before the passive-aggressive notes start. Not legally binding. Between you as equals.</div>
+    </div>
+
     <!-- Review modal -->
     <div id="hh-review-modal" class="hh-review-modal" style="display:none;">
       <div class="hh-review-modal-inner">
@@ -4297,27 +4385,6 @@ body.light-mode {
           </div>
         </div>
       </div>
-
-        <!-- ── Your vibe card (S97 — reads from city-page quiz result) ── -->
-        <div class="profile-section-card" id="dashboard-vibe-card">
-          <div class="profile-section-head" style="display:flex;align-items:center;justify-content:space-between;">
-            <span>✨ Your vibe</span>
-            <span class="vibe-cob-badge" style="font-size:11px;padding:2px 8px;">🤠 Cob</span>
-          </div>
-          <!-- Filled state -->
-          <div id="dvibe-filled" style="display:none;padding:14px 18px 18px;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-              <div id="dvibe-equation" style="font-size:28px;letter-spacing:4px;line-height:1;"></div>
-            </div>
-            <div id="dvibe-summary" style="font-size:13px;color:var(--text-muted);font-style:italic;line-height:1.5;margin-bottom:14px;"></div>
-            <a id="dvibe-redo-link" href="/" style="font-size:12px;color:var(--brand-blue);text-decoration:none;opacity:0.85;">Redo quiz ↺</a>
-          </div>
-          <!-- Empty state -->
-          <div id="dvibe-empty" style="display:none;padding:14px 18px 18px;">
-            <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">🤠 No vibe yet — complete the Lifestyle step on your city page to get your emoji equation.</div>
-            <a id="dvibe-quiz-link" href="/" style="display:inline-block;font-size:13px;color:var(--brand-blue);text-decoration:none;border:1px solid rgba(75,191,224,0.35);border-radius:8px;padding:6px 14px;">Take the quiz →</a>
-          </div>
-        </div>
 
     </div>
 
@@ -5454,37 +5521,6 @@ function applyProfileData(p, cobRefinedFields) {
   }
 }
 
-// ── Dashboard vibe card (S97) ─────────────────────────────────────────────────
-function populateDashboardVibeCard(supabaseProfile) {
-  var p = supabaseProfile || {};
-  var primary   = localStorage.getItem('ur_vibe_primary')   || p.vibe_emoji_primary   || '';
-  var secondary = localStorage.getItem('ur_vibe_secondary') || p.vibe_emoji_secondary || '';
-  var summary   = localStorage.getItem('ur_vibe_summary')   || p.cob_summary          || '';
-  var city      = localStorage.getItem('ur_city')           || 'melbourne';
-  var cityRoot  = city === 'melbourne' ? '/' : '/' + city;
-  var step4Link = cityRoot + '#step-4';
-
-  var filled = document.getElementById('dvibe-filled');
-  var empty  = document.getElementById('dvibe-empty');
-  var redo   = document.getElementById('dvibe-redo-link');
-  var qlink  = document.getElementById('dvibe-quiz-link');
-  if (!filled || !empty) return;
-
-  if (primary || summary) {
-    var eq = document.getElementById('dvibe-equation');
-    var sm = document.getElementById('dvibe-summary');
-    if (eq) eq.textContent = (primary || '') + (secondary ? ' ' + secondary : '');
-    if (sm) sm.textContent = summary || '';
-    if (redo) redo.href = step4Link;
-    filled.style.display = 'block';
-    empty.style.display  = 'none';
-  } else {
-    if (qlink) qlink.href = step4Link;
-    filled.style.display = 'none';
-    empty.style.display  = 'block';
-  }
-}
-
 // ── Fetch profile from Supabase (primary source) ──────────────────────────────
 async function loadProfileFromSupabase(email) {
   try {
@@ -5522,7 +5558,6 @@ function loadProfile() {
 
   // Fast path — paint immediately from cached localStorage values
   applyProfileData({}, []);
-  populateDashboardVibeCard(null);
   extrasLoadSaved();
 
   // Authoritative path — fetch from Supabase and repaint with richer data
@@ -5538,7 +5573,6 @@ function loadProfile() {
 
         const cobRefined = profile.cob_refined_fields || [];
         applyProfileData(profile, cobRefined);
-        populateDashboardVibeCard(profile);
         extrasLoadFromProfile(profile);
       }
     });
@@ -5979,7 +6013,51 @@ function adaptApiMatchForCard(p) {
     vibe_emoji_primary: p.vibe_emoji_primary || null,
     vibe_emoji_secondary: p.vibe_emoji_secondary || null,
     cob_summary: p.cob_summary || null,
+    field_of_study: p.field_of_study || null,
   };
+}
+
+function cobExamClashNudge(matches) {
+  // Remove any existing nudge first (e.g. on refresh)
+  var existing = document.getElementById('exam-clash-nudge');
+  if (existing) existing.remove();
+
+  var myField = window._loadedProfile && window._loadedProfile.field_of_study;
+  if (!myField) return; // can't compare without our own field
+
+  // Find matches in the same field
+  var clashMatches = matches.filter(function(m) {
+    return m.field_of_study && m.field_of_study.toLowerCase() === myField.toLowerCase();
+  });
+  if (clashMatches.length === 0) return; // no same-field matches — no nudge
+
+  var clashNames = clashMatches.map(function(m) {
+    return (m.display_name || 'Someone').split(' ')[0];
+  });
+  var nameStr = clashNames.length === 1
+    ? clashNames[0]
+    : clashNames.slice(0, -1).join(', ') + ' and ' + clashNames[clashNames.length - 1];
+  var plural = clashNames.length > 1;
+
+  var nudge = document.createElement('div');
+  nudge.className = 'exam-clash-nudge';
+  nudge.id = 'exam-clash-nudge';
+  nudge.innerHTML =
+    '<span class="exam-clash-nudge-icon">🤠</span>' +
+    '<div class="exam-clash-nudge-body">' +
+      '<div class="exam-clash-nudge-title">Heads up — exam period clash possible</div>' +
+      '<div class="exam-clash-nudge-msg">' +
+        nameStr + (plural ? ' are' : ' is') + ' also studying ' + myField + ', so your exam periods will likely overlap. ' +
+        'Worth discussing study boundaries and quiet hours early — before you move in, not after.' +
+      '</div>' +
+    '</div>' +
+    '<button class="exam-clash-nudge-dismiss" onclick="var n=document.getElementById(\'exam-clash-nudge\');if(n)n.remove();" title="Dismiss">✕</button>';
+
+  // Insert above the match grid
+  var grid = document.getElementById('match-grid');
+  if (grid && grid.parentNode) {
+    grid.parentNode.insertBefore(nudge, grid);
+  }
 }
 
 async function renderMatches() {
@@ -6025,6 +6103,7 @@ async function renderMatches() {
       grid.appendChild(emptyEl.firstElementChild);
     } else {
       realMatches.forEach(p => grid.appendChild(renderMatchCard(adaptApiMatchForCard(p))));
+      cobExamClashNudge(realMatches);
     }
   }
 
@@ -6090,7 +6169,7 @@ function skipCard(btn) {
 }
 
 function copyReferral() {
-  const url = 'https://unirenter.vercel.app';
+  const url = 'https://unirenter.com.au';
   navigator.clipboard.writeText(url).then(() => showToast('📋 Copied!', 'Referral link copied to clipboard.'));
 }
 
@@ -6151,6 +6230,8 @@ function openConversation(key, el) {
 
   // Store current key for sending
   window._currentConvo = key;
+  // Reset agreement nudge so it can fire once per conversation
+  _msgAgreementNudgeFired = false;
 }
 
 function sendMessage() {
@@ -6179,6 +6260,40 @@ function sendMessage() {
   if (key && CONVERSATIONS[key]) {
     CONVERSATIONS[key].messages.push({ from:'me', text, time:'just now' });
   }
+
+  // Keyword nudge — suggest housemate agreement after relevant terms
+  msgCheckAgreementNudge(text);
+}
+
+var _msgAgreementNudgeFired = false;
+function hhAgNudgeAccept() {
+  var n = document.getElementById('msg-ag-nudge');
+  if (n) n.style.display = 'none';
+  hhAgOpenStandalone();
+}
+function msgCheckAgreementNudge(text) {
+  if (_msgAgreementNudgeFired) return;
+  var keywords = /\b(cleaning|cleanliness|clean|quiet hours|quiet|guests|overnight|bills|utilities|rent|chores|rules|move.?in|housemate agreement|flatmate agreement|house rules|groceries|dishes|washing up|noise|parties|pets)\b/i;
+  if (!keywords.test(text)) return;
+  _msgAgreementNudgeFired = true;
+  // Small delay so message appears first
+  setTimeout(function() {
+    var msgs = document.getElementById('msg-messages');
+    if (!msgs) return;
+    var nudge = document.createElement('div');
+    nudge.className = 'chat-msg cob-nudge';
+    nudge.id = 'msg-ag-nudge';
+    nudge.innerHTML =
+      '<div class="cob-nudge-inner">' +
+        '<span class="cob-nudge-avatar">🤠</span>' +
+        '<div class="cob-nudge-body">' +
+          '<div class="cob-nudge-text">Want to sort this properly? A housemate agreement covers all of this — and only takes a couple of minutes.</div>' +
+          '<button class="cob-nudge-btn" onclick="hhAgNudgeAccept()">📋 Start a housemate agreement →</button>' +
+        '</div>' +
+      '</div>';
+    msgs.appendChild(nudge);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 600);
 }
 
 function blockUser() {
@@ -9070,16 +9185,21 @@ function householdRenderEmpty() {
   }
   // Show empty state (sample preview)
   if (emptyState) emptyState.style.display = 'block';
+  // Show agreement entry card
+  var agCard = document.getElementById('hh-ag-empty-card');
+  if (agCard) agCard.style.display = 'block';
 }
 
 function householdSetup() {
   var email = localStorage.getItem('unirenter_email');
   if (!email || localStorage.getItem('unirenter_email_verified') !== '1') {
-    alert('Please verify your email first to set up a household.');
+    householdSetupError('Please verify your email first to set up a household.');
     return;
   }
   var btn = document.querySelector('.household-setup-btn');
+  var errEl = document.getElementById('household-setup-error');
   if (btn) { btn.disabled = true; btn.textContent = 'Setting up…'; }
+  if (errEl) errEl.style.display = 'none';
   fetch('/api/household/create', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -9090,12 +9210,18 @@ function householdSetup() {
     if (!d.ok) throw new Error(d.error || 'Setup failed');
     localStorage.setItem('ur_household_id', d.household_id);
     localStorage.setItem('ur_household_invite_token', d.invite_token);
+    // Keep dummy preview visible momentarily, then load real household
     householdLoad(d.household_id);
   })
   .catch(function(err) {
     if (btn) { btn.disabled = false; btn.textContent = 'Set up my household →'; }
-    alert('Could not set up household: ' + err.message);
+    householdSetupError(err.message);
   });
+}
+
+function householdSetupError(msg) {
+  var errEl = document.getElementById('household-setup-error');
+  if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
 }
 
 function householdJoinConfirm() {
@@ -9274,6 +9400,16 @@ function householdRender(data, currentEmail) {
   inner.innerHTML = html;
 
   if (subtitleEl) subtitleEl.textContent = members.length + ' member' + (members.length !== 1 ? 's' : '') + ' in your household';
+
+  // Show agreement entry card at bottom of active household
+  var agCard = document.getElementById('hh-ag-empty-card');
+  if (agCard) {
+    agCard.style.display = 'block';
+    // Update sub-text and load real state if household exists
+    var agSub = agCard.querySelector('.hh-agreement-entry-sub');
+    if (agSub) agSub.textContent = 'Sort the house rules before someone needs to guess. Tap to start or review your agreement.';
+    hhAgLoadEntryState(localStorage.getItem('ur_household_id'), currentEmail);
+  }
 }
 
 function householdShowInvite() {
@@ -9628,14 +9764,29 @@ function hhReviewSummaryLoad(householdId, email, containerEl) {
 function vibeCardShareHousehold() { alert('Household vibe cards — coming in the next update! 🤠'); }
 
 // ── Housemate agreement card in Messages tab (S77) ──
-function msgAgreementCardClick() {
+function hhAgOpenStandalone() {
+  // Open the agreement builder without requiring a household ID.
+  // If user has a household, use it. Otherwise open in standalone mode.
   var householdId = localStorage.getItem('ur_household_id');
   var email = localStorage.getItem('unirenter_email') || '';
   if (householdId && email) {
     hhAgOpen(householdId, email);
   } else {
-    switchTab('household');
+    // Standalone mode — open tier select directly, save locally
+    _hhAgHouseholdId = null;
+    _hhAgEmail = email || 'guest';
+    _hhAgAgreement = null;
+    _hhAgMembers = email ? [email] : [];
+    _hhAgTicks = [];
+    document.getElementById('hh-agreement-modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    hhAgRenderTierSelect();
   }
+}
+
+function msgAgreementCardClick() {
+  // Use standalone opener — no longer requires household to be set up first
+  hhAgOpenStandalone();
 }
 
 function msgAgreementCardInit() {
@@ -9664,7 +9815,7 @@ function msgAgreementCardInit() {
       if (badge) { badge.textContent = '🔒 Locked'; badge.className = 'hh-agreement-entry-badge locked'; }
       if (sub)   sub.textContent = 'Your house rules are locked and agreed by everyone — tap to review.';
     } else {
-      var tierNames = { 1: 'Quick Rules', 2: 'House Rules', 3: 'Full House Manual' };
+      var tierNames = { 1: 'Quick Agreement', 2: 'Full Agreement', 3: 'Household Manual' };
       var tierName = tierNames[agreement.tier] || 'House Rules';
       if (badge) { badge.textContent = tierName; badge.className = 'hh-agreement-entry-badge'; }
       if (sub)   sub.textContent = pct + '% of clauses ticked — tap to review.';
@@ -9723,7 +9874,7 @@ function hhAgLoadEntryState(householdId, currentEmail) {
       if (sub)   sub.textContent = 'Your house rules are locked and agreed by everyone.';
       if (pwrap) pwrap.style.display = 'none';
     } else {
-      var tierNames = { 1: 'Quick Rules', 2: 'House Rules', 3: 'Full House Manual' };
+      var tierNames = { 1: 'Quick Agreement', 2: 'Full Agreement', 3: 'Household Manual' };
       var tierName = tierNames[agreement.tier] || 'House Rules';
       if (badge) { badge.textContent = tierName; badge.className = 'hh-agreement-entry-badge'; }
       if (sub)   sub.textContent = pct + '% of clauses ticked — tap to review.';
@@ -9740,7 +9891,7 @@ function hhAgLoadEntryState(householdId, currentEmail) {
 // Clause definitions by tier
 var HH_AG_TIERS = {
   1: {
-    name: 'Quick Rules',
+    name: 'Quick Agreement',
     desc: '5 core clauses',
     time: '2 min',
     icon: '⚡',
@@ -9753,7 +9904,7 @@ var HH_AG_TIERS = {
     ]
   },
   2: {
-    name: 'House Rules',
+    name: 'Full Agreement',
     desc: '12 clauses',
     time: '8 min',
     icon: '🏠',
@@ -9773,8 +9924,8 @@ var HH_AG_TIERS = {
     ]
   },
   3: {
-    name: 'Full House Manual',
-    desc: '20+ clauses + roster',
+    name: 'Household Manual',
+    desc: '20+ clauses',
     time: '20 min',
     icon: '📖',
     clauses: [
@@ -9858,7 +10009,7 @@ function hhAgBack() {
 }
 
 function hhAgShowLoading() {
-  document.getElementById('hh-ag-modal-title').textContent = 'House Rules';
+  document.getElementById('hh-ag-modal-title').textContent = 'Housemate Agreement';
   document.getElementById('hh-ag-back-btn').style.display = 'none';
   document.getElementById('hh-ag-action-bar').style.display = 'none';
   document.getElementById('hh-ag-progress-note').textContent = '';
@@ -9874,7 +10025,7 @@ function hhAgShowError(msg) {
 
 function hhAgRenderTierSelect() {
   _hhAgStep = 'tier-select';
-  document.getElementById('hh-ag-modal-title').textContent = 'House Rules';
+  document.getElementById('hh-ag-modal-title').textContent = 'Housemate Agreement';
   document.getElementById('hh-ag-back-btn').style.display = 'none';
   document.getElementById('hh-ag-action-bar').style.display = 'none';
   document.getElementById('hh-ag-progress-note').textContent = '';
@@ -9890,9 +10041,9 @@ function hhAgRenderTierSelect() {
   }).join('');
 
   document.getElementById('hh-ag-modal-body').innerHTML =
-    '<div class="hh-ag-cob-intro">🤠 Want to sort the house rules before someone leaves a passive-aggressive note about the dishes? Pick a level — I\'ll help you build something everyone can actually agree on.</div>' +
+    '<div class="hh-ag-cob-intro">🤠 A housemate agreement isn\'t legally binding — it works because <em>you all agreed to it</em>, not because of anything written. But sorting the basics upfront prevents most of the stuff that turns a good house into a painful one. Totally optional. Pick a level:</div>' +
     '<div class="hh-ag-tier-grid">' + cards + '</div>' +
-    '<div class="hh-ag-disclaimer">This is not a legally binding document. It works because you\'ve all agreed to it \u2014 not because of anything written here. If something\'s not working, talk to each other first.</div>';
+    '<div class="hh-ag-disclaimer">Not legally binding. Works between you as equals — not set by a landlord. If something\'s not working, talk to each other first.</div>';
 }
 
 function hhAgSelectTier(tierNum) {
@@ -9993,7 +10144,7 @@ function hhAgRenderClauses() {
 function hhAgRenderLocked() {
   _hhAgStep = 'locked';
   var agreement = _hhAgAgreement;
-  document.getElementById('hh-ag-modal-title').textContent = 'House Rules — Locked';
+  document.getElementById('hh-ag-modal-title').textContent = 'Housemate Agreement — Locked';
   document.getElementById('hh-ag-back-btn').style.display = 'none';
   document.getElementById('hh-ag-action-bar').style.display = 'none';
   document.getElementById('hh-ag-progress-note').textContent = '';
@@ -10047,7 +10198,8 @@ function hhAgRenderLocked() {
       '<div style="font-size:12px;color:var(--text-muted);margin-bottom:10px);">Starting over will unlock the agreement and clear all ticks. Everyone will need to re-agree.</div>' +
       '<button onclick="hhAgUnlock()" style="background:none;border:1px solid rgba(232,98,58,0.4);color:var(--brand-coral);border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:Inter,sans-serif;">Unlock & edit</button>' +
     '</div>' +
-    '<div class="hh-ag-disclaimer">This is not a legally binding document. It works because you\'ve all agreed to it \u2014 not because of anything written here.</div>';
+    '<div class="hh-ag-cob-tip" style="margin-top:14px;padding:12px 14px;background:rgba(75,191,224,0.07);border:1px solid rgba(75,191,224,0.2);border-radius:8px;display:flex;gap:10px;align-items:flex-start;"><span style="font-size:18px;">🤠</span><div style="font-size:12px;color:var(--text-muted);line-height:1.5;"><strong style="color:var(--text-primary);">Worth revisiting in 6 weeks.</strong> Most houses find the cleaning roster needs a tweak once everyone settles in. Unlock and edit anytime — everyone just needs to re-tick.</div></div>' +
+    '<div class="hh-ag-disclaimer">Not legally binding. Agreed between housemates — not set by a landlord.</div>';
 
   // Wire up the copy button (can't use inline onclick with dynamic URL)
   var _shareUrlForCopy = shareUrl;
@@ -10478,6 +10630,7 @@ function cobReviewStar(n) {
     var thanks = document.getElementById('cob-review-thanks');
     if (thanks) thanks.textContent = n === 5 ? 'Five stars! 🤠 Cheers!' : 'Thanks for that! 🤠';
     document.getElementById('cob-review-step-comment').classList.add('active');
+    cobReviewMicInit();
     // Hide dismiss button during follow-up (keep card open)
     var dismiss = document.querySelector('#cob-review-card .cob-review-dismiss');
     if (dismiss) dismiss.style.display = 'none';
@@ -10487,6 +10640,60 @@ function cobReviewStar(n) {
     const email = encodeURIComponent(localStorage.getItem('unirenter_email') || '');
     window.location.href = '/review?rating=' + n + '&email=' + email;
   }
+}
+
+function cobReviewChip(btn, label) {
+  var ta = document.getElementById('cob-review-comment');
+  if (!ta) return;
+  var current = ta.value.trim();
+  if (btn.classList.contains('used')) {
+    // Deselect — remove label from textarea
+    btn.classList.remove('used');
+    var escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    ta.value = current.replace(new RegExp('(, )?' + escaped + '(, )?', 'g'), '').replace(/^, |, $/g, '').trim();
+  } else {
+    btn.classList.add('used');
+    ta.value = current ? current + ', ' + label : label;
+  }
+}
+
+var _cobReviewMicActive = false;
+var _cobReviewRecognition = null;
+function cobReviewMicInit() {
+  var micBtn = document.getElementById('cob-review-mic-btn');
+  if (!micBtn) return;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return; // browser doesn't support — stays hidden
+  micBtn.style.display = 'flex';
+  _cobReviewRecognition = new SR();
+  _cobReviewRecognition.lang = 'en-AU';
+  _cobReviewRecognition.continuous = false;
+  _cobReviewRecognition.interimResults = false;
+  _cobReviewRecognition.onresult = function(e) {
+    var transcript = e.results[0][0].transcript;
+    var ta = document.getElementById('cob-review-comment');
+    if (ta) ta.value = ta.value ? ta.value + ' ' + transcript : transcript;
+    cobReviewMicOff();
+  };
+  _cobReviewRecognition.onerror = function() { cobReviewMicOff(); };
+  _cobReviewRecognition.onend = function() { cobReviewMicOff(); };
+}
+function cobReviewMicToggle() {
+  if (_cobReviewMicActive) {
+    if (_cobReviewRecognition) _cobReviewRecognition.stop();
+    cobReviewMicOff();
+  } else {
+    if (!_cobReviewRecognition) return;
+    _cobReviewRecognition.start();
+    _cobReviewMicActive = true;
+    var btn = document.getElementById('cob-review-mic-btn');
+    if (btn) btn.classList.add('active');
+  }
+}
+function cobReviewMicOff() {
+  _cobReviewMicActive = false;
+  var btn = document.getElementById('cob-review-mic-btn');
+  if (btn) btn.classList.remove('active');
 }
 
 function cobReviewSubmit() {
@@ -10555,7 +10762,7 @@ function openCardPreview() {
   var suburbs = window._loadedProfile && window._loadedProfile.suburb_preferences || [];
   var vibeP = localStorage.getItem('ur_vibe_primary') || window._loadedProfile && window._loadedProfile.vibe_emoji_primary || null;
   var vibeS = localStorage.getItem('ur_vibe_secondary') || window._loadedProfile && window._loadedProfile.vibe_emoji_secondary || null;
-  var cobSummary = window._loadedProfile && window._loadedProfile.cob_summary || null;
+  var cobSummary = localStorage.getItem('ur_vibe_summary') || window._loadedProfile && window._loadedProfile.cob_summary || null;
   var status = localStorage.getItem('ur_student_status') || window._loadedProfile && window._loadedProfile.student_status || '';
   var lastSeen = window._loadedProfile && window._loadedProfile.last_seen || new Date().toISOString();
 
@@ -10757,9 +10964,6 @@ function closeCardPreview() {
       </div>
     </div>
 
-    <!-- Display section -->
-    <div class="sp-section" id="sp-display" style="display:none;"></div>
-
     <!-- Sound section -->
     <div class="sp-section" id="sp-sound">
       <div class="sp-sound-master-row">
@@ -10843,7 +11047,7 @@ function closeCardPreview() {
   <div class="hh-ag-modal-box" id="hh-ag-modal-box">
     <div class="hh-ag-modal-header">
       <button class="hh-ag-modal-back" id="hh-ag-back-btn" onclick="hhAgBack()" style="display:none;">← Back</button>
-      <span class="hh-ag-modal-title" id="hh-ag-modal-title">House Rules</span>
+      <span class="hh-ag-modal-title" id="hh-ag-modal-title">Housemate Agreement</span>
       <button class="hh-ag-modal-close" onclick="hhAgClose()" aria-label="Close">✕</button>
     </div>
     <div class="hh-ag-modal-body" id="hh-ag-modal-body">
