@@ -4009,7 +4009,7 @@ body.light-mode {
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <button class="section-action" onclick="openCardPreview()" style="background:rgba(75,191,224,0.12);border-color:rgba(75,191,224,0.3);color:var(--brand-blue);">👤 Preview my card</button>
-        <button class="section-action" onclick="window.location.href=''">✏️ Edit profile</button>
+        <button class="section-action" onclick="editProfile()">✏️ Edit profile</button>
       </div>
     </div>
     <!-- Completion banner — shown when profile < 80% -->
@@ -5510,6 +5510,12 @@ function applyProfileData(p, cobRefinedFields) {
   const cityRoots = { melbourne: '/', sydney: '/sydney', brisbane: '/brisbane', adelaide: '/adelaide', perth: '/perth', canberra: '/canberra' };
   const cityRoot = cityRoots[city] || '/';
   const banner = document.getElementById('completion-banner');
+
+function editProfile() {
+  var city = localStorage.getItem('ur_city') || 'melbourne';
+  var roots = { melbourne:'/', sydney:'/sydney', brisbane:'/brisbane', adelaide:'/adelaide', perth:'/perth', canberra:'/canberra' };
+  window.location.href = (roots[city] || '/') + '#step-2';
+}
   if (banner && pct < 80) {
     banner.style.display = 'flex';
     const pcbTitle = document.getElementById('pcb-title');
@@ -9375,11 +9381,9 @@ function householdRender(data, currentEmail) {
 
   // Actions HTML
   var actionsHtml = '<div class="household-actions">' +
-    '<button class="household-action-btn primary" onclick="alert(\'Vibe cards coming soon in the next update! 🤠\')">Share household card</button>' +
-    '<button class="household-action-btn" onclick="alert(\'Flatmate search coming soon! 🤠\')">Find a new flatmate</button>';
-  if (inviteLink) {
-    actionsHtml += '<button class="household-action-btn" onclick="householdShowInvite()">Invite another flatmate</button>';
-  }
+    '<button class="household-action-btn primary" onclick="householdShareCard()">Share household card</button>' +
+    '<button class="household-action-btn" onclick="householdShowInvite()">Find a new flatmate</button>';
+  // 'Invite another' merged into 'Find a new flatmate' button
   actionsHtml += '</div>';
 
   // Invite panel (collapsed by default, toggled by "Invite another" button)
@@ -9410,6 +9414,23 @@ function householdRender(data, currentEmail) {
     if (agSub) agSub.textContent = 'Sort the house rules before someone needs to guess. Tap to start or review your agreement.';
     hhAgLoadEntryState(localStorage.getItem('ur_household_id'), currentEmail);
   }
+}
+
+function householdShareCard() {
+  if (_hhAgAgreement && _hhAgAgreement.locked_at && _hhAgAgreement.share_token) {
+    var url = 'https://unirenter.com.au/house-rules/' + _hhAgAgreement.share_token;
+    navigator.clipboard.writeText(url).then(function() {
+      showToast('📋 Link copied!', 'Share with family or housemates — shows your vibe and agreed rules.');
+    }).catch(function() {
+      var ta = document.createElement('textarea');
+      ta.value = url; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      showToast('📋 Link copied!', 'Share with family or housemates.');
+    });
+    return;
+  }
+  showToast('📋 Finish your agreement first', 'Lock a housemate agreement and your shareable household card generates automatically.');
+  hhAgOpenStandalone();
 }
 
 function householdShowInvite() {
