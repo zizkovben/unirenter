@@ -3443,150 +3443,7 @@ body.light-mode {
     <div class="match-grid" id="match-grid">
       <!-- Populated by JS -->
     </div>
-    <!-- ── Post-match: Vibe card (strengthen profile while waiting) ── -->
-    <div id="post-match-vibe-section" style="display:none;">
-      <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin:24px 0 10px;">Strengthen your profile</div>
-    <!-- ── "Your vibe" card (Cob quiz — Session 42) ── -->
-    <div class="vibe-card" id="vibe-card">
-      <div class="vibe-card-head">
-        <span>Your vibe <span class="vibe-optional">(optional)</span></span>
-        <span class="vibe-cob-badge">🤠 Cob</span>
-      </div>
-
-      <!-- Empty state — show quiz start button (gated on email verified) -->
-      <div id="vibe-card-empty">
-        <div class="vibe-card-intro">
-          Let Cob write a short personality portrait based on how you describe yourself — shown to potential housemates so they get a real sense of you beyond checkboxes.
-        </div>
-        <div id="vibe-locked-msg" style="display:none;" class="vibe-locked-notice">
-          🔒 Verify your email and complete your profile to unlock this.
-        </div>
-        <button class="vibe-start-btn" id="vibe-start-btn" onclick="vibeStartQuiz()">Let Cob write your vibe →</button>
-      </div>
-
-      <!-- Quiz — 5 inline questions -->
-      <div id="vibe-card-quiz" style="display:none;">
-        <div class="vibe-quiz-progress">
-          <div class="vibe-quiz-bar"><div class="vibe-quiz-fill" id="vibe-quiz-fill" style="width:20%"></div></div>
-          <span class="vibe-quiz-step" id="vibe-quiz-step">1 of 6</span>
-        </div>
-        <div class="vibe-quiz-questions" id="vibe-quiz-questions">
-          <!-- injected by JS -->
-        </div>
-        <div class="vibe-quiz-nav">
-          <button class="vibe-nav-btn secondary" id="vibe-btn-back" onclick="vibeNavBack()" style="display:none;">← Back</button>
-          <button class="vibe-nav-btn" id="vibe-btn-next" onclick="vibeNavNext()">Next →</button>
-        </div>
-      </div>
-
-      <!-- Generating state -->
-      <div id="vibe-card-generating" style="display:none;">
-        <div class="vibe-generating-wrap">
-          <div class="vibe-generating-spinner">🤠</div>
-          <div class="vibe-generating-text">Cob is writing your vibe<span id="vibe-gen-dots">…</span></div>
-        </div>
-      </div>
-
-      <!-- Done state — result + chips + retake -->
-      <div id="vibe-card-done" style="display:none;">
-        <div class="vibe-result" id="vibe-result-block">
-          <div class="vibe-result-emoji" id="vibe-primary-emoji">🌿</div>
-          <div class="vibe-result-text" id="vibe-summary-text">"Your vibe summary will appear here."</div>
-        </div>
-        <!-- Emoji override row -->
-        <div class="vibe-override-row">
-          <div class="vibe-override-group">
-            <div class="vibe-chip-label">Primary emoji</div>
-            <div class="vibe-emoji-override" id="vibe-override-primary" onclick="vibeOverridePrimary()" title="Change primary emoji">
-              <span id="vibe-override-primary-val">🌿</span>
-              <span class="vibe-override-edit">✏️</span>
-            </div>
-          </div>
-          <div class="vibe-override-group">
-            <div class="vibe-chip-label">Secondary emoji</div>
-            <div class="vibe-emoji-override" id="vibe-override-secondary" onclick="vibeOverrideSecondary()" title="Change secondary emoji">
-              <span id="vibe-override-secondary-val">☕</span>
-              <span class="vibe-override-edit">✏️</span>
-            </div>
-          </div>
-        </div>
-        <!-- Emoji picker (hidden by default) -->
-        <div id="vibe-emoji-picker" class="vibe-emoji-picker" style="display:none;">
-          <div class="vibe-picker-label" id="vibe-picker-label">Pick primary emoji</div>
-          <div class="vibe-picker-type" id="vibe-picker-type">primary</div>
-          <div class="vibe-picker-grid" id="vibe-picker-grid"></div>
-          <button class="vibe-nav-btn secondary" style="margin-top:8px;font-size:12px;" onclick="vibeClosePicker()">Cancel</button>
-        </div>
-        <div class="vibe-chips-row">
-          <div class="vibe-chip-group"><div class="vibe-chip-label">Primary</div><div class="vibe-chip-val" id="vibe-chip-primary">—</div></div>
-          <div class="vibe-chip-group"><div class="vibe-chip-label">Secondary</div><div class="vibe-chip-val" id="vibe-chip-secondary">—</div></div>
-          <div class="vibe-chip-group"><div class="vibe-chip-label">Star sign</div><div class="vibe-chip-val" id="vibe-chip-star">—</div></div>
-          <div class="vibe-chip-group"><div class="vibe-chip-label">Gen</div><div class="vibe-chip-val" id="vibe-chip-gen">—</div></div>
-        </div>
-        <!-- Star sign + generation selects — inline inside done state -->
-        <div class="vibe-inline-extras">
-          <div class="vibe-inline-extras-row">
-            <div class="vibe-extras-group">
-              <label class="vibe-extras-label" for="select-star-sign-inline">⭐ Star sign</label>
-              <select id="select-star-sign-inline" class="vibe-extras-select" onchange="vibeExtrasChangeInline()">
-                <option value="">Prefer not to say</option>
-                <option value="Aries">Aries ♈</option>
-                <option value="Taurus">Taurus ♉</option>
-                <option value="Gemini">Gemini ♊</option>
-                <option value="Cancer">Cancer ♋</option>
-                <option value="Leo">Leo ♌</option>
-                <option value="Virgo">Virgo ♍</option>
-                <option value="Libra">Libra ♎</option>
-                <option value="Scorpio">Scorpio ♏</option>
-                <option value="Sagittarius">Sagittarius ♐</option>
-                <option value="Capricorn">Capricorn ♑</option>
-                <option value="Aquarius">Aquarius ♒</option>
-                <option value="Pisces">Pisces ♓</option>
-              </select>
-            </div>
-            <div class="vibe-extras-group">
-              <label class="vibe-extras-label" for="select-generation-inline">🧬 Generation</label>
-              <select id="select-generation-inline" class="vibe-extras-select" onchange="vibeExtrasChangeInline()">
-                <option value="">Prefer not to say</option>
-                <option value="Gen Z">Gen Z (1997–2012)</option>
-                <option value="Millennial">Millennial (1981–1996)</option>
-                <option value="Gen X">Gen X (1965–1980)</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-          </div>
-          <div id="vibe-inline-extras-saved" style="display:none;" class="vibe-saved-notice">✅ Saved</div>
-        </div>
-        <div class="vibe-save-row">
-          <button class="vibe-save-btn" id="vibe-save-btn" onclick="vibeSave()">Save vibe ✓</button>
-          <button class="vibe-retake-btn" onclick="vibeRetakeRequest()">Retake</button>
-        </div>
-        <div id="vibe-saved-notice" style="display:none;" class="vibe-saved-notice">✅ Saved to your profile</div>
-        <div id="vibe-share-block" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.07);">
-          <button class="vibe-share-btn" id="vibe-share-btn" onclick="vibeCardShare()">🔗 Share my vibe card</button>
-          <div id="vibe-share-link-row" style="display:none;margin-top:10px;">
-            <div class="vibe-share-link-box" id="vibe-share-link-text"></div>
-            <div style="display:flex;gap:6px;margin-top:6px;">
-              <button class="vibe-share-copy-btn" id="vibe-share-copy-btn" onclick="vibeCardCopyLink()">📋 Copy</button>
-              <span style="font-size:11px;color:var(--text-muted);align-self:center;">Link expires in 90 days</span>
-            </div>
-          </div>
-          <div id="vibe-share-error" style="display:none;font-size:12px;color:var(--coral);margin-top:8px;"></div>
-        </div>
-      </div>
-
-      <!-- Retake confirmation dialog -->
-      <div id="vibe-retake-confirm" class="vibe-retake-confirm" style="display:none;">
-        <div class="vibe-retake-cob">🤠</div>
-        <div class="vibe-retake-msg">You sure? I thought your last one was pretty spot on 😏</div>
-        <div class="vibe-retake-actions">
-          <button class="vibe-nav-btn" onclick="vibeConfirmRetake()">Yes, redo it</button>
-          <button class="vibe-nav-btn secondary" onclick="vibeCancelRetake()">Keep it</button>
-        </div>
-      </div>
-    </div>
-
-        <div class="fw-card" id="fw-card">
+    <div class="fw-card" id="fw-card">
       <div class="fw-card-header">
         <span class="fw-card-icon">📢</span>
         <div class="fw-card-title">Flatmate Wanted</div>
@@ -4167,6 +4024,147 @@ body.light-mode {
     </div>
 
 
+
+
+
+    <!-- ── "Your vibe" card (Cob quiz — Session 42) ── -->
+    <div class="vibe-card" id="vibe-card">
+      <div class="vibe-card-head">
+        <span>Your vibe <span class="vibe-optional">(optional)</span></span>
+        <span class="vibe-cob-badge">🤠 Cob</span>
+      </div>
+
+      <!-- Empty state — show quiz start button (gated on email verified) -->
+      <div id="vibe-card-empty">
+        <div class="vibe-card-intro">
+          Let Cob write a short personality portrait based on how you describe yourself — shown to potential housemates so they get a real sense of you beyond checkboxes.
+        </div>
+        <div id="vibe-locked-msg" style="display:none;" class="vibe-locked-notice">
+          🔒 Verify your email and complete your profile to unlock this.
+        </div>
+        <button class="vibe-start-btn" id="vibe-start-btn" onclick="vibeStartQuiz()">Let Cob write your vibe →</button>
+      </div>
+
+      <!-- Quiz — 5 inline questions -->
+      <div id="vibe-card-quiz" style="display:none;">
+        <div class="vibe-quiz-progress">
+          <div class="vibe-quiz-bar"><div class="vibe-quiz-fill" id="vibe-quiz-fill" style="width:20%"></div></div>
+          <span class="vibe-quiz-step" id="vibe-quiz-step">1 of 6</span>
+        </div>
+        <div class="vibe-quiz-questions" id="vibe-quiz-questions">
+          <!-- injected by JS -->
+        </div>
+        <div class="vibe-quiz-nav">
+          <button class="vibe-nav-btn secondary" id="vibe-btn-back" onclick="vibeNavBack()" style="display:none;">← Back</button>
+          <button class="vibe-nav-btn" id="vibe-btn-next" onclick="vibeNavNext()">Next →</button>
+        </div>
+      </div>
+
+      <!-- Generating state -->
+      <div id="vibe-card-generating" style="display:none;">
+        <div class="vibe-generating-wrap">
+          <div class="vibe-generating-spinner">🤠</div>
+          <div class="vibe-generating-text">Cob is writing your vibe<span id="vibe-gen-dots">…</span></div>
+        </div>
+      </div>
+
+      <!-- Done state — result + chips + retake -->
+      <div id="vibe-card-done" style="display:none;">
+        <div class="vibe-result" id="vibe-result-block">
+          <div class="vibe-result-emoji" id="vibe-primary-emoji">🌿</div>
+          <div class="vibe-result-text" id="vibe-summary-text">"Your vibe summary will appear here."</div>
+        </div>
+        <!-- Emoji override row -->
+        <div class="vibe-override-row">
+          <div class="vibe-override-group">
+            <div class="vibe-chip-label">Primary emoji</div>
+            <div class="vibe-emoji-override" id="vibe-override-primary" onclick="vibeOverridePrimary()" title="Change primary emoji">
+              <span id="vibe-override-primary-val">🌿</span>
+              <span class="vibe-override-edit">✏️</span>
+            </div>
+          </div>
+          <div class="vibe-override-group">
+            <div class="vibe-chip-label">Secondary emoji</div>
+            <div class="vibe-emoji-override" id="vibe-override-secondary" onclick="vibeOverrideSecondary()" title="Change secondary emoji">
+              <span id="vibe-override-secondary-val">☕</span>
+              <span class="vibe-override-edit">✏️</span>
+            </div>
+          </div>
+        </div>
+        <!-- Emoji picker (hidden by default) -->
+        <div id="vibe-emoji-picker" class="vibe-emoji-picker" style="display:none;">
+          <div class="vibe-picker-label" id="vibe-picker-label">Pick primary emoji</div>
+          <div class="vibe-picker-type" id="vibe-picker-type">primary</div>
+          <div class="vibe-picker-grid" id="vibe-picker-grid"></div>
+          <button class="vibe-nav-btn secondary" style="margin-top:8px;font-size:12px;" onclick="vibeClosePicker()">Cancel</button>
+        </div>
+        <div class="vibe-chips-row">
+          <div class="vibe-chip-group"><div class="vibe-chip-label">Primary</div><div class="vibe-chip-val" id="vibe-chip-primary">—</div></div>
+          <div class="vibe-chip-group"><div class="vibe-chip-label">Secondary</div><div class="vibe-chip-val" id="vibe-chip-secondary">—</div></div>
+          <div class="vibe-chip-group"><div class="vibe-chip-label">Star sign</div><div class="vibe-chip-val" id="vibe-chip-star">—</div></div>
+          <div class="vibe-chip-group"><div class="vibe-chip-label">Gen</div><div class="vibe-chip-val" id="vibe-chip-gen">—</div></div>
+        </div>
+        <!-- Star sign + generation selects — inline inside done state -->
+        <div class="vibe-inline-extras">
+          <div class="vibe-inline-extras-row">
+            <div class="vibe-extras-group">
+              <label class="vibe-extras-label" for="select-star-sign-inline">⭐ Star sign</label>
+              <select id="select-star-sign-inline" class="vibe-extras-select" onchange="vibeExtrasChangeInline()">
+                <option value="">Prefer not to say</option>
+                <option value="Aries">Aries ♈</option>
+                <option value="Taurus">Taurus ♉</option>
+                <option value="Gemini">Gemini ♊</option>
+                <option value="Cancer">Cancer ♋</option>
+                <option value="Leo">Leo ♌</option>
+                <option value="Virgo">Virgo ♍</option>
+                <option value="Libra">Libra ♎</option>
+                <option value="Scorpio">Scorpio ♏</option>
+                <option value="Sagittarius">Sagittarius ♐</option>
+                <option value="Capricorn">Capricorn ♑</option>
+                <option value="Aquarius">Aquarius ♒</option>
+                <option value="Pisces">Pisces ♓</option>
+              </select>
+            </div>
+            <div class="vibe-extras-group">
+              <label class="vibe-extras-label" for="select-generation-inline">🧬 Generation</label>
+              <select id="select-generation-inline" class="vibe-extras-select" onchange="vibeExtrasChangeInline()">
+                <option value="">Prefer not to say</option>
+                <option value="Gen Z">Gen Z (1997–2012)</option>
+                <option value="Millennial">Millennial (1981–1996)</option>
+                <option value="Gen X">Gen X (1965–1980)</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div id="vibe-inline-extras-saved" style="display:none;" class="vibe-saved-notice">✅ Saved</div>
+        </div>
+        <div class="vibe-save-row">
+          <button class="vibe-save-btn" id="vibe-save-btn" onclick="vibeSave()">Save vibe ✓</button>
+          <button class="vibe-retake-btn" onclick="vibeRetakeRequest()">Retake</button>
+        </div>
+        <div id="vibe-saved-notice" style="display:none;" class="vibe-saved-notice">✅ Saved to your profile</div>
+        <div id="vibe-share-block" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.07);">
+          <button class="vibe-share-btn" id="vibe-share-btn" onclick="vibeCardShare()">🔗 Share my vibe card</button>
+          <div id="vibe-share-link-row" style="display:none;margin-top:10px;">
+            <div class="vibe-share-link-box" id="vibe-share-link-text"></div>
+            <div style="display:flex;gap:6px;margin-top:6px;">
+              <button class="vibe-share-copy-btn" id="vibe-share-copy-btn" onclick="vibeCardCopyLink()">📋 Copy</button>
+              <span style="font-size:11px;color:var(--text-muted);align-self:center;">Link expires in 90 days</span>
+            </div>
+          </div>
+          <div id="vibe-share-error" style="display:none;font-size:12px;color:var(--coral);margin-top:8px;"></div>
+        </div>
+      </div>
+
+      <!-- Retake confirmation dialog -->
+      <div id="vibe-retake-confirm" class="vibe-retake-confirm" style="display:none;">
+        <div class="vibe-retake-cob">🤠</div>
+        <div class="vibe-retake-msg">You sure? I thought your last one was pretty spot on 😏</div>
+        <div class="vibe-retake-actions">
+          <button class="vibe-nav-btn" onclick="vibeConfirmRetake()">Yes, redo it</button>
+          <button class="vibe-nav-btn secondary" onclick="vibeCancelRetake()">Keep it</button>
+        </div>
+      </div>
 
 
 
@@ -6179,10 +6177,6 @@ async function renderMatches() {
       grid.appendChild(cs);
     }
   }
-  // Show vibe strengthen section only for verified users (not dummy cards)
-  var vibeSection = document.getElementById('post-match-vibe-section');
-  if (vibeSection) vibeSection.style.display = showingDummy ? 'none' : 'block';
-
   // Render vibe emoji filter chips after match cards are in the DOM
   renderVibeFilterChips();
 }
