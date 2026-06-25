@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>House Rules — UniRenter</title>
-  <meta name="description" content="Household agreement shared via UniRenter.">
+  <title>Housemate Agreement — UniRenter</title>
+  <meta name="description" content="Housemate agreement shared via UniRenter.">
   <meta name="robots" content="noindex">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -339,6 +339,42 @@
       .ag-header-title { font-size: 18px; }
       .hv-member-eq { font-size: 16px; }
     }
+    /* ── PDF button ── */
+    .ag-pdf-btn {
+      background: var(--brand-yellow, #F5B800);
+      color: #0d1f2d;
+      border: none;
+      border-radius: 7px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: Inter, sans-serif;
+      margin-left: 8px;
+      flex-shrink: 0;
+    }
+    .ag-pdf-btn:hover { opacity: 0.88; }
+    /* ── Print styles ── */
+    @media print {
+      nav, .hv-nudge, .ag-share-strip, .ag-cta-footer, .ag-pdf-btn { display: none !important; }
+      body { background: #fff; color: #000; font-family: Georgia, serif; }
+      .page-wrap { max-width: 100%; padding: 0; }
+      .ag-header { background: #f8f8f8; border: 1px solid #ddd; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+      .ag-header-title { color: #0d1f2d; font-size: 18px; }
+      .ag-header-sub { color: #555; font-size: 13px; }
+      .ag-locked-badge { color: #333; font-size: 12px; }
+      .ag-members-row { margin-top: 10px; }
+      .ag-member-chip { display: inline-block; margin-right: 8px; font-size: 13px; }
+      .ag-disclaimer { background: #f5f5f5; border: 1px solid #ddd; color: #555; font-size: 12px; border-radius: 4px; padding: 10px 12px; margin-bottom: 16px; }
+      .ag-section-head { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #888; margin: 16px 0 6px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+      .ag-clause-card { border: 1px solid #e0e0e0; border-radius: 4px; padding: 10px 12px; margin-bottom: 6px; page-break-inside: avoid; }
+      .ag-clause-head { display: flex; gap: 8px; align-items: center; }
+      .ag-clause-title { font-weight: 600; color: #111; font-size: 13px; }
+      .ag-clause-value { color: #333; font-size: 13px; margin-top: 4px; padding-left: 24px; }
+      .ag-no-value { color: #aaa; font-style: italic; }
+      .hv-block { border: 1px solid #ddd; border-radius: 4px; padding: 10px 12px; margin-bottom: 16px; }
+      .page-footer { text-align: center; font-size: 11px; color: #aaa; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px; }
+    }
   </style>
 </head>
 <body>
@@ -352,7 +388,7 @@
   <div id="page-content">
     <div class="state-card" id="loading-state">
       <div class="state-icon">📋</div>
-      <div>Loading house rules…</div>
+      <div>Loading housemate agreement…</div>
     </div>
   </div>
 </div>
@@ -373,13 +409,13 @@
   })
   .then(function(d) {
     if (!d || !d.ok) {
-      showError('This house rules link has expired or doesn\'t exist.');
+      showError('This housemate agreement link has expired or doesn\'t exist.');
       return;
     }
     renderAgreement(d.agreement, d.members || []);
   })
   .catch(function() {
-    showError('Could not load house rules. Check your connection and try again.');
+    showError('Could not load housemate agreement. Check your connection and try again.');
   });
 
   var CAT_LABELS = {
@@ -395,8 +431,8 @@
       ? new Date(agreement.locked_at).toLocaleDateString('en-AU', { day:'numeric', month:'long', year:'numeric' })
       : '';
 
-    var tierNames = { 1:'Quick Rules', 2:'House Rules', 3:'Full House Manual' };
-    var tierName  = tierNames[agreement.tier] || 'House Rules';
+    var tierNames = { 1:'Quick Agreement', 2:'Full Agreement', 3:'Household Manual' };
+    var tierName  = tierNames[agreement.tier] || 'Full Agreement';
 
     var publicUrl = window.location.href;
 
@@ -498,7 +534,7 @@
       });
     });
 
-    document.title = 'House Rules — ' + tierName + ' — UniRenter';
+    document.title = 'Housemate Agreement — ' + tierName + ' — UniRenter';
 
     document.getElementById('page-content').innerHTML =
       // Header
@@ -507,7 +543,7 @@
           '<span class="ag-header-icon">🏠</span>' +
           '<div>' +
             '<div class="ag-header-title">' + escHtml(tierName) + '</div>' +
-            '<div class="ag-header-sub">Household agreement via UniRenter</div>' +
+            '<div class="ag-header-sub">Housemate agreement — agreed between tenants via UniRenter</div>' +
           '</div>' +
         '</div>' +
         (agreement.locked_at
@@ -519,7 +555,7 @@
       (houseVibeHtml || '') +
       // Disclaimer
       '<div class="ag-disclaimer">' +
-        '<strong>This is not a legally binding document.</strong> It works because everyone agreed to it — not because of anything written here. If something\'s not working, talk to each other first.' +
+        '<strong>Not legally binding.</strong> This works because everyone agreed to it — not because of anything written here. It\'s agreed between tenants as equals, not set by a landlord. If something\'s not working, talk to each other first.' +
       '</div>' +
       // Clauses
       clauseHtml +
@@ -531,6 +567,7 @@
           '<div class="ag-share-strip-sub">' + escHtml(publicUrl) + '</div>' +
         '</div>' +
         '<button class="ag-copy-btn" id="ag-copy-btn">Copy link</button>' +
+        '<button class="ag-pdf-btn" onclick="window.print()">⬇ Download PDF</button>' +
       '</div>' +
       // CTA
       '<div class="ag-cta-footer">' +
