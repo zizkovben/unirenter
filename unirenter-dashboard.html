@@ -9242,7 +9242,7 @@ function householdJoinConfirm() {
   if (!token) return;
   var email = localStorage.getItem('unirenter_email');
   if (!email || localStorage.getItem('unirenter_email_verified') !== '1') {
-    alert('Please verify your email first to join a household.');
+    showToast('🔒 Email not verified', 'Please verify your email before joining a household.');
     return;
   }
   var btn = document.getElementById('household-join-confirm-btn');
@@ -9267,7 +9267,7 @@ function householdJoinConfirm() {
   })
   .catch(function(err) {
     if (btn) { btn.disabled = false; btn.textContent = 'Join household →'; }
-    alert('Could not join household: ' + err.message);
+    showToast('❌ Could not join', err.message || 'Check your connection and try again.');
   });
 }
 
@@ -9580,7 +9580,7 @@ function vibeShareBlockShow() {
 }
 function vibeCardShare() {
   var email = localStorage.getItem('unirenter_email');
-  if (!email || localStorage.getItem('unirenter_email_verified') !== '1') { alert('Please verify your email first.'); return; }
+  if (!email || localStorage.getItem('unirenter_email_verified') !== '1') { showToast('🔒 Email not verified', 'Please verify your email before ticking clauses.'); return; }
   var btn = document.getElementById('vibe-share-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Generating link...'; }
   var errEl = document.getElementById('vibe-share-error');
@@ -9658,7 +9658,7 @@ var HH_REVIEW_QUESTIONS = [
 ];
 function hhReviewOpen(householdId, members, currentEmail) {
   var subjects = (members||[]).filter(function(m){return m.email!==currentEmail;});
-  if (!subjects.length) { alert('No flatmates to review yet!'); return; }
+  if (!subjects.length) { showToast('🤠 No flatmates yet', 'Invite flatmates to your household first — then you can review them.'); return; }
   _hhReview.step=0; _hhReview.subject=null; _hhReview.subjects=subjects; _hhReview.answers={}; _hhReview.householdId=householdId;
   var modal=document.getElementById('hh-review-modal'); if(modal) modal.style.display='flex';
   hhReviewRender();
@@ -9721,7 +9721,7 @@ function hhReviewSelectSubject(email) {
 function hhReviewSelectChoice(key,value) { _hhReview.answers[key]=value; hhReviewRender(); }
 function hhReviewNext() {
   var step=_hhReview.step, q=HH_REVIEW_QUESTIONS[step], total=HH_REVIEW_QUESTIONS.length;
-  if(step===0){if(!_hhReview.subject){alert('Please choose a flatmate.');return;}}
+  if(step===0){if(!_hhReview.subject){showToast('👆 Choose a flatmate', 'Select who you want to review first.');return;}}
   else if(q.type==='scale'){var re=document.getElementById('hhr-scale-'+q.key);if(re)_hhReview.answers[q.key]=parseInt(re.value,10);if(_hhReview.answers[q.key]===undefined)_hhReview.answers[q.key]=3;}
   else if(q.type==='choice'){if(!_hhReview.answers[q.key]){alert('Please choose an option.');return;}}
   else if(q.type==='text'){var te=document.getElementById('hhr-text-'+q.key);if(te)_hhReview.answers[q.key]=te.value;if(q.required&&!(_hhReview.answers[q.key]||'').trim()){alert('Please enter a response.');return;}}
@@ -9731,13 +9731,13 @@ function hhReviewNext() {
 function hhReviewBack() { if(_hhReview.step>0){_hhReview.step--;hhReviewRender();} }
 function hhReviewSubmit() {
   var email=localStorage.getItem('unirenter_email');
-  if(!email){alert('Please sign in first.');return;}
-  if(!_hhReview.subject){alert('No subject selected.');return;}
+  if(!email){showToast('🔒 Not signed in', 'Please sign in to submit a review.');return;}
+  if(!_hhReview.subject){showToast('👆 No subject selected','Please choose a flatmate to review.');return;}
   var nb=document.getElementById('hh-review-next-btn'); if(nb){nb.disabled=true;nb.textContent='Submitting...';}
   fetch('/api/household/review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reviewer_email:email,subject_email:_hhReview.subject.email,household_id:_hhReview.householdId,responses:_hhReview.answers})})
   .then(function(r){return r.json();})
   .then(function(d){
-    if(!d.ok) throw new Error(d.error||'Could not submit review');
+    if(!d.ok) throw new Error(d.error||'Could not submit. Check your connection and try again.');
     var done=JSON.parse(localStorage.getItem('ur_flatmate_review_done')||'[]');
     if(!done.includes(_hhReview.subject.email)){done.push(_hhReview.subject.email);localStorage.setItem('ur_flatmate_review_done',JSON.stringify(done));}
     hhReviewClose();
@@ -9751,7 +9751,7 @@ function hhReviewSubmit() {
       setTimeout(function(){if(notice.parentNode)notice.parentNode.removeChild(notice);},6000);
     }
   })
-  .catch(function(err){if(nb){nb.disabled=false;nb.textContent='Submit review ✓';}alert('Could not submit: '+err.message);});
+  .catch(function(err){if(nb){nb.disabled=false;nb.textContent='Submit review';} showToast('❌ Could not submit', err.message||'Check your connection and try again.');});
 }
 var _origHouseholdRender = householdRender;
 function householdRender(data, currentEmail) {
@@ -9796,7 +9796,7 @@ function hhReviewSummaryLoad(householdId, email, containerEl) {
   .catch(function(){});
 }
 
-function vibeCardShareHousehold() { alert('Household vibe cards — coming in the next update! 🤠'); }
+function vibeCardShareHousehold() { householdShareCard(); }
 
 // ── Housemate agreement card in Messages tab (S77) ──
 function hhAgOpenStandalone() {
@@ -10292,7 +10292,7 @@ function hhAgToggleTick(clauseId, ticked) {
   })
   .then(function(r) { return r.json(); })
   .then(function(d) {
-    if (!d.ok) { alert('Could not save tick. Try again.'); return; }
+    if (!d.ok) { showToast('❌ Tick failed', 'Could not save. Try again.'); return; }
     // Update local ticks state
     var key = _hhAgEmail + ':' + clauseId;
     if (ticked) {
@@ -10306,7 +10306,7 @@ function hhAgToggleTick(clauseId, ticked) {
     hhAgRefreshClauseRow(clauseId);
     hhAgUpdateLockBtn();
   })
-  .catch(function() { alert('Could not save tick. Check your connection.'); });
+  .catch(function() { showToast('❌ Tick failed', 'Check your connection and try again.'); });
 }
 
 function hhAgRefreshClauseRow(clauseId) {
@@ -10441,7 +10441,7 @@ function hhAgSave() {
     saveBtn.disabled = false;
     if (!d.ok) {
       saveBtn.textContent = 'Save agreement';
-      alert('Could not save: ' + (d.error || 'unknown error'));
+      showToast('❌ Save failed', d.error || 'Could not save agreement. Try again.');
       return;
     }
     saveBtn.textContent = 'Saved ✓';
@@ -10463,7 +10463,7 @@ function hhAgSave() {
   .catch(function() {
     saveBtn.disabled = false;
     saveBtn.textContent = 'Save agreement';
-    alert('Could not save. Check your connection.');
+    showToast('❌ Save failed', 'Check your connection and try again.');
   });
 }
 
@@ -10484,7 +10484,7 @@ function hhAgLock() {
   .then(function(d) {
     lockBtn.disabled = false;
     lockBtn.textContent = '🔒 Lock agreement';
-    if (!d.ok) { alert('Could not lock: ' + (d.error || 'unknown error')); return; }
+    if (!d.ok) { showToast('❌ Lock failed', d.error || 'Could not lock agreement. Try again.'); return; }
     _hhAgAgreement.locked_at = new Date().toISOString();
     _hhAgAgreement.share_token = d.share_token || _hhAgAgreement.share_token;
     hhAgRenderLocked();
@@ -10492,7 +10492,7 @@ function hhAgLock() {
   .catch(function() {
     lockBtn.disabled = false;
     lockBtn.textContent = '🔒 Lock agreement';
-    alert('Could not lock. Check your connection.');
+    showToast('❌ Lock failed', 'Check your connection and try again.');
   });
 }
 
