@@ -1711,6 +1711,10 @@ function tryGoStep(n) {
 
 function unlockAndGo(n) {
   saveProfileSteps(); // S94: persist selections before advancing
+  // Auto-save to Supabase on every tab advance (S106)
+  if (localStorage.getItem('unirenter_email_verified') === '1') {
+    saveProfileToSupabase();
+  }
   if (n > unlockedUpTo) {
     unlockedUpTo = n;
     localStorage.setItem('ur_unlocked_up_to', unlockedUpTo);
