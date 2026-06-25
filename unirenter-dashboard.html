@@ -9216,8 +9216,8 @@ function householdSetup() {
     if (!d.ok) throw new Error(d.error || 'Setup failed');
     localStorage.setItem('ur_household_id', d.household_id);
     localStorage.setItem('ur_household_invite_token', d.invite_token);
-    // Keep dummy preview visible momentarily, then load real household
-    householdLoad(d.household_id);
+    // Pass freshCreate=true so a timing failure retries rather than clearing the ID
+    householdLoad(d.household_id, true);
   })
   .catch(function(err) {
     if (btn) { btn.disabled = false; btn.textContent = 'Set up my household →'; }
@@ -9264,7 +9264,7 @@ function householdJoinConfirm() {
   });
 }
 
-function householdLoad(householdId) {
+function householdLoad(householdId, freshCreate) {
   var email = localStorage.getItem('unirenter_email') || '';
   // Show loading skeleton while fetching
   var loading = document.getElementById('household-loading');
@@ -9276,6 +9276,11 @@ function householdLoad(householdId) {
   .then(function(d) {
     if (loading) loading.style.display = 'none';
     if (!d.ok || !d.data) {
+      if (freshCreate) {
+        // Just created — membership row may not be committed yet. Retry once after short delay.
+        setTimeout(function() { householdLoad(householdId, false); }, 1200);
+        return;
+      }
       // Stale household ID — clear it and show empty state
       localStorage.removeItem('ur_household_id');
       householdRenderEmpty();
@@ -9287,7 +9292,9 @@ function householdLoad(householdId) {
   })
   .catch(function() {
     if (loading) loading.style.display = 'none';
-    localStorage.removeItem('ur_household_id');
+    if (!freshCreate) {
+      localStorage.removeItem('ur_household_id');
+    }
     householdRenderEmpty();
   });
 }
@@ -10347,7 +10354,7 @@ function hhAgShowSaveFirst() {
     saveBtn.textContent = '← Save first, then agree';
     setTimeout(function() {
       saveBtn.style.background = '';
-      saveBtn.textContent = 'Save rules';
+      saveBtn.textContent = 'Save agreement';
     }, 2500);
   }
 }
@@ -10426,12 +10433,12 @@ function hhAgSave() {
   .then(function(d) {
     saveBtn.disabled = false;
     if (!d.ok) {
-      saveBtn.textContent = 'Save rules';
+      saveBtn.textContent = 'Save agreement';
       alert('Could not save: ' + (d.error || 'unknown error'));
       return;
     }
     saveBtn.textContent = 'Saved ✓';
-    setTimeout(function() { saveBtn.textContent = 'Save rules'; }, 2000);
+    setTimeout(function() { saveBtn.textContent = 'Save agreement'; }, 2000);
 
     // Update local agreement state
     if (!_hhAgAgreement) {
@@ -10448,7 +10455,7 @@ function hhAgSave() {
   })
   .catch(function() {
     saveBtn.disabled = false;
-    saveBtn.textContent = 'Save rules';
+    saveBtn.textContent = 'Save agreement';
     alert('Could not save. Check your connection.');
   });
 }
@@ -11075,7 +11082,7 @@ function closeCardPreview() {
       <!-- dynamically filled -->
     </div>
     <div class="hh-ag-action-bar" id="hh-ag-action-bar" style="display:none;">
-      <button class="hh-ag-save-btn" id="hh-ag-save-btn" onclick="hhAgSave()">Save rules</button>
+      <button class="hh-ag-save-btn" id="hh-ag-save-btn" onclick="hhAgSave()">Save agreement</button>
       <button class="hh-ag-lock-btn" id="hh-ag-lock-btn" onclick="hhAgLock()">🔒 Lock agreement</button>
     </div>
     <div class="hh-ag-progress-note" id="hh-ag-progress-note"></div>
