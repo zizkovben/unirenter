@@ -1358,6 +1358,19 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           </div>
         </div>
 
+
+        <div class="form-group" style="margin-top:18px;">
+          <label>🔄 Open to lease transfer?</label>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">I'm open to taking over an existing lease — shows you lease transfer listings alongside regular matches.</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;font-weight:400;">
+              <input type="checkbox" id="toggle-lease-transfer" onchange="saveProfileSteps()"
+                style="width:18px;height:18px;accent-color:var(--brand-blue);cursor:pointer;" />
+              Yes, I'm open to it
+            </label>
+          </div>
+        </div>
+
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(2)">← Back</button>
           <button class="btn-next" onclick="unlockAndGo(4)">Next: Lifestyle →</button>
@@ -1464,28 +1477,9 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         
 
         <!-- VIBE QUIZ (S96) — personalised, 5 questions, chips + mic + type -->
-        <div id="vibe-quiz-wrap" style="margin-top:22px;">
-          <div style="margin-bottom:12px;">
-            <label style="display:block;font-weight:600;margin-bottom:3px;">Your vibe</label>
-            <div style="font-size:13px;color:var(--text-muted);">Cob asks you 5 quick questions, then writes your match card summary and assigns your emoji equation 🤠</div>
-          </div>
-          <div id="vibe-chat" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:14px 14px 10px;min-height:80px;max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;"></div>
-          <div id="vibe-chips-tray" style="display:none;padding:8px 0 4px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;"></div>
-          <div id="vibe-input-row" style="display:flex;gap:8px;margin-top:8px;align-items:center;">
-            <button id="vibe-mic-btn" onclick="vibeMicToggle()" title="Speak your answer" style="flex-shrink:0;padding:9px 11px;border-radius:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:var(--text-muted);font-size:16px;cursor:pointer;line-height:1;">&#127908;</button>
-            <input id="vibe-input" type="text" placeholder="Type your answer…" style="flex:1;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#fff;font-size:14px;min-width:0;" onkeydown="if(event.key==='Enter')vibeSubmitAnswer()" />
-            <button onclick="vibeSubmitAnswer()" style="flex-shrink:0;padding:10px 16px;border-radius:8px;background:var(--brand-blue);border:none;color:#fff;font-size:15px;cursor:pointer;font-weight:700;">↑</button>
-          </div>
-          <div id="vibe-result" style="display:none;margin-top:14px;background:rgba(75,191,224,0.08);border:1px solid rgba(75,191,224,0.22);border-radius:12px;padding:15px 16px;">
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--brand-blue);margin-bottom:10px;opacity:0.85;">Your match card vibe</div>
-            <div id="vibe-result-emojis" style="font-size:26px;letter-spacing:5px;margin-bottom:8px;"></div>
-            <div id="vibe-result-summary" style="font-size:13px;color:var(--text-muted);font-style:italic;line-height:1.55;margin-bottom:12px;"></div>
-            <button onclick="vibeReset()" style="background:none;border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:var(--text-muted);font-size:12px;padding:5px 11px;cursor:pointer;">Redo quiz ↺</button>
-          </div>
-          <input type="hidden" id="vibe-primary-val" />
+                  <input type="hidden" id="vibe-primary-val" />
           <input type="hidden" id="vibe-secondary-val" />
           <input type="hidden" id="vibe-summary-val" />
-        </div>
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(3)">← Back</button>
           <button class="btn-next" onclick="unlockAndGo(5)">Next: Location →</button>
@@ -1751,6 +1745,7 @@ function saveProfileSteps() {
   var vp = document.getElementById('vibe-primary-val'); if (vp) data['vibe-primary'] = vp.value;
   var vs = document.getElementById('vibe-secondary-val'); if (vs) data['vibe-secondary'] = vs.value;
   var rentRange = document.querySelector('#step-6 input[type=range]'); if (rentRange) data['rent-slider'] = rentRange.value;
+  var ltToggle = document.getElementById('toggle-lease-transfer'); if (ltToggle) data['lease-transfer'] = ltToggle.checked;
   localStorage.setItem(UR_PROFILE_KEY, JSON.stringify(data));
 }
 function restoreProfileSteps() {
@@ -1783,6 +1778,10 @@ function restoreProfileSteps() {
     var vsEl  = document.getElementById('vibe-secondary-val'); if (vsEl)  vsEl.value  = rSec;
     var vsuEl = document.getElementById('vibe-summary-val');   if (vsuEl) vsuEl.value = rSum;
     if (rPrim) { vibeShowResult(rPrim, rSec, rSum); }
+  }
+  if (typeof data['lease-transfer'] !== 'undefined') {
+    var ltEl = document.getElementById('toggle-lease-transfer');
+    if (ltEl) ltEl.checked = data['lease-transfer'];
   }
   if (data['rent-slider']) {
     var rs = document.querySelector('#step-6 input[type=range]');
@@ -2488,7 +2487,6 @@ function toggleTheme() {
     if (nextBtn) { nextBtn.style.opacity = '1'; nextBtn.style.pointerEvents = 'auto'; }
   }
   restoreProfileSteps(); // S94: restore chip/input selections
-  vibeInit();            // S96: start vibe quiz or restore completed state
 })();
 
 // ── Referral & sharing ──────────────────────────────────────────────────────
@@ -2563,6 +2561,7 @@ async function saveProfileToSupabase() {
     language_home: languageHome, languages_spoken: languagesSpoken.length > 0 ? languagesSpoken : null,
     stay_duration: stayDuration, cob_summary: cobSummary,
     vibe_emoji_primary: vibeEmojiPrimary, vibe_emoji_secondary: vibeEmojiSecondary,
+    open_to_lease_transfer: (document.getElementById('toggle-lease-transfer')?.checked || false),
   };
   const savedEmail = localStorage.getItem('unirenter_email');
   if (savedEmail) profileData.email = savedEmail;
