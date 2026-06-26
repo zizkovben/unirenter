@@ -80,6 +80,45 @@ Output format:
 
 Only extract what the student explicitly stated or clearly implied. Do not guess.`;
 
+const CALENDAR_SYSTEM = `You are a date-extraction assistant for UniRenter, a student housing platform.
+Analyse the latest student message for any date or deadline signals.
+Respond ONLY with valid JSON — no markdown, no backticks, no preamble.
+
+Output format:
+{
+  "has_signal": true or false,
+  "title": "short event title, max 8 words, or null",
+  "date": "YYYY-MM-DD or null",
+  "category": one of: "housing" | "uni" | "work" | "social" | "other" — or null,
+  "sub_type": "specific sub-type string or null"
+}
+
+Detection triggers — extract a signal when the student mentions:
+- inspection / inspect / walk-through / viewing
+- move in / move out / moving on / moving date
+- lease ends / lease start / lease until / lease from
+- due date / assignment due / exam on / exam date
+- shift / roster / work on / working on [date]
+- meeting on / meeting at
+- rent due / bond claim / notice
+- any specific date combined with a housing or study event
+
+Category mapping:
+- inspection, move-in, move-out, lease dates, rent due, bond, notice → "housing"
+- assignment, exam, enrolment deadline, timetable → "uni"
+- shift, roster, pay day → "work"
+- meetup, event, social plan → "social"
+- anything else → "other"
+
+Sub-type mapping (use these exact strings):
+- housing: "Inspection" | "Move-in" | "Move-out" | "Lease start" | "Lease end" | "Rent due" | "Bond claim" | "Notice to vacate"
+- uni: "Assignment due" | "Exam" | "Enrolment deadline" | "Timetable change"
+- work: "Shift start" | "Pay day" | "Meeting" | "Roster change"
+- social: "Event" | "Housemate meetup"
+- other: "General reminder"
+
+Only extract when the student explicitly states or clearly implies a date. Do not guess dates. If no date is given, set has_signal: false.`;
+
 const VIBE_SYSTEM = `You are Cob, UniRenter's Australian student housing assistant. Your job is to read a student's answers to 5 personalised vibe questions and assign them an emoji equation and a one-sentence match card summary.
 
 You must respond ONLY with valid JSON — no markdown, no backticks, no preamble, no explanation.
@@ -279,7 +318,7 @@ module.exports = async function handler(req, res) {
   }
 
   // ── STANDARD COB CHAT BRANCH ────────────────────────────────────────────────
-  const { messages, city, extract_signals, systemPrompt: systemPromptOverride } = req.body;
+  const { messages, city, extract_signals, extract_calendar, systemPrompt: systemPromptOverride } = req.body;
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'messages array required' });
   }
@@ -334,7 +373,34 @@ module.exports = async function handler(req, res) {
         console.warn('Signal extraction failed (non-fatal):', signalErr.message);
       }
     }
-    return res.status(200).json({ reply, model: data.model, profile_signals });
+    let calendar_signal = null;
+    if (extract_calendar && messages.length >= 1) {
+      try {
+        const lastUserMsg = [...messages].reverse().find(function(m) { return m.role === 'user'; });
+        if (lastUserMsg && lastUserMsg.content) {
+          const calRes = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: anthropicHeaders,
+            body: JSON.stringify({
+              model: 'claude-haiku-4-5-20251001',
+              max_tokens: 200,
+              system: CALENDAR_SYSTEM,
+              messages: [{ role: 'user', content: 'Extract any date or deadline signals from this student message:\n\n' + lastUserMsg.content }]
+            })
+          });
+          if (calRes.ok) {
+            const calData = await calRes.json();
+            let rawCal = calData.content?.[0]?.text || '';
+            rawCal = rawCal.replace(/```json/g, '').replace(/```/g, '').trim();
+            const parsedCal = JSON.parse(rawCal);
+            if (parsedCal.has_signal) calendar_signal = parsedCal;
+          }
+        }
+      } catch (calErr) {
+        console.warn('Calendar signal extraction failed (non-fatal):', calErr.message);
+      }
+    }
+    return res.status(200).json({ reply, model: data.model, profile_signals, calendar_signal });
   } catch (err) {
     console.error('Cob API handler error:', err);
     return res.status(500).json({ error: 'Internal server error' });
