@@ -4915,6 +4915,28 @@ body.light-mode {
 })();
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+function shareToFbGroup(groupUrl, postText) {
+  // Copy post text to clipboard, then open the group
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(postText).then(function() {
+      showToast('Text copied!', 'Paste it into the post box in the Facebook group that just opened.');
+    }).catch(function() {
+      showToast('Opening Facebook group', 'Copy this text and paste it into the post box: ' + postText.substring(0, 60) + '...');
+    });
+  } else {
+    // Fallback for older browsers
+    var ta = document.createElement('textarea');
+    ta.value = postText;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+    showToast('Text copied!', 'Paste it into the post box in the Facebook group that just opened.');
+  }
+  window.open(groupUrl, '_blank');
+}
+
 function showToast(title, msg) {
   if (title && (title.includes('❌') || title.includes('🚨') || title.includes('⚠️'))) { playSound('error'); }
   else if (title && (title.includes('✅') || title.includes('🎉') || title.includes('✓'))) { playSound('confirmation'); }
@@ -6622,6 +6644,8 @@ function renderEmptyState() {
   const cityLabel = city.charAt(0).toUpperCase() + city.slice(1);
 
   // Facebook group links per city (Ben owns these groups)
+  // Facebook group URLs — Ben's groups per city
+  // NOTE: Replace numeric IDs with real group URLs once confirmed
   const fbGroups = {
     melbourne: 'https://www.facebook.com/groups/melbournestudentaccommodation',
     sydney: 'https://www.facebook.com/groups/sydneystudentaccommodation',
@@ -6630,9 +6654,8 @@ function renderEmptyState() {
     perth: 'https://www.facebook.com/groups/perthstudentaccommodation',
     canberra: 'https://www.facebook.com/groups/canberrastudentaccommodation',
   };
-  const fbUrl = fbGroups[city] || fbGroups.melbourne;
-  const shareText = encodeURIComponent('Looking for a housemate in ' + cityLabel + '? I\'m using UniRenter — free housemate matching for students. Join me: https://unirenter.com.au');
-  const fbShareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent('https://unirenter.com.au') + '&quote=' + shareText;
+  const fbGroupUrl = fbGroups[city] || fbGroups.melbourne;
+  const sharePostText = 'Hey everyone! Just signed up to UniRenter — free housemate matching built for students in ' + cityLabel + '. If you\'re looking for a housemate or a room, jump on and set up your profile. Takes about 2 mins: https://unirenter.com.au 🤠';
 
   return `<div class="empty-state-card">
     <div class="empty-state-avatar">🔍</div>
@@ -6647,7 +6670,7 @@ function renderEmptyState() {
       <div style="font-size:11px;color:var(--text-muted);margin-bottom:16px;">Free · No spam · Unsubscribe any time</div>
       ${remaining > 0 ? `<button class="empty-state-cta" onclick="switchTab('profile')" style="margin-bottom:10px;">Finish my profile →</button><br>` : ''}
       <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">The more students who join, the better everyone's matches.</div>
-      <button onclick="window.open('${fbShareUrl}','_blank')" style="display:inline-flex;align-items:center;gap:8px;background:#1877F2;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-display);">
+      <button onclick="shareToFbGroup('${fbGroupUrl}','${sharePostText.replace(/'/g, String.fromCharCode(39))}')" style="display:inline-flex;align-items:center;gap:8px;background:#1877F2;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-display);">
         📢 Share to ${cityLabel} Facebook group
       </button>
     </div>
