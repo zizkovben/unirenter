@@ -616,10 +616,12 @@ body.light-mode {
   color: var(--text-muted); padding: 6px 0; text-transform: uppercase; letter-spacing: 0.05em;
 }
 .cal-day {
-  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  padding-top: 6px;
   font-size: 13px; border-radius: 8px; cursor: default;
   position: relative; transition: background 0.15s;
 }
+.cal-day-num { flex-shrink: 0; line-height: 1; }
 .cal-day.other-month { color: var(--text-muted); opacity: 0.4; }
 .cal-day.today {
   background: var(--navy-mid);
@@ -636,6 +638,25 @@ body.light-mode {
 .cal-day-dot.dot-urgent { background: var(--brand-coral); }
 .cal-day-dot.dot-info   { background: var(--brand-blue); }
 .cal-day-dot.dot-green  { background: var(--brand-green); }
+/* ── Calendar day event chips (replaces single dot in monthly view) ── */
+.cal-day-chips {
+  display: flex; flex-direction: column; gap: 2px;
+  width: 100%; margin-top: 3px; align-items: stretch;
+}
+.cal-day-chip {
+  display: flex; align-items: center; gap: 3px;
+  padding: 1px 4px; border-radius: 4px;
+  font-size: 9px; font-weight: 600; line-height: 1.4;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%;
+}
+.cal-day-chip.cc-yellow  { background: rgba(245,184,0,0.18); color: #F5B800; }
+.cal-day-chip.cc-blue    { background: rgba(75,191,224,0.18); color: #4BBFE0; }
+.cal-day-chip.cc-coral   { background: rgba(232,98,58,0.18);  color: #E8623A; }
+.cal-day-chip.cc-green   { background: rgba(61,170,92,0.18);  color: #3DAA5C; }
+.cal-day-chip.cc-muted   { background: rgba(255,255,255,0.08); color: var(--text-muted); }
+.cal-day-chip-icon { font-size: 8px; flex-shrink: 0; }
+.cal-day-chip-label { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .cal-events-section { margin-bottom: 24px; }
 .cal-events-title {
   font-family: var(--font-display); font-size: 14px; font-weight: 700;
@@ -3485,6 +3506,116 @@ body.light-mode {
   pointer-events: none; /* read-only */
 }
 #card-preview-card-wrap .match-actions { display: none; }
+
+/* === Lease Handover Panel S114 === */
+#lease-handover-backdrop {
+  display: none; position: fixed; inset: 0; z-index: 3000;
+  background: rgba(10,18,25,0.82); align-items: flex-end; justify-content: center;
+}
+#lease-handover-backdrop.open { display: flex; }
+#lease-handover-panel {
+  background: var(--surface); width: 100%; max-width: 560px;
+  border-radius: 18px 18px 0 0; max-height: 92vh; overflow-y: auto;
+  padding: 0 0 env(safe-area-inset-bottom,16px);
+  animation: lhpSlideUp 0.22s ease;
+}
+@keyframes lhpSlideUp { from { transform: translateY(60px); opacity: 0; } to { transform: none; opacity: 1; } }
+.lhp-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 18px 20px 14px; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--surface); z-index: 1;
+  border-radius: 18px 18px 0 0;
+}
+.lhp-header-title { flex: 1; font-family: var(--font-display); font-size: 16px; font-weight: 700; }
+.lhp-close {
+  background: none; border: none; color: var(--text-muted); font-size: 20px;
+  cursor: pointer; padding: 2px 6px; line-height: 1; border-radius: 6px;
+}
+.lhp-close:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+.lhp-body { padding: 18px 20px; }
+.lhp-status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+.lhp-status-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.3px;
+}
+.lhp-status-badge.s-active    { background: rgba(61,170,92,0.15); color: var(--brand-green); border: 1px solid rgba(61,170,92,0.3); }
+.lhp-status-badge.s-proceeding{ background: rgba(75,191,224,0.12); color: var(--brand-blue);  border: 1px solid rgba(75,191,224,0.25); }
+.lhp-status-badge.s-inspection{ background: rgba(245,184,0,0.12);  color: var(--brand-yellow);border: 1px solid rgba(245,184,0,0.25); }
+.lhp-status-badge.s-handover  { background: rgba(232,98,58,0.12);  color: var(--brand-coral); border: 1px solid rgba(232,98,58,0.25); }
+.lhp-status-badge.s-complete  { background: rgba(61,170,92,0.08);  color: var(--brand-green); border: 1px solid rgba(61,170,92,0.18); }
+.lhp-status-badge.s-muted     { background: rgba(255,255,255,0.06);color: var(--text-muted);  border: 1px solid var(--border); }
+.lhp-listing-ref { font-size: 11px; color: var(--text-muted); }
+.lhp-section { margin-bottom: 20px; }
+.lhp-section-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.6px;
+  color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px;
+}
+.lhp-seeker-card {
+  background: rgba(75,191,224,0.07); border: 1px solid rgba(75,191,224,0.18);
+  border-radius: 10px; padding: 14px 16px;
+}
+.lhp-seeker-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+.lhp-seeker-uni  { font-size: 12px; color: var(--text-muted); }
+.lhp-seeker-empty { font-size: 13px; color: var(--text-muted); padding: 12px 0; }
+.lhp-doc-list { display: flex; flex-direction: column; gap: 8px; }
+.lhp-doc-row {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px;
+}
+.lhp-doc-icon  { font-size: 16px; flex-shrink: 0; }
+.lhp-doc-label { flex: 1; font-size: 13px; }
+.lhp-doc-sub   { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.lhp-doc-btn {
+  font-size: 11px; font-weight: 600; padding: 5px 10px;
+  border-radius: 6px; cursor: pointer; font-family: var(--font-body);
+  white-space: nowrap; border: none;
+}
+.lhp-doc-btn.d-upload   { background: rgba(232,98,58,0.12); color: var(--brand-coral); }
+.lhp-doc-btn.d-request  { background: rgba(75,191,224,0.12); color: var(--brand-blue); }
+.lhp-doc-btn.d-done     { background: rgba(61,170,92,0.12); color: var(--brand-green); pointer-events: none; }
+.lhp-doc-btn.d-requested{ background: rgba(245,184,0,0.1);  color: var(--brand-yellow); pointer-events: none; }
+.lhp-doc-btn.d-upload:hover, .lhp-doc-btn.d-request:hover { filter: brightness(1.2); }
+.lhp-actions { display: flex; flex-direction: column; gap: 8px; margin-bottom: 6px; }
+.lhp-btn {
+  width: 100%; padding: 13px 16px; border-radius: 10px; cursor: pointer;
+  font-family: var(--font-display); font-size: 14px; font-weight: 700;
+  border: none; transition: opacity 0.15s; text-align: center;
+}
+.lhp-btn:disabled { opacity: 0.45; cursor: default; }
+.lhp-btn.b-primary { background: var(--brand-blue); color: var(--navy); }
+.lhp-btn.b-success { background: var(--brand-green); color: #fff; }
+.lhp-btn.b-warning { background: rgba(245,184,0,0.15); color: var(--brand-yellow); border: 1px solid rgba(245,184,0,0.25); }
+.lhp-btn.b-danger  { background: rgba(232,98,58,0.10); color: var(--brand-coral);  border: 1px solid rgba(232,98,58,0.20); }
+.lhp-btn.b-muted   { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); }
+.lhp-btn.b-primary:not(:disabled):hover, .lhp-btn.b-success:not(:disabled):hover { opacity: 0.88; }
+.lhp-btn.b-warning:not(:disabled):hover { background: rgba(245,184,0,0.22); }
+.lhp-btn.b-danger:not(:disabled):hover  { background: rgba(232,98,58,0.18); }
+.lhp-btn.b-muted:not(:disabled):hover   { background: rgba(255,255,255,0.09); color: var(--text); }
+.lhp-cob-tip {
+  background: rgba(75,191,224,0.06); border: 1px solid rgba(75,191,224,0.18);
+  border-radius: 10px; padding: 14px 16px; display: flex; gap: 10px; align-items: flex-start;
+  margin-top: 4px;
+}
+.lhp-cob-tip-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.lhp-cob-tip-text { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+.lhp-close-confirm { display: none; padding-top: 10px; }
+.lhp-close-confirm.show { display: block; }
+.lhp-close-reason-label { font-size: 13px; margin-bottom: 8px; color: var(--text-muted); }
+.lhp-close-reason-select {
+  width: 100%; padding: 10px 12px; border-radius: 8px; font-size: 13px;
+  background: rgba(255,255,255,0.05); color: var(--text);
+  border: 1px solid var(--border); font-family: var(--font-body); margin-bottom: 10px;
+}
+.lhp-close-reason-select option { background: #1a2f42; }
+.lhp-close-action-row { display: flex; gap: 8px; }
+.lhp-loading { text-align: center; padding: 32px 0; color: var(--text-muted); font-size: 14px; }
+.lhp-error {
+  padding: 16px; background: rgba(232,98,58,0.08);
+  border: 1px solid rgba(232,98,58,0.2); border-radius: 8px;
+  font-size: 13px; color: var(--brand-coral);
+}
+.lhp-file-input { display: none; }
 
 </style>
 </head>
@@ -7857,7 +7988,7 @@ function calRenderWeekStrip() {
     const dotsHtml = dayEvs.slice(0,3).map(ev => {
       const meta = CAT_META[ev.cat] || CAT_META.other;
       const dotColor = { yellow:'#F5B800', coral:'#E8623A', blue:'#4BBFE0', green:'#3DAA5C' }[meta.color] || '#7a96aa';
-      return '<span class="wday-dot" style="background:' + dotColor + ';"></span>';
+      return '<span class="wday-dot" style="background:' + dotColor + ';border-radius:3px;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;">' + meta.icon + '</span>';
     }).join('');
     return '<div class="' + cls + '"><span class="wday-name">' + DAYS[d.getDay()] + '</span><span class="wday-num">' + d.getDate() + '</span><div class="wday-dots">' + dotsHtml + '</div></div>';
   }).join('');
@@ -7921,13 +8052,16 @@ function calRenderMonthly() {
   const labelEl = document.getElementById('cal-month-label');
   if (labelEl) labelEl.textContent = new Date(calViewYear, calViewMonth, 1).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
 
-  const dotsByDay = {};
+  // Build events-by-day map: day -> [{cat, icon, color, title}]
+  var COLOR_MAP = { yellow: 'cc-yellow', coral: 'cc-coral', blue: 'cc-blue', green: 'cc-green' };
+  const evsByDay = {};
   events.forEach(ev => {
     const d = new Date(ev.date + 'T00:00:00');
     if (d.getFullYear() === calViewYear && d.getMonth() === calViewMonth) {
       const key = d.getDate();
+      if (!evsByDay[key]) evsByDay[key] = [];
       const meta = CAT_META[ev.cat] || CAT_META.other;
-      dotsByDay[key] = dotsByDay[key] || meta.dot || 'dot-info';
+      evsByDay[key].push({ icon: meta.icon, color: meta.color, title: ev.title || ev.name || '' });
     }
   });
 
@@ -7939,21 +8073,39 @@ function calRenderMonthly() {
 
   let html = dows.map(d => '<div class="cal-dow">' + d + '</div>').join('');
   for (let i = startDow - 1; i >= 0; i--) {
-    html += '<div class="cal-day other-month">' + (daysInPrev - i) + '</div>';
+    html += '<div class="cal-day other-month"><span class="cal-day-num">' + (daysInPrev - i) + '</span></div>';
   }
   for (let d = 1; d <= daysInMonth; d++) {
     const isToday = (d === now.getDate() && calViewMonth === now.getMonth() && calViewYear === now.getFullYear());
-    const hasDot  = dotsByDay[d];
+    const dayEvs  = evsByDay[d] || [];
     let cls = 'cal-day';
-    if (isToday)  cls += ' today';
-    if (hasDot)   cls += ' has-event';
-    const dotHtml = hasDot ? '<span class="cal-day-dot ' + hasDot + '"></span>' : '';
-    html += '<div class="' + cls + '">' + d + dotHtml + '</div>';
+    if (isToday)         cls += ' today';
+    if (dayEvs.length)   cls += ' has-event';
+    // Build chip strip — max 2 chips, +N overflow chip
+    var chipsHtml = '';
+    if (dayEvs.length) {
+      const MAX_CHIPS = 2;
+      const shown = dayEvs.slice(0, MAX_CHIPS);
+      chipsHtml = '<div class="cal-day-chips">';
+      shown.forEach(function(ev) {
+        var cc = COLOR_MAP[ev.color] || 'cc-muted';
+        var truncTitle = ev.title ? ev.title.substring(0, 10) + (ev.title.length > 10 ? '…' : '') : '';
+        chipsHtml += '<div class="cal-day-chip ' + cc + '">'
+          + '<span class="cal-day-chip-icon">' + ev.icon + '</span>'
+          + (truncTitle ? '<span class="cal-day-chip-label">' + truncTitle + '</span>' : '')
+          + '</div>';
+      });
+      if (dayEvs.length > MAX_CHIPS) {
+        chipsHtml += '<div class="cal-day-chip cc-muted">+' + (dayEvs.length - MAX_CHIPS) + '</div>';
+      }
+      chipsHtml += '</div>';
+    }
+    html += '<div class="' + cls + '"><span class="cal-day-num">' + d + '</span>' + chipsHtml + '</div>';
   }
   const totalCells = startDow + daysInMonth;
   const remainder  = (7 - (totalCells % 7)) % 7;
   for (let d = 1; d <= remainder; d++) {
-    html += '<div class="cal-day other-month">' + d + '</div>';
+    html += '<div class="cal-day other-month"><span class="cal-day-num">' + d + '</span></div>';
   }
   const gridEl = document.getElementById('cal-grid');
   if (gridEl) gridEl.innerHTML = html;
@@ -9185,6 +9337,420 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 
+
+// ============================================================
+// LEASE HANDOVER PANEL (S114)
+// ============================================================
+
+var _lhpRef = null;
+var _lhpListing = null;
+var _lhpHandover = null;
+var _lhpPendingUploadDocType = null;
+
+var LHP_STATUS_CFG = {
+  active:            { label: 'Active',            cls: 's-active',     dot: 'green-dot' },
+  proceeding:        { label: 'Proceeding',         cls: 's-proceeding', dot: 'blue-dot'  },
+  inspection_booked: { label: 'Inspection Booked',  cls: 's-inspection', dot: 'yellow-dot'},
+  handover:          { label: 'Handover',           cls: 's-handover',   dot: 'coral-dot' },
+  complete:          { label: 'Complete',           cls: 's-complete',   dot: 'green-dot' },
+  paused:            { label: 'Paused',             cls: 's-muted',      dot: 'muted-dot' },
+  timed_out:         { label: 'Timed Out',          cls: 's-muted',      dot: 'muted-dot' },
+  withdrawn:         { label: 'Withdrawn',          cls: 's-muted',      dot: 'muted-dot' },
+};
+
+var LHP_COB_TIPS = {
+  active:            "Your listing is live and being shown to seekers. Reply quickly when interest comes in " +
+                     "\u2014 good listings go within days. If you have not yet started the landlord " +
+                     "consent process, do it now. It can take 14\u201328 days.",
+  proceeding:        "You are in talks with a seeker. Request the documents you need (condition report, " +
+                     "their ID). The clearer the picture you give them, the faster this moves. " +
+                     "Do not sign anything until both of you are happy.",
+  inspection_booked: "Inspection is booked \u2014 nearly there! Make sure the property is accessible and " +
+                     "the condition report is ready. After inspection, use Complete Handover to " +
+                     "signal you are both satisfied.",
+  handover:          "Handover is underway. Both parties have a 48-hour window to acknowledge completion. " +
+                     "Once done, all documents are auto-deleted from UniRenter. " +
+                     "Contact your property manager to finalise the formal lease assignment.",
+  complete:          "All done \u2014 nice work! Your lease transfer is complete. Follow up with your " +
+                     "property manager about the formal lease assignment and bond transfer. " +
+                     "You can request a review from your seeker via UniRenter.",
+  paused:            "Your listing is paused and will not appear in search results. " +
+                     "Reactivate anytime \u2014 your details are saved.",
+  timed_out:         "Your listing timed out after 30 days of inactivity. You can relist for free anytime. " +
+                     "Tip: a clear description and condition report get a lot more interest.",
+  withdrawn:         "You have closed this listing. If your situation changes, you can relist for free. " +
+                     "We hope you found a resolution \u2014 let Cob know how it went.",
+};
+
+var LHP_DOCS = [
+  { type: 'condition_report', icon: '\uD83D\uDCCB', label: 'Condition Report',
+    sub: 'Recommended \u2014 seeker will want to inspect this', canUpload: true, canRequest: false },
+  { type: 'landlord_consent', icon: '\u2709\uFE0F', label: 'Landlord Consent Letter',
+    sub: 'Upload once you have written approval', canUpload: true, canRequest: false },
+  { type: 'existing_lease',   icon: '\uD83D\uDCC4', label: 'Copy of Existing Lease',
+    sub: 'Seeker must know what they are inheriting', canUpload: true, canRequest: false },
+  { type: 'bond_receipt',     icon: '\uD83E\uDDFE', label: 'Bond Lodgement Receipt',
+    sub: 'Confirms bond amount and lodgement status', canUpload: true, canRequest: false },
+  { type: 'break_lease_fee',  icon: '\uD83D\uDCB8', label: 'Break Lease Fee Agreement',
+    sub: 'If applicable in your state', canUpload: true, canRequest: false },
+  { type: 'seeker_id',        icon: '\uD83E\uDEAA', label: 'Seeker ID / References',
+    sub: 'Request from the interested seeker', canUpload: false, canRequest: true },
+];
+
+// ── Open ────────────────────────────────────────────────────
+function lhpOpen(ref) {
+  _lhpRef = ref;
+  _lhpListing = null;
+  _lhpHandover = null;
+  _lhpPendingUploadDocType = null;
+  var backdrop = document.getElementById('lease-handover-backdrop');
+  var body = document.getElementById('lhp-body');
+  body.innerHTML = '<div class="lhp-loading">Loading your listing\u2026</div>';
+  backdrop.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  lhpFetch(ref);
+}
+
+// ── Close ───────────────────────────────────────────────────
+function lhpClose() {
+  var backdrop = document.getElementById('lease-handover-backdrop');
+  backdrop.classList.remove('open');
+  document.body.style.overflow = '';
+  _lhpRef = null;
+  _lhpListing = null;
+  _lhpHandover = null;
+  try {
+    var url = new URL(window.location.href);
+    if (url.searchParams.has('handover')) {
+      url.searchParams.delete('handover');
+      window.history.replaceState({}, '', url.pathname + (url.search || ''));
+    }
+  } catch(e) {}
+}
+
+// ── Fetch listing + handover status ────────────────────────
+async function lhpFetch(ref) {
+  var body = document.getElementById('lhp-body');
+  var email = localStorage.getItem('unirenter_email') || '';
+  if (!email) {
+    body.innerHTML = '<div class="lhp-error">You need to be signed in to view this panel.</div>';
+    return;
+  }
+  try {
+    var listingUrl = '/api/lease/get?ref=' + encodeURIComponent(ref) + '&email=' + encodeURIComponent(email);
+    var hvUrl = '/api/lease/handover/status?ref=' + encodeURIComponent(ref);
+    var [listingRes, hvRes] = await Promise.all([fetch(listingUrl), fetch(hvUrl)]);
+    var listingData = await listingRes.json();
+    var hvData = hvRes.ok ? await hvRes.json() : null;
+    if (!listingRes.ok || !listingData.listing) {
+      body.innerHTML = '<div class="lhp-error">' + escapeHtml(listingData.error || 'Listing not found.') + '</div>';
+      return;
+    }
+    if (listingData.owner === false) {
+      body.innerHTML = '<div class="lhp-error">You do not own this listing. <a href="/about" style="color:var(--brand-blue);">Contact us</a> if you think this is a mistake.</div>';
+      return;
+    }
+    _lhpListing = listingData.listing;
+    _lhpHandover = hvData || null;
+    lhpRender();
+  } catch (err) {
+    body.innerHTML = '<div class="lhp-error">Could not load your listing. Please try again.</div>';
+  }
+}
+
+// ── Render ─────────────────────────────────────────────────
+function lhpRender() {
+  var body = document.getElementById('lhp-body');
+  var listing = _lhpListing;
+  var hv = _lhpHandover;
+  var status = listing.status || 'active';
+  var ref = escapeHtml(listing.ref || _lhpRef || '');
+  var cfg = LHP_STATUS_CFG[status] || LHP_STATUS_CFG.paused;
+  var tipText = LHP_COB_TIPS[status] || LHP_COB_TIPS.active;
+
+  // Seeker
+  var seekerName = (hv && hv.incoming_name) || listing.interested_name || null;
+  var seekerUni  = (hv && hv.incoming_uni)  || listing.interested_uni  || null;
+  var seekerHtml;
+  if (seekerName) {
+    seekerHtml = '<div class="lhp-seeker-card">'
+      + '<div class="lhp-seeker-name">' + escapeHtml(seekerName) + '</div>'
+      + (seekerUni ? '<div class="lhp-seeker-uni">' + escapeHtml(seekerUni) + '</div>' : '')
+      + '</div>';
+  } else {
+    seekerHtml = '<div class="lhp-seeker-empty">No interest received yet \u2014 your listing is live and being shown to seekers.</div>';
+  }
+
+  // Documents
+  var uploadedDocs  = (hv && Array.isArray(hv.uploaded_docs))  ? hv.uploaded_docs  : [];
+  var requestedDocs = (hv && Array.isArray(hv.requested_docs)) ? hv.requested_docs : [];
+  var docRowsHtml = LHP_DOCS.map(function(doc) {
+    var isUploaded  = uploadedDocs.indexOf(doc.type) !== -1;
+    var isRequested = requestedDocs.indexOf(doc.type) !== -1;
+    var btnHtml = '';
+    if (doc.canUpload) {
+      if (isUploaded) {
+        btnHtml += '<button class="lhp-doc-btn d-done">\u2713 Uploaded</button>';
+      } else {
+        btnHtml += '<button class="lhp-doc-btn d-upload" data-dtype="' + doc.type + '" onclick="lhpStartUpload(this.dataset.dtype)">Upload</button>';
+      }
+    }
+    if (doc.canRequest) {
+      if (isRequested) {
+        btnHtml += '<button class="lhp-doc-btn d-requested">\u2713 Requested</button>';
+      } else {
+        btnHtml += '<button class="lhp-doc-btn d-request" data-dtype="' + doc.type + '" onclick="lhpRequestDoc(this.dataset.dtype)">Request</button>';
+      }
+    }
+    return '<div class="lhp-doc-row">'
+      + '<span class="lhp-doc-icon">' + doc.icon + '</span>'
+      + '<div style="flex:1;"><div class="lhp-doc-label">' + doc.label + '</div>'
+      + '<div class="lhp-doc-sub">' + doc.sub + '</div></div>'
+      + btnHtml + '</div>';
+  }).join('');
+
+  // Action buttons — all using data-action to avoid single-quote nesting
+  var actHtml = '';
+  var hasProceed         = (status === 'active') && !!seekerName;
+  var hasBookInspect     = status === 'proceeding';
+  var hasCompleteHandover = status === 'inspection_booked';
+  var canReactivate      = (status === 'paused' || status === 'timed_out');
+  var canExtend          = ['active','proceeding','inspection_booked','paused','timed_out'].indexOf(status) !== -1;
+  var canPause           = (status === 'active' || status === 'proceeding');
+  var canClose           = ['active','proceeding','inspection_booked','paused'].indexOf(status) !== -1;
+  var isTerminal         = (status === 'complete' || status === 'withdrawn');
+  var safeFirstName      = seekerName ? escapeHtml(seekerName.split(' ')[0]) : '';
+
+  if (hasProceed) {
+    actHtml += '<button class="lhp-btn b-primary" data-action="proceed" onclick="lhpAction(this.dataset.action)">'
+      + '\u2713 Mark as Proceeding with ' + safeFirstName + '</button>';
+  }
+  if (hasBookInspect) {
+    actHtml += '<button class="lhp-btn b-primary" data-action="book_inspection" onclick="lhpAction(this.dataset.action)">'
+      + 'Book Inspection</button>';
+  }
+  if (hasCompleteHandover) {
+    actHtml += '<button class="lhp-btn b-success" onclick="lhpCompleteHandover()">'
+      + 'Complete Handover</button>';
+  }
+  if (canReactivate) {
+    actHtml += '<button class="lhp-btn b-primary" data-action="reactivate" onclick="lhpAction(this.dataset.action)">'
+      + 'Reactivate Listing</button>';
+  }
+  if (canExtend) {
+    actHtml += '<button class="lhp-btn b-warning" data-action="extend" onclick="lhpAction(this.dataset.action)">'
+      + 'Extend Listing (free)</button>';
+  }
+  if (canPause) {
+    actHtml += '<button class="lhp-btn b-muted" data-action="pause" onclick="lhpAction(this.dataset.action)">'
+      + 'Pause Listing</button>';
+  }
+  if (canClose) {
+    actHtml += '<button class="lhp-btn b-danger" onclick="lhpShowCloseConfirm()">'
+      + 'Close Listing</button>';
+  }
+  if (isTerminal) {
+    actHtml += '<button class="lhp-btn b-muted" onclick="lhpRelist()">'
+      + 'Relist for free</button>';
+  }
+  if (!actHtml) {
+    actHtml = '<div style="font-size:13px;color:var(--text-muted);">No actions available for this status.</div>';
+  }
+
+  // Close confirm section
+  var closeConfirmHtml = '<div class="lhp-close-confirm" id="lhp-close-confirm">'
+    + '<div class="lhp-close-reason-label">Why are you closing?</div>'
+    + '<select class="lhp-close-reason-select" id="lhp-close-reason">'
+    + '<option value="">\u2014 select a reason \u2014</option>'
+    + '<option value="found_through_unirenter">Found a replacement through UniRenter</option>'
+    + '<option value="found_other">Found someone another way</option>'
+    + '<option value="no_longer_needed">No longer need to transfer</option>'
+    + '<option value="other">Other reason</option>'
+    + '</select>'
+    + '<div class="lhp-close-action-row">'
+    + '<button class="lhp-btn b-danger" style="flex:1;" onclick="lhpConfirmClose()">Confirm close</button>'
+    + '<button class="lhp-btn b-muted" style="flex:1;" onclick="lhpHideCloseConfirm()">Cancel</button>'
+    + '</div></div>';
+
+  body.innerHTML =
+    // Status
+    '<div class="lhp-status-row">'
+    + '<span class="lhp-status-badge ' + cfg.cls + '">' + escapeHtml(cfg.label) + '</span>'
+    + '<span class="lhp-listing-ref">' + ref + '</span>'
+    + '</div>'
+    // Seeker
+    + '<div class="lhp-section"><div class="lhp-section-title">Interested Seeker</div>'
+    + seekerHtml + '</div>'
+    // Docs
+    + '<div class="lhp-section"><div class="lhp-section-title">Documents</div>'
+    + '<div class="lhp-doc-list">' + docRowsHtml + '</div></div>'
+    // Actions
+    + '<div class="lhp-section"><div class="lhp-section-title">Actions</div>'
+    + '<div class="lhp-actions" id="lhp-actions">' + actHtml + '</div>'
+    + closeConfirmHtml + '</div>'
+    // Cob tip
+    + '<div class="lhp-cob-tip"><span class="lhp-cob-tip-icon">\uD83E\uDD20</span>'
+    + '<div class="lhp-cob-tip-text">' + escapeHtml(tipText) + '</div></div>';
+}
+
+// ── State machine action ────────────────────────────────────
+async function lhpAction(action) {
+  if (!_lhpRef) return;
+  var email = localStorage.getItem('unirenter_email') || '';
+  var btns = document.querySelectorAll('#lhp-actions .lhp-btn');
+  btns.forEach(function(b) { b.disabled = true; });
+  try {
+    var res = await fetch('/api/lease/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref: _lhpRef, email: email, action: action }),
+    });
+    var data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Updated \u2713');
+      await lhpFetch(_lhpRef);
+    } else {
+      showToast(data.error || 'Action failed \u2014 try again');
+      btns.forEach(function(b) { b.disabled = false; });
+    }
+  } catch (err) {
+    showToast('Network error \u2014 try again');
+    btns.forEach(function(b) { b.disabled = false; });
+  }
+}
+
+// ── Complete handover ───────────────────────────────────────
+async function lhpCompleteHandover() {
+  var email = localStorage.getItem('unirenter_email') || '';
+  var btns = document.querySelectorAll('#lhp-actions .lhp-btn');
+  btns.forEach(function(b) { b.disabled = true; });
+  try {
+    var res = await fetch('/api/lease/handover/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref: _lhpRef, email: email }),
+    });
+    var data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Handover complete! Documents will be deleted in 48hrs.');
+      await lhpFetch(_lhpRef);
+    } else {
+      showToast(data.error || 'Could not complete handover \u2014 try again');
+      btns.forEach(function(b) { b.disabled = false; });
+    }
+  } catch (err) {
+    showToast('Network error \u2014 try again');
+    btns.forEach(function(b) { b.disabled = false; });
+  }
+}
+
+// ── Close confirm UI ────────────────────────────────────────
+function lhpShowCloseConfirm() {
+  var cc = document.getElementById('lhp-close-confirm');
+  if (cc) {
+    cc.classList.add('show');
+    var panel = document.getElementById('lease-handover-panel');
+    if (panel) setTimeout(function() { panel.scrollTop = panel.scrollHeight; }, 50);
+  }
+}
+function lhpHideCloseConfirm() {
+  var cc = document.getElementById('lhp-close-confirm');
+  if (cc) cc.classList.remove('show');
+}
+async function lhpConfirmClose() {
+  var reasonEl = document.getElementById('lhp-close-reason');
+  if (!reasonEl || !reasonEl.value) { showToast('Please select a reason first'); return; }
+  var email = localStorage.getItem('unirenter_email') || '';
+  var foundViaUR = (reasonEl.value === 'found_through_unirenter');
+  try {
+    var res = await fetch('/api/lease/close', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref: _lhpRef, email: email, reason: reasonEl.value, found_through_unirenter: foundViaUR }),
+    });
+    var data = await res.json();
+    if (res.ok && data.success) {
+      showToast(foundViaUR ? 'Listing closed \u2014 nice one!' : 'Listing closed.');
+      await lhpFetch(_lhpRef);
+    } else {
+      showToast(data.error || 'Could not close listing');
+    }
+  } catch (err) { showToast('Network error \u2014 try again'); }
+}
+
+// ── Relist ──────────────────────────────────────────────────
+async function lhpRelist() {
+  var email = localStorage.getItem('unirenter_email') || '';
+  try {
+    var res = await fetch('/api/lease/relist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref: _lhpRef, email: email }),
+    });
+    var data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Relisted! Your listing is live again.');
+      await lhpFetch(_lhpRef);
+    } else {
+      showToast(data.error || 'Could not relist');
+    }
+  } catch (err) { showToast('Network error \u2014 try again'); }
+}
+
+// ── Document upload ─────────────────────────────────────────
+function lhpStartUpload(docType) {
+  _lhpPendingUploadDocType = docType;
+  var input = document.getElementById('lhp-file-input');
+  if (input) input.click();
+}
+async function lhpHandleFileSelected(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  var docType = _lhpPendingUploadDocType;
+  if (!docType) return;
+  _lhpPendingUploadDocType = null;
+  input.value = '';
+  if (file.size > 10 * 1024 * 1024) { showToast('File too large \u2014 max 10 MB'); return; }
+  showToast('Uploading\u2026');
+  var email = localStorage.getItem('unirenter_email') || '';
+  var fd = new FormData();
+  fd.append('file', file);
+  fd.append('ref', _lhpRef);
+  fd.append('email', email);
+  fd.append('doc_type', docType);
+  try {
+    var res = await fetch('/api/lease/handover/upload', { method: 'POST', body: fd });
+    var data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Document uploaded \u2713');
+      if (!_lhpHandover) _lhpHandover = { uploaded_docs: [], requested_docs: [] };
+      if (!Array.isArray(_lhpHandover.uploaded_docs)) _lhpHandover.uploaded_docs = [];
+      if (_lhpHandover.uploaded_docs.indexOf(docType) === -1) _lhpHandover.uploaded_docs.push(docType);
+      lhpRender();
+    } else { showToast(data.error || 'Upload failed \u2014 try again'); }
+  } catch (err) { showToast('Upload error \u2014 try again'); }
+}
+
+// ── Request doc from seeker ─────────────────────────────────
+async function lhpRequestDoc(docType) {
+  var email = localStorage.getItem('unirenter_email') || '';
+  try {
+    var res = await fetch('/api/lease/handover/request-docs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref: _lhpRef, email: email, doc_types: [docType] }),
+    });
+    var data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Document request sent \u2713');
+      if (!_lhpHandover) _lhpHandover = { uploaded_docs: [], requested_docs: [] };
+      if (!Array.isArray(_lhpHandover.requested_docs)) _lhpHandover.requested_docs = [];
+      if (_lhpHandover.requested_docs.indexOf(docType) === -1) _lhpHandover.requested_docs.push(docType);
+      lhpRender();
+    } else { showToast(data.error || 'Request failed'); }
+  } catch (err) { showToast('Network error'); }
+}
+
 // ── URL param handling (V54) ──
 (function() {
   var params  = new URLSearchParams(window.location.search);
@@ -9194,6 +9760,21 @@ window.addEventListener('DOMContentLoaded', function() {
   var legacyMap = { 'calendar':'tenancy', 'calculator':'tenancy' };
   window.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
+      // ?handover= param → Lease Handover Panel (S114)
+      var handoverRef = params.get('handover');
+      if (handoverRef) {
+        switchTab('matches');
+        var _lhpWait = 0;
+        var _lhpPoll = setInterval(function() {
+          _lhpWait++;
+          var em = localStorage.getItem('unirenter_email');
+          if (em || _lhpWait > 20) {
+            clearInterval(_lhpPoll);
+            lhpOpen(handoverRef);
+          }
+        }, 150);
+        return;
+      }
       // ?join= param → Household tab
       var joinToken = params.get('join');
       if (joinToken) {
@@ -12111,6 +12692,23 @@ function closeCardPreview() {
     <div id="card-preview-card-wrap"></div>
   </div>
 </div>
+
+
+<!-- LEASE HANDOVER PANEL (S114) -->
+<div id="lease-handover-backdrop" onclick="if(event.target===this)lhpClose()">
+  <div id="lease-handover-panel">
+    <div class="lhp-header">
+      <span style="font-size:20px;">&#x1F511;</span>
+      <span class="lhp-header-title">Lease Transfer &mdash; Lister Panel</span>
+      <button class="lhp-close" onclick="lhpClose()" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="lhp-body" id="lhp-body">
+      <div class="lhp-loading">Loading your listing&hellip;</div>
+    </div>
+  </div>
+</div>
+<input type="file" class="lhp-file-input" id="lhp-file-input"
+  accept=".pdf,.jpg,.jpeg,.png" onchange="lhpHandleFileSelected(this)">
 
 </body>
 </html>
