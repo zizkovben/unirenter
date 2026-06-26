@@ -580,6 +580,39 @@
       .stat-card { padding: 14px 16px; }
       .stat-card .stat-val { font-size: 22px; }
     }
+    .lead-new-badge {
+      display: inline-block;
+      background: var(--brand-yellow);
+      color: var(--navy);
+      font-size: 9px;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 1px 5px;
+      vertical-align: middle;
+      letter-spacing: 0.4px;
+      margin-left: 4px;
+    }
+    .lead-expand-row td {
+      background: var(--navy-mid);
+      padding: 12px 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--card-border);
+    }
+    .lead-expand-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 8px 16px;
+    }
+    .lead-expand-item strong {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--brand-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 2px;
+    }
   </style>
 </head>
 <body>
@@ -615,7 +648,7 @@
 
     <div class="portal-header">
       <h1 id="portal-title">Lead Inbox</h1>
-      <p id="portal-subtitle">Students who requested housing assistance through UniRenter.</p>
+      <p id="portal-subtitle">Students who opted in to housing partner assistance via UniRenter.</p>
     </div>
 
     <!-- STATS STRIP -->
@@ -701,7 +734,11 @@
     <div class="leads-section">
       <div class="leads-section-header">
         <h2>Student leads</h2>
-        <span class="leads-count" id="leads-count-label">Loading...</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="text" id="lead-search" placeholder="Search name or email…" oninput="filterLeads()" style="background:var(--navy-mid);border:1px solid var(--card-border);color:var(--text);border-radius:8px;padding:6px 12px;font-size:12px;font-family:var(--font-body);outline:none;width:200px;">
+          <button onclick="exportCSV()" style="background:transparent;border:1px solid var(--card-border);color:var(--text-muted);border-radius:8px;padding:6px 14px;font-size:12px;font-family:var(--font-body);cursor:pointer;">⬇ Export CSV</button>
+          <span class="leads-count" id="leads-count-label">Loading...</span>
+        </div>
       </div>
       <div id="leads-body">
         <div class="loading-state"><span class="spinner"></span> Loading leads...</div>
@@ -877,10 +914,21 @@
   }
 
   // ─── Render leads table ───────────────────────────────────────────────────────
+  function filterLeads() { renderLeads(); }
+
   function renderLeads() {
-    const filtered = activeCityFilter === 'all'
+    const searchVal = (document.getElementById('lead-search') || {}).value || '';
+    const searchLower = searchVal.toLowerCase().trim();
+    let filtered = activeCityFilter === 'all'
       ? allLeads
       : allLeads.filter(l => l.city === activeCityFilter);
+    if (searchLower) {
+      filtered = filtered.filter(l =>
+        (l.student_name || '').toLowerCase().includes(searchLower) ||
+        (l.student_email || '').toLowerCase().includes(searchLower) ||
+        (l.university || '').toLowerCase().includes(searchLower)
+      );
+    }
 
     const countLabel = document.getElementById('leads-count-label');
     countLabel.textContent = filtered.length + ' lead' + (filtered.length !== 1 ? 's' : '');
@@ -900,10 +948,11 @@
     const rows = filtered.map(lead => {
       const dateStr = formatDate(lead.created_at);
       const statusClass = (lead.status || 'new').replace(' ', '_');
+      const isNew = lead.created_at && (Date.now() - new Date(lead.created_at).getTime()) < 24*3600*1000;
       return `
-        <tr>
+        <tr style="cursor:pointer;" onclick="toggleLeadExpand(this, ${JSON.stringify(lead)})">
           <td>
-            <div class="lead-name">${esc(lead.student_name || 'Student')}</div>
+            <div class="lead-name">${esc(lead.student_name || 'Student')}${isNew ? ' <span class="lead-new-badge">NEW</span>' : ''}</div>
             <div class="lead-email">${esc(lead.student_email)}</div>
           </td>
           <td><span class="lead-city-badge">${cap(lead.city || '')}</span></td>
@@ -1029,6 +1078,7 @@
     if (!el) return;
     el.innerHTML = '<div class="market-stats">' +
       '<div class="market-stat"><span class="m-val">' + (market.newStudentsMonth !== undefined ? market.newStudentsMonth : '—') + '</span><span class="m-lbl">New student registrations this month</span></div>' +
+      '<div class="market-stat"><span class="m-val">' + (market.totalProfiles !== undefined ? market.totalProfiles : '—') + '</span><span class="m-lbl">Total student profiles</span></div>' +
       '<div class="market-stat"><span class="m-val">' + (market.activeLeaseListings !== undefined ? market.activeLeaseListings : '—') + '</span><span class="m-lbl">Active lease transfer listings</span></div>' +
       '<div class="market-stat"><span class="m-val">' + (market.totalProfiles !== undefined ? market.totalProfiles : '—') + '</span><span class="m-lbl">Total students on platform</span></div>' +
       '</div>';
@@ -1151,6 +1201,63 @@
         '<span class="uni-pct">' + Math.round(u.count/total*100) + '%</span>' +
         '</div>';
     }).join('');
+  }
+
+  // ─── Lead row expand (click to see more) ────────────────────────────────────
+  function toggleLeadExpand(row, lead) {
+    // Don't expand when clicking status select
+    if (window.event && window.event.target && window.event.target.tagName === 'SELECT') return;
+    const next = row.nextElementSibling;
+    if (next && next.classList.contains('lead-expand-row')) {
+      next.remove();
+      return;
+    }
+    // Remove any other open expand rows
+    document.querySelectorAll('.lead-expand-row').forEach(r => r.remove());
+    const colCount = row.cells.length;
+    const expandRow = document.createElement('tr');
+    expandRow.className = 'lead-expand-row';
+    const td = document.createElement('td');
+    td.colSpan = colCount;
+    const suburbStr = Array.isArray(lead.suburb_preferences)
+      ? lead.suburb_preferences.join(', ')
+      : (lead.suburb_preferences || '—');
+    td.innerHTML = '<div class="lead-expand-grid">' +
+      '<div class="lead-expand-item"><strong>Suburb preferences</strong>' + esc(suburbStr) + '</div>' +
+      '<div class="lead-expand-item"><strong>Student status</strong>' + esc(lead.student_status || '—') + '</div>' +
+      '<div class="lead-expand-item"><strong>Budget range</strong>' + (lead.budget_max ? '$' + lead.budget_max + '/wk' : '—') + '</div>' +
+      '<div class="lead-expand-item"><strong>Move-in date</strong>' + esc(lead.move_in_date || '—') + '</div>' +
+      '<div class="lead-expand-item"><strong>Received</strong>' + formatDate(lead.created_at) + '</div>' +
+      '</div>';
+    expandRow.appendChild(td);
+    row.insertAdjacentElement('afterend', expandRow);
+  }
+
+  // ─── Export CSV ─────────────────────────────────────────────────────────────
+  function exportCSV() {
+    if (!allLeads.length) { showToast('No leads to export'); return; }
+    const headers = ['Name','Email','City','University','Budget ($/wk)','Move-in date','Status','Received'];
+    const rows = allLeads.map(function(l) {
+      return [
+        l.student_name || '',
+        l.student_email || '',
+        l.city || '',
+        l.university || '',
+        l.budget_max || '',
+        l.move_in_date || '',
+        l.status || '',
+        l.created_at ? new Date(l.created_at).toLocaleDateString('en-AU') : ''
+      ].map(function(v) { return '"' + String(v).replace(/"/g,'""') + '"'; }).join(',');
+    });
+    const csv = [headers.join(',')].concat(rows).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'unirenter-leads-' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV exported ✓');
   }
 
   let toastTimer = null;
