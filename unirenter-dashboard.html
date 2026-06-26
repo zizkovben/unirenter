@@ -6944,7 +6944,10 @@ const CAT_META = {
   study:      { icon: '📚', color: 'blue',   dot: 'dot-info',    filterGroup: 'uni' },
   other:      { icon: '📌', color: 'yellow', dot: '',            filterGroup: 'other' },
   work:       { icon: '💼', color: 'yellow', dot: '',            filterGroup: 'work' },
-  public_holiday: { icon: '🇦🇺', color: 'green', dot: 'dot-green', filterGroup: 'public_holidays' }
+  public_holiday: { icon: '🇦🇺', color: 'green', dot: 'dot-green', filterGroup: 'public_holidays' },
+  housing:    { icon: '🏠', color: 'yellow', dot: 'dot-yellow',  filterGroup: 'housing' },
+  uni:        { icon: '🎓', color: 'blue',   dot: 'dot-info',    filterGroup: 'uni' },
+  social:     { icon: '🎉', color: 'blue',   dot: 'dot-info',    filterGroup: 'other' }
 };
 
 // Filter groups — stored in ur_cal_filters
@@ -7118,8 +7121,26 @@ DM me if you're keen! 😊`;
 
 
 function calLoadEvents() {
-  try { return JSON.parse(localStorage.getItem(CAL_STORE_KEY) || '[]'); }
-  catch(e) { return []; }
+  let events = [];
+  try { events = JSON.parse(localStorage.getItem(CAL_STORE_KEY) || '[]'); } catch(e) {}
+  // Merge To Do items from ur_todos so they appear on calendar views
+  try {
+    const todos = JSON.parse(localStorage.getItem('ur_todos') || '[]');
+    todos.forEach(function(t) {
+      if (t.status === 'done' || !t.date) return;
+      // Map todo category to CAT_META key
+      const catMap = { housing: 'housing', uni: 'uni', work: 'work', social: 'social', other: 'other' };
+      events.push({
+        id: t.id,
+        title: t.title,
+        cat: catMap[t.category] || 'other',
+        date: t.date,
+        source: 'todo',
+        editable: true,
+      });
+    });
+  } catch(e) {}
+  return events;
 }
 function calSaveEvents(events) {
   localStorage.setItem(CAL_STORE_KEY, JSON.stringify(events));
