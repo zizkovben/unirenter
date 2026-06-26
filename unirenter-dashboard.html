@@ -3793,7 +3793,7 @@ body.light-mode {
       💬 <span class="tab-label">Messages</span> <span class="tab-badge" id="msg-badge">2</span>
     </button>
     <button class="tab-btn" id="tab-btn-tenancy" role="tab" onclick="switchTab('tenancy')">
-      🏠 <span class="tab-label">Tenancy</span>
+      🗓️ <span class="tab-label">Planner</span>
     </button>
     <button class="tab-btn" id="tab-btn-household" role="tab" onclick="switchTab('household')">
       👥 <span class="tab-label">Household</span>
@@ -4085,7 +4085,7 @@ body.light-mode {
     <div class="section-header">
       <div>
         <div class="section-title">📅 Calendar</div>
-        <div class="section-sub">Key dates for your tenancy and studies</div>
+        <div class="section-sub">Your calendar, to-do list and lease dates</div>
       </div>
       <button class="section-action" onclick="calToday()">Today</button>
     </div>
@@ -9136,7 +9136,7 @@ UNIRENTER FEATURES — PROMOTE NATURALLY
 - Renter's Guide (/{city}/guide): full state-specific tenancy breakdown — point students here for rights questions
 - Getting Settled (/{city}/settled): life in their city as a student — banking, transport, community
 - Sleep modes: smart way to pause without losing matches — inspecting a place, exam crunch, sorted
-- Lease Companion (Tenancy tab): tracks lease dates and nudges before anything important
+- Lease Companion (Planner tab): tracks lease dates and nudges before anything important
 - Profile badges: verify uni email to build trust — verified profiles get more connections
 - Sharing: if this has been helpful, their friends are probably in the same boat — remind them sharing UniRenter (📤 Share button in Matches tab) helps everyone get better matches
 
@@ -9284,7 +9284,7 @@ function cobCalNudgeAccept() {
     }).catch(function(e) { console.warn('calendar/add non-fatal:', e.message); });
   }
 
-  cobPanelAddMsg('cob', 'Done! Added "' + title + '" to your calendar. You can find it in the Tenancy tab. 🤠');
+  cobPanelAddMsg('cob', 'Done! Added "' + title + '" to your calendar. You can find it in the Planner tab. 🤠');
 }
 
 function cobCalNudgeDismiss() {
@@ -12445,7 +12445,7 @@ function closeCardPreview() {
   <div class="cob-panel-typing" id="cob-panel-typing"></div>
   <div class="cob-panel-input-row">
     <textarea class="cob-panel-input" id="cob-panel-input" rows="1"
-      placeholder="Ask Cob anything about your tenancy…"
+      placeholder="Ask Cob anything about renting, your lease, or life in Australia…"
       onkeydown="cobPanelKeydown(event)"></textarea>
     <button class="cob-panel-send" onclick="cobPanelSend()">Send</button>
   </div>
