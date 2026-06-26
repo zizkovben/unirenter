@@ -28,10 +28,51 @@ module.exports = async function handler(req, res) {
     const VALID_CITIES = ['melbourne', 'sydney', 'brisbane', 'adelaide', 'perth', 'canberra'];
     const city = VALID_CITIES.includes(body.city) ? body.city : 'melbourne';
  
+    // ── Profile completeness — calculated server-side (S110) ──────────────────
+    // The client sends a DOM-state calculation that can be low during intermediate
+    // step-advance saves (unlockAndGo fires on every tab advance). We recalculate
+    // here from actual payload field values AND compare against what's already
+    // stored in Supabase, always taking the highest value so completeness never
+    // decreases due to a partial intermediate save.
+    function calcComplete(b) {
+      const fields = [
+        b.display_name, b.university, b.student_status, b.seeking,
+        b.move_in_date, b.household_type, b.sleep_schedule, b.cleanliness,
+        b.budget_min, b.budget_max,
+      ];
+      const filled = fields.filter(v => v !== undefined && v !== null && v !== '').length;
+      return Math.round((filled / 10) * 100);
+    }
+
+    // Fetch currently-stored completeness so we never lower it
+    let storedPct = 0;
+    try {
+      const matchCol2 = body.email ? 'email' : 'id';
+      const matchVal2 = body.email || body.id;
+      const existingRes = await fetch(
+        `${supabaseUrl}/rest/v1/profiles?${matchCol2}=eq.${encodeURIComponent(matchVal2)}&select=profile_complete`,
+        {
+          headers: {
+            'apikey':        serviceKey,
+            'Authorization': `Bearer ${serviceKey}`,
+          },
+        }
+      );
+      const existingData = await existingRes.json();
+      if (Array.isArray(existingData) && existingData.length > 0) {
+        storedPct = existingData[0].profile_complete || 0;
+      }
+    } catch (_) { /* non-fatal — storedPct stays 0 */ }
+
+    const clientPct = typeof body.profile_complete === 'number' ? body.profile_complete : 0;
+    const serverPct = calcComplete(body);
+    // Never lower completeness — take max across client report, server calc, and stored value
+    const derivedPct = Math.max(clientPct, serverPct, storedPct);
+
     const payload = {
       updated_at:       new Date().toISOString(),
       last_seen:        new Date().toISOString(),
-      profile_complete: body.profile_complete ?? 0,
+      profile_complete: derivedPct,
       is_active:        true,
       city,
     };
