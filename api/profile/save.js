@@ -90,6 +90,7 @@ module.exports = async function handler(req, res) {
       'language_home', 'languages_spoken', 'english_practice',
       'chinese_zodiac', 'sleep_mode', 'listing_token', 'listing_expires_at',
       'stay_duration',
+      'open_to_lease_transfer',
     ];
  
     for (const f of fields) {
