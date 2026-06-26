@@ -434,6 +434,160 @@ body.light-mode {
 /* ── Tab panels ── */
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
+/* ── Quick Add Strip ── */
+.quick-add-strip {
+  background: var(--navy-card);
+  border: 1px solid var(--navy-border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: all 0.22s ease;
+}
+.qa-collapsed {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; cursor: pointer;
+}
+.qa-collapsed:hover { background: rgba(255,255,255,0.03); }
+.qa-add-btn {
+  background: rgba(75,191,224,0.12);
+  border: 1px solid rgba(75,191,224,0.25);
+  border-radius: 8px;
+  color: var(--brand-blue); font-size: 12px; font-weight: 600;
+  padding: 5px 12px; cursor: pointer; white-space: nowrap;
+  font-family: var(--font-body);
+}
+.qa-add-btn:hover { background: rgba(75,191,224,0.2); }
+.qa-upcoming {
+  display: flex; gap: 6px; flex-wrap: wrap; flex: 1;
+  overflow: hidden;
+}
+.qa-upcoming-pill {
+  font-size: 11px; color: var(--text-muted);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--navy-border);
+  border-radius: 20px; padding: 3px 9px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 160px;
+}
+.qa-expanded { padding: 14px; border-top: 1px solid var(--navy-border); }
+.qa-cats { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 12px; }
+.qa-cat-chip {
+  background: rgba(255,255,255,0.05); border: 1px solid var(--navy-border);
+  border-radius: 20px; padding: 5px 13px;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  color: var(--text-muted); font-family: var(--font-body);
+  transition: all 0.15s;
+}
+.qa-cat-chip:hover { background: rgba(255,255,255,0.09); color: var(--text); }
+.qa-cat-chip.selected { background: rgba(75,191,224,0.15); border-color: rgba(75,191,224,0.4); color: var(--brand-blue); }
+.qa-subtypes { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; min-height: 0; }
+.qa-sub-chip {
+  background: rgba(255,255,255,0.04); border: 1px solid var(--navy-border);
+  border-radius: 16px; padding: 4px 11px;
+  font-size: 11px; cursor: pointer; color: var(--text-muted);
+  font-family: var(--font-body); transition: all 0.15s;
+}
+.qa-sub-chip:hover { color: var(--text); background: rgba(255,255,255,0.07); }
+.qa-sub-chip.selected { color: var(--brand-yellow); border-color: rgba(245,184,0,0.35); background: rgba(245,184,0,0.08); }
+.qa-input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.qa-text-input {
+  flex: 1; background: var(--navy-mid); border: 1px solid var(--navy-border);
+  border-radius: 8px; color: var(--text); font-size: 13px;
+  padding: 8px 12px; font-family: var(--font-body);
+  outline: none;
+}
+.qa-text-input:focus { border-color: rgba(75,191,224,0.4); }
+.qa-text-input::placeholder { color: var(--text-muted); }
+.qa-date-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.qa-date-chip {
+  background: rgba(255,255,255,0.05); border: 1px solid var(--navy-border);
+  border-radius: 16px; padding: 5px 12px; font-size: 12px;
+  cursor: pointer; color: var(--text-muted); font-family: var(--font-body);
+  transition: all 0.15s;
+}
+.qa-date-chip:hover { color: var(--text); }
+.qa-date-chip.selected { color: var(--brand-yellow); border-color: rgba(245,184,0,0.35); background: rgba(245,184,0,0.08); }
+.qa-date-input {
+  background: var(--navy-mid); border: 1px solid var(--navy-border);
+  border-radius: 8px; color: var(--text); font-size: 12px;
+  padding: 6px 10px; font-family: var(--font-body); outline: none;
+  display: none;
+}
+.qa-date-input.visible { display: block; }
+.qa-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.qa-save-btn {
+  background: var(--brand-blue); color: #fff; border: none;
+  border-radius: 8px; padding: 8px 20px; font-size: 13px;
+  font-weight: 600; cursor: pointer; font-family: var(--font-body);
+}
+.qa-save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.qa-save-btn:not(:disabled):hover { background: #5dcbec; }
+.qa-close-strip { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 4px; }
+.qa-cob-nudge {
+  background: rgba(245,184,0,0.08); border: 1px solid rgba(245,184,0,0.2);
+  border-radius: 10px; padding: 10px 14px; margin-top: 10px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; color: var(--text-muted);
+}
+.qa-nudge-btns { display: flex; gap: 6px; margin-top: 4px; }
+.qa-nudge-btn {
+  background: rgba(255,255,255,0.07); border: 1px solid var(--navy-border);
+  border-radius: 8px; padding: 4px 12px; font-size: 11px;
+  font-weight: 600; cursor: pointer; color: var(--text);
+  font-family: var(--font-body);
+}
+.qa-nudge-btn:hover { background: rgba(255,255,255,0.12); }
+
+/* ── To Do list ── */
+#cal-view-todo { }
+.todo-group-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--text-muted);
+  padding: 8px 0 6px; margin-bottom: 2px;
+  border-bottom: 1px solid var(--navy-border);
+}
+.todo-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 2px; border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: opacity 0.2s;
+}
+.todo-item.done-item { opacity: 0.45; }
+.todo-check {
+  width: 18px; height: 18px; border-radius: 5px;
+  border: 2px solid var(--navy-border); background: none;
+  cursor: pointer; flex-shrink: 0; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.todo-check.checked { background: var(--brand-green); border-color: var(--brand-green); }
+.todo-check.checked::after { content: '✓'; color: #fff; font-size: 11px; font-weight: 700; }
+.todo-body { flex: 1; min-width: 0; }
+.todo-title {
+  font-size: 13px; color: var(--text); font-weight: 500;
+  margin-bottom: 3px; line-height: 1.4;
+}
+.todo-item.done-item .todo-title { text-decoration: line-through; color: var(--text-muted); }
+.todo-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.todo-cat-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.todo-date-label { font-size: 11px; color: var(--text-muted); }
+.todo-cat-pill {
+  font-size: 10px; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; padding: 2px 7px; border-radius: 8px;
+}
+.todo-item-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.todo-action-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: 14px; padding: 2px 4px;
+  border-radius: 5px;
+}
+.todo-action-btn:hover { background: rgba(255,255,255,0.07); color: var(--text); }
+.todo-empty {
+  text-align: center; padding: 40px 20px; color: var(--text-muted);
+  font-size: 13px; line-height: 1.7;
+}
+
 /* ── Calendar tab ── */
 .cal-header-row {
   display: flex; align-items: center; justify-content: space-between;
@@ -3361,6 +3515,60 @@ body.light-mode {
     <button class="push-prompt-dismiss" onclick="dismissPushPrompt()" title="Dismiss">✕</button>
   </div>
 
+  <!-- ── Quick Add Strip (S108) ── -->
+  <div class="quick-add-strip" id="quick-add-strip">
+    <!-- Collapsed state (default) -->
+    <div class="qa-collapsed" id="qa-collapsed" onclick="qaToggle()">
+      <button class="qa-add-btn" onclick="event.stopPropagation();qaOpen()">+ Quick add</button>
+      <div class="qa-upcoming" id="qa-upcoming-pills">
+        <!-- populated by JS from calendar_events -->
+      </div>
+    </div>
+    <!-- Expanded state -->
+    <div class="qa-expanded" id="qa-expanded" style="display:none;">
+      <!-- Category chips -->
+      <div class="qa-cats" id="qa-cats">
+        <button class="qa-cat-chip" data-cat="housing" onclick="qaSelectCat('housing')">🏠 Housing</button>
+        <button class="qa-cat-chip" data-cat="uni" onclick="qaSelectCat('uni')">🎓 Uni</button>
+        <button class="qa-cat-chip" data-cat="work" onclick="qaSelectCat('work')">💼 Work</button>
+        <button class="qa-cat-chip" data-cat="social" onclick="qaSelectCat('social')">🎉 Social</button>
+        <button class="qa-cat-chip" data-cat="other" onclick="qaSelectCat('other')">⋯ Other</button>
+      </div>
+      <!-- Sub-type chips (shown after category selected) -->
+      <div class="qa-subtypes" id="qa-subtypes"></div>
+      <!-- Title input + date -->
+      <div class="qa-input-row">
+        <input class="qa-text-input" id="qa-title-input" type="text" placeholder="What do you need to remember?" maxlength="80">
+      </div>
+      <!-- Date chips -->
+      <div class="qa-date-row" id="qa-date-row">
+        <button class="qa-date-chip selected" data-date="this_week" onclick="qaSelectDate('this_week')">This week</button>
+        <button class="qa-date-chip" data-date="next_week" onclick="qaSelectDate('next_week')">Next week</button>
+        <button class="qa-date-chip" data-date="pick" onclick="qaSelectDate('pick')">Pick date…</button>
+        <input class="qa-date-input" id="qa-date-picker" type="date" onchange="qaDatePicked()">
+      </div>
+      <!-- Footer -->
+      <div class="qa-footer">
+        <div style="font-size:11px;color:var(--text-muted);">Category + date is all you need</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="qa-close-strip" onclick="qaClose()">✕</button>
+          <button class="qa-save-btn" id="qa-save-btn" onclick="qaSave()" disabled>Save</button>
+        </div>
+      </div>
+      <!-- Cob nudge (shown after save) -->
+      <div class="qa-cob-nudge" id="qa-cob-nudge" style="display:none;">
+        <span style="font-size:20px;">🤠</span>
+        <div style="flex:1;">
+          <div id="qa-nudge-text" style="margin-bottom:6px;"></div>
+          <div class="qa-nudge-btns">
+            <button class="qa-nudge-btn" onclick="qaSetReminder(true)">Add reminder</button>
+            <button class="qa-nudge-btn" onclick="qaSetReminder(false)">No thanks</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Tab bar — 4 tabs (V46 restructure, Session 41) -->
   <div class="tab-bar" role="tablist">
     <button class="tab-btn active" id="tab-btn-matches" role="tab" onclick="switchTab('matches')">
@@ -3680,6 +3888,7 @@ body.light-mode {
       <button class="cal-view-btn active" id="vbtn-week_strip" onclick="calSetView('week_strip')">This week</button>
       <button class="cal-view-btn" id="vbtn-weekly" onclick="calSetView('weekly')">Weekly</button>
       <button class="cal-view-btn" id="vbtn-monthly" onclick="calSetView('monthly')">Monthly</button>
+      <button class="cal-view-btn" id="vbtn-todo" onclick="calSetView('todo')">To do</button>
     </div>
 
     <!-- Category filter pills -->
@@ -3729,6 +3938,14 @@ body.light-mode {
         </div>
       </div>
       <div class="cal-grid" id="cal-grid"><!-- populated by JS --></div>
+    </div>
+
+    <!-- VIEW: To do list -->
+    <div id="cal-view-todo" style="display:none;">
+      <div id="todo-list-wrap">
+        <!-- populated by renderTodoList() -->
+      </div>
+      <button class="cal-add-btn" style="margin-top:16px;" onclick="qaOpen()">+ Add to do item</button>
     </div>
 
     <!-- Upcoming events list (shown in monthly + week strip view) -->
@@ -6926,6 +7143,326 @@ function calInitFilterUI() {
 }
 
 // ── View management ──
+// ── Quick Add Strip + To Do list (S108) ──────────────────────────────────────
+
+const QA_SUBTYPES = {
+  housing: ['Inspection', 'Lease renewal', 'Bond claim', 'Move-out notice', 'Other'],
+  uni:     ['Assignment due', 'Exam', 'Enrolment deadline', 'Timetable change', 'Other'],
+  work:    ['Shift start', 'Pay day', 'Meeting', 'Roster change', 'Other'],
+  social:  ['Event', 'Moving with friends', 'Housemate meetup', 'Other'],
+  other:   ['General reminder', 'Other'],
+};
+
+const TODO_CAT_COLORS = {
+  housing: '#F5B800',
+  uni:     '#4BBFE0',
+  work:    '#3DAA5C',
+  social:  '#9b7de8',
+  other:   '#7a96aa',
+};
+
+let qaIsOpen      = false;
+let qaSelectedCat = null;
+let qaSelectedSub = null;
+let qaDateMode    = 'this_week';
+let qaPickedDate  = null;
+let qaLastSavedId = null;
+
+// Local store for to-do items (backed by api/calendar/add when user signed in)
+// Shape: { id, title, category, sub_type, date, status, reminder_date, source, notes, created_at }
+function todoGetAll() {
+  try { return JSON.parse(localStorage.getItem('ur_todos') || '[]'); } catch(e) { return []; }
+}
+function todoSave(items) {
+  localStorage.setItem('ur_todos', JSON.stringify(items));
+}
+
+function qaToggle() {
+  if (qaIsOpen) qaClose(); else qaOpen();
+}
+
+function qaOpen() {
+  qaIsOpen = true;
+  const exp = document.getElementById('qa-expanded');
+  if (exp) exp.style.display = '';
+  const coll = document.getElementById('qa-collapsed');
+  if (coll) coll.style.pointerEvents = 'none';
+  document.getElementById('qa-cob-nudge') && (document.getElementById('qa-cob-nudge').style.display = 'none');
+  qaLastSavedId = null;
+  // Reset
+  qaSelectedCat = null;
+  qaSelectedSub = null;
+  qaDateMode    = 'this_week';
+  qaPickedDate  = null;
+  document.querySelectorAll('.qa-cat-chip').forEach(c => c.classList.remove('selected'));
+  document.getElementById('qa-subtypes').innerHTML = '';
+  const ti = document.getElementById('qa-title-input');
+  if (ti) ti.value = '';
+  document.querySelectorAll('.qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.date === 'this_week'));
+  const dp = document.getElementById('qa-date-picker');
+  if (dp) { dp.classList.remove('visible'); dp.value = ''; }
+  qaCheckCanSave();
+}
+
+function qaClose() {
+  qaIsOpen = false;
+  const exp = document.getElementById('qa-expanded');
+  if (exp) exp.style.display = 'none';
+  const coll = document.getElementById('qa-collapsed');
+  if (coll) coll.style.pointerEvents = '';
+  document.getElementById('qa-cob-nudge') && (document.getElementById('qa-cob-nudge').style.display = 'none');
+  qaRefreshUpcomingPills();
+}
+
+function qaSelectCat(cat) {
+  qaSelectedCat = cat;
+  qaSelectedSub = null;
+  document.querySelectorAll('.qa-cat-chip').forEach(c => c.classList.toggle('selected', c.dataset.cat === cat));
+  // Render sub-type chips
+  const wrap = document.getElementById('qa-subtypes');
+  wrap.innerHTML = '';
+  (QA_SUBTYPES[cat] || []).forEach(sub => {
+    const chip = document.createElement('button');
+    chip.className = 'qa-sub-chip';
+    chip.textContent = sub;
+    chip.onclick = function() { qaSelectSub(sub, this); };
+    wrap.appendChild(chip);
+  });
+  // Pre-fill title if empty
+  const ti = document.getElementById('qa-title-input');
+  if (ti && !ti.value.trim()) ti.placeholder = 'Describe the ' + cat + ' task (optional)';
+  qaCheckCanSave();
+}
+
+function qaSelectSub(sub, chip) {
+  qaSelectedSub = sub;
+  document.querySelectorAll('.qa-sub-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+  // Pre-fill title
+  const ti = document.getElementById('qa-title-input');
+  if (ti && !ti.value.trim()) ti.value = sub;
+  qaCheckCanSave();
+}
+
+function qaSelectDate(mode) {
+  qaDateMode = mode;
+  document.querySelectorAll('.qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.date === mode));
+  const dp = document.getElementById('qa-date-picker');
+  if (dp) dp.classList.toggle('visible', mode === 'pick');
+  qaPickedDate = null;
+  qaCheckCanSave();
+}
+
+function qaDatePicked() {
+  const dp = document.getElementById('qa-date-picker');
+  if (dp) qaPickedDate = dp.value;
+  qaCheckCanSave();
+}
+
+function qaCheckCanSave() {
+  const btn = document.getElementById('qa-save-btn');
+  if (!btn) return;
+  const hasDate = (qaDateMode !== 'pick') || (qaPickedDate && qaPickedDate.length > 0);
+  btn.disabled = !(qaSelectedCat && hasDate);
+}
+
+function qaResolveDate() {
+  const now = new Date();
+  if (qaDateMode === 'this_week') {
+    // Next Sunday
+    const d = new Date(now);
+    d.setDate(d.getDate() + (7 - d.getDay()));
+    return d.toISOString().split('T')[0];
+  }
+  if (qaDateMode === 'next_week') {
+    const d = new Date(now);
+    d.setDate(d.getDate() + (14 - d.getDay()));
+    return d.toISOString().split('T')[0];
+  }
+  return qaPickedDate || now.toISOString().split('T')[0];
+}
+
+async function qaSave() {
+  const btn = document.getElementById('qa-save-btn');
+  if (!qaSelectedCat) return;
+  const date  = qaResolveDate();
+  const rawTitle = (document.getElementById('qa-title-input') || {}).value || '';
+  const title = rawTitle.trim() || (qaSelectedSub || (qaSelectedCat.charAt(0).toUpperCase() + qaSelectedCat.slice(1) + ' reminder'));
+
+  const item = {
+    id: 'todo-' + Date.now(),
+    title,
+    category: qaSelectedCat,
+    sub_type: qaSelectedSub || null,
+    date,
+    reminder_date: null,
+    source: 'todo',
+    status: 'pending',
+    notes: null,
+    created_at: new Date().toISOString(),
+  };
+
+  // Save locally
+  const items = todoGetAll();
+  items.push(item);
+  todoSave(items);
+  qaLastSavedId = item.id;
+
+  // Try to persist to backend
+  const email = localStorage.getItem('unirenter_email');
+  if (email) {
+    try {
+      await fetch('/api/calendar/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, title, category: qaSelectedCat, sub_type: qaSelectedSub, date, source: 'todo' }),
+      });
+    } catch(e) { /* silent — localStorage is the source of truth */ }
+  }
+
+  // Show Cob nudge
+  const nudge = document.getElementById('qa-cob-nudge');
+  const nudgeText = document.getElementById('qa-nudge-text');
+  if (nudge && nudgeText) {
+    nudgeText.textContent = 'Want me to add a reminder before "' + title + '" is due? 🤠';
+    nudge.style.display = 'flex';
+  }
+  if (btn) btn.textContent = '✓ Saved';
+  setTimeout(() => { if (btn) btn.textContent = 'Save'; }, 2000);
+
+  // If in To Do view, refresh it
+  if (calCurrentView === 'todo') renderTodoList();
+  qaRefreshUpcomingPills();
+}
+
+function qaSetReminder(yes) {
+  const nudge = document.getElementById('qa-cob-nudge');
+  if (!nudge) return;
+  if (yes && qaLastSavedId) {
+    const items = todoGetAll();
+    const idx = items.findIndex(i => i.id === qaLastSavedId);
+    if (idx > -1) {
+      const d = new Date(items[idx].date);
+      d.setDate(d.getDate() - 2);
+      items[idx].reminder_date = d.toISOString().split('T')[0];
+      todoSave(items);
+    }
+    if (nudge) nudge.innerHTML = '<span style="font-size:20px;">🤠</span><span style="color:var(--text-muted);">Reminder set — I\'ll nudge you 2 days before.</span>';
+  } else {
+    nudge.style.display = 'none';
+  }
+  setTimeout(() => {
+    if (nudge) nudge.style.display = 'none';
+    qaClose();
+  }, 1800);
+}
+
+function qaRefreshUpcomingPills() {
+  const wrap = document.getElementById('qa-upcoming-pills');
+  if (!wrap) return;
+  const items = todoGetAll()
+    .filter(i => i.status === 'pending')
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 2);
+  if (!items.length) {
+    wrap.innerHTML = '<span class="qa-upcoming-pill" style="color:var(--text-muted);opacity:.6;">No upcoming to-dos</span>';
+    return;
+  }
+  wrap.innerHTML = items.map(i => {
+    const d = new Date(i.date + 'T00:00:00');
+    const label = d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+    return '<span class="qa-upcoming-pill">' + i.title + ' · ' + label + '</span>';
+  }).join('');
+}
+
+// ── To Do list rendering ──────────────────────────────────────────────────────
+
+function todoGroupItems(items) {
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  const endOfWeekDate = new Date(now);
+  endOfWeekDate.setDate(endOfWeekDate.getDate() + (7 - endOfWeekDate.getDay()));
+  const endOfWeekStr = endOfWeekDate.toISOString().split('T')[0];
+
+  const overdue   = items.filter(i => i.status === 'pending' && i.date < todayStr);
+  const thisWeek  = items.filter(i => i.status === 'pending' && i.date >= todayStr && i.date <= endOfWeekStr);
+  const comingUp  = items.filter(i => i.status === 'pending' && i.date > endOfWeekStr);
+  const done      = items.filter(i => i.status === 'done');
+  return { overdue, thisWeek, comingUp, done };
+}
+
+function todoItemHTML(item) {
+  const d = new Date(item.date + 'T00:00:00');
+  const label = d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+  const color = TODO_CAT_COLORS[item.category] || '#7a96aa';
+  const isDone = item.status === 'done';
+  return '<div class="todo-item' + (isDone ? ' done-item' : '') + '" data-todo-id="' + item.id + '">' +
+    '<div class="todo-check' + (isDone ? ' checked' : '') + '" onclick="todoToggleDone(\'' + item.id + '\')"></div>' +
+    '<div class="todo-body">' +
+      '<div class="todo-title">' + escHtml(item.title) + '</div>' +
+      '<div class="todo-meta">' +
+        '<span class="todo-cat-dot" style="background:' + color + ';"></span>' +
+        '<span class="todo-date-label">' + label + '</span>' +
+        (item.reminder_date ? '<span class="todo-date-label" style="color:var(--brand-yellow);">🔔 Reminder set</span>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="todo-item-actions">' +
+      '<button class="todo-action-btn" onclick="todoDelete(\'' + item.id + '\')" title="Delete">🗑</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderTodoList() {
+  const wrap = document.getElementById('todo-list-wrap');
+  if (!wrap) return;
+  const items = todoGetAll();
+  if (!items.length) {
+    wrap.innerHTML = '<div class="todo-empty">🗓️<br>No to-do items yet.<br><span style="font-size:12px;">Use the Quick Add strip above to add your first one.</span></div>';
+    return;
+  }
+  const groups = todoGroupItems(items);
+  let html = '';
+  if (groups.overdue.length) {
+    html += '<div class="todo-group-label" style="color:var(--brand-coral);">⚠️ Overdue</div>';
+    html += groups.overdue.map(todoItemHTML).join('');
+  }
+  if (groups.thisWeek.length) {
+    html += '<div class="todo-group-label">This week</div>';
+    html += groups.thisWeek.map(todoItemHTML).join('');
+  }
+  if (groups.comingUp.length) {
+    html += '<div class="todo-group-label">Coming up</div>';
+    html += groups.comingUp.map(todoItemHTML).join('');
+  }
+  if (groups.done.length) {
+    html += '<div class="todo-group-label">Done</div>';
+    html += groups.done.map(todoItemHTML).join('');
+  }
+  wrap.innerHTML = html;
+}
+
+function todoToggleDone(id) {
+  const items = todoGetAll();
+  const idx = items.findIndex(i => i.id === id);
+  if (idx === -1) return;
+  items[idx].status = items[idx].status === 'done' ? 'pending' : 'done';
+  todoSave(items);
+  renderTodoList();
+  qaRefreshUpcomingPills();
+}
+
+function todoDelete(id) {
+  const items = todoGetAll().filter(i => i.id !== id);
+  todoSave(items);
+  renderTodoList();
+  qaRefreshUpcomingPills();
+}
+
+
 function calSetView(view) {
   calCurrentView = view;
   localStorage.setItem(CAL_VIEW_KEY, view);
@@ -6934,18 +7471,21 @@ function calSetView(view) {
   const btn = document.getElementById('vbtn-' + view);
   if (btn) btn.classList.add('active');
   // Show/hide view containers
-  ['week_strip','weekly','monthly'].forEach(v => {
+  ['week_strip','weekly','monthly','todo'].forEach(v => {
     const el = document.getElementById('cal-view-' + v);
     if (el) el.style.display = (v === view) ? '' : 'none';
   });
-  // Events list: show for week_strip and monthly, hide for weekly (events are inline)
+  // Events list: show for week_strip and monthly, hide for weekly + todo
   const evSection = document.getElementById('cal-events-section');
-  if (evSection) evSection.style.display = (view === 'weekly') ? 'none' : '';
-  calRender();
+  if (evSection) evSection.style.display = (view === 'weekly' || view === 'todo') ? 'none' : '';
+  // Add section: hide when todo active
+  const addSection = document.querySelector('.cal-add-section');
+  if (addSection) addSection.style.display = (view === 'todo') ? 'none' : '';
+  if (view === 'todo') { renderTodoList(); } else { calRender(); }
 }
 function calLoadView() {
   const stored = localStorage.getItem(CAL_VIEW_KEY);
-  return (stored && ['week_strip','weekly','monthly'].includes(stored)) ? stored : 'week_strip';
+  return (stored && ['week_strip','weekly','monthly','todo'].includes(stored)) ? stored : 'week_strip';
 }
 
 // ── Navigation ──
@@ -8220,6 +8760,7 @@ window.addEventListener('DOMContentLoaded', function() {
   renderMatches();
   touchActivity();
   cobSleepCheckIn();
+  qaRefreshUpcomingPills();
   setTimeout(function() {
     tier1CheckDates();
     tier2CheckDates();

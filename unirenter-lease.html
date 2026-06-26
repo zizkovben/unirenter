@@ -2290,6 +2290,80 @@ function propertyLabel(type) {
   return map[type] || type;
 }
 
+// ── Dummy listings — shown when no real listings exist ────────────────────────
+const DUMMY_LISTINGS = {
+  melbourne: [
+    { listing_ref: 'MEL-EX1', title: 'Private room — Carlton share house', suburb: 'Carlton', property_type: 'private_room_share_house', weekly_rent: 265, available_from: '2026-07-15', lease_ends: '2026-12-31', furnished: true, pets_allowed: false, description: 'Large private room in a quiet 3-bed share house near Uni of Melbourne. Bills split evenly. Great housemates.', city: 'melbourne', created_at: new Date(Date.now() - 3*86400000).toISOString() },
+    { listing_ref: 'MEL-EX2', title: 'Private room — Fitzroy apartment', suburb: 'Fitzroy', property_type: 'private_room_share_apartment', weekly_rent: 290, available_from: '2026-08-01', lease_ends: '2027-01-31', furnished: false, pets_allowed: false, description: 'Sunny private room in modern 2-bed apartment, walk to RMIT. On-site laundry, secure building.', city: 'melbourne', created_at: new Date(Date.now() - 7*86400000).toISOString() },
+    { listing_ref: 'MEL-EX3', title: 'Share room — Southbank apartment', suburb: 'Southbank', property_type: 'share_room', weekly_rent: 195, available_from: '2026-07-20', lease_ends: '2026-11-30', furnished: true, pets_allowed: false, description: 'Share room available in a friendly 3-person apartment, stunning CBD views. Suit quiet, studious tenant.', city: 'melbourne', created_at: new Date(Date.now() - 14*86400000).toISOString() },
+  ],
+  sydney: [
+    { listing_ref: 'SYD-EX1', title: 'Private room — Kensington share house', suburb: 'Kensington', property_type: 'private_room_share_house', weekly_rent: 295, available_from: '2026-07-15', lease_ends: '2026-12-31', furnished: true, pets_allowed: false, description: 'Large private room 10 min walk to UNSW. Friendly household of 3, clean and quiet. NBN included.', city: 'sydney', created_at: new Date(Date.now() - 2*86400000).toISOString() },
+    { listing_ref: 'SYD-EX2', title: 'Private room — Newtown apartment', suburb: 'Newtown', property_type: 'private_room_share_apartment', weekly_rent: 320, available_from: '2026-08-01', lease_ends: '2027-01-31', furnished: false, pets_allowed: true, description: 'Modern private room in 2-bed apartment near UTS. Great cafes, transport, and vibe. Pets considered.', city: 'sydney', created_at: new Date(Date.now() - 5*86400000).toISOString() },
+    { listing_ref: 'SYD-EX3', title: 'Studio — Ultimo', suburb: 'Ultimo', property_type: 'studio', weekly_rent: 380, available_from: '2026-07-22', lease_ends: '2026-12-22', furnished: true, pets_allowed: false, description: 'Furnished studio minutes from UTS and Broadway. Perfect for an independent student. Bills on top.', city: 'sydney', created_at: new Date(Date.now() - 10*86400000).toISOString() },
+  ],
+  brisbane: [
+    { listing_ref: 'BNE-EX1', title: 'Private room — Kelvin Grove share house', suburb: 'Kelvin Grove', property_type: 'private_room_share_house', weekly_rent: 255, available_from: '2026-07-15', lease_ends: '2026-12-31', furnished: true, pets_allowed: false, description: 'Bright private room in a 3-bed house right near QUT Kelvin Grove. Chill household, great transport links.', city: 'brisbane', created_at: new Date(Date.now() - 3*86400000).toISOString() },
+    { listing_ref: 'BNE-EX2', title: 'Private room — St Lucia apartment', suburb: 'St Lucia', property_type: 'private_room_share_apartment', weekly_rent: 270, available_from: '2026-08-01', lease_ends: '2027-01-31', furnished: false, pets_allowed: false, description: 'Spacious room in modern 2-bed apartment, walking distance to UQ. River views, aircon throughout.', city: 'brisbane', created_at: new Date(Date.now() - 6*86400000).toISOString() },
+    { listing_ref: 'BNE-EX3', title: 'Share room — West End apartment', suburb: 'West End', property_type: 'share_room', weekly_rent: 200, available_from: '2026-07-20', lease_ends: '2026-11-28', furnished: true, pets_allowed: false, description: 'Affordable share room in vibrant West End. Close to Griffith South Bank and South Brisbane. Bills included.', city: 'brisbane', created_at: new Date(Date.now() - 12*86400000).toISOString() },
+  ],
+  adelaide: [
+    { listing_ref: 'ADL-EX1', title: 'Private room — North Adelaide share house', suburb: 'North Adelaide', property_type: 'private_room_share_house', weekly_rent: 200, available_from: '2026-07-15', lease_ends: '2026-12-31', furnished: true, pets_allowed: false, description: 'Quiet private room in charming North Adelaide terrace. 15 min to UniSA City campus. Garden, off-street parking.', city: 'adelaide', created_at: new Date(Date.now() - 4*86400000).toISOString() },
+    { listing_ref: 'ADL-EX2', title: 'Private room — Kensington (SA) apartment', suburb: 'Kensington', property_type: 'private_room_share_apartment', weekly_rent: 195, available_from: '2026-08-01', lease_ends: '2027-01-31', furnished: false, pets_allowed: false, description: 'Light-filled private room near University of Adelaide. Great value for a central location. Shared outdoor area.', city: 'adelaide', created_at: new Date(Date.now() - 8*86400000).toISOString() },
+    { listing_ref: 'ADL-EX3', title: 'Private room — Bedford Park share house', suburb: 'Bedford Park', property_type: 'private_room_share_house', weekly_rent: 185, available_from: '2026-07-22', lease_ends: '2026-12-20', furnished: true, pets_allowed: true, description: 'Affordable room near Flinders University. Study-friendly household, pets welcome. Walking distance to campus.', city: 'adelaide', created_at: new Date(Date.now() - 11*86400000).toISOString() },
+  ],
+  perth: [
+    { listing_ref: 'PER-EX1', title: 'Private room — Crawley share house', suburb: 'Crawley', property_type: 'private_room_share_house', weekly_rent: 250, available_from: '2026-07-15', lease_ends: '2026-12-31', furnished: true, pets_allowed: false, description: 'Great private room minutes from UWA. Friendly share house of 4, large backyard, quiet study environment.', city: 'perth', created_at: new Date(Date.now() - 3*86400000).toISOString() },
+    { listing_ref: 'PER-EX2', title: 'Private room — Bentley apartment', suburb: 'Bentley', property_type: 'private_room_share_apartment', weekly_rent: 240, available_from: '2026-08-01', lease_ends: '2027-01-31', furnished: false, pets_allowed: false, description: 'Modern room near Curtin University. Quiet building, secure parking, close to shops. Bills shared equally.', city: 'perth', created_at: new Date(Date.now() - 7*86400000).toISOString() },
+    { listing_ref: 'PER-EX3', title: 'Private room — Leederville apartment', suburb: 'Leederville', property_type: 'private_room_share_apartment', weekly_rent: 270, available_from: '2026-07-25', lease_ends: '2026-12-25', furnished: true, pets_allowed: false, description: 'Stylish private room in Leederville apartment, great cafes, bars and transport. Near ECU Mt Lawley.', city: 'perth', created_at: new Date(Date.now() - 9*86400000).toISOString() },
+  ],
+  canberra: [
+    { listing_ref: 'CBR-EX1', title: 'Private room — Acton share house', suburb: 'Acton', property_type: 'private_room_share_house', weekly_rent: 230, available_from: '2026-07-15', lease_ends: '2026-12-31', furnished: true, pets_allowed: false, description: 'Private room in a well-maintained house right next to ANU. Quiet, studious household. NBN, bills shared.', city: 'canberra', created_at: new Date(Date.now() - 2*86400000).toISOString() },
+    { listing_ref: 'CBR-EX2', title: 'Private room — Bruce apartment', suburb: 'Bruce', property_type: 'private_room_share_apartment', weekly_rent: 215, available_from: '2026-08-01', lease_ends: '2027-01-31', furnished: false, pets_allowed: false, description: 'Affordable private room near UC and Bruce campus. Easy bus to city. Neat, modern apartment.', city: 'canberra', created_at: new Date(Date.now() - 6*86400000).toISOString() },
+    { listing_ref: 'CBR-EX3', title: 'Studio — Braddon', suburb: 'Braddon', property_type: 'studio', weekly_rent: 295, available_from: '2026-07-22', lease_ends: '2026-12-22', furnished: true, pets_allowed: false, description: 'Self-contained furnished studio in trendy Braddon. Walking distance to ANU. Perfect for an independent student.', city: 'canberra', created_at: new Date(Date.now() - 10*86400000).toISOString() },
+  ],
+};
+
+function buildDummyCard(listing) {
+  const card = buildLeaseCard(listing);
+  // Mark as example — add badge to top
+  const top = card.querySelector('.lease-card-top');
+  if (top) {
+    const badge = document.createElement('div');
+    badge.style.cssText = 'display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--brand-yellow);background:rgba(245,184,0,0.12);border:1px solid rgba(245,184,0,0.25);border-radius:6px;padding:3px 8px;margin-bottom:8px;';
+    badge.textContent = '✦ Example listing';
+    card.insertBefore(badge, top);
+  }
+  // Disable interest button — redirect to sign in / info
+  const btn = card.querySelector('.btn-lease-contact');
+  if (btn) {
+    btn.textContent = 'Post your own listing ↗';
+    btn.onclick = function(){ postYourListing(); };
+    btn.style.background = 'rgba(75,191,224,0.15)';
+    btn.style.color = 'var(--brand-blue)';
+    btn.style.borderColor = 'rgba(75,191,224,0.3)';
+  }
+  // Disable report button on dummy cards
+  const rpt = card.querySelector('.report-btn');
+  if (rpt) rpt.style.display = 'none';
+  return card;
+}
+
+function postYourListing() {
+  if (typeof heroTab === 'function') heroTab('post');
+  else { var el = document.getElementById('post-lease-form'); if (el) { el.classList.add('visible'); el.scrollIntoView({behavior:'smooth',block:'start'}); } }
+}
+
+function renderDummyListings(grid, city) {
+  const dummies = DUMMY_LISTINGS[city] || DUMMY_LISTINGS.melbourne;
+  grid.innerHTML = '';
+  const intro = document.createElement('div');
+  intro.style.cssText = 'background:rgba(245,184,0,0.07);border:1px solid rgba(245,184,0,0.2);border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--text-muted);line-height:1.6;';
+  intro.innerHTML = "<strong style=\"color:var(--brand-yellow);\">&#127968; Example listings</strong> &mdash; Sample cards showing what the board looks like. Real verified lease transfers appear here when students post them. <a href=\"#\" onclick=\"postYourListing();return false;\" style=\"color:var(--brand-blue);font-weight:600;\">Be the first to post one &#8599;</a>";
+  grid.appendChild(intro);
+  dummies.forEach(l => grid.appendChild(buildDummyCard(l)));
+}
+
 function buildLeaseCard(listing) {
   const interestKey = 'ur_interested_' + listing.listing_ref;
   const handoverKey = 'ur_hd_' + listing.listing_ref + '_s1_contact';
@@ -2349,14 +2423,9 @@ async function loadLeaseListings() {
     grid.innerHTML = '';
 
     if (listings.length === 0) {
-      grid.innerHTML = `
-        <div style="text-align:center;padding:48px 24px;color:var(--text-muted);">
-          <div style="font-size:36px;margin-bottom:12px;">🏠</div>
-          <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px;">No active listings yet</div>
-          <div style="font-size:13px;line-height:1.7;">Be the first to post a lease transfer in ${city.charAt(0).toUpperCase()+city.slice(1)}, or check back soon.</div>
-        </div>
-      `;
-      if (countEl) countEl.textContent = 'No active listings in ' + city.charAt(0).toUpperCase() + city.slice(1);
+      // Show city-aware dummy listings so the board never looks empty
+      renderDummyListings(grid, city);
+      if (countEl) countEl.innerHTML = '<span style="color:var(--brand-yellow);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;">Example listings</span>&ensp;<span style="color:var(--text-muted);">— real listings appear here first</span>';
       return;
     }
 
