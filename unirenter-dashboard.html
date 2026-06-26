@@ -1509,6 +1509,24 @@ body.light-mode {
   padding: 10px 14px; border-radius: 10px; cursor: pointer; flex-shrink: 0;
 }
 .cob-panel-send:hover { opacity: 0.88; }
+/* ── Calendar signal nudge card ── */
+.cob-cal-nudge {
+  margin: 6px 12px 2px; padding: 11px 13px; border-radius: 12px;
+  background: rgba(245,184,0,0.10); border: 1px solid rgba(245,184,0,0.28);
+  font-size: 12.5px; color: var(--text);
+}
+.cob-cal-nudge-title { font-weight: 600; margin-bottom: 7px; line-height: 1.4; }
+.cob-cal-nudge-title span { color: var(--brand-yellow); }
+.cob-cal-nudge-actions { display: flex; gap: 8px; }
+.cob-cal-nudge-btn {
+  flex: 1; padding: 7px 10px; border-radius: 8px; border: none;
+  font-family: var(--font-body); font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.cob-cal-nudge-btn.primary { background: var(--brand-yellow); color: #0d1f2d; }
+.cob-cal-nudge-btn.secondary {
+  background: rgba(255,255,255,0.07); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1);
+}
+.cob-cal-nudge-btn:hover { opacity: 0.85; }
 
 /* ── Tier 2 check-in card ── */
 .tier2-card {
@@ -8716,13 +8734,19 @@ When a student mentions a calculator result or saved figure, refer to the most r
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: cobPanelHistory.slice(-10), // last 10 turns
-        systemPrompt: systemPrompt
+        systemPrompt: systemPrompt,
+        extract_calendar: true
       })
     });
     const data = await res.json();
     const reply = (data.reply || data.message || 'Sorry, I hit a snag. Try again?');
     cobPanelHistory.push({ role: 'assistant', content: reply });
     cobPanelAddMsg('cob', reply);
+
+    // ── Calendar signal nudge ──
+    if (data.calendar_signal && data.calendar_signal.has_signal) {
+      cobCalNudgeShow(data.calendar_signal);
+    }
 
     // Check for calc result bridge — if Cob references a calc, save to history
     if (reply.match(/\$[\d,]+.*per week|weekly.*\$[\d,]+|move.in.*\$[\d,]+/i)) {
@@ -8734,6 +8758,100 @@ When a student mentions a calculator result or saved figure, refer to the most r
     cobPanelInFlight = false;
     if (typing) typing.textContent = '';
   }
+}
+
+
+// ── Calendar signal nudge (from Cob date detection) ──────────────────────────
+// Shows a nudge card in the Cob panel when a date is detected in the student's message.
+// One active nudge at a time — dismissed or accepted before next can show.
+var _cobCalNudgePending = null;
+
+function cobCalNudgeShow(signal) {
+  // Only one nudge at a time
+  var existing = document.getElementById('cob-cal-nudge-card');
+  if (existing) existing.remove();
+
+  _cobCalNudgePending = signal;
+  var title = signal.title || signal.sub_type || 'this event';
+  var dateStr = signal.date ? ' on ' + cobCalFormatDate(signal.date) : '';
+
+  var card = document.createElement('div');
+  card.className = 'cob-cal-nudge';
+  card.id = 'cob-cal-nudge-card';
+  card.innerHTML =
+    '<div class="cob-cal-nudge-title">🤠 Hey, want me to add <span>' + escapeHtml(title) + dateStr + '</span> to your calendar?</div>' +
+    '<div class="cob-cal-nudge-actions">' +
+      '<button class="cob-cal-nudge-btn primary" onclick="cobCalNudgeAccept()">Add it</button>' +
+      '<button class="cob-cal-nudge-btn secondary" onclick="cobCalNudgeDismiss()">No thanks</button>' +
+    '</div>';
+
+  var msgs = document.getElementById('cob-panel-messages');
+  if (msgs) {
+    msgs.appendChild(card);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+}
+
+function cobCalFormatDate(iso) {
+  if (!iso) return '';
+  try {
+    var d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+  } catch(e) { return iso; }
+}
+
+function cobCalNudgeAccept() {
+  var signal = _cobCalNudgePending;
+  if (!signal) return;
+  cobCalNudgeDismiss();
+
+  // Save to localStorage todos (same store as Quick Add)
+  var title = signal.title || signal.sub_type || 'Calendar reminder';
+  var todos = JSON.parse(localStorage.getItem('ur_todos') || '[]');
+  var newItem = {
+    id: 'todo_' + Date.now(),
+    title: title,
+    category: signal.category || 'other',
+    sub_type: signal.sub_type || null,
+    date: signal.date || null,
+    reminder_date: null,
+    source: 'cob_chat',
+    status: 'pending',
+    created_at: new Date().toISOString()
+  };
+  todos.push(newItem);
+  localStorage.setItem('ur_todos', JSON.stringify(todos));
+  qaRefreshUpcomingPills();
+
+  // Also POST to /api/calendar/add if signed in
+  var email = localStorage.getItem('unirenter_email');
+  if (email && signal.date) {
+    fetch('/api/calendar/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        title: title,
+        category: signal.category || 'other',
+        sub_type: signal.sub_type || null,
+        date: signal.date,
+        source: 'cob_chat',
+        notes: null
+      })
+    }).catch(function(e) { console.warn('calendar/add non-fatal:', e.message); });
+  }
+
+  cobPanelAddMsg('cob', 'Done! Added "' + title + '" to your calendar. You can find it in the Tenancy tab. 🤠');
+}
+
+function cobCalNudgeDismiss() {
+  _cobCalNudgePending = null;
+  var card = document.getElementById('cob-cal-nudge-card');
+  if (card) card.remove();
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ══════════════════════════════════════════════════════════════
