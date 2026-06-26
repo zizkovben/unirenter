@@ -656,6 +656,50 @@ body.light-mode {
 .cal-day-chip.cc-green   { background: rgba(61,170,92,0.18);  color: #3DAA5C; }
 .cal-day-chip.cc-muted   { background: rgba(255,255,255,0.08); color: var(--text-muted); }
 .cal-day-chip-icon { font-size: 8px; flex-shrink: 0; }
+/* Calendar chip popover */
+.cal-chip-popover {
+  position: fixed; z-index: 9999;
+  background: #1a2e3f; border: 1px solid rgba(75,191,224,0.25);
+  border-radius: 10px; padding: 12px 14px;
+  min-width: 200px; max-width: 260px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+  animation: calPopIn 0.12s ease;
+  pointer-events: all;
+}
+@keyframes calPopIn {
+  from { opacity: 0; transform: translateY(4px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.cal-chip-pop-header {
+  display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px;
+}
+.cal-chip-pop-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.cal-chip-pop-title {
+  font-family: var(--font-display); font-size: 13px; font-weight: 700;
+  color: var(--text-primary); line-height: 1.35; word-break: break-word;
+}
+.cal-chip-pop-meta {
+  font-size: 11px; color: var(--text-muted);
+  margin-bottom: 10px; display: flex; flex-direction: column; gap: 2px;
+}
+.cal-chip-pop-source {
+  font-size: 10px; color: var(--text-muted); opacity: 0.6;
+}
+.cal-chip-pop-actions { display: flex; gap: 6px; }
+.cal-chip-pop-btn {
+  flex: 1; padding: 6px 10px; border-radius: 6px; font-size: 11px;
+  font-weight: 600; cursor: pointer; border: none; transition: opacity 0.15s;
+}
+.cal-chip-pop-btn:hover { opacity: 0.85; }
+.cal-chip-pop-btn.primary { background: rgba(75,191,224,0.18); color: #4BBFE0; }
+.cal-chip-pop-btn.dismiss { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+.cal-chip-clickable { cursor: pointer; }
+.cal-chip-clickable:hover { opacity: 0.82; }
+.todo-highlight { animation: todoFlash 2s ease; }
+@keyframes todoFlash {
+  0%,100% { background: transparent; }
+  20%,60%  { background: rgba(75,191,224,0.15); border-radius: 8px; }
+}
 .cal-day-chip-label { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .cal-events-section { margin-bottom: 24px; }
 .cal-events-title {
@@ -7925,6 +7969,97 @@ function calLoadView() {
   const stored = localStorage.getItem(CAL_VIEW_KEY);
   return (stored && ['week_strip','weekly','monthly','todo'].includes(stored)) ? stored : 'week_strip';
 }
+// ── Calendar chip popover ─────────────────────────────────────────────────
+var _calPopover = null;
+var _calPopoverChipId = null;
+function calChipClose() {
+  if (_calPopover) { _calPopover.remove(); _calPopover = null; _calPopoverChipId = null; }
+}
+function calChipClick(chipEl, e) {
+  e.stopPropagation();
+  var chipId = chipEl.dataset.ev || '';
+  // Toggle off if same chip clicked again
+  if (_calPopoverChipId === chipId) { calChipClose(); return; }
+  calChipClose();
+  var ev;
+  try { ev = JSON.parse(chipEl.dataset.ev); } catch(err) { return; }
+
+  // Format date nicely
+  var dateStr = '';
+  if (ev.date) {
+    try {
+      var d = new Date(ev.date + 'T00:00:00');
+      dateStr = d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+    } catch(err2) { dateStr = ev.date; }
+  }
+
+  // Source label
+  var sourceMap = {
+    todo: 'Added via Quick Add',
+    lease_companion: 'From Lease Companion',
+    matching: 'From Matching',
+    cob_chat: 'Suggested by Cob',
+    household: 'From Household',
+    lease_transfer: 'From Lease Transfer'
+  };
+  var sourceLabel = sourceMap[ev.source] || (ev.source ? 'Source: ' + ev.source : '');
+
+  // Category label
+  var catMap = { housing: '🏠 Housing', uni: '🎓 Uni', work: '💼 Work', social: '🎉 Social', other: '⋯ Other' };
+  var catLabel = catMap[ev.cat] || '';
+
+  var evId = ev.id || '';
+  var pop = document.createElement('div');
+  pop.className = 'cal-chip-popover';
+  pop.innerHTML =
+    '<div class="cal-chip-pop-header">' +
+      '<div class="cal-chip-pop-icon">' + (ev.icon || '📅') + '</div>' +
+      '<div class="cal-chip-pop-title">' + ((ev.title || 'Event').replace(/</g,'&lt;')) + '</div>' +
+    '</div>' +
+    '<div class="cal-chip-pop-meta">' +
+      (dateStr ? '<span>' + dateStr + '</span>' : '') +
+      (catLabel ? '<span>' + catLabel + '</span>' : '') +
+      (sourceLabel ? '<span class="cal-chip-pop-source">' + sourceLabel + '</span>' : '') +
+    '</div>' +
+    '<div class="cal-chip-pop-actions">' +
+      '<button class="cal-chip-pop-btn primary" onclick="calChipGoTodo(' + JSON.stringify(evId) + ');calChipClose();">View in To Do →</button>' +
+      '<button class="cal-chip-pop-btn dismiss" onclick="calChipClose()">Dismiss</button>' +
+    '</div>';
+
+  document.body.appendChild(pop);
+  _calPopover = pop;
+  _calPopoverChipId = chipId;
+
+  // Position: prefer above the chip, fall back to below
+  var rect = chipEl.getBoundingClientRect();
+  var popW = 240;
+  var popH = 140;
+  var left = Math.min(rect.left, window.innerWidth - popW - 12);
+  left = Math.max(left, 8);
+  var top = rect.top - popH - 6;
+  if (top < 8) top = rect.bottom + 6;
+  pop.style.left = left + 'px';
+  pop.style.top  = top + 'px';
+  pop.style.width = popW + 'px';
+
+  // Close on next outside click
+  setTimeout(function() {
+    document.addEventListener('click', calChipClose, { once: true });
+  }, 0);
+}
+function calChipGoTodo(evId) {
+  calSetView('todo');
+  if (!evId) return;
+  setTimeout(function() {
+    var el = document.querySelector('.todo-item[data-id="' + evId + '"]');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('todo-highlight');
+      setTimeout(function() { el.classList.remove('todo-highlight'); }, 2000);
+    }
+  }, 120);
+}
+
 
 // ── Navigation ──
 function calToday() {
@@ -8038,7 +8173,8 @@ function calRenderWeekly() {
     const numClass = 'wcol-num' + (isToday ? ' today' : '');
     const evsHtml = dayEvs.map(ev => {
       const meta = CAT_META[ev.cat] || CAT_META.other;
-      return '<div class="cal-weekly-ev cat-' + meta.color + '">' + meta.icon + ' ' + ev.name + '</div>';
+      var wEvData = JSON.stringify({ title: ev.title || ev.name || '', icon: meta.icon, color: meta.color, cat: ev.cat, date: ev.date, source: ev.source || '', id: ev.id || '' }).replace(/"/g, '&quot;');
+      return '<div class="cal-weekly-ev cat-' + meta.color + ' cal-chip-clickable" data-ev="' + wEvData + '" onclick="calChipClick(this,event)" role="button" tabindex="0" title="' + (ev.title || ev.name || '').replace(/"/g,'') + '">' + meta.icon + ' ' + (ev.title || ev.name || '') + '</div>';
     }).join('');
     html += '<div class="' + colClass + '"><div class="cal-weekly-col-head"><div class="wcol-dow">' + DOWS[i] + '</div><div class="' + numClass + '">' + d.getDate() + '</div></div><div class="cal-weekly-events">' + evsHtml + '</div></div>';
   }
@@ -8061,7 +8197,7 @@ function calRenderMonthly() {
       const key = d.getDate();
       if (!evsByDay[key]) evsByDay[key] = [];
       const meta = CAT_META[ev.cat] || CAT_META.other;
-      evsByDay[key].push({ icon: meta.icon, color: meta.color, title: ev.title || ev.name || '' });
+      evsByDay[key].push({ icon: meta.icon, color: meta.color, title: ev.title || ev.name || '', cat: ev.cat, date: ev.date, source: ev.source || '', id: ev.id || '' });
     }
   });
 
@@ -8089,8 +8225,9 @@ function calRenderMonthly() {
       chipsHtml = '<div class="cal-day-chips">';
       shown.forEach(function(ev) {
         var cc = COLOR_MAP[ev.color] || 'cc-muted';
-        var truncTitle = ev.title ? ev.title.substring(0, 10) + (ev.title.length > 10 ? '…' : '') : '';
-        chipsHtml += '<div class="cal-day-chip ' + cc + '">'
+        var truncTitle = ev.title ? ev.title.substring(0, 12) + (ev.title.length > 12 ? '…' : '') : '';
+        var evData = JSON.stringify({ title: ev.title, icon: ev.icon, color: ev.color, cat: ev.cat, date: ev.date, source: ev.source, id: ev.id }).replace(/"/g, '&quot;');
+        chipsHtml += '<div class="cal-day-chip ' + cc + ' cal-chip-clickable" data-ev="' + evData + '" onclick="calChipClick(this,event)" role="button" tabindex="0" title="' + (ev.title || '').replace(/"/g,'') + '">'
           + '<span class="cal-day-chip-icon">' + ev.icon + '</span>'
           + (truncTitle ? '<span class="cal-day-chip-label">' + truncTitle + '</span>' : '')
           + '</div>';
