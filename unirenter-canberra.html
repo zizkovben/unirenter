@@ -1674,8 +1674,11 @@ const SAMO = 'data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJ
 
 // ── Breadcrumb unlock system (S91) ──
 let unlockedUpTo = (function() {
+  const _pct = parseInt(localStorage.getItem('unirenter_profile_complete') || '0', 10);
+  // S111: Accept numeric completeness >= 80 (old code only checked 'true'/'1')
   if (localStorage.getItem('unirenter_profile_complete') === 'true' ||
-      localStorage.getItem('unirenter_profile_complete') === '1') {
+      localStorage.getItem('unirenter_profile_complete') === '1' ||
+      _pct >= 80) {
     localStorage.setItem('ur_unlocked_up_to', 6);
     return 6;
   }
@@ -2230,7 +2233,10 @@ async function registerComingSoonNotify(city, btn) {
   }
 }
 function showMatches() {
+  // S111: Force profile_complete to 100 so intermediate step saves never leave a low value.
+  _forceProfileComplete = 100;
   saveProfileToSupabase();
+  _forceProfileComplete = null;
   generateMatches();
   document.getElementById('matches').classList.add('visible');
   setTimeout(() => document.getElementById('matches').scrollIntoView({behavior:'smooth'}), 100);
@@ -2513,6 +2519,9 @@ function copyReferralLink() {
 }
 
 // ── Save profile to Supabase ──
+// S111: set to a number by showMatches() to force 100% on final submission
+let _forceProfileComplete = null;
+
 async function saveProfileToSupabase() {
   const displayName = document.getElementById('display-name')?.value?.trim() || null;
   const statusCard = document.querySelector('.status-card.selected');
@@ -2545,7 +2554,12 @@ async function saveProfileToSupabase() {
   const filled = [displayName, university, studentStatus, seeking,
                   moveInDate, householdType, sleepSchedule, cleanliness,
                   budgetMin, budgetMax].filter(Boolean).length;
-  const profileComplete = Math.round((filled / 10) * 100);
+  // S111: _forceProfileComplete is set by showMatches() to guarantee 100
+  // when the user has reached the final step. Intermediate saves from unlockAndGo()
+  // send partial values; _forceProfileComplete overrides that logic.
+  const profileComplete = (typeof _forceProfileComplete === 'number')
+    ? _forceProfileComplete
+    : Math.round((filled / 10) * 100);
   const languageHome = (document.querySelector('#chips-lang-home .chip.selected') || {textContent: ''}).textContent.trim() || null;
   const languagesSpoken = Array.from(document.querySelectorAll('#chips-languages .chip.selected')).map(c => c.textContent.trim());
   const profileData = {

@@ -9387,6 +9387,24 @@ function openSettingsPanel(section) {
     cobSleepCheckIn();
   }
 
+  // S111: Save city change to localStorage + Supabase
+  function spSaveCity(city) {
+    localStorage.setItem('ur_city', city);
+    var email = localStorage.getItem('unirenter_email');
+    if (!email) return;
+    fetch('/api/profile/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, city: city })
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d && d.ok) {
+        showToast('📍 City updated', 'Your city is now ' + city.charAt(0).toUpperCase() + city.slice(1) + '.');
+      }
+    }).catch(function() {
+      // silent fail — localStorage already updated
+    });
+  }
+
   function closeSettingsPanel() {
     var panel = document.getElementById('settings-panel');
     var backdrop = document.getElementById('settings-panel-backdrop');
@@ -11720,6 +11738,20 @@ function closeCardPreview() {
             <div class="settings-row-sub" id="sp-acct-pct">—</div>
           </div>
           <button class="section-action" onclick="editProfile()">Edit →</button>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Your city</div>
+            <div class="settings-row-sub">Updates your matches and Cob context</div>
+          </div>
+          <select id="sp-city-select" onchange="spSaveCity(this.value)" style="background:var(--navy-card,#182f42);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--text);font-size:13px;padding:6px 10px;cursor:pointer;">
+            <option value="melbourne">Melbourne</option>
+            <option value="sydney">Sydney</option>
+            <option value="brisbane">Brisbane</option>
+            <option value="adelaide">Adelaide</option>
+            <option value="perth">Perth</option>
+            <option value="canberra">Canberra</option>
+          </select>
         </div>
         <div class="settings-row">
           <div class="settings-row-info">
