@@ -899,6 +899,72 @@ body.light-mode {
   transition: border-color 0.2s, transform 0.2s;
 }
 .match-card:hover { border-color: rgba(75,191,224,0.2); transform: translateY(-1px); }
+/* ── Lease transfer card (S113) ── */
+.lease-card {
+  background: var(--navy-card);
+  border: 1px solid rgba(232,98,58,0.25);
+  border-radius: var(--radius); padding: 20px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.lease-card:hover { border-color: rgba(232,98,58,0.45); transform: translateY(-1px); }
+.lease-card-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(232,98,58,0.12); color: var(--brand-coral);
+  border: 1px solid rgba(232,98,58,0.25);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.4px;
+  padding: 3px 8px; border-radius: 6px; margin-bottom: 10px;
+}
+.lease-card-title {
+  font-family: var(--font-display); font-weight: 700; font-size: 15px; margin-bottom: 3px;
+}
+.lease-card-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+.lease-card-details {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+}
+.lease-card-detail {
+  font-size: 11px; padding: 3px 8px; border-radius: 6px;
+  background: rgba(232,98,58,0.08); color: var(--brand-coral);
+  border: 1px solid rgba(232,98,58,0.15);
+}
+.lease-card-detail.yellow { background: rgba(245,184,0,0.08); color: var(--brand-yellow); border-color: rgba(245,184,0,0.15); }
+.lease-card-detail.blue { background: rgba(75,191,224,0.08); color: var(--brand-blue); border-color: rgba(75,191,224,0.15); }
+.lease-card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; margin-bottom: 12px; }
+.lease-card-actions { display: flex; gap: 8px; }
+.btn-lease-interest {
+  flex: 1; padding: 9px 16px; border-radius: 8px; cursor: pointer;
+  font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  background: var(--brand-coral); color: #fff; border: none;
+  transition: opacity 0.15s;
+}
+.btn-lease-interest:hover { opacity: 0.88; }
+.btn-lease-interest:disabled { opacity: 0.5; cursor: default; }
+.btn-lease-view {
+  padding: 9px 16px; border-radius: 8px; cursor: pointer;
+  font-family: var(--font-body); font-size: 13px;
+  background: none; color: var(--text-muted);
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: border-color 0.15s, color 0.15s;
+  text-decoration: none; display: flex; align-items: center;
+}
+.btn-lease-view:hover { border-color: rgba(75,191,224,0.3); color: var(--brand-blue); }
+/* ── Cob lease nudge card (From Cob section) ── */
+.cob-lease-nudge {
+  background: rgba(232,98,58,0.06); border: 1px solid rgba(232,98,58,0.2);
+  border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: none;
+}
+.cob-lease-nudge.show { display: block; }
+.cob-lease-nudge-title { font-weight: 600; font-size: 13px; margin-bottom: 6px; line-height: 1.4; }
+.cob-lease-nudge-title span { color: var(--brand-coral); }
+.cob-lease-nudge-text { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5; }
+.cob-lease-nudge-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.cob-lease-nudge-btn {
+  padding: 7px 14px; border-radius: 8px; cursor: pointer;
+  font-family: var(--font-body); font-size: 12px; font-weight: 600;
+  border: 1px solid rgba(232,98,58,0.3); background: none; color: var(--brand-coral);
+  transition: opacity 0.15s;
+}
+.cob-lease-nudge-btn.primary { background: var(--brand-coral); color: #fff; border-color: var(--brand-coral); }
+.cob-lease-nudge-btn:hover { opacity: 0.8; }
 .match-vibe-equation {
   font-size: 12px; color: var(--text-muted); margin-bottom: 10px;
   display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
@@ -5818,6 +5884,7 @@ function loadProfile() {
   if (email) {
     loadProfileFromSupabase(email).then(profile => {
       if (profile) {
+        window._loadedProfile = profile;
         const sbPct = profile.profile_complete || pct;
         document.getElementById('header-pct-bar').style.width  = sbPct + '%';
         document.getElementById('profile-pct-bar').style.width = sbPct + '%';
@@ -5877,6 +5944,180 @@ async function applyCobSignals(signals, email) {
 
   applyProfileData(payload, refinedFields);
   showToast('🤠 Cob updated your profile', 'Preferences saved from your conversation.');
+}
+
+// ── Lease transfer seeker flow (S113) ──────────────────────────────────────────
+
+function renderLeaseCard(listing) {
+  var card = document.createElement('div');
+  card.className = 'lease-card';
+
+  var propType = (listing.property_type || 'Room').replace(/_/g,' ');
+  propType = propType.charAt(0).toUpperCase() + propType.slice(1);
+  var beds = listing.bedrooms ? listing.bedrooms + ' bed · ' : '';
+  var rent = listing.weekly_rent ? '$' + listing.weekly_rent + '/wk' : '';
+  var suburb = listing.suburb || '';
+  var avail = listing.available_from
+    ? 'From ' + new Date(listing.available_from).toLocaleDateString('en-AU', {day:'numeric',month:'short'})
+    : '';
+  var leaseEnd = listing.lease_ends
+    ? 'Until ' + new Date(listing.lease_ends).toLocaleDateString('en-AU', {day:'numeric',month:'short',year:'numeric'})
+    : '';
+  var furnished = listing.furnished ? '🛋️ Furnished' : '';
+  var pets = listing.pets_allowed ? '🐾 Pets OK' : '';
+  var ref = listing.listing_ref || '';
+  var title = listing.title || (propType + (suburb ? ' in ' + suburb : ''));
+  var desc = listing.description || '';
+
+  var details = [];
+  if (rent) details.push({label: rent, cls: 'yellow'});
+  if (avail) details.push({label: avail, cls: 'blue'});
+  if (leaseEnd) details.push({label: leaseEnd, cls: ''});
+  if (furnished) details.push({label: furnished, cls: 'blue'});
+  if (pets) details.push({label: pets, cls: 'blue'});
+
+  var detailHtml = details.map(function(d) {
+    return '<span class="lease-card-detail ' + d.cls + '">' + escapeHtml(d.label) + '</span>';
+  }).join('');
+
+  var descHtml = desc
+    ? '<div class="lease-card-desc">' + escapeHtml(desc.slice(0, 140)) + (desc.length > 140 ? '…' : '') + '</div>'
+    : '';
+
+  var safeName = escapeHtml(title).replace(/'/g, "\'");
+  var safeRef  = escapeHtml(ref).replace(/'/g, "\'");
+
+  card.innerHTML =
+    '<div class="lease-card-badge">🔑 Lease Transfer · ' + escapeHtml(ref) + '</div>' +
+    '<div class="lease-card-title">' + escapeHtml(title) + '</div>' +
+    '<div class="lease-card-sub">' + beds + escapeHtml(propType) + (suburb ? ' · ' + escapeHtml(suburb) : '') + '</div>' +
+    '<div class="lease-card-details">' + detailHtml + '</div>' +
+    descHtml +
+    '<div class="lease-card-actions">' +
+      '<button class="btn-lease-interest" id="lease-btn-' + escapeHtml(ref) + '" ' +
+        'onclick="expressInterest(\'' + safeRef + '\',\'' + safeName + '\',this)">' +
+        "I'm interested" +
+      '</button>' +
+      '<a class="btn-lease-view" href="/lease" target="_blank" rel="noopener">View board ↗</a>' +
+    '</div>';
+
+  return card;
+}
+
+async function expressInterest(listingRef, listingTitle, btn) {
+  var email = localStorage.getItem('unirenter_email') || '';
+  if (!email) {
+    showToast('Sign in first', 'Verify your email to express interest in a listing.');
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
+  var name = (window._loadedProfile && window._loadedProfile.display_name) || '';
+  var uni  = (window._loadedProfile && window._loadedProfile.university)
+          || localStorage.getItem('ur_university') || '';
+
+  try {
+    var res = await fetch('/api/lease/interest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        listing_ref:    listingRef,
+        incoming_email: email,
+        incoming_name:  name  || undefined,
+        incoming_uni:   uni   || undefined,
+      }),
+    });
+    var data = await res.json();
+    if (!res.ok) {
+      showToast('Could not send', data.error || 'Try again shortly.');
+      if (btn) { btn.disabled = false; btn.textContent = "I'm interested"; }
+      return;
+    }
+    if (btn) { btn.textContent = '✓ Interest sent'; }
+    showToast('🔑 Interest sent!', 'The current tenant will be notified. Keep an eye on your email.');
+  } catch(err) {
+    showToast('Connection error', 'Please try again.');
+    if (btn) { btn.disabled = false; btn.textContent = "I'm interested"; }
+  }
+}
+
+// Fetch lease listings for the seeker's city and filter by budget
+async function fetchLeaseListingsForSeeker(city, budgetMax) {
+  try {
+    var res = await fetch('/api/lease/list?city=' + encodeURIComponent(city));
+    if (!res.ok) return [];
+    var data = await res.json();
+    var listings = data.listings || [];
+    // Filter: only show listings within +20% of seeker's budget (generous range)
+    if (budgetMax && parseInt(budgetMax)) {
+      var ceiling = Math.round(parseInt(budgetMax) * 1.2);
+      listings = listings.filter(function(l) {
+        return !l.weekly_rent || l.weekly_rent <= ceiling;
+      });
+    }
+    return listings;
+  } catch(err) {
+    return [];
+  }
+}
+
+// ── Cob lease nudge (From Cob section) ────────────────────────────────────────
+// Shows if: user hasn't ticked open_to_lease_transfer AND ≥1 listing in their city
+
+function cobLeaseNudgeShow(count) {
+  // Only show once per session
+  if (window._cobLeaseNudgeShown) return;
+  window._cobLeaseNudgeShown = true;
+
+  var body = document.getElementById('from-cob-body');
+  if (!body) return;
+
+  // Don't double-inject
+  if (document.getElementById('cob-lease-nudge-card')) return;
+
+  var card = document.createElement('div');
+  card.className = 'cob-lease-nudge show';
+  card.id = 'cob-lease-nudge-card';
+  card.innerHTML =
+    '<div class="cob-lease-nudge-title">🤠 There&#39;s a lease transfer that might suit you <span>(' + count + ' listing' + (count > 1 ? 's' : '') + ')</span></div>' +
+    '<div class="cob-lease-nudge-text">A student in your city is looking for someone to take over their lease &#8212; often below market rent, and faster to move in than a fresh application. Want me to show you what&#39;s available?</div>' +
+    '<div class="cob-lease-nudge-actions">' +
+      '<button class="cob-lease-nudge-btn primary" onclick="cobLeaseNudgeAccept()">Show me →</button>' +
+      '<button class="cob-lease-nudge-btn" onclick="cobLeaseNudgeDismiss()">Not for me</button>' +
+    '</div>';
+
+  // Insert before the empty-state div
+  var empty = document.getElementById('from-cob-empty');
+  if (empty) {
+    body.insertBefore(card, empty);
+  } else {
+    body.appendChild(card);
+  }
+
+  updateFromCobSection();
+  // Open the From Cob section so the nudge is visible
+  var section = document.getElementById('from-cob-section');
+  if (section && !section.classList.contains('open')) {
+    section.classList.add('open');
+  }
+}
+
+function cobLeaseNudgeAccept() {
+  cobLeaseNudgeDismiss();
+  // Switch to Matches tab and scroll to lease cards
+  switchTab('matches');
+  setTimeout(function() {
+    var firstLease = document.querySelector('.lease-card');
+    if (firstLease) firstLease.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 200);
+}
+
+function cobLeaseNudgeDismiss() {
+  var card = document.getElementById('cob-lease-nudge-card');
+  if (card) card.remove();
+  updateFromCobSection();
+  // Suppress for this session
+  window._cobLeaseNudgeShown = true;
 }
 
 // ── Matches ───────────────────────────────────────────────────────────────────
@@ -6358,6 +6599,15 @@ async function renderMatches() {
     }
   }
 
+  // ── Fetch lease listings in parallel with match render (S113) ──────────────
+  var budgetMax = (window._loadedProfile && window._loadedProfile.budget_max)
+               || localStorage.getItem('ur_budget_max') || null;
+  var openToLT  = (window._loadedProfile && window._loadedProfile.open_to_lease_transfer) || false;
+  var leaseListings = [];
+  if (isVerified && email) {
+    leaseListings = await fetchLeaseListingsForSeeker(city, budgetMax);
+  }
+
   grid.innerHTML = '';
   const showingDummy = (realMatches === null);
 
@@ -6375,6 +6625,24 @@ async function renderMatches() {
     } else {
       realMatches.forEach(p => grid.appendChild(renderMatchCard(adaptApiMatchForCard(p))));
       cobExamClashNudge(realMatches);
+    }
+    // ── Inject lease cards after regular match cards (S113) ──────────────────
+    if (leaseListings.length > 0) {
+      // Section header
+      var lhdr = document.createElement('div');
+      lhdr.style.cssText = 'margin:20px 0 10px;display:flex;align-items:center;gap:10px;';
+      lhdr.innerHTML =
+        '<div style="height:1px;flex:1;background:rgba(232,98,58,0.2);"></div>' +
+        '<span style="font-size:11px;font-weight:700;color:var(--brand-coral);letter-spacing:0.5px;white-space:nowrap;">🔑 LEASE TRANSFERS IN YOUR CITY</span>' +
+        '<div style="height:1px;flex:1;background:rgba(232,98,58,0.2);"></div>';
+      grid.appendChild(lhdr);
+      leaseListings.forEach(function(listing) {
+        grid.appendChild(renderLeaseCard(listing));
+      });
+      // Cob nudge if user hasn't opted in
+      if (!openToLT) {
+        cobLeaseNudgeShow(leaseListings.length);
+      }
     }
   }
 
@@ -8388,7 +8656,9 @@ function updateFromCobSection() {
 
   const t2Active = t2Card && t2Card.classList.contains('show');
   const wfActive = wfCard && wfCard.classList.contains('show');
-  const activeCount = (t2Active ? 1 : 0) + (wfActive ? 1 : 0);
+  const lnCard = document.getElementById('cob-lease-nudge-card');
+  const lnActive = lnCard && lnCard.classList.contains('show');
+  const activeCount = (t2Active ? 1 : 0) + (wfActive ? 1 : 0) + (lnActive ? 1 : 0);
 
   // Badge
   if (activeCount > 0) {
