@@ -27,8 +27,8 @@ async function getAgent(token) {
 async function getSuburbHeat(city) {
   let query = supabase
     .from('profiles')
-    .select('suburbs')
-    .not('suburbs', 'is', null);
+    .select('suburb_preferences')
+    .not('suburb_preferences', 'is', null);
   if (city) query = query.eq('city', city);
 
   const { data, error } = await query;
@@ -36,7 +36,7 @@ async function getSuburbHeat(city) {
 
   const counts = {};
   data.forEach(function(row) {
-    let subs = row.suburbs;
+    let subs = row.suburb_preferences;
     if (typeof subs === 'string') {
       try { subs = JSON.parse(subs); } catch (e) { return; }
     }
@@ -135,8 +135,8 @@ async function getBudgetBands(city) {
 async function getUniBreakdown(city) {
   let query = supabase
     .from('profiles')
-    .select('uni')
-    .not('uni', 'is', null);
+    .select('university')
+    .not('university', 'is', null);
   if (city) query = query.eq('city', city);
 
   const { data, error } = await query;
@@ -144,7 +144,7 @@ async function getUniBreakdown(city) {
 
   const counts = {};
   data.forEach(function(row) {
-    const u = (row.uni || '').trim();
+    const u = (row.university || '').trim();
     if (!u || u === 'Other' || u === 'TAFE / College') return;
     counts[u] = (counts[u] || 0) + 1;
   });
