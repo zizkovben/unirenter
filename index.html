@@ -184,7 +184,6 @@ section { position: relative; z-index: 1; padding: 80px 24px; max-width: 1080px;
 .photo-upload-info p { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px; }
 .btn-upload { display: inline-block; background: rgba(75,191,224,0.1); border: 1px solid rgba(75,191,224,0.3); color: var(--brand-blue); font-family: var(--font-body); font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
 .btn-upload:hover { background: rgba(75,191,224,0.18); }
-#photo-file-input { display: none; }
 
 /* ── Phone verify ── */
 .phone-block { background: rgba(75,191,224,0.05); border: 1px solid rgba(75,191,224,0.15); border-radius: 14px; padding: 22px; margin-bottom: 22px; }
@@ -1116,16 +1115,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         <div class="step-sub">A photo and basic details — profiles with photos get 3× more connections.</div>
 
         <div class="photo-upload-area">
-          <div class="photo-preview" onclick="document.getElementById('photo-file-input').click()">
-            <div class="photo-preview-default" id="photo-placeholder">🧑</div>
-            <img id="photo-preview-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;" />
-          </div>
-          <div class="photo-upload-info">
-            <h4>Profile photo</h4>
-            <p>Use a clear, friendly photo of your face. This builds trust with potential housemates. Your photo is only visible to other verified members.</p>
-            <label class="btn-upload" for="photo-file-input">📷 Upload photo</label>
-            <input type="file" id="photo-file-input" accept="image/*" onchange="previewPhoto(this)" />
-          </div>
+          
         </div>
 
         <div class="form-row">
@@ -1733,6 +1723,8 @@ function unlockAndGo(n) {
   }
   renderTabLocks();
   goStep(n); // Navigate immediately — don't block on async save
+  // Assign Cob emoji after lifestyle step (step 4 → 5)
+  if (n === 5) { setTimeout(cobAssignEmoji, 100); }
   // Fire-and-forget Supabase save AFTER navigation so mobile tap is never blocked
   if (localStorage.getItem('unirenter_email_verified') === '1') {
     setTimeout(function() { saveProfileToSupabase(); }, 0);
@@ -1773,7 +1765,6 @@ function saveProfileSteps() {
   // Scalar inputs
   var fname = document.getElementById('fname'); if (fname) data['fname'] = fname.value;
   // Save photo to localStorage so it survives page reload
-  if (uploadedPhoto) { localStorage.setItem('ur_photo', uploadedPhoto); data['photo'] = uploadedPhoto; }
   var cobSum = document.getElementById('vibe-summary-val'); if (cobSum) data['cob-summary'] = cobSum.value;
   var vp = document.getElementById('vibe-primary-val'); if (vp) data['vibe-primary'] = vp.value;
   var vs = document.getElementById('vibe-secondary-val'); if (vs) data['vibe-secondary'] = vs.value;
@@ -1870,14 +1861,7 @@ function restoreProfileSteps() {
   // Restore move-in-date
   if (data['move-in-date']) { var midEl = document.getElementById('move-in-date'); if (midEl) midEl.value = data['move-in-date']; }
   // Restore photo from localStorage
-  var savedPhoto = data['photo'] || localStorage.getItem('ur_photo');
-  if (savedPhoto) {
-    uploadedPhoto = savedPhoto;
-    var img = document.getElementById('photo-preview-img');
-    var ph  = document.getElementById('photo-placeholder');
-    if (img) { img.src = savedPhoto; img.style.display = 'block'; }
-    if (ph)  { ph.style.display = 'none'; }
-  }
+
   if (data['vibe-primary'] || data['cob-summary']) {
     var rPrim = data['vibe-primary'] || '';
     var rSec  = data['vibe-secondary'] || '';
@@ -1980,20 +1964,6 @@ function updateFlag(selectId, flagId) {
   document.getElementById(flagId).textContent = flagMap[v] || '🌍';
 }
 
-function previewPhoto(input) {
-  if (input.files && input.files[0]) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const img = document.getElementById('photo-preview-img');
-      img.src = e.target.result;
-      img.style.display = 'block';
-      document.getElementById('photo-placeholder').style.display = 'none';
-      uploadedPhoto = e.target.result;
-      showToast('📸 Photo uploaded!','Looking great — that will help your matches connect with you.');
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
-}
 
 // ── Step 1 email input — enable Next as soon as @ is typed ──
 function onEmailInput() {
@@ -2708,7 +2678,7 @@ async function saveProfileToSupabase() {
     guests, substances, dietary, pets, city: 'melbourne', profile_complete: profileComplete,
     language_home: languageHome, languages_spoken: languagesSpoken.length > 0 ? languagesSpoken : null,
     stay_duration: stayDuration, cob_summary: cobSummary,
-    vibe_emoji_primary: vibeEmojiPrimary, vibe_emoji_secondary: vibeEmojiSecondary,
+    vibe_emoji_primary: avatarEmoji || vibeEmojiPrimary, vibe_emoji_secondary: vibeEmojiSecondary,
     open_to_lease_transfer: (document.getElementById('toggle-lease-transfer')?.checked || false),
   };
   const savedEmail = localStorage.getItem('unirenter_email');
@@ -3452,9 +3422,7 @@ async function vibeAssign() {
     var data = await res.json();
     if (data.vibe_result) {
       var r = data.vibe_result;
-      localStorage.setItem('ur_vibe_primary',   r.vibe_emoji_primary   || '');
-      localStorage.setItem('ur_vibe_secondary',  r.vibe_emoji_secondary || '');
-      localStorage.setItem('ur_vibe_summary',    r.cob_summary          || '');
+      try { localStorage.setItem('ur_vibe_primary', r.vibe_emoji_primary || ''); localStorage.setItem('ur_vibe_secondary', r.vibe_emoji_secondary || ''); localStorage.setItem('ur_vibe_summary', r.cob_summary || ''); } catch(e) {}
       vibeShowResult(r.vibe_emoji_primary, r.vibe_emoji_secondary, r.cob_summary);
     } else {
       vibeAddMsg('cob', 'Hmm, something went wrong \u2014 try again in a sec.');
@@ -3531,6 +3499,108 @@ function vibeMicToggle() {
 
 // ── End Vibe Quiz (S96) ───────────────────────────────────────────────────────
 
+
+
+// ── Avatar system (replaces photo upload) ────────────────────────────────────
+// Colour palette for avatar circles - one per letter
+var AVATAR_COLOURS = {
+  A:'#1a3a50',B:'#2a1828',C:'#1a2a10',D:'#2a2510',E:'#1a1a3a',
+  F:'#2a1a10',G:'#1a3028',H:'#1a3a50',I:'#2a1828',J:'#1a2a10',
+  K:'#2a2510',L:'#1a1a3a',M:'#2a1a10',N:'#1a3028',O:'#1a3a50',
+  P:'#2a1828',Q:'#1a2a10',R:'#2a2510',S:'#1a1a3a',T:'#2a1a10',
+  U:'#1a3028',V:'#1a3a50',W:'#2a1828',X:'#1a2a10',Y:'#2a2510',Z:'#1a1a3a'
+};
+var AVATAR_TEXT_COLOURS = {
+  A:'#4BBFE0',B:'#a07ee0',C:'#3DAA5C',D:'#F5B800',E:'#a07ee0',
+  F:'#E8623A',G:'#4BBFE0',H:'#4BBFE0',I:'#a07ee0',J:'#3DAA5C',
+  K:'#F5B800',L:'#a07ee0',M:'#E8623A',N:'#4BBFE0',O:'#4BBFE0',
+  P:'#a07ee0',Q:'#3DAA5C',R:'#F5B800',S:'#a07ee0',T:'#E8623A',
+  U:'#4BBFE0',V:'#4BBFE0',W:'#a07ee0',X:'#3DAA5C',Y:'#F5B800',Z:'#a07ee0'
+};
+
+// Emoji pool Cob picks from based on profile answers
+var EMOJI_POOL = {
+  study:    ['📚','🤓','💻','📐','🔬','✍️','🎧','📖'],
+  social:   ['🥳','🎉','🤗','☕','🎵','🎤','🌟','✨'],
+  chill:    ['😌','🛋️','🌙','🌿','☕','😊','🧘','🌸'],
+  nature:   ['🌊','🏔️','🌺','🌴','🦋','🌸','🪷','🌿'],
+  animals:  ['🐼','🦊','🐨','🐯','🦄','🐉','🐸','🦅'],
+  creative: ['🎨','🎵','🎭','✍️','🎤','🎬','🎮','🎸'],
+  food:     ['🍜','🧋','🍣','☕','🥑','🍕','🌮','🍱'],
+  cosmic:   ['🌙','⭐','🪐','💫','🔮','🌈','❄️','🔥']
+};
+
+function cobAssignEmoji() {
+  // Pick emoji based on lifestyle chip selections
+  var social = document.querySelector('#chips-social .chip.selected');
+  var clean  = document.querySelector('#chips-clean .chip.selected');
+  var study  = document.querySelector('#chips-study .chip.selected');
+  var pets   = document.querySelector('#chips-pets .chip.selected');
+
+  var pool = EMOJI_POOL.chill; // default
+  if (social) {
+    var st = social.textContent;
+    if (st.includes('Party') || st.includes('Social')) pool = EMOJI_POOL.social;
+    else if (st.includes('Chilled') || st.includes('Homebody')) pool = EMOJI_POOL.chill;
+  }
+  if (study) {
+    var sd = study.textContent;
+    if (sd.includes('Study at home') || sd.includes('library')) pool = EMOJI_POOL.study;
+  }
+  if (pets && pets.textContent.includes('Have')) pool = EMOJI_POOL.animals;
+
+  // Pick deterministically from name so same person always gets same emoji
+  var name = (document.getElementById('fname') || {}).value || 'U';
+  var idx  = name.charCodeAt(0) % pool.length;
+  var emoji = pool[idx];
+
+  localStorage.setItem('ur_avatar_emoji', emoji);
+  updateAvatarCircle();
+  return emoji;
+}
+
+function updateAvatarCircle() {
+  var circle = document.getElementById('avatar-circle');
+  var placeholder = document.getElementById('photo-placeholder');
+  var label = document.getElementById('avatar-preview-label');
+  if (!circle || !placeholder) return;
+
+  var name = (document.getElementById('fname') || {}).value || '';
+  var initial = name.trim() ? name.trim()[0].toUpperCase() : null;
+  var emoji = localStorage.getItem('ur_avatar_emoji') || null;
+
+  if (initial) {
+    var bg   = AVATAR_COLOURS[initial]  || '#1a3a50';
+    var fg   = AVATAR_TEXT_COLOURS[initial] || '#4BBFE0';
+    circle.style.background = bg;
+    circle.style.border = 'none';
+
+    if (emoji) {
+      placeholder.innerHTML = '<span style="font-size:32px;line-height:1;">' + emoji + '</span>' +
+        '<span style="position:absolute;bottom:-2px;right:-2px;width:28px;height:28px;border-radius:50%;background:#0d1f2d;display:flex;align-items:center;justify-content:center;font-size:17px;border:2px solid #0d1f2d;">' + initial + '</span>';
+      placeholder.style.position = 'relative';
+    } else {
+      placeholder.innerHTML = '<span style="font-size:32px;font-weight:700;color:' + fg + ';">' + initial + '</span>';
+    }
+    if (label) label.textContent = emoji
+      ? 'Cob picked ' + emoji + ' for you — customise in your dashboard after matching.'
+      : 'Your avatar colour is set! Cob will add a personalised emoji after you fill in your preferences.';
+  } else {
+    placeholder.innerHTML = '<span style="font-size:36px;line-height:1;">🧑</span>';
+    circle.style.background = 'var(--navy-mid)';
+  }
+}
+
+// Wire up live preview on fname input
+(function() {
+  function wireAvatar() {
+    var inp = document.getElementById('fname');
+    if (inp) inp.addEventListener('input', updateAvatarCircle);
+    updateAvatarCircle();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireAvatar);
+  else wireAvatar();
+})();
 
 // ── Mobile-safe Next button handler (S126b) ──────────────────────────────────
 // Replaces inline onclick attributes which can silently fail on mobile Safari
