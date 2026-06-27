@@ -2321,7 +2321,13 @@ async function showMatches() {
   // S110: Reaching "Show my matches" means the user has completed all 6 steps.
   // Force profile_complete to 100 so intermediate step saves never leave a low value.
   _forceProfileComplete = 100;
-  await saveProfileToSupabase();
+  console.log('[UR] showMatches: starting save, email=' + localStorage.getItem('unirenter_email'));
+  try {
+    await saveProfileToSupabase();
+    console.log('[UR] showMatches: save complete');
+  } catch(e) {
+    console.error('[UR] showMatches: save threw: ' + e.message);
+  }
   _forceProfileComplete = null;
   generateMatches();
   document.getElementById('matches').classList.add('visible');
@@ -2679,6 +2685,12 @@ async function saveProfileToSupabase() {
   };
   const savedEmail = localStorage.getItem('unirenter_email');
   if (savedEmail) profileData.email = savedEmail;
+  console.log('[UR] profileData:', JSON.stringify({
+    email: profileData.email, name: profileData.display_name,
+    sleep: profileData.sleep_schedule, clean: profileData.cleanliness,
+    budget: profileData.budget_max, seeking: profileData.seeking,
+    status: profileData.student_status, pets: profileData.pets
+  }));
   try {
     const res = await fetch('/api/profile/save', {
       method: 'POST',
@@ -2687,6 +2699,7 @@ async function saveProfileToSupabase() {
     });
     const result = await res.json();
     try { localStorage.setItem('unirenter_profile_complete', profileComplete); } catch(e) {} // Always set — breadcrumb must not wait on API response
+    console.log('[UR] save result:', JSON.stringify(result).substring(0, 200));
     if (!result.success) console.warn('Profile save warning:', result);
   } catch (err) {
     console.warn('Profile save offline:', err.message);
