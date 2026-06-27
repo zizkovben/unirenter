@@ -1085,7 +1085,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="step-nav">
           <div></div>
-          <button class="btn-next" onclick="triggerStep1Verify()" id="btn-step1-next" style="opacity:0.4;pointer-events:none;">Verify &amp; continue →</button>
+          <button class="btn-next" id="btn-step1-next" data-action="step1verify" style="opacity:0.4;pointer-events:none;">Verify &amp; continue →</button>
         </div>
       </div>
 
@@ -1266,7 +1266,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(1)">← Back</button>
-          <button class="btn-next" onclick="unlockAndGo(3)">Next: Housing →</button>
+          <button class="btn-next" data-action="unlock" data-step="3">Next: Housing →</button>
         </div>
       </div>
 
@@ -1356,7 +1356,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(2)">← Back</button>
-          <button class="btn-next" onclick="unlockAndGo(4)">Next: Lifestyle →</button>
+          <button class="btn-next" data-action="unlock" data-step="4">Next: Lifestyle →</button>
         </div>
       </div>
 
@@ -1463,7 +1463,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           <input type="hidden" id="vibe-summary-val" />
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(3)">← Back</button>
-          <button class="btn-next" onclick="unlockAndGo(5)">Next: Location →</button>
+          <button class="btn-next" data-action="unlock" data-step="5">Next: Location →</button>
         </div>
       </div>
 
@@ -1477,7 +1477,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         <div class="form-group" style="margin-top:20px;"><label>Maximum commute to campus</label><div class="chips" id="chips-commute"><div class="chip" onclick="toggle(this)">🚶 20 min walk</div><div class="chip" onclick="toggle(this)">🚌 30 min PT</div><div class="chip" onclick="toggle(this)">🚇 45 min PT</div><div class="chip" onclick="toggle(this)">🚆 Up to 60 min</div><div class="chip" onclick="toggle(this)">Flexible</div></div></div>
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(4)">← Back</button>
-          <button class="btn-next" onclick="unlockAndGo(6)">Next: Budget →</button>
+          <button class="btn-next" data-action="unlock" data-step="6">Next: Budget →</button>
         </div>
       </div>
 
@@ -1544,7 +1544,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         </div>
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(5)">← Back</button>
-          <button class="btn-next" onclick="triggerMatchesVerify()" style="background:var(--brand-coral);color:#fff;">🎉 Show my matches</button>
+          <button class="btn-next" data-action="showmatches" style="background:var(--brand-coral);color:#fff;">🎉 Show my matches</button>
         </div>
       </div>
 
@@ -3464,6 +3464,33 @@ function vibeMicToggle() {
 
 // ── End Vibe Quiz (S96) ───────────────────────────────────────────────────────
 
+
+// ── Mobile-safe Next button handler (S126b) ──────────────────────────────────
+// Replaces inline onclick attributes which can silently fail on mobile Safari
+// inside scrollable containers. addEventListener is reliable across all devices.
+(function() {
+  function attachNextButtons() {
+    document.querySelectorAll('.btn-next[data-action]').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var action = btn.getAttribute('data-action');
+        var step   = parseInt(btn.getAttribute('data-step') || '0', 10);
+        if (action === 'unlock' && step) {
+          unlockAndGo(step);
+        } else if (action === 'step1verify') {
+          triggerStep1Verify();
+        } else if (action === 'showmatches') {
+          triggerMatchesVerify();
+        }
+      }, { passive: false });
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachNextButtons);
+  } else {
+    attachNextButtons();
+  }
+})();
 </script>
 
 <!-- EMAIL VERIFY MODAL — triggered by "Show my matches" -->
