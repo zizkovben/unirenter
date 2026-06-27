@@ -1558,13 +1558,13 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
   <div class="match-grid" id="match-grid"></div>
 
   <!-- Housemate agreement — shown after matches, inside matches section -->
-  <div class="agreement-banner" id="agreement-banner" style="display:none;">
-    <div class="ab-icon">📋</div>
+  <div class="agreement-banner" id="agreement-banner" style="display:none;background:rgba(75,191,224,0.06);border-color:rgba(75,191,224,0.2);">
+    <div class="ab-icon">🎉</div>
     <div class="ab-body">
-      <div class="ab-title">Free housemate agreement template</div>
-      <div class="ab-desc">Moving in together? A one-page agreement covering rent, bills, cleaning and notice. Prevents 90% of housemate conflicts. Download from your <a href="/dashboard" style="color:var(--brand-blue);">dashboard</a> once you've matched.</div>
+      <div class="ab-title">You're matched — finish setting up your dashboard</div>
+      <div class="ab-desc">Complete your vibe quiz, set up your household hub, and message your matches — it all lives in your dashboard.</div>
     </div>
-    <button class="btn-download" onclick="window.location='/dashboard'">Go to dashboard →</button>
+    <button class="btn-download" onclick="window.location='/dashboard'" style="background:var(--brand-blue);white-space:nowrap;">Go to dashboard →</button>
   </div>
 
   <!-- Referral banner — compact, shown after matches load -->
@@ -2624,21 +2624,30 @@ async function saveProfileToSupabase() {
   // email as their uni_email too. Other statuses leave it null — they can add a uni
   // email later from the dashboard once the dual-email management feature ships (S87/S4).
   const uniEmail     = (studentStatus === 'current') ? (localStorage.getItem('unirenter_email') || null) : null;
-  const accomCards = [...document.querySelectorAll('.accom-card.selected')].map(c => c.dataset?.type).filter(Boolean);
-  const seeking       = accomCards[0] || null;
+  const accomCards = [...document.querySelectorAll('.accom-card.selected')].map(c => c.querySelector('.ac-title')?.textContent.trim()).filter(Boolean);
+  const seeking       = accomCards.length ? accomCards.join(', ') : (getChip('chips-seeking') || null);
   const moveInDate    = document.getElementById('move-in-date')?.value || null;
-  const householdType = document.querySelector('.household-option.selected')?.dataset?.value || null;
-  const sleepSchedule = document.querySelector('.pref-chip.selected[data-cat="sleep"]')?.dataset?.value || null;
-  const cleanliness   = document.querySelector('.pref-chip.selected[data-cat="clean"]')?.dataset?.value || null;
-  const studyLocation = document.querySelector('.pref-chip.selected[data-cat="study"]')?.dataset?.value || null;
-  const guests        = document.querySelector('.pref-chip.selected[data-cat="guests"]')?.dataset?.value || null;
-  const substances    = document.querySelector('.pref-chip.selected[data-cat="substances"]')?.dataset?.value || null;
-  const dietary       = document.querySelector('.pref-chip.selected[data-cat="dietary"]')?.dataset?.value || null;
-  const pets          = document.querySelector('.pref-chip.selected[data-cat="pets"]')?.dataset?.value || null;
+  const householdType = document.querySelector('.household-option.selected')?.dataset?.value || getChip('chips-housemates') || null;
+  // Read lifestyle chips by group ID (chips have class="chip", no data-cat attribute)
+  function getChip(groupId) {
+    var el = document.querySelector('#' + groupId + ' .chip.selected');
+    return el ? el.textContent.trim() : null;
+  }
+  function getChips(groupId) {
+    return Array.from(document.querySelectorAll('#' + groupId + ' .chip.selected')).map(function(c){ return c.textContent.trim(); });
+  }
+  const sleepSchedule = getChip('chips-sleep');
+  const cleanliness   = getChip('chips-clean');
+  const studyLocation = getChip('chips-study');
+  const guests        = getChips('chips-guests').join(', ') || null;
+  const substances    = getChip('chips-smoking');
+  const dietary       = null; // no dietary chips in current flow
+  const pets          = getChip('chips-pets');
   const suburbPrefs = [...document.querySelectorAll('.suburb-chip.selected')]
     .map(c => c.dataset?.suburb || c.textContent.trim()).filter(Boolean);
-  const budgetMin = parseInt(document.getElementById('budget-min')?.value) || null;
-  const budgetMax = parseInt(document.getElementById('budget-max')?.value) || null;
+  const budgetSlider = document.querySelector('input[type="range"]');
+  const budgetMax = budgetSlider ? parseInt(budgetSlider.value) : null;
+  const budgetMin = budgetMax ? Math.round(budgetMax * 0.8) : null;
   const stayDuration = document.querySelector('#chips-duration .chip.selected')?.textContent.trim() || null;
   const cobSummary = document.getElementById('vibe-summary-val')?.value.trim() || localStorage.getItem('ur_vibe_summary') || null;
   const avatarEmoji = localStorage.getItem('ur_avatar_emoji') || null;
