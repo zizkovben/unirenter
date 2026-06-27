@@ -371,7 +371,7 @@ input[type="range"] { flex: 1; accent-color: var(--brand-yellow); cursor: pointe
 .step-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,0.07); }
 .btn-back { background: none; border: 1px solid rgba(255,255,255,0.12); color: var(--text-muted); font-family: var(--font-body); font-size: 13px; padding: 9px 18px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
 .btn-back:hover { border-color: rgba(255,255,255,0.3); color: var(--text); }
-.btn-next { background: var(--brand-blue); color: var(--navy); font-family: var(--font-body); font-weight: 600; font-size: 14px; border: none; padding: 11px 26px; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+.btn-next { background: var(--brand-blue); color: var(--navy); font-family: var(--font-body); font-weight: 600; font-size: 14px; border: none; padding: 11px 26px; border-radius: 10px; cursor: pointer; transition: all 0.2s; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .btn-next:hover { background: var(--teal-dim); transform: translateY(-1px); }
 
 /* ── Match cards ── */
@@ -1698,16 +1698,16 @@ function tryGoStep(n) {
 
 function unlockAndGo(n) {
   saveProfileSteps(); // S94: persist selections before advancing
-  // Auto-save to Supabase on every tab advance (S106)
-  if (localStorage.getItem('unirenter_email_verified') === '1') {
-    saveProfileToSupabase();
-  }
   if (n > unlockedUpTo) {
     unlockedUpTo = n;
     localStorage.setItem('ur_unlocked_up_to', unlockedUpTo);
   }
   renderTabLocks();
-  goStep(n);
+  goStep(n); // Navigate immediately — don't block on async save
+  // Fire-and-forget Supabase save AFTER navigation so mobile tap is never blocked
+  if (localStorage.getItem('unirenter_email_verified') === '1') {
+    setTimeout(function() { saveProfileToSupabase(); }, 0);
+  }
 }
 
 // ── Profile step data persistence (S94) ─────────────────────────────────────
@@ -1749,18 +1749,6 @@ function saveProfileSteps() {
     var sels = panel.querySelectorAll('select');
     sels.forEach(function(s, i) { data[pid + '-sel-' + i] = s.value; });
   });
-  var mid = document.getElementById('move-in-date'); if (mid) data['move-in-date'] = mid.value;
-  // Save status card selection
-  var selCard = document.querySelector('.status-card.selected');
-  if (selCard) data['status-type'] = selCard.dataset.type;
-  // Save conditional panel selects (by panel id + index)
-  ['panel-future','panel-current','panel-ex','panel-other'].forEach(function(pid) {
-    var panel = document.getElementById(pid);
-    if (!panel) return;
-    var sels = panel.querySelectorAll('select');
-    sels.forEach(function(s, i) { data[pid + '-sel-' + i] = s.value; });
-  });
-  // Save move-in-date
   var mid = document.getElementById('move-in-date'); if (mid) data['move-in-date'] = mid.value;
   // Save status card selection
   var selCard = document.querySelector('.status-card.selected');
@@ -2651,7 +2639,6 @@ async function saveProfileToSupabase() {
     const result = await res.json();
     localStorage.setItem('unirenter_profile_complete', profileComplete); // Always set — breadcrumb must not wait on API response
     if (!result.success) console.warn('Profile save warning:', result);
-    else console.warn('Profile save warning:', result);
   } catch (err) {
     console.warn('Profile save offline:', err.message);
   }
