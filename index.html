@@ -1112,11 +1112,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
       <!-- STEP 2: Photo + About -->
       <div class="step" id="step-2">
         <div class="step-title">Your profile</div>
-        <div class="step-sub">A photo and basic details — profiles with photos get 3× more connections.</div>
-
-        <div class="photo-upload-area">
-          
-        </div>
+        <div class="step-sub">Basic details about you — the more complete your profile, the better your matches.</div>
 
         <div class="form-row">
           <div class="form-group">
@@ -1403,10 +1399,10 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           <label>👥 Guests &amp; visitors</label>
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Select all that apply</div>
           <div class="chips" id="chips-guests">
-            <div class="chip" onclick="toggle(this)">👨‍👩‍👧 Family visits regularly</div>
+            <div class="chip" onclick="toggle(this)">👨‍👩‍👧 Family stays over sometimes</div>
             <div class="chip" onclick="toggle(this)">💑 Partner stays over regularly</div>
-            <div class="chip" onclick="toggle(this)">👋 Friends over occasionally</div>
-            <div class="chip" onclick="toggle(this)">🔔 Guests fine — just give notice</div>
+            <div class="chip" onclick="toggle(this)">👋 Friends stay over occasionally</div>
+            <div class="chip" onclick="toggle(this)">🔔 Guests welcome — just give notice</div>
             <div class="chip" onclick="toggle(this)">🚪 Prefer no overnight guests</div>
           </div>
         </div>
@@ -1509,14 +1505,13 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         <div class="form-group">
           <label>Expected stay duration</label>
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;line-height:1.5;">Helps match you with housemates planning a similar stay — especially useful for exchange students and short courses.</div>
-          <div class="chips" id="chips-dur">
+          <div class="chips" id="chips-duration">
             <div class="chip" onclick="toggleSingle(this,'chips-duration')">1–3 months</div>
             <div class="chip" onclick="toggleSingle(this,'chips-duration')">3–6 months</div>
             <div class="chip" onclick="toggleSingle(this,'chips-duration')">6–12 months</div>
             <div class="chip" onclick="toggleSingle(this,'chips-duration')">12+ months</div>
             <div class="chip" onclick="toggleSingle(this,'chips-duration')">Flexible / not sure</div>
           </div>
-          <div id="chips-duration"></div>
         </div>
 
         <div class="agent-optin">
