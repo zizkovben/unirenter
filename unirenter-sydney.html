@@ -1026,10 +1026,10 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         <div class="step-title">What brings you to Sydney?</div>
         <div class="step-sub">This helps us personalise your experience — including how you verify your account. Future students welcome — no student ID required to get started.</div>
         <div class="status-cards">
-          <div class="status-card" onclick="selectStatus('future',this)"><div class="sc-icon">✈️</div><div class="sc-title">Future student</div><div class="sc-desc">Accepted or applying — heading to Sydney soon</div></div>
-          <div class="status-card" onclick="selectStatus('current',this)"><div class="sc-icon">🎓</div><div class="sc-title">Current student</div><div class="sc-desc">Enrolled and studying in Sydney now</div></div>
-          <div class="status-card" onclick="selectStatus('ex',this)"><div class="sc-icon">💼</div><div class="sc-title">Graduate / Alumni</div><div class="sc-desc">Finished studying, still need Sydney accommodation</div></div>
-          <div class="status-card" onclick="selectStatus('other',this)"><div class="sc-icon">🌏</div><div class="sc-title">Community member</div><div class="sc-desc">Not currently a student — working holiday, young professional, or related community</div></div>
+          <div class="status-card" data-type="future" onclick="selectStatus('future',this)"><div class="sc-icon">✈️</div><div class="sc-title">Future student</div><div class="sc-desc">Accepted or applying — heading to Sydney soon</div></div>
+          <div class="status-card" data-type="current" onclick="selectStatus('current',this)"><div class="sc-icon">🎓</div><div class="sc-title">Current student</div><div class="sc-desc">Enrolled and studying in Sydney now</div></div>
+          <div class="status-card" data-type="ex" onclick="selectStatus('ex',this)"><div class="sc-icon">💼</div><div class="sc-title">Graduate / Alumni</div><div class="sc-desc">Finished studying, still need Sydney accommodation</div></div>
+          <div class="status-card" data-type="other" onclick="selectStatus('other',this)"><div class="sc-icon">🌏</div><div class="sc-title">Community member</div><div class="sc-desc">Not currently a student — working holiday, young professional, or related community</div></div>
         </div>
 <div class="cond-panel" id="panel-future">
           <div class="cond-title">Future student details</div>
@@ -1792,12 +1792,8 @@ function restoreProfileSteps() {
   if (data['fname']) { var f = document.getElementById('fname'); if (f) f.value = data['fname']; }
   // Restore status card selection
   if (data['status-type']) {
-    var cards = document.querySelectorAll('.status-card');
-    cards.forEach(function(card) {
-      if (card.dataset.type === data['status-type']) {
-        selectStatus(data['status-type'], card);
-      }
-    });
+    var card = document.querySelector('.status-card[data-type="' + data['status-type'] + '"]');
+    if (card) selectStatus(data['status-type'], card);
   }
   // Restore conditional panel selects
   ['panel-future','panel-current','panel-ex','panel-other'].forEach(function(pid) {
@@ -1811,15 +1807,7 @@ function restoreProfileSteps() {
   });
   // Restore move-in-date
   if (data['move-in-date']) { var midEl = document.getElementById('move-in-date'); if (midEl) midEl.value = data['move-in-date']; }
-  // Restore status card selection
-  if (data['status-type']) {
-    var cards = document.querySelectorAll('.status-card');
-    cards.forEach(function(card) {
-      if (card.dataset.type === data['status-type']) {
-        selectStatus(data['status-type'], card);
-      }
-    });
-  }
+
   // Restore conditional panel selects
   ['panel-future','panel-current','panel-ex','panel-other'].forEach(function(pid) {
     var panel = document.getElementById(pid);
@@ -1892,6 +1880,7 @@ function selectStatus(type, el) {
     if (p) p.classList.toggle('visible', t === type);
   });
   updateEmailAskCopy(type);
+  saveProfileSteps(); // persist status selection immediately
 }
 
 function toggleReligion() {
