@@ -25,7 +25,13 @@ const CITY_PREFIX = {
   canberra:  'CAN',
 };
 
-const VALID_PROPERTY_TYPES = ['room', 'studio', 'apartment', 'house', 'other'];
+const VALID_PROPERTY_TYPES = [
+  // Legacy short slugs (keep for backwards compat)
+  'room', 'studio', 'apartment', 'house', 'other',
+  // Frontend descriptive values (used by lease form select)
+  'private_room_share_house', 'private_room_share_apartment',
+  'share_room', '1br_apartment', '2br_apartment', '3br_plus',
+];
 
 function generateRef(city) {
   const prefix = CITY_PREFIX[city] || 'UNI';
