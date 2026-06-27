@@ -1681,7 +1681,6 @@ function renderTabLocks() {
 }
 
 function tryGoStep(n) {
-  if (n > currentStep) return; // tabs can only go back
   if (n > unlockedUpTo) return; // respect unlock gate
   goStep(n);
 }
