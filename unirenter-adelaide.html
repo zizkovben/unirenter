@@ -2313,11 +2313,8 @@ async function showMatches() {
   const dd = document.getElementById('nav-dd-dashboard'); if (dd) dd.style.display = '';
 }
 function connect(name) {
-  showToast("✉️ Connected!", name + " accepted — opening chat.");
-  setTimeout(() => {
-    document.getElementById('chat-section').classList.add('visible');
-    document.getElementById('chat-section').scrollIntoView({behavior:'smooth'});
-  }, 1200);
+  showToast("✉️ Connecting!", "Taking you to your dashboard to message " + name + ".");
+  setTimeout(() => { window.location.href = '/dashboard'; }, 1400);
 }
 function skip(btn) {
   const card = btn.closest('.match-card');
