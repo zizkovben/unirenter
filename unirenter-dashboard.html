@@ -4079,15 +4079,6 @@ body.light-mode {
     </div>
     </div>
 
-    <!-- Housemate agreement template card (S77) -->
-    <div class="hh-agreement-entry-card" id="msg-agreement-card" onclick="msgAgreementCardClick()" style="margin-top:16px;">
-      <div class="hh-agreement-entry-head">
-        <span class="hh-agreement-entry-icon">📋</span>
-        <span class="hh-agreement-entry-title">Housemate agreement</span>
-        <span class="hh-agreement-entry-badge" id="msg-ag-badge">New</span>
-      </div>
-      <div class="hh-agreement-entry-sub" id="msg-ag-sub">Sort out house rules, chores and bills upfront with a simple shared agreement — before someone leaves a passive-aggressive note about the dishes.</div>
-    </div>
   </div>
 
   <!-- ══════════════════════════════════════════════════════ -->
@@ -9794,6 +9785,14 @@ window.addEventListener('DOMContentLoaded', function() {
   soundInit();
   loadProfile();
   renderMatches();
+  // Open specific tab if URL hash is set (e.g. /dashboard#profile from city page CTA)
+  (function() {
+    var hash = window.location.hash.replace('#', '');
+    var validTabs = ['matches','messages','tenancy','household','profile'];
+    if (hash && validTabs.indexOf(hash) !== -1) {
+      setTimeout(function() { switchTab(hash); }, 50);
+    }
+  })();
   touchActivity();
   cobSleepCheckIn();
   qaRefreshUpcomingPills();
