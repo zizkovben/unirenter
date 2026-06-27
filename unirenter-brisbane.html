@@ -1737,6 +1737,18 @@ function saveProfileSteps() {
   var vp = document.getElementById('vibe-primary-val'); if (vp) data['vibe-primary'] = vp.value;
   var vs = document.getElementById('vibe-secondary-val'); if (vs) data['vibe-secondary'] = vs.value;
   var rentRange = document.querySelector('#step-6 input[type=range]'); if (rentRange) data['rent-slider'] = rentRange.value;
+  // Save status card selection
+  var selCard = document.querySelector('.status-card.selected');
+  if (selCard) data['status-type'] = selCard.dataset.type;
+  // Save conditional panel selects (by panel id + index)
+  ['panel-future','panel-current','panel-ex','panel-other'].forEach(function(pid) {
+    var panel = document.getElementById(pid);
+    if (!panel) return;
+    var sels = panel.querySelectorAll('select');
+    sels.forEach(function(s, i) { data[pid + '-sel-' + i] = s.value; });
+  });
+  // Save move-in-date
+  var mid = document.getElementById('move-in-date'); if (mid) data['move-in-date'] = mid.value;
   var ltToggle = document.getElementById('toggle-lease-transfer'); if (ltToggle) data['lease-transfer'] = ltToggle.checked;
   localStorage.setItem(UR_PROFILE_KEY, JSON.stringify(data));
 }
@@ -1762,6 +1774,27 @@ function restoreProfileSteps() {
     }
   });
   if (data['fname']) { var f = document.getElementById('fname'); if (f) f.value = data['fname']; }
+  // Restore status card selection
+  if (data['status-type']) {
+    var cards = document.querySelectorAll('.status-card');
+    cards.forEach(function(card) {
+      if (card.dataset.type === data['status-type']) {
+        selectStatus(data['status-type'], card);
+      }
+    });
+  }
+  // Restore conditional panel selects
+  ['panel-future','panel-current','panel-ex','panel-other'].forEach(function(pid) {
+    var panel = document.getElementById(pid);
+    if (!panel) return;
+    var sels = panel.querySelectorAll('select');
+    sels.forEach(function(s, i) {
+      var key = pid + '-sel-' + i;
+      if (data[key]) s.value = data[key];
+    });
+  });
+  // Restore move-in-date
+  if (data['move-in-date']) { var midEl = document.getElementById('move-in-date'); if (midEl) midEl.value = data['move-in-date']; }
   // Restore photo from localStorage
   var savedPhoto = data['photo'] || localStorage.getItem('ur_photo');
   if (savedPhoto) {
@@ -2584,7 +2617,8 @@ async function saveProfileToSupabase() {
       body: JSON.stringify(profileData),
     });
     const result = await res.json();
-    if (result.success) localStorage.setItem('unirenter_profile_complete', profileComplete);
+    localStorage.setItem('unirenter_profile_complete', profileComplete); // Always set — breadcrumb must not wait on API response
+    if (!result.success) console.warn('Profile save warning:', result);
     else console.warn('Profile save warning:', result);
   } catch (err) {
     console.warn('Profile save offline:', err.message);
