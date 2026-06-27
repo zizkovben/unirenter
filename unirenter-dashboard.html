@@ -6295,14 +6295,105 @@ function leaseAckCheckGate() {
 
 async function leaseAckProceed() {
   if (!_leaseAckPending) return;
-  var btn = document.getElementById('la-proceed-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  leaseDocRequestOpen();
+}
+
+// -- Document request step (S122) -------------------------------------------
+var LEASE_DOC_TYPES = [
+  { id: 'condition_report',       label: 'Condition Report',          desc: 'Existing room-by-room condition report',   icon: '&#x1F4CB;' },
+  { id: 'landlord_consent',       label: 'Landlord Consent Letter',   desc: 'Written approval from the landlord',       icon: '&#x270D;&#xFE0F;' },
+  { id: 'existing_lease',         label: 'Copy of Existing Lease',    desc: 'The full lease you will be inheriting',    icon: '&#x1F4C4;' },
+  { id: 'bond_lodgement',         label: 'Bond Lodgement Receipt',    desc: 'Confirms bond amount and authority',       icon: '&#x1F4B0;' },
+  { id: 'break_lease_agreement',  label: 'Break Lease Fee Agreement', desc: 'Any agreed break lease cost (if any)',     icon: '&#x1F4DD;' },
+  { id: 'house_rules',            label: 'House Rules / By-laws',     desc: 'Household expectations and by-laws',       icon: '&#x1F3E0;' },
+];
+
+var _leaseDocSelected = new Set();
+
+function leaseDocRequestOpen() {
+  var ackModal = document.getElementById('lease-ack-modal');
+  if (ackModal) ackModal.style.display = 'none';
+  _leaseDocSelected = new Set();
+
+  if (!document.getElementById('lease-doc-modal')) {
+    var el = document.createElement('div');
+    el.id = 'lease-doc-modal';
+    el.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:3000;align-items:center;justify-content:center;padding:16px;';
+    el.onclick = function(e) { if (e.target === el) leaseDocRequestClose(); };
+    document.body.appendChild(el);
+  }
+
+  var modal = document.getElementById('lease-doc-modal');
+  var docsHtml = LEASE_DOC_TYPES.map(function(d) {
+    return '<div class="ldoc-row" id="ldoc-row-' + d.id + '" onclick="leaseDocToggle(\'' + d.id + '\')"' +
+      ' style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border);margin-bottom:8px;cursor:pointer;transition:border-color 0.15s,background 0.15s;">' +
+      '<span style="font-size:20px;line-height:1;margin-top:2px;">' + d.icon + '</span>' +
+      '<div style="flex:1;">' +
+        '<div style="font-weight:600;font-size:13px;color:var(--navy);">' + d.label + '</div>' +
+        '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">' + d.desc + '</div>' +
+      '</div>' +
+      '<span class="ldoc-check" id="ldoc-check-' + d.id + '" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;"></span>' +
+    '</div>';
+  }).join('');
+
+  modal.innerHTML =
+    '<div style="background:#fff;border-radius:16px;max-width:480px;width:100%;padding:24px 20px;box-shadow:0 8px 40px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;">' +
+      '<div style="font-family:var(--font-display);font-weight:800;font-size:18px;color:var(--navy);margin-bottom:6px;">&#x1F511; Request documents</div>' +
+      '<div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;">Select documents to request from the lister. Requests are sent when you express interest. Nothing is required, but a condition report is strongly recommended.</div>' +
+      docsHtml +
+      '<div style="background:#fffbea;border:1px solid #f0d080;border-radius:10px;padding:12px 14px;margin:12px 0 16px;font-size:12px;color:#8a6000;line-height:1.5;">&#x1F920; Cob tip: At minimum, ask for the condition report and a copy of the existing lease before agreeing to anything.</div>' +
+      '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
+        '<button onclick="leaseDocRequestClose()" style="padding:10px 18px;border-radius:8px;border:1.5px solid var(--border);background:transparent;font-weight:600;font-size:13px;cursor:pointer;">Cancel</button>' +
+        '<button id="ldoc-submit-btn" onclick="leaseDocRequestSubmit()" style="padding:10px 20px;border-radius:8px;background:var(--brand-yellow);color:var(--navy);font-weight:700;font-size:13px;border:none;cursor:pointer;">Express interest &rarr;</button>' +
+      '</div>' +
+    '</div>';
+
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function leaseDocToggle(docId) {
+  if (_leaseDocSelected.has(docId)) {
+    _leaseDocSelected.delete(docId);
+  } else {
+    _leaseDocSelected.add(docId);
+  }
+  var row = document.getElementById('ldoc-row-' + docId);
+  var chk = document.getElementById('ldoc-check-' + docId);
+  if (_leaseDocSelected.has(docId)) {
+    if (row) { row.style.borderColor = 'var(--brand-coral)'; row.style.background = 'rgba(232,98,58,0.04)'; }
+    if (chk) { chk.style.background = 'var(--brand-coral)'; chk.style.borderColor = 'var(--brand-coral)'; chk.innerHTML = '&#x2714;'; chk.style.color = '#fff'; chk.style.fontSize = '11px'; }
+  } else {
+    if (row) { row.style.borderColor = 'var(--border)'; row.style.background = ''; }
+    if (chk) { chk.style.background = ''; chk.style.borderColor = 'var(--border)'; chk.innerHTML = ''; }
+  }
+}
+
+function leaseDocRequestClose() {
+  var modal = document.getElementById('lease-doc-modal');
+  if (modal) { modal.style.display = 'none'; }
+  document.body.style.overflow = '';
+  if (_leaseAckPending && _leaseAckPending.btn) {
+    _leaseAckPending.btn.disabled = false;
+    _leaseAckPending.btn.textContent = "I'm interested";
+  }
+  _leaseAckPending = null;
+  _leaseDocSelected = new Set();
+}
+
+async function leaseDocRequestSubmit() {
+  if (!_leaseAckPending) return;
+  var btn = document.getElementById('ldoc-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
 
   var email = localStorage.getItem('unirenter_email') || '';
   var name = (window._loadedProfile && window._loadedProfile.display_name) || '';
   var uni  = (window._loadedProfile && window._loadedProfile.university)
           || localStorage.getItem('ur_university') || '';
 
+  // POST to /api/lease/interest
+  // STRIPE_ENABLED=true  -> returns { stripe_checkout_url } -> redirect to Stripe
+  // STRIPE_ENABLED=false -> returns { ok: true }            -> free launch path
   try {
     var res = await fetch('/api/lease/interest', {
       method: 'POST',
@@ -6315,23 +6406,55 @@ async function leaseAckProceed() {
       }),
     });
     var data = await res.json();
+
     if (!res.ok) {
       showToast('Could not send', data.error || 'Try again shortly.');
-      if (btn) { btn.disabled = false; btn.textContent = 'Continue'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Express interest'; }
       return;
     }
-    // Success
-    leaseAckClose();
-    if (_leaseAckPending && _leaseAckPending.btn) {
-      _leaseAckPending.btn.textContent = '✓ Interest sent';
+
+    // Stripe checkout redirect (activates Jan 2027 when STRIPE_ENABLED=true)
+    if (data.stripe_checkout_url) {
+      window.location.href = data.stripe_checkout_url;
+      return;
     }
-    showToast('🔑 Interest sent!', 'The current tenant has been notified. They\'ll review your profile and be in touch.');
+
+    // Free launch: interest recorded -- also send any doc requests selected
+    if (_leaseDocSelected.size > 0) {
+      try {
+        await fetch('/api/lease/handover/request-docs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ref:       _leaseAckPending.listingRef,
+            email:     email,
+            doc_types: Array.from(_leaseDocSelected),
+          }),
+        });
+      } catch(e) { console.warn('Doc request non-fatal:', e.message); }
+    }
+
+    // Close + update UI
+    var docModal = document.getElementById('lease-doc-modal');
+    if (docModal) { docModal.style.display = 'none'; }
+    document.body.style.overflow = '';
+
+    if (_leaseAckPending.btn) {
+      _leaseAckPending.btn.disabled = false;
+      _leaseAckPending.btn.textContent = 'Interest sent';
+    }
+
+    var docNote = _leaseDocSelected.size > 0 ? ' Your document requests have also been sent.' : '';
+    showToast('Interest sent!', "The current tenant has been notified. They'll review your profile and be in touch." + docNote);
+
+    _leaseAckPending = null;
+    _leaseDocSelected = new Set();
+
   } catch(err) {
     showToast('Connection error', 'Please try again.');
-    if (btn) { btn.disabled = false; btn.textContent = 'Continue'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Express interest'; }
   }
 }
-
 // Fetch lease listings for the seeker's city and filter by budget
 async function fetchLeaseListingsForSeeker(city, budgetMax) {
   try {
@@ -6894,7 +7017,6 @@ async function renderMatches() {
   // ── Fetch lease listings in parallel with match render (S113) ──────────────
   var budgetMax = (window._loadedProfile && window._loadedProfile.budget_max)
                || localStorage.getItem('ur_budget_max') || null;
-  var openToLT  = (window._loadedProfile && window._loadedProfile.open_to_lease_transfer) || false;
   var leaseListings = [];
   if (isVerified && email) {
     leaseListings = await fetchLeaseListingsForSeeker(city, budgetMax);
@@ -6931,10 +7053,8 @@ async function renderMatches() {
       leaseListings.forEach(function(listing) {
         grid.appendChild(renderLeaseCard(listing));
       });
-      // Cob nudge if user hasn't opted in
-      if (!openToLT) {
-        cobLeaseNudgeShow(leaseListings.length);
-      }
+      // Cob nudge whenever lease listings exist (toggle removed S121)
+      cobLeaseNudgeShow(leaseListings.length);
     }
   }
 
@@ -13005,7 +13125,7 @@ function closeCardPreview() {
     <div class="lease-ack-actions">
       <button class="lease-ack-cancel" onclick="leaseAckClose()">Cancel</button>
       <button class="lease-ack-proceed" id="la-proceed-btn" onclick="leaseAckProceed()" disabled>
-        I understand — express interest →
+        I understand — request documents →
       </button>
     </div>
   </div>
