@@ -1069,7 +1069,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         </div>
 <div class="cond-panel" id="panel-other">
           <div class="cond-title">Tell us a bit more</div>
-          <div class="form-group"><label>What brings you to Canberra?</label><div class="chips"><div class="chip" onclick="toggle(this)">Working holiday visa</div><div class="chip" onclick="toggle(this)">Young professional</div><div class="chip" onclick="toggle(this)">Considering studying here</div><div class="chip" onclick="toggle(this)">Family / partner of student</div><div class="chip" onclick="toggle(this)">Other</div></div></div>
+          <div class="form-group"><label>What brings you to Canberra?</label><div class="chips" id="chips-community-reason"><div class="chip" onclick="toggle(this)">Working holiday visa</div><div class="chip" onclick="toggle(this)">Young professional</div><div class="chip" onclick="toggle(this)">Considering studying here</div><div class="chip" onclick="toggle(this)">Family / partner of student</div><div class="chip" onclick="toggle(this)">Other</div></div></div>
           <div class="info-note">🌏 UniRenter is primarily for students and graduates — other young people in Canberra's communities are welcome too.</div>
         </div>
         <!-- Contextual email verification — appears once a status is selected (registration redesign S84) -->
@@ -1700,7 +1700,8 @@ function renderTabLocks() {
 }
 
 function tryGoStep(n) {
-  if (n > unlockedUpTo) return;
+  if (n > currentStep) return; // tabs can only go back
+  if (n > unlockedUpTo) return; // respect unlock gate
   goStep(n);
 }
 
@@ -1728,7 +1729,8 @@ const CHIP_GROUP_IDS = [
   'chips-clean','chips-kitchen','chips-temp','chips-smoking','chips-pets',
   'chips-lang-home','chips-languages',
   'chips-suburb-inner','chips-suburb-east','chips-suburb-west','chips-commute',
-  'chips-movein','chips-dur'
+  'chips-movein','chips-dur',
+  'chips-community-reason'
 ];
 function saveProfileSteps() {
   var data = {};
@@ -1748,6 +1750,15 @@ function saveProfileSteps() {
   var vp = document.getElementById('vibe-primary-val'); if (vp) data['vibe-primary'] = vp.value;
   var vs = document.getElementById('vibe-secondary-val'); if (vs) data['vibe-secondary'] = vs.value;
   var rentRange = document.querySelector('#step-6 input[type=range]'); if (rentRange) data['rent-slider'] = rentRange.value;
+  var selCard = document.querySelector('.status-card.selected');
+  if (selCard) data['status-type'] = selCard.dataset.type;
+  ['panel-future','panel-current','panel-ex','panel-other'].forEach(function(pid) {
+    var panel = document.getElementById(pid);
+    if (!panel) return;
+    var sels = panel.querySelectorAll('select');
+    sels.forEach(function(s, i) { data[pid + '-sel-' + i] = s.value; });
+  });
+  var mid = document.getElementById('move-in-date'); if (mid) data['move-in-date'] = mid.value;
   // Save status card selection
   var selCard = document.querySelector('.status-card.selected');
   if (selCard) data['status-type'] = selCard.dataset.type;
@@ -1956,7 +1967,7 @@ function onEmailInput() {
 }
 
 // ── Step 1: Verify email before proceeding to Step 2 ──
-let _verifyDestination = 'step2'; // 'step2' or 'matches'
+let _verifyDestination = 'matches'; // 'step2' or 'matches'
 function triggerStep1Verify() {
   const email = document.getElementById('email-input')?.value?.trim() || '';
   const statusSelected = document.querySelector('.status-card.selected');
