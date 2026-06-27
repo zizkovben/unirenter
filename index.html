@@ -281,7 +281,7 @@ input[type="range"] { flex: 1; accent-color: var(--brand-yellow); cursor: pointe
 
 /* ── Match cards ── */
 #matches { padding-top: 20px; display: none; }
-#matches.visible { display: block; }
+#matches.visible { display: block !important; }
 .matches-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
 .match-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
 .match-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
@@ -1342,16 +1342,6 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         </div>
 
         <div class="form-group">
-          <label>Lease type preference</label>
-          <div class="chips" id="chips-lease">
-            <div class="chip" onclick="toggle(this)">📋 Fixed-term (6–12 months)</div>
-            <div class="chip" onclick="toggle(this)">📅 Month-to-month / periodic</div>
-            <div class="chip" onclick="toggle(this)">🔄 Open to broken lease / sublet</div>
-            <div class="chip" onclick="toggle(this)">🏠 I have a place already</div>
-          </div>
-        </div>
-
-        <div class="form-group">
           <label>Furnished or unfurnished?</label>
           <div class="chips" id="chips-furnished">
             <div class="chip" onclick="toggle(this)">🛋️ Fully furnished preferred</div>
@@ -1503,14 +1493,15 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         </div>
         <div class="form-group"><label>Move-in timeline</label><div class="chips" id="chips-movein"><div class="chip" onclick="toggle(this)">ASAP</div><div class="chip" onclick="toggle(this)">Within 1 month</div><div class="chip" onclick="toggle(this)">1–3 months</div><div class="chip" onclick="toggle(this)">Just exploring</div></div></div>
         <div class="form-group">
-          <label>Expected stay duration</label>
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;line-height:1.5;">Helps match you with housemates planning a similar stay — especially useful for exchange students and short courses.</div>
+          <label>How long are you looking to stay?</label>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;line-height:1.5;">Helps match you with housemates on a similar timeline — also tells us what lease types suit you.</div>
           <div class="chips" id="chips-duration">
-            <div class="chip" onclick="toggleSingle(this,'chips-duration')">1–3 months</div>
-            <div class="chip" onclick="toggleSingle(this,'chips-duration')">3–6 months</div>
-            <div class="chip" onclick="toggleSingle(this,'chips-duration')">6–12 months</div>
-            <div class="chip" onclick="toggleSingle(this,'chips-duration')">12+ months</div>
-            <div class="chip" onclick="toggleSingle(this,'chips-duration')">Flexible / not sure</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-duration')">📋 1–3 months (short stay / sublet)</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-duration')">📅 3–6 months (semester / exchange)</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-duration')">🏠 6–12 months (fixed-term lease)</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-duration')">📆 12+ months (long-term)</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-duration')">🔄 Open to a lease transfer / sublet</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-duration')">💬 Flexible — open to options</div>
           </div>
         </div>
 
@@ -2650,6 +2641,7 @@ async function saveProfileToSupabase() {
   const budgetMax = parseInt(document.getElementById('budget-max')?.value) || null;
   const stayDuration = document.querySelector('#chips-duration .chip.selected')?.textContent.trim() || null;
   const cobSummary = document.getElementById('vibe-summary-val')?.value.trim() || localStorage.getItem('ur_vibe_summary') || null;
+  const avatarEmoji = localStorage.getItem('ur_avatar_emoji') || null;
   const vibeEmojiPrimary = document.getElementById('vibe-primary-val')?.value.trim() || localStorage.getItem('ur_vibe_primary') || null;
   const vibeEmojiSecondary = document.getElementById('vibe-secondary-val')?.value.trim() || localStorage.getItem('ur_vibe_secondary') || null;
   const filled = [displayName, university, studentStatus, seeking,
@@ -2673,7 +2665,7 @@ async function saveProfileToSupabase() {
     guests, substances, dietary, pets, city: 'melbourne', profile_complete: profileComplete,
     language_home: languageHome, languages_spoken: languagesSpoken.length > 0 ? languagesSpoken : null,
     stay_duration: stayDuration, cob_summary: cobSummary,
-    vibe_emoji_primary: avatarEmoji || vibeEmojiPrimary, vibe_emoji_secondary: vibeEmojiSecondary,
+    vibe_emoji_primary: (localStorage.getItem('ur_avatar_emoji') || vibeEmojiPrimary), vibe_emoji_secondary: vibeEmojiSecondary,
     open_to_lease_transfer: (document.getElementById('toggle-lease-transfer')?.checked || false),
   };
   const savedEmail = localStorage.getItem('unirenter_email');
