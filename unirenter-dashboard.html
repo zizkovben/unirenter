@@ -4044,76 +4044,39 @@ body.light-mode {
 
     <div class="msg-layout">
       <!-- Sidebar -->
-      <div class="msg-sidebar">
+      <div class="msg-sidebar" id="msg-sidebar">
         <div class="msg-sidebar-head">Conversations</div>
-        <div class="msg-contact active" onclick="openConversation('priya', this)">
-          <div class="msg-contact-avatar" style="background:linear-gradient(135deg,#e85d9f,#b83278);">P</div>
-          <div class="msg-contact-info">
-            <div class="msg-contact-name">Priya R.</div>
-            <div class="msg-contact-preview">Sounds great! When are you free…</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-            <div class="msg-contact-time">2m</div>
-            <div class="msg-unread"></div>
-          </div>
-        </div>
-        <div class="msg-contact" onclick="openConversation('jake', this)">
-          <div class="msg-contact-avatar" style="background:linear-gradient(135deg,#4BBFE0,#2a7a9e);">J</div>
-          <div class="msg-contact-info">
-            <div class="msg-contact-name">Jake S.</div>
-            <div class="msg-contact-preview">Yeah the place has off-street…</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-            <div class="msg-contact-time">1h</div>
-            <div class="msg-unread"></div>
-          </div>
-        </div>
-        <div class="msg-contact" onclick="openConversation('anika', this)">
-          <div class="msg-contact-avatar" style="background:linear-gradient(135deg,#F5B800,#c4900a);">A</div>
-          <div class="msg-contact-info">
-            <div class="msg-contact-name">Anika M.</div>
-            <div class="msg-contact-preview">Happy to catch up for coffee!</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-            <div class="msg-contact-time">3h</div>
-          </div>
+        <div id="msg-contacts-list">
+          <div id="msg-contacts-loading" style="padding:24px 16px;text-align:center;color:var(--text-muted);font-size:13px;">Loading…</div>
         </div>
       </div>
-      <!-- Main chat pane -->
+            <!-- Main chat pane -->
       <div class="msg-main" id="msg-main">
         <div class="msg-main-head">
-          <div class="msg-contact-avatar" id="convo-avatar" style="background:linear-gradient(135deg,#e85d9f,#b83278);width:36px;height:36px;font-size:15px;">P</div>
+          <div class="msg-contact-avatar" id="convo-avatar" style="background:linear-gradient(135deg,#4BBFE0,#2a7a9e);width:36px;height:36px;font-size:15px;">?</div>
           <div class="msg-main-head-info">
-            <div class="msg-main-head-name" id="convo-name">Priya R.</div>
-            <div class="msg-main-head-sub">96% match · UniMelb · Carlton</div>
+            <div class="msg-main-head-name" id="convo-name">Select a conversation</div>
+            <div class="msg-main-head-sub" id="convo-sub"></div>
           </div>
-          <div class="msg-head-actions">
-            <button class="msg-head-btn" onclick="openModal('report-modal')">⚑ Report</button>
-            <button class="msg-head-btn" onclick="blockUser()">✕ Block</button>
+          <div class="msg-head-actions" id="msg-head-actions" style="display:none;">
+            <button class="msg-head-btn" onclick="openModal('report-modal')">&#9873; Report</button>
+            <button class="msg-head-btn" onclick="blockUser()">&#10005; Block</button>
           </div>
         </div>
         <div class="msg-messages" id="msg-messages">
-          <div class="chat-msg them">
-            <div class="chat-bubble">Hi! I saw your profile and I think we'd be a great match 😊 I'm looking for a place in Carlton or Fitzroy from February.</div>
-            <div class="chat-meta">Priya R. · 2 min ago</div>
-          </div>
-          <div class="chat-msg me">
-            <div class="chat-bubble">Hey Priya! That sounds perfect — I'm also looking at Carlton. Happy to jump on a call sometime?</div>
-            <div class="chat-meta">You · 1 min ago · ✓</div>
-          </div>
-          <div class="chat-msg them">
-            <div class="chat-bubble">Sounds great! When are you free this week?</div>
-            <div class="chat-meta">Priya R. · just now</div>
+          <div style="padding:40px 16px;text-align:center;color:var(--text-muted);font-size:13px;">
+            Select a conversation to start chatting &#x1F4AC;
           </div>
         </div>
         <div class="msg-safety-bar">
-          🔒 Never share your home address, bank details, or pay a deposit before inspecting a property in person.
+          &#x1F512; Never share your home address, bank details, or pay a deposit before inspecting a property in person.
         </div>
         <div class="msg-input-row">
-          <input type="text" class="msg-input" id="msg-input" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendMessage()">
-          <button class="msg-send" onclick="sendMessage()">Send</button>
+          <input type="text" class="msg-input" id="msg-input" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendMessage()" disabled>
+          <button class="msg-send" id="msg-send-btn" onclick="sendMessage()" disabled>Send</button>
         </div>
       </div>
+    </div>
     </div>
 
     <!-- Housemate agreement template card (S77) -->
@@ -5039,6 +5002,7 @@ function switchTab(name) {
     var badge = document.getElementById('msg-badge');
     if (badge) badge.style.display = 'none';
     msgAgreementCardInit();
+    loadConversations();
   }
   if (name === 'tenancy') {
     lcEntryCardInit();
@@ -6721,7 +6685,7 @@ function renderMatchCard(p) {
     <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">✓ ${p.reason}</div>
     ${eqHtml}
     <div class="match-actions">
-      <button class="btn-connect" onclick="connectWith('${p.name}')">Connect</button>
+      <button class="btn-connect" data-name="${p.name}" data-email="${p.email||''}" onclick="connectWith(this.dataset.name,this.dataset.email)">Connect</button>
       <button class="btn-skip" onclick="skipCard(this)">Skip</button>
     </div>`;
   playSound('match_found');
@@ -6941,6 +6905,7 @@ function adaptApiMatchForCard(p) {
     vibe_emoji_secondary: p.vibe_emoji_secondary || null,
     cob_summary: p.cob_summary || null,
     field_of_study: p.field_of_study || null,
+    email: p.email || null,
   };
 }
 
@@ -7105,11 +7070,15 @@ function refreshMatches() {
   });
 }
 
-function connectWith(name) {
-  showToast('✉️ Connected!', `${name} will see your profile — say hello in Messages.`);
-  // Show message badge
-  const badge = document.getElementById('msg-badge');
+function connectWith(name, recipientEmail) {
+  showToast('✉️ Connected!', name + ' will see your profile — say hello in Messages.');
+  var badge = document.getElementById('msg-badge');
   if (badge) { badge.style.display = ''; badge.textContent = parseInt(badge.textContent||'0')+1; }
+  if (recipientEmail) {
+    switchTab('messages');
+    window._currentConvoEmail = recipientEmail;
+    window._currentConvoName  = name;
+  }
 }
 
 function skipCard(btn) {
@@ -7124,99 +7093,231 @@ function copyReferral() {
   navigator.clipboard.writeText(url).then(() => showToast('📋 Copied!', 'Referral link copied to clipboard.'));
 }
 
-// ── Messages ──────────────────────────────────────────────────────────────────
-const CONVERSATIONS = {
-  priya: {
-    avatar: 'P', bg: 'linear-gradient(135deg,#e85d9f,#b83278)',
-    name: 'Priya R.', sub: '96% match · UniMelb · Carlton',
-    messages: [
-      { from:'them', text:"Hi! I saw your profile and I think we'd be a great match 😊 I'm looking for a place in Carlton or Fitzroy from February.", time:'2 min ago' },
-      { from:'me', text:"Hey Priya! That sounds perfect — I'm also looking at Carlton. Happy to jump on a call sometime?", time:'1 min ago' },
-      { from:'them', text:"Sounds great! When are you free this week?", time:'just now' },
-    ]
-  },
-  jake: {
-    avatar: 'J', bg: 'linear-gradient(135deg,#4BBFE0,#2a7a9e)',
-    name: 'Jake S.', sub: '88% match · RMIT · Footscray',
-    messages: [
-      { from:'them', text:"Hey! Saw you're also looking in Footscray. I found a place with off-street parking if that's something you'd need.", time:'1 hr ago' },
-      { from:'me', text:"Yeah that would be great actually! What's the rent like?", time:'45 min ago' },
-      { from:'them', text:"Yeah the place has off-street parking, rent is $280/wk each. Agent is showing it Saturday.", time:'30 min ago' },
-    ]
-  },
-  anika: {
-    avatar: 'A', bg: 'linear-gradient(135deg,#F5B800,#c4900a)',
-    name: 'Anika M.', sub: '84% match · Monash · St Kilda',
-    messages: [
-      { from:'me', text:"Hi Anika! Loved your profile — St Kilda is my top suburb too.", time:'3 hr ago' },
-      { from:'them', text:"Happy to catch up for coffee!", time:'2 hr ago' },
-    ]
+// ── Messages (real — S124) ──────────────────────────────────────────────────────────────────────────────
+window._currentConvoEmail = null;
+window._currentConvoName  = null;
+var _msgAgreementNudgeFired = false;
+var _msgPollingTimer = null;
+var _msgLastCount = 0;
+
+var MSG_BG_PALETTE = [
+  'linear-gradient(135deg,#e85d9f,#b83278)',
+  'linear-gradient(135deg,#4BBFE0,#2a7a9e)',
+  'linear-gradient(135deg,#F5B800,#c4900a)',
+  'linear-gradient(135deg,#3DAA5C,#1e7a3a)',
+  'linear-gradient(135deg,#E8623A,#b83a1a)',
+  'linear-gradient(135deg,#8b5cf6,#5b21b6)',
+];
+
+function msgBg(email) {
+  var code = 0;
+  for (var i = 0; i < email.length; i++) code += email.charCodeAt(i);
+  return MSG_BG_PALETTE[code % MSG_BG_PALETTE.length];
+}
+function msgInitials(name) {
+  return (name || '?').split(' ').map(function(w){return w[0];}).filter(Boolean).join('').slice(0,2).toUpperCase() || '?';
+}
+function msgRelTime(iso) {
+  if (!iso) return '';
+  var diff = Date.now() - new Date(iso).getTime();
+  var m = Math.floor(diff / 60000);
+  if (m < 1)  return 'just now';
+  if (m < 60) return m + 'm ago';
+  var h = Math.floor(m / 60);
+  if (h < 24) return h + 'h ago';
+  return Math.floor(h / 24) + 'd ago';
+}
+
+async function loadConversations() {
+  var email = localStorage.getItem('unirenter_email');
+  var list = document.getElementById('msg-contacts-list');
+  if (!list) return;
+  if (!email) {
+    list.innerHTML = '<div style="padding:24px 16px;text-align:center;color:var(--text-muted);font-size:13px;">Sign in to see your messages.</div>';
+    return;
   }
-};
+  try {
+    var res = await fetch('/api/messages/get?email=' + encodeURIComponent(email));
+    if (!res.ok) throw new Error('API error');
+    var data = await res.json();
+    var convos = data.conversations || [];
+    if (convos.length === 0) {
+      list.innerHTML = '<div style="padding:28px 16px;text-align:center;color:var(--text-muted);font-size:13px;">No conversations yet — connect with a match to get started.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    convos.forEach(function(c, idx) {
+      var el = document.createElement('div');
+      el.className = 'msg-contact' + (idx === 0 ? ' active' : '');
+      el.dataset.email = c.partner_email;
+      var initials = msgInitials(c.display_name);
+      var bg = msgBg(c.partner_email);
+      var preview = (c.last_message || '').slice(0,40) + ((c.last_message || '').length > 40 ? '…' : '');
+      var unreadDot = c.unread > 0 ? '<div class="msg-unread"></div>' : '';
+      el.innerHTML =
+        '<div class="msg-contact-avatar" style="background:' + bg + ';">' + initials + '</div>' +
+        '<div class="msg-contact-info">' +
+          '<div class="msg-contact-name">' + (c.display_name || 'Student') + '</div>' +
+          '<div class="msg-contact-preview">' + preview + '</div>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">' +
+          '<div class="msg-contact-time">' + msgRelTime(c.last_time) + '</div>' +
+          unreadDot +
+        '</div>';
+      el.onclick = function() { openConversation(c.partner_email, c.display_name, c.university, el); };
+      list.appendChild(el);
+    });
+    var totalUnread = data.totalUnread || 0;
+    var badge = document.getElementById('msg-badge');
+    if (badge) {
+      if (totalUnread > 0) { badge.textContent = totalUnread; badge.style.display = ''; }
+      else badge.style.display = 'none';
+    }
+    if (convos.length > 0 && !window._currentConvoEmail) {
+      var first = list.querySelector('.msg-contact');
+      if (first) openConversation(convos[0].partner_email, convos[0].display_name, convos[0].university, first);
+    }
+  } catch(err) {
+    console.warn('loadConversations error:', err);
+    list.innerHTML = '<div style="padding:24px 16px;text-align:center;color:var(--text-muted);font-size:13px;">Could not load conversations.</div>';
+  }
+}
 
-function openConversation(key, el) {
-  document.querySelectorAll('.msg-contact').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  // Remove unread dot
-  const dot = el.querySelector('.msg-unread');
-  if (dot) dot.remove();
+async function openConversation(partnerEmail, partnerName, partnerUni, el) {
+  document.querySelectorAll('.msg-contact').forEach(function(c){ c.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  if (el) { var dot = el.querySelector('.msg-unread'); if (dot) dot.remove(); }
+  var myEmail = localStorage.getItem('unirenter_email');
+  window._currentConvoEmail = partnerEmail;
+  window._currentConvoName  = partnerName;
+  _msgAgreementNudgeFired = false;
+  var bg = msgBg(partnerEmail);
+  var initials = msgInitials(partnerName);
+  document.getElementById('convo-avatar').textContent = initials;
+  document.getElementById('convo-avatar').style.background = bg;
+  document.getElementById('convo-name').textContent = partnerName || 'Student';
+  var subEl = document.getElementById('convo-sub');
+  if (subEl) subEl.textContent = partnerUni || '';
+  var headActions = document.getElementById('msg-head-actions');
+  if (headActions) headActions.style.display = '';
+  var inp = document.getElementById('msg-input');
+  var sendBtn = document.getElementById('msg-send-btn');
+  if (inp) { inp.disabled = false; inp.placeholder = 'Type a message…'; }
+  if (sendBtn) sendBtn.disabled = false;
+  var msgs = document.getElementById('msg-messages');
+  msgs.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Loading…</div>';
+  try {
+    var url = '/api/messages/get?email=' + encodeURIComponent(myEmail) + '&other=' + encodeURIComponent(partnerEmail);
+    var res = await fetch(url);
+    if (!res.ok) throw new Error('Thread load failed');
+    var data = await res.json();
+    renderThread(data.messages || [], partnerName);
+  } catch(err) {
+    console.warn('openConversation thread error:', err);
+    msgs.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Could not load messages.</div>';
+  }
+  msgStartPolling();
+}
 
-  const convo = CONVERSATIONS[key];
-  if (!convo) return;
-
-  document.getElementById('convo-name').textContent = convo.name;
-  document.getElementById('convo-avatar').textContent = convo.avatar;
-  document.getElementById('convo-avatar').style.background = convo.bg;
-  document.querySelector('#msg-main .msg-main-head-sub').textContent = convo.sub;
-
-  const msgs = document.getElementById('msg-messages');
+function renderThread(messages, partnerName) {
+  var myEmail = localStorage.getItem('unirenter_email');
+  var msgs = document.getElementById('msg-messages');
+  if (!msgs) return;
+  if (messages.length === 0) {
+    msgs.innerHTML = '<div style="padding:32px 16px;text-align:center;color:var(--text-muted);font-size:13px;">Start the conversation — say hello! 👋</div>';
+    _msgLastCount = 0;
+    return;
+  }
   msgs.innerHTML = '';
-  convo.messages.forEach(m => {
-    const div = document.createElement('div');
-    div.className = 'chat-msg ' + m.from;
-    div.innerHTML = `<div class="chat-bubble">${m.text}</div><div class="chat-meta">${m.from === 'me' ? 'You' : convo.name} · ${m.time}${m.from === 'me' ? ' · ✓' : ''}</div>`;
+  messages.forEach(function(m) {
+    var isMe = m.sender_email === myEmail;
+    var div = document.createElement('div');
+    div.className = 'chat-msg ' + (isMe ? 'me' : 'them');
+    var timeStr = msgRelTime(m.created_at);
+    div.innerHTML =
+      '<div class="chat-bubble">' + escMsgText(m.body) + '</div>' +
+      '<div class="chat-meta">' + (isMe ? 'You' : (partnerName || 'Them')) + ' · ' + timeStr + (isMe ? ' · ✓' : '') + '</div>';
     msgs.appendChild(div);
   });
   msgs.scrollTop = msgs.scrollHeight;
+  _msgLastCount = messages.length;
+}
 
-  // Store current key for sending
-  window._currentConvo = key;
-  // Reset agreement nudge so it can fire once per conversation
-  _msgAgreementNudgeFired = false;
+function escMsgText(t) {
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function msgStartPolling() {
+  msgStopPolling();
+  _msgPollingTimer = setInterval(function() {
+    var partnerEmail = window._currentConvoEmail;
+    var myEmail = localStorage.getItem('unirenter_email');
+    if (!partnerEmail || !myEmail) return;
+    fetch('/api/messages/get?email=' + encodeURIComponent(myEmail) + '&other=' + encodeURIComponent(partnerEmail))
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        var msgs = data.messages || [];
+        if (msgs.length > _msgLastCount) { renderThread(msgs, window._currentConvoName); loadConversationsSilent(); }
+      }).catch(function(){});
+  }, 8000);
+}
+function msgStopPolling() {
+  if (_msgPollingTimer) { clearInterval(_msgPollingTimer); _msgPollingTimer = null; }
+}
+
+async function loadConversationsSilent() {
+  var email = localStorage.getItem('unirenter_email');
+  if (!email) return;
+  try {
+    var res = await fetch('/api/messages/get?email=' + encodeURIComponent(email));
+    if (!res.ok) return;
+    var data = await res.json();
+    var totalUnread = data.totalUnread || 0;
+    var badge = document.getElementById('msg-badge');
+    if (badge && totalUnread > 0) { badge.textContent = totalUnread; badge.style.display = ''; }
+  } catch(e) {}
 }
 
 function sendMessage() {
-  const input = document.getElementById('msg-input');
-  const text = input.value.trim();
+  var input = document.getElementById('msg-input');
+  var text = input.value.trim();
   if (!text) return;
-
-  // Safety check
-  const BLOCKED = [/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/, /\b\d{6}[\s-]\d{6,10}\b/,
-    /\b(paypal\.me|cashapp|venmo|binance)\b/i];
-  if (BLOCKED.some(p => p.test(text))) {
-    showToast('⚠️ Message blocked', 'For your safety, financial details cannot be shared in chat.');
+  var partnerEmail = window._currentConvoEmail;
+  var myEmail = localStorage.getItem('unirenter_email');
+  var city = localStorage.getItem('ur_city') || 'melbourne';
+  if (!partnerEmail || !myEmail) {
+    showToast('⚠️ No conversation open', 'Select a conversation first.');
     return;
   }
-
-  const msgs = document.getElementById('msg-messages');
-  const div = document.createElement('div');
-  div.className = 'chat-msg me';
-  div.innerHTML = `<div class="chat-bubble">${text}</div><div class="chat-meta">You · just now · ✓</div>`;
-  msgs.appendChild(div);
-  input.value = '';
-  msgs.scrollTop = msgs.scrollHeight;
-
-  // Store to conversation
-  const key = window._currentConvo;
-  if (key && CONVERSATIONS[key]) {
-    CONVERSATIONS[key].messages.push({ from:'me', text, time:'just now' });
+  var BLOCKED = [/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/,/\b\d{6}[\s-]\d{6,10}\b/,
+    /\b(paypal\.me|cashapp|venmo|binance)\b/i,/\bwhatsapp\b/i];
+  if (BLOCKED.some(function(p){ return p.test(text); })) {
+    showToast('⚠️ Message blocked', 'For your safety, financial details and external contact info cannot be shared here.');
+    return;
   }
-
-  // Keyword nudge — suggest housemate agreement after relevant terms
+  var msgs = document.getElementById('msg-messages');
+  var tempDiv = document.createElement('div');
+  tempDiv.className = 'chat-msg me';
+  tempDiv.innerHTML = '<div class="chat-bubble">' + escMsgText(text) + '</div><div class="chat-meta">You · just now · ✓</div>';
+  var empty = msgs.querySelector('div[style*="text-align:center"]');
+  if (empty) empty.remove();
+  msgs.appendChild(tempDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+  input.value = '';
+  _msgLastCount++;
+  fetch('/api/messages/send', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({sender_email:myEmail,recipient_email:partnerEmail,city:city,body:text})
+  }).then(function(r){ return r.json(); }).then(function(data) {
+    if (!data.ok) showToast('⚠️ Not sent', data.error || 'Message could not be sent.');
+  }).catch(function() {
+    showToast('⚠️ Not sent', 'Check your connection and try again.');
+  });
   msgCheckAgreementNudge(text);
 }
 
-var _msgAgreementNudgeFired = false;
+
 function hhAgNudgeAccept() {
   var n = document.getElementById('msg-ag-nudge');
   if (n) n.style.display = 'none';
