@@ -1742,6 +1742,8 @@ function saveProfileSteps() {
     });
   });
   var fname = document.getElementById('fname'); if (fname) data['fname'] = fname.value;
+  // Save photo to localStorage so it survives page reload
+  if (uploadedPhoto) { localStorage.setItem('ur_photo', uploadedPhoto); data['photo'] = uploadedPhoto; }
   var cobSum = document.getElementById('vibe-summary-val'); if (cobSum) data['cob-summary'] = cobSum.value;
   var vp = document.getElementById('vibe-primary-val'); if (vp) data['vibe-primary'] = vp.value;
   var vs = document.getElementById('vibe-secondary-val'); if (vs) data['vibe-secondary'] = vs.value;
@@ -1771,6 +1773,15 @@ function restoreProfileSteps() {
     }
   });
   if (data['fname']) { var f = document.getElementById('fname'); if (f) f.value = data['fname']; }
+  // Restore photo from localStorage
+  var savedPhoto = data['photo'] || localStorage.getItem('ur_photo');
+  if (savedPhoto) {
+    uploadedPhoto = savedPhoto;
+    var img = document.getElementById('photo-preview-img');
+    var ph  = document.getElementById('photo-placeholder');
+    if (img) { img.src = savedPhoto; img.style.display = 'block'; }
+    if (ph)  { ph.style.display = 'none'; }
+  }
   if (data['vibe-primary'] || data['cob-summary']) {
     var rPrim = data['vibe-primary'] || '';
     var rSec  = data['vibe-secondary'] || '';
@@ -2232,10 +2243,10 @@ async function registerComingSoonNotify(city, btn) {
     btn.textContent = 'Notify me';
   }
 }
-function showMatches() {
+async function showMatches() {
   // S111: Force profile_complete to 100 so intermediate step saves never leave a low value.
   _forceProfileComplete = 100;
-  saveProfileToSupabase();
+  await saveProfileToSupabase();
   _forceProfileComplete = null;
   generateMatches();
   document.getElementById('matches').classList.add('visible');
@@ -2523,7 +2534,7 @@ function copyReferralLink() {
 let _forceProfileComplete = null;
 
 async function saveProfileToSupabase() {
-  const displayName = document.getElementById('display-name')?.value?.trim() || null;
+  const displayName = document.getElementById('fname')?.value?.trim() || null;
   const statusCard = document.querySelector('.status-card.selected');
   const studentStatus = statusCard?.dataset?.type || null;
   const activePanel = document.querySelector('.cond-panel.visible');
