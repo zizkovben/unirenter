@@ -1138,7 +1138,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
         <div class="legal-card-body">
           <div class="legal-card-title">You remain liable for rent until transfer is complete</div>
           <div class="legal-card-desc">Until the landlord approves a new tenant and the lease is formally assigned, you are still responsible for paying rent. Stopping payments before this is done can result in debt, bad references, and tribunal orders against you.</div>
-          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/leases-rental-agreements/changing-or-ending-a-lease" target="_blank" onclick="event.stopPropagation()">Consumer Affairs Victoria — Lease assignment →</a>
+          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/leases-rental-agreements/assignment-and-subletting" target="_blank" onclick="event.stopPropagation()">Consumer Affairs Victoria — Lease assignment →</a>
         </div>
         <div class="legal-card-check"></div>
       </div>
@@ -1147,7 +1147,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
         <div class="legal-card-body">
           <div class="legal-card-title">Landlord must give written consent</div>
           <div class="legal-card-desc">Your landlord cannot unreasonably refuse an assignment, but they must approve the incoming tenant in writing. A verbal agreement is not enough — get it in writing before the incoming tenant pays anything or moves in.</div>
-          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/leases-rental-agreements/changing-or-ending-a-lease" target="_blank" onclick="event.stopPropagation()">Assignment requirements →</a>
+          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/leases-rental-agreements/assignment-and-subletting" target="_blank" onclick="event.stopPropagation()">Assignment requirements →</a>
         </div>
         <div class="legal-card-check"></div>
       </div>
@@ -1213,7 +1213,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
         <div class="legal-card-body">
           <div class="legal-card-title">Landlord must approve you in writing</div>
           <div class="legal-card-desc">You cannot take over a lease without the landlord's written consent. Both you and the current tenant must get this before any money or keys change hands. A verbal agreement from the outgoing tenant is not enough.</div>
-          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/leases-rental-agreements/changing-or-ending-a-lease" target="_blank" onclick="event.stopPropagation()">Consumer Affairs Victoria →</a>
+          <a class="legal-card-link" href="https://www.consumer.vic.gov.au/housing/renting/leases-rental-agreements/assignment-and-subletting" target="_blank" onclick="event.stopPropagation()">Consumer Affairs Victoria →</a>
         </div>
         <div class="legal-card-check"></div>
       </div>
@@ -1265,7 +1265,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
         <div class="legal-card-icon">🤠</div>
         <div class="legal-card-body">
           <div class="legal-card-title">Cob will guide you through every step safely</div>
-          <div class="legal-card-desc">Once you connect with a listing, Cob walks both parties through the inspection, condition documentation, landlord consent process, and key handover. The platform keeps your contact details private until you\'re both ready to inspect.</div>
+          <div class="legal-card-desc">Once you connect with a listing, Cob walks both parties through the inspection, condition documentation, landlord consent process, and key handover. The platform keeps your contact details private until you're both ready to inspect.</div>
         </div>
         <div class="legal-card-check"></div>
       </div>
@@ -1422,7 +1422,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
         <span style="font-size:20px;line-height:1.4;">🤠</span>
         <div style="font-size:13px;line-height:1.6;">
           <strong style="color:var(--brand-yellow);">Cob's reminder</strong><br>
-          <span style="color:var(--text-muted);">Don't include your phone number, WhatsApp, or any payment details in your listing. Interested renters contact you through UniRenter — we keep your details private until you\'re both ready to inspect.</span>
+          <span style="color:var(--text-muted);">Don't include your phone number, WhatsApp, or any payment details in your listing. Interested renters contact you through UniRenter — we keep your details private until you're both ready to inspect.</span>
         </div>
       </div>
 
@@ -1439,7 +1439,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
       <div style="font-size:48px;margin-bottom:16px;">🎉</div>
       <div style="font-family:var(--font-display);font-size:22px;font-weight:800;margin-bottom:8px;">Listing posted!</div>
       <div id="lease-success-ref" style="font-size:13px;color:var(--text-muted);margin-bottom:20px;"></div>
-      <div style="font-size:14px;color:var(--text-muted);line-height:1.7;max-width:380px;margin:0 auto 24px;">We'll email you when someone is interested. All contact happens through UniRenter — no personal details shared until you\'re both ready to inspect.</div>
+      <div style="font-size:14px;color:var(--text-muted);line-height:1.7;max-width:380px;margin:0 auto 24px;">We'll email you when someone is interested. All contact happens through UniRenter — no personal details shared until you're both ready to inspect.</div>
       <div style="background:rgba(245,184,0,0.08);border:1px solid rgba(245,184,0,0.25);border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;text-align:left;max-width:400px;margin:0 auto;">
         <span style="font-size:20px;">🤠</span>
         <div style="font-size:13px;color:var(--text-muted);line-height:1.6;">
@@ -2035,7 +2035,7 @@ async function submitLeaseListing() {
       }
       if (btn) { btn.disabled = false; btn.textContent = 'Post my lease listing →'; }
     } else {
-      if (errorDiv) { errorDiv.style.display = 'block'; errorDiv.textContent = d.error || 'Something went wrong. Please try again.'; }
+      if (errorDiv) { errorDiv.style.display = 'block'; errorDiv.textContent = (d.error || 'Something went wrong. Please try again.') + (d.detail ? ' (' + d.detail + ')' : ''); }
       if (btn) { btn.disabled = false; btn.textContent = 'Post my lease listing →'; }
     }
   } catch(e) {
