@@ -1471,7 +1471,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
             <div class="chip" onclick="toggle(this)">🚫 No pets please</div>
             <div class="chip" onclick="toggle(this)">🤧 Allergic to cats or dogs</div>
           </div>
-          <div class="info-note" style="margin-top:10px;">🐾 <strong>SA pet law:</strong> Under the Residential Tenancies Act 1995, landlords cannot unreasonably refuse a pet. <a href="/adelaide/guide" target="_blank" style="color:var(--brand-blue);">See our Pets &amp; Rentals guide →</a></div>
+          <div class="info-note" style="margin-top:10px;">🐾 <strong>SA pet law:</strong> Under the Residential Tenancies Act 1995, landlords cannot unreasonably refuse a pet. <a href="/adelaide/guide#pets" target="_blank" style="color:var(--brand-blue);">See our Pets &amp; Rentals guide →</a></div>
         </div>
 
         
@@ -1762,6 +1762,18 @@ function saveProfileSteps() {
   });
   // Save move-in-date
   var mid = document.getElementById('move-in-date'); if (mid) data['move-in-date'] = mid.value;
+  // Save status card selection
+  var selCard = document.querySelector('.status-card.selected');
+  if (selCard) data['status-type'] = selCard.dataset.type;
+  // Save conditional panel selects (by panel id + index)
+  ['panel-future','panel-current','panel-ex','panel-other'].forEach(function(pid) {
+    var panel = document.getElementById(pid);
+    if (!panel) return;
+    var sels = panel.querySelectorAll('select');
+    sels.forEach(function(s, i) { data[pid + '-sel-' + i] = s.value; });
+  });
+  // Save move-in-date
+  var mid = document.getElementById('move-in-date'); if (mid) data['move-in-date'] = mid.value;
   var ltToggle = document.getElementById('toggle-lease-transfer'); if (ltToggle) data['lease-transfer'] = ltToggle.checked;
   localStorage.setItem(UR_PROFILE_KEY, JSON.stringify(data));
 }
@@ -1787,6 +1799,27 @@ function restoreProfileSteps() {
     }
   });
   if (data['fname']) { var f = document.getElementById('fname'); if (f) f.value = data['fname']; }
+  // Restore status card selection
+  if (data['status-type']) {
+    var cards = document.querySelectorAll('.status-card');
+    cards.forEach(function(card) {
+      if (card.dataset.type === data['status-type']) {
+        selectStatus(data['status-type'], card);
+      }
+    });
+  }
+  // Restore conditional panel selects
+  ['panel-future','panel-current','panel-ex','panel-other'].forEach(function(pid) {
+    var panel = document.getElementById(pid);
+    if (!panel) return;
+    var sels = panel.querySelectorAll('select');
+    sels.forEach(function(s, i) {
+      var key = pid + '-sel-' + i;
+      if (data[key]) s.value = data[key];
+    });
+  });
+  // Restore move-in-date
+  if (data['move-in-date']) { var midEl = document.getElementById('move-in-date'); if (midEl) midEl.value = data['move-in-date']; }
   // Restore status card selection
   if (data['status-type']) {
     var cards = document.querySelectorAll('.status-card');

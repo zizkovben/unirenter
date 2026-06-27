@@ -852,8 +852,21 @@ function showGuide(id, btn) {
   document.querySelectorAll('.gtab').forEach(b => b.classList.remove('active'));
   document.getElementById('guide-' + id).classList.add('active');
   if (btn) btn.classList.add('active');
+  // Update btn from tabs if called via hash (no btn passed)
+  if (!btn) {
+    var tabBtn = document.querySelector('.gtab[onclick*=\'"' + id + '\'"]');
+    if (tabBtn) tabBtn.classList.add('active');
+  }
   window.scrollTo({top: 300, behavior:'smooth'});
 }
+// Open tab from URL hash on load (e.g. /guide#pets)
+(function() {
+  var hash = window.location.hash.replace('#', '');
+  var valid = ['housemate','landlord','pbsa','pets','legal','translate','repairs','rights'];
+  if (hash && valid.indexOf(hash) !== -1) {
+    setTimeout(function() { showGuide(hash, null); }, 100);
+  }
+})();
 function translatePage(lang) {
   const status = document.getElementById('translate-status');
   if (!lang) { status.textContent = ''; return; }
