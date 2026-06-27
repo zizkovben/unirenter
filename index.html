@@ -1729,7 +1729,7 @@ function unlockAndGo(n) {
   saveProfileSteps(); // S94: persist selections before advancing
   if (n > unlockedUpTo) {
     unlockedUpTo = n;
-    localStorage.setItem('ur_unlocked_up_to', unlockedUpTo);
+    try { localStorage.setItem('ur_unlocked_up_to', unlockedUpTo); } catch(e) {}
   }
   renderTabLocks();
   goStep(n); // Navigate immediately — don't block on async save
@@ -1801,7 +1801,18 @@ function saveProfileSteps() {
   // Save move-in-date
   var mid = document.getElementById('move-in-date'); if (mid) data['move-in-date'] = mid.value;
   var ltToggle = document.getElementById('toggle-lease-transfer'); if (ltToggle) data['lease-transfer'] = ltToggle.checked;
-  localStorage.setItem(UR_PROFILE_KEY, JSON.stringify(data));
+  try {
+    localStorage.setItem(UR_PROFILE_KEY, JSON.stringify(data));
+  } catch(e) {
+    // localStorage full — clear stale UniRenter data and retry
+    try {
+      var keep = ['unirenter_email','unirenter_email_verified','ur_unlocked_up_to','unirenter_profile_complete','ur_city'];
+      Object.keys(localStorage).forEach(function(k) {
+        if (k.startsWith('ur_') && !keep.includes(k)) localStorage.removeItem(k);
+      });
+      localStorage.setItem(UR_PROFILE_KEY, JSON.stringify(data));
+    } catch(e2) { /* non-fatal — navigation continues regardless */ }
+  }
 }
 
 function restoreProfileSteps() {
@@ -2709,7 +2720,7 @@ async function saveProfileToSupabase() {
       body: JSON.stringify(profileData),
     });
     const result = await res.json();
-    localStorage.setItem('unirenter_profile_complete', profileComplete); // Always set — breadcrumb must not wait on API response
+    try { localStorage.setItem('unirenter_profile_complete', profileComplete); } catch(e) {} // Always set — breadcrumb must not wait on API response
     if (!result.success) console.warn('Profile save warning:', result);
   } catch (err) {
     console.warn('Profile save offline:', err.message);
