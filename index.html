@@ -1680,6 +1680,7 @@ function tryGoStep(n) {
 }
 
 function unlockAndGo(n) {
+  console.log('[UR] unlockAndGo called, n=' + n + ' currentStep=' + currentStep + ' unlockedUpTo=' + unlockedUpTo);
   saveProfileSteps(); // S94: persist selections before advancing
   if (n > unlockedUpTo) {
     unlockedUpTo = n;
@@ -1843,15 +1844,25 @@ function restoreProfileSteps() {
 
 
 function goStep(n) {
-  document.getElementById('step-' + currentStep).classList.remove('active');
-  document.getElementById('tab-' + currentStep).classList.remove('active');
-  document.getElementById('tab-' + currentStep).classList.add('done');
+  var fromStep = currentStep;
+  var fromEl = document.getElementById('step-' + fromStep);
+  var fromTab = document.getElementById('tab-' + fromStep);
+  var toEl = document.getElementById('step-' + n);
+  var toTab = document.getElementById('tab-' + n);
+  // Guard: if DOM elements missing, bail cleanly
+  if (!fromEl || !toEl || !fromTab || !toTab) { console.warn('goStep: missing element', fromStep, n); return; }
+  fromEl.classList.remove('active');
+  fromTab.classList.remove('active');
+  fromTab.classList.add('done');
   currentStep = n;
-  document.getElementById('step-' + n).classList.add('active');
-  document.getElementById('tab-' + n).classList.add('active');
-  const setupEl = document.getElementById('setup');
-  if (setupEl) setupEl.scrollIntoView({behavior:'smooth',block:'start'});
+  toEl.classList.add('active');
+  toTab.classList.add('active');
   updateCompleteness(n);
+  // Defer scroll — mobile Safari can abort if scrollIntoView fires during touch inertia
+  setTimeout(function() {
+    var setupEl = document.getElementById('setup');
+    if (setupEl) setupEl.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 50);
 }
 
 function toggleSingle(el, groupId) {
