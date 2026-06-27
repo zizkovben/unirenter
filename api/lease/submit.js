@@ -31,6 +31,7 @@ const VALID_PROPERTY_TYPES = [
   // Frontend descriptive values (used by lease form select)
   'private_room_share_house', 'private_room_share_apartment',
   'share_room', '1br_apartment', '2br_apartment', '3br_plus',
+  'whole_property',
 ];
 
 function generateRef(city) {
@@ -169,7 +170,7 @@ module.exports = async function handler(req, res) {
 
     if (insertErr) {
       console.error('[lease/submit] Supabase insert error:', insertErr);
-      return res.status(500).json({ error: 'Could not save listing. Please try again.' });
+      return res.status(500).json({ error: 'Could not save listing. Please try again.', detail: insertErr.message || insertErr.code || null });
     }
 
     // ── Confirmation email ────────────────────────────────────────────────────
