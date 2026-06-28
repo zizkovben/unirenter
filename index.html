@@ -2121,7 +2121,7 @@ function renderMatchCard(p) {
     <div class="card-compat"><div class="compat-bar" style="width:${p.match_score||0}%"></div></div>
     <div class="card-tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
     ${vibeHtml}${cobSummaryHtml}<div class="card-footer">
-      <button class="btn-connect" data-email="${p.email||''}" data-name="${p.display_name||'Student'}" onclick="connectCard(this)">Connect</button>
+      <button class="btn-connect" data-id="${p.id||''}" data-name="${p.display_name||'Student'}" onclick="connectCard(this)">Connect</button>
       <button class="btn-skip" onclick="skip(this)">Skip</button>
     </div>
     <div class="card-footer-row">
@@ -2328,10 +2328,10 @@ async function connect(recipientEmail, name, btnEl) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        sender_email:    myEmail,
-        recipient_email: recipientEmail,
-        city:            'melbourne',
-        body:            'Hi! I found your profile on UniRenter and think we could be a great match. Would love to connect 😊'
+        sender_email:  myEmail,
+        recipient_id:  recipientEmail,
+        city:          'melbourne',
+        body:          'Hi! I found your profile on UniRenter and think we could be a great match. Would love to connect 😊'
       })
     });
     const data = await res.json();
@@ -2376,9 +2376,9 @@ function markCardAsSent(btnEl, name, recipientEmail) {
 
 // -- connectCard() reads email/name from data attrs (S128) --
 function connectCard(btn) {
-  const email = btn.getAttribute('data-email') || '';
-  const name  = btn.getAttribute('data-name')  || 'them';
-  connect(email, name, btn);
+  const id   = btn.getAttribute('data-id')   || '';
+  const name = btn.getAttribute('data-name') || 'them';
+  connect(id, name, btn);
 }
 
 // -- restoreSentStates on re-render (S128) --
@@ -2386,9 +2386,9 @@ function restoreSentStates() {
   document.querySelectorAll('.match-card').forEach(card => {
     const btn = card.querySelector('.btn-connect:not(.sent)');
     if (!btn) return;
-    const email = btn.getAttribute('data-email') || '';
-    const name  = btn.getAttribute('data-name')  || 'them';
-    if (email && hasSentRequest(email)) markCardAsSent(btn, name, email);
+    const id   = btn.getAttribute('data-id')   || '';
+    const name = btn.getAttribute('data-name') || 'them';
+    if (id && hasSentRequest(id)) markCardAsSent(btn, name, id);
   });
 }
 function skip(btn) {
