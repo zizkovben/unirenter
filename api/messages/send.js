@@ -17,88 +17,101 @@ const BLOCKED_PATTERNS = [
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { sender_email, recipient_email, recipient_id, city, body } = req.body || {};
+  try {
+    const { sender_email, recipient_email, recipient_id, city, body } = req.body || {};
 
-  // S128: accept recipient_id (UUID from matches API) OR recipient_email
-  if (!sender_email || (!recipient_email && !recipient_id) || !city || !body) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
-  const trimmed = body.trim();
-  if (!trimmed || trimmed.length > 2000) {
-    return res.status(400).json({ error: 'Message must be 1–2000 characters' });
-  }
-  if (BLOCKED_PATTERNS.some(p => p.test(trimmed))) {
-    return res.status(400).json({ error: 'Message contains blocked content' });
-  }
-
-  // Verify sender is verified
-  const { data: senderProfile, error: senderErr } = await supabase
-    .from('profiles')
-    .select('email, email_verified, display_name')
-    .eq('email', sender_email)
-    .single();
-
-  if (senderErr || !senderProfile || !senderProfile.email_verified) {
-    return res.status(403).json({ error: 'Sender not verified' });
-  }
-
-  // Resolve recipient — by id (preferred, from matches API) or by email
-  let resolvedRecipientEmail = recipient_email || null;
-  if (!resolvedRecipientEmail && recipient_id) {
-    const { data: recipById, error: recipByIdErr } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('id', recipient_id)
-      .single();
-    if (recipByIdErr || !recipById) {
-      return res.status(404).json({ error: 'Recipient not found' });
+    // S128: accept recipient_id (UUID from matches API) OR recipient_email
+    if (!sender_email || (!recipient_email && !recipient_id) || !city || !body) {
+      return res.status(400).json({ error: 'Missing required fields' });
     }
-    resolvedRecipientEmail = recipById.email;
-  } else {
-    // Verify recipient exists when using email directly
-    const { data: recipientProfile, error: recipientErr } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('email', resolvedRecipientEmail)
-      .single();
-    if (recipientErr || !recipientProfile) {
-      return res.status(404).json({ error: 'Recipient not found' });
+    const trimmed = (body || '').trim();
+    if (!trimmed || trimmed.length > 2000) {
+      return res.status(400).json({ error: 'Message must be 1–2000 characters' });
     }
+    if (BLOCKED_PATTERNS.some(p => p.test(trimmed))) {
+      return res.status(400).json({ error: 'Message contains blocked content' });
+    }
+
+    // Verify sender exists and is verified
+    const { data: senderProfile, error: senderErr } = await supabase
+      .from('profiles')
+      .select('email, email_verified, display_name')
+      .eq('email', sender_email)
+      .single();
+
+    if (senderErr || !senderProfile) {
+      return res.status(403).json({ error: 'Sender profile not found' });
+    }
+    if (!senderProfile.email_verified) {
+      return res.status(403).json({ error: 'Sender not verified — please verify your email first' });
+    }
+
+    // Resolve recipient email — by id (from matches API) or directly
+    let resolvedRecipientEmail = recipient_email || null;
+
+    if (!resolvedRecipientEmail && recipient_id) {
+      const { data: recipById, error: recipByIdErr } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', recipient_id)
+        .single();
+      if (recipByIdErr || !recipById || !recipById.email) {
+        return res.status(404).json({ error: 'Recipient not found' });
+      }
+      resolvedRecipientEmail = recipById.email;
+    } else if (resolvedRecipientEmail) {
+      const { data: recipientProfile, error: recipientErr } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('email', resolvedRecipientEmail)
+        .single();
+      if (recipientErr || !recipientProfile) {
+        return res.status(404).json({ error: 'Recipient not found' });
+      }
+    }
+
+    if (!resolvedRecipientEmail) {
+      return res.status(400).json({ error: 'Could not resolve recipient' });
+    }
+
+    if (sender_email === resolvedRecipientEmail) {
+      return res.status(400).json({ error: 'Cannot message yourself' });
+    }
+
+    // Check for existing thread (prevent duplicate openers)
+    const { count: existingCount } = await supabase
+      .from('messages')
+      .select('id', { count: 'exact', head: true })
+      .or(`and(sender_email.eq.${sender_email},recipient_email.eq.${resolvedRecipientEmail}),and(sender_email.eq.${resolvedRecipientEmail},recipient_email.eq.${sender_email})`);
+
+    if ((existingCount || 0) > 0) {
+      return res.status(409).json({ error: 'Already messaged this person' });
+    }
+
+    // Insert message
+    const { data, error: insertErr } = await supabase
+      .from('messages')
+      .insert({ sender_email, recipient_email: resolvedRecipientEmail, city, body: trimmed })
+      .select()
+      .single();
+
+    if (insertErr) {
+      console.error('Message insert error:', JSON.stringify(insertErr));
+      return res.status(500).json({ error: 'Failed to send message', detail: insertErr.message });
+    }
+
+    // Fire-and-forget notification
+    notifyRecipient({
+      recipientEmail: resolvedRecipientEmail,
+      senderName: senderProfile.display_name || sender_email.split('@')[0],
+      messagePreview: trimmed,
+      city,
+    });
+
+    return res.status(200).json({ ok: true, message: data });
+
+  } catch (err) {
+    console.error('send.js unhandled error:', err);
+    return res.status(500).json({ error: 'Internal server error', detail: err.message });
   }
-
-  if (sender_email === resolvedRecipientEmail) {
-    return res.status(400).json({ error: 'Cannot message yourself' });
-  }
-
-  // Check for duplicate (already messaged this person)
-  const { count: existingCount } = await supabase
-    .from('messages')
-    .select('id', { count: 'exact', head: true })
-    .or(`and(sender_email.eq.${sender_email},recipient_email.eq.${resolvedRecipientEmail}),and(sender_email.eq.${resolvedRecipientEmail},recipient_email.eq.${sender_email})`);
-
-  if ((existingCount || 0) > 0) {
-    return res.status(409).json({ error: 'Already messaged this person' });
-  }
-
-  // Insert message
-  const { data, error } = await supabase
-    .from('messages')
-    .insert({ sender_email, recipient_email: resolvedRecipientEmail, city, body: trimmed })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Message insert error:', error);
-    return res.status(500).json({ error: 'Failed to send message' });
-  }
-
-  // Notify recipient on first message
-  notifyRecipient({
-    recipientEmail: resolvedRecipientEmail,
-    senderName: senderProfile.display_name || sender_email.split('@')[0],
-    messagePreview: trimmed,
-    city,
-  });
-
-  return res.status(200).json({ ok: true, message: data });
 };
