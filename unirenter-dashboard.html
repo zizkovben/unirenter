@@ -7068,14 +7068,69 @@ function refreshMatches() {
   });
 }
 
-function connectWith(name, recipientEmail) {
-  showToast('✉️ Connected!', name + ' will see your profile — say hello in Messages.');
-  var badge = document.getElementById('msg-badge');
-  if (badge) { badge.style.display = ''; badge.textContent = parseInt(badge.textContent||'0')+1; }
-  if (recipientEmail) {
-    switchTab('messages');
-    window._currentConvoEmail = recipientEmail;
-    window._currentConvoName  = name;
+async function connectWith(name, recipientEmail) {
+  var myEmail = localStorage.getItem('unirenter_email');
+  var city = localStorage.getItem('ur_city') || 'melbourne';
+  if (!myEmail || !recipientEmail) {
+    showToast('Not sent', 'Please sign in first.');
+    return;
+  }
+  // Find button by recipient email
+  var allBtns = document.querySelectorAll('.btn-connect');
+  var btn = null;
+  allBtns.forEach(function(b){ if (b.dataset.email === recipientEmail) btn = b; });
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+  try {
+    var res = await fetch('/api/messages/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sender_email: myEmail,
+        recipient_email: recipientEmail,
+        city: city,
+        body: 'Hi! I found your profile on UniRenter and think we could be a great match. Would love to connect!'
+      })
+    });
+    if (!res.ok) {
+      var errData = await res.json().catch(function(){ return {}; });
+      if (errData.error && errData.error.indexOf('already') !== -1) {
+        showToast('Already connected', 'You\'ve already messaged ' + name + '.');
+        if (btn) { btn.disabled = false; btn.textContent = 'Connect'; }
+      } else {
+        throw new Error(errData.error || 'Send failed');
+      }
+      return;
+    }
+    // Success - update card to sent-state
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Request sent';
+      btn.style.background = '#E8623A';
+      btn.style.color = '#fff';
+      var card = btn.closest('.match-card');
+      if (card) {
+        card.style.background = 'rgba(232,98,58,0.04)';
+        card.style.borderColor = 'rgba(232,98,58,0.3)';
+        var skipBtn = card.querySelector('.btn-skip');
+        if (skipBtn) {
+          skipBtn.textContent = 'Go to messages';
+          skipBtn.onclick = function() { switchTab('messages'); };
+        }
+        var banner = document.createElement('div');
+        banner.style.cssText = 'font-size:12px;color:#E8623A;margin-bottom:10px;';
+        banner.textContent = 'Message sent - awaiting reply';
+        var acts = card.querySelector('.match-actions');
+        if (acts) card.insertBefore(banner, acts);
+      }
+    }
+    showToast('Connected!', name + ' will see your profile - say hello in Messages.');
+    var badge = document.getElementById('msg-badge');
+    if (badge) { badge.style.display = ''; badge.textContent = parseInt(badge.textContent||'0')+1; }
+    setTimeout(function() { if (typeof loadConversationsSilent === 'function') loadConversationsSilent(); }, 1500);
+  } catch(err) {
+    console.warn('connectWith error:', err);
+    showToast('Not sent', 'Check your connection and try again.');
+    if (btn) { btn.disabled = false; btn.textContent = 'Connect'; }
   }
 }
 
