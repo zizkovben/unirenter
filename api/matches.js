@@ -56,6 +56,10 @@ module.exports = async function handler(req, res) {
     if (email) {
       url += `&email=neq.${encodeURIComponent(email)}`;
     }
+    // S128: also exclude by id in case email lookup differs
+    if (myProfile && myProfile.id) {
+      url += `&id=neq.${encodeURIComponent(myProfile.id)}`;
+    }
  
     const candRes = await fetch(url, {
       headers: {
@@ -93,8 +97,15 @@ module.exports = async function handler(req, res) {
       near_misses = computeNearMisses(myProfile, eligibleCandidates, city);
     }
  
+    // S128: safety filter — never return requester's own profile
+    const safeTop = top.filter(p => {
+      if (email && p.email === email) return false;
+      if (myProfile && myProfile.id && p.id === myProfile.id) return false;
+      return true;
+    });
+
     return res.status(200).json({
-      matches:     top,
+      matches:     safeTop,
       near_misses,
       total:       candidates.length,
       city,
