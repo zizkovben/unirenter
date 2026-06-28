@@ -63,7 +63,7 @@ module.exports = async function handler(req, res) {
       const profile = profileMap[c.partner_email] || {};
       return {
         ...c,
-        display_name: profile.display_name || c.partner_email.split('@')[0],
+        display_name: profile.display_name || 'Housemate',
         university: profile.university || null,
         suburb_preferences: profile.suburb_preferences || [],
       };
