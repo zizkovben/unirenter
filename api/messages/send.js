@@ -78,11 +78,13 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Cannot message yourself' });
     }
 
-    // Check for existing thread (prevent duplicate openers)
+    // Check if THIS SENDER has already sent an opener to this recipient
+    // (only block duplicate openers — replies are always allowed)
     const { count: existingCount } = await supabase
       .from('messages')
       .select('id', { count: 'exact', head: true })
-      .or(`and(sender_email.eq.${sender_email},recipient_email.eq.${resolvedRecipientEmail}),and(sender_email.eq.${resolvedRecipientEmail},recipient_email.eq.${sender_email})`);
+      .eq('sender_email', sender_email)
+      .eq('recipient_email', resolvedRecipientEmail);
 
     if ((existingCount || 0) > 0) {
       return res.status(409).json({ error: 'Already messaged this person' });
