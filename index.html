@@ -2308,8 +2308,14 @@ function getSentRequests() {
   try { return JSON.parse(localStorage.getItem(UR_SENT_KEY) || '{}'); } catch(e) { return {}; }
 }
 function saveSentRequest(email, name) {
-  const sent = getSentRequests();
+  let sent = getSentRequests();
   sent[email] = { name: name, sentAt: Date.now() };
+  // Cap at 50 entries to prevent localStorage quota errors on mobile
+  const keys = Object.keys(sent);
+  if (keys.length > 50) {
+    keys.sort((a,b) => sent[a].sentAt - sent[b].sentAt)
+        .slice(0, keys.length - 50).forEach(k => delete sent[k]);
+  }
   try { localStorage.setItem(UR_SENT_KEY, JSON.stringify(sent)); } catch(e) {}
 }
 function hasSentRequest(email) { return !!getSentRequests()[email]; }
@@ -2372,6 +2378,16 @@ function markCardAsSent(btnEl, name, recipientEmail) {
     + '<span class="sent-countdown">Expires in ' + expiryDays + 'd</span>';
   const footer = card.querySelector('.card-footer');
   if (footer) card.insertBefore(banner, footer);
+  // Replace Skip button with 'Go to messages' link
+  const skipBtn = footer ? footer.querySelector('.btn-skip') : null;
+  if (skipBtn) {
+    const goBtn = document.createElement('a');
+    goBtn.href = '/dashboard#messages';
+    goBtn.className = 'btn-skip';
+    goBtn.style.cssText = 'text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:13px;';
+    goBtn.textContent = 'Go to messages →';
+    skipBtn.replaceWith(goBtn);
+  }
 }
 
 // -- connectCard() reads email/name from data attrs (S128) --
