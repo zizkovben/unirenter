@@ -2181,7 +2181,7 @@ async function generateMatches() {
 
       // ── Render real match cards ──────────────────────────────────────────
       data.matches.forEach(p => grid.appendChild(renderMatchCard(p)));
-      restoreSentStates(); // S128: restore sent-state on re-render
+      restoreSentStates(); // S128
 
       // ── Add dummy examples when no real matches (S94: verified users see Coming Soon card only) ──
       if (matchCount === 0 && localStorage.getItem('unirenter_email_verified') !== '1') {
@@ -2302,7 +2302,7 @@ async function showMatches() {
   const dp = document.getElementById('dashboard-prompt'); if (dp) dp.style.display = 'block';
   const dd = document.getElementById('nav-dd-dashboard'); if (dd) dd.style.display = '';
 }
-// ── Sent-requests store (S128) ──
+// -- Sent-requests store (S128) --
 const UR_SENT_KEY = 'ur_sent_requests';
 function getSentRequests() {
   try { return JSON.parse(localStorage.getItem(UR_SENT_KEY) || '{}'); } catch(e) { return {}; }
@@ -2312,22 +2312,17 @@ function saveSentRequest(email, name) {
   sent[email] = { name: name, sentAt: Date.now() };
   try { localStorage.setItem(UR_SENT_KEY, JSON.stringify(sent)); } catch(e) {}
 }
-function hasSentRequest(email) {
-  return !!getSentRequests()[email];
-}
+function hasSentRequest(email) { return !!getSentRequests()[email]; }
 function getSentRequestAge(email) {
   const sent = getSentRequests();
   return sent[email] ? Math.floor((Date.now() - sent[email].sentAt) / 86400000) : null;
 }
 
-// ── connect() — S128: sends first message, updates card state in-place ──
+// -- connect() S128: sends first message, updates card in-place --
 async function connect(recipientEmail, name, btnEl) {
   const myEmail = localStorage.getItem('unirenter_email');
-  if (!myEmail) {
-    showToast('\u26a0\ufe0f Sign in required', 'Please complete your profile first.');
-    return;
-  }
-  if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Sending\u2026'; }
+  if (!myEmail) { showToast('⚠️ Sign in required', 'Please complete your profile first.'); return; }
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Sending…'; }
   try {
     const res = await fetch('/api/messages/send', {
       method: 'POST',
@@ -2335,32 +2330,34 @@ async function connect(recipientEmail, name, btnEl) {
       body: JSON.stringify({
         sender_email:    myEmail,
         recipient_email: recipientEmail,
-        content:         'Hi! I found your profile on UniRenter and think we could be a great match. Would love to connect \ud83d\ude0a'
+        city:            'melbourne',
+        body:            'Hi! I found your profile on UniRenter and think we could be a great match. Would love to connect 😊'
       })
     });
     const data = await res.json();
     if (res.ok || res.status === 409) {
       saveSentRequest(recipientEmail, name);
       markCardAsSent(btnEl, name, recipientEmail);
-      if (res.ok) showToast('\u2709\ufe0f Request sent!', "Your message is waiting in their inbox. You'll hear when they reply.");
-      else showToast('\u2709\ufe0f Already connected', 'You\'ve already messaged ' + name + '. Check Messages in your dashboard.');
+      const msg = res.ok ? "Your message is waiting in their inbox. You'll hear when they reply."
+                         : 'You’ve already messaged ' + name + '. Check Messages in your dashboard.';
+      showToast('✉️ ' + (res.ok ? 'Request sent!' : 'Already connected'), msg);
     } else {
       if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'Connect'; }
-      showToast('\u26a0\ufe0f Couldn\'t send', data.error || 'Please try again.');
+      showToast('⚠️ Couldn’t send', data.error || 'Please try again.');
     }
   } catch(e) {
     if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'Connect'; }
-    showToast('\u26a0\ufe0f Offline', 'Check your connection and try again.');
+    showToast('⚠️ Offline', 'Check your connection and try again.');
   }
 }
 
-// ── Mark card visually as sent (S128) ──
+// -- markCardAsSent (S128) --
 function markCardAsSent(btnEl, name, recipientEmail) {
   const card = btnEl ? btnEl.closest('.match-card') : null;
   if (!card) return;
   card.classList.add('sent-state');
   btnEl.className = 'btn-connect sent';
-  btnEl.textContent = '\u2709\ufe0f Request sent';
+  btnEl.textContent = '✉️ Request sent';
   btnEl.disabled = true;
   btnEl.onclick = null;
   if (card.querySelector('.sent-banner')) return;
@@ -2369,31 +2366,29 @@ function markCardAsSent(btnEl, name, recipientEmail) {
   const banner = document.createElement('div');
   banner.className = 'sent-banner';
   banner.innerHTML =
-    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
-    '<path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>' +
-    '<span>Message sent \u2014 awaiting reply</span>' +
-    '<span class="sent-countdown">Awaiting reply \u00b7 expires in ' + expiryDays + 'd</span>';
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">'
+    + '<path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>'
+    + '<span>Message sent — awaiting reply</span>'
+    + '<span class="sent-countdown">Expires in ' + expiryDays + 'd</span>';
   const footer = card.querySelector('.card-footer');
   if (footer) card.insertBefore(banner, footer);
 }
 
-// ── connectCard() — reads email/name from data attrs (S128) ──
+// -- connectCard() reads email/name from data attrs (S128) --
 function connectCard(btn) {
   const email = btn.getAttribute('data-email') || '';
   const name  = btn.getAttribute('data-name')  || 'them';
   connect(email, name, btn);
 }
 
-// ── Restore sent-state on matches re-render (S128) ──
+// -- restoreSentStates on re-render (S128) --
 function restoreSentStates() {
   document.querySelectorAll('.match-card').forEach(card => {
     const btn = card.querySelector('.btn-connect:not(.sent)');
     if (!btn) return;
     const email = btn.getAttribute('data-email') || '';
     const name  = btn.getAttribute('data-name')  || 'them';
-    if (email && hasSentRequest(email)) {
-      markCardAsSent(btn, name, email);
-    }
+    if (email && hasSentRequest(email)) markCardAsSent(btn, name, email);
   });
 }
 function skip(btn) {
