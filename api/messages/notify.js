@@ -44,7 +44,7 @@ module.exports = async function notifyRecipient({ recipientEmail, senderName, me
             <p style="margin:0;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.6;">"${preview}"</p>
           </div>
           <p style="font-size:13px;color:rgba(255,255,255,0.5);margin:16px 0 24px;">Head to your dashboard to reply — conversations are only available inside UniRenter.</p>
-          <a href="https://unirenter.com.au/dashboard" style="display:inline-block;background:#4BBFE0;color:#0d1f2d;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;">Open Messages →</a>
+          <a href="https://unirenter.com.au/dashboard#messages" style="display:inline-block;background:#4BBFE0;color:#0d1f2d;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;">Open Messages →</a>
         </td></tr>
         <!-- Footer -->
         <tr><td style="padding:20px 32px;border-top:1px solid rgba(255,255,255,0.08);">
