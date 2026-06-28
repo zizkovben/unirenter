@@ -1,10 +1,7 @@
 // api/profile/get.js
 // Returns a student's full profile from Supabase by email.
 // Called via GET /api/profile/get?email=student@example.com
-// Used by the dashboard to load profile data on login.
-// Auth: uses SUPABASE_SERVICE_ROLE_KEY (server-side only — never exposed to client)
-// Fixed S107: expanded select list to return all profile fields (was truncated to 15 fields,
-// causing first_name, university, vibe fields, language fields etc. to appear null on dashboard)
+// Uses select=* so it never breaks when columns are added or removed from the profiles table.
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -27,58 +24,8 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const selectFields = [
-      'id',
-      'email',
-      'display_name',
-      'photo_url',
-      'university',
-      'student_status',
-      'field_of_study',
-      'year_of_study',
-      'uni_email',
-      'uni_email_verified',
-      'email_verified',
-      'phone',
-      'seeking',
-      'move_in_date',
-      'lease_duration',
-      'household_type',
-      'suburb_preferences',
-      'budget_min',
-      'budget_max',
-      'sleep_schedule',
-      'cleanliness',
-      'study_location',
-      'guests',
-      'substances',
-      'dietary',
-      'pets',
-      'vibe_emoji_primary',
-      'vibe_emoji_secondary',
-      'cob_summary',
-      'star_sign',
-      'generation',
-      'chinese_zodiac',
-      'vibe_lifestyle',
-      'vibe_quiz_answers',
-      'language_home',
-      'languages_spoken',
-      'english_practice',
-      'stay_duration',
-      'sleep_mode',
-      'listing_token',
-      'listing_expires_at',
-      'city',
-      'profile_complete',
-      'is_active',
-      'last_seen',
-      'created_at',
-      'updated_at',
-    ].join(',');
-
     const response = await fetch(
-      `${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email)}&select=${selectFields}`,
+      `${supabaseUrl}/rest/v1/profiles?email=eq.${encodeURIComponent(email)}&select=*`,
       {
         method: 'GET',
         headers: {
