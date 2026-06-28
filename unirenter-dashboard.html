@@ -5960,6 +5960,12 @@ function applyProfileData(p, cobRefinedFields) {
   setRow('prow-studyloc',  studyloc,               'study_location');
   setRow('prow-duration',   stayDur,                'stay_duration');
 
+  if (p.display_name) {
+    const nameEl = document.getElementById('profile-big-name');
+    if (nameEl) nameEl.textContent = p.display_name;
+    try { localStorage.setItem('unirenter_display_name', p.display_name); } catch(e) {}
+  }
+
   if (uni) {
     setRow('prow-uni', uni, 'university');
     const uniEl = document.getElementById('profile-big-uni');
@@ -5988,6 +5994,7 @@ function applyProfileData(p, cobRefinedFields) {
   }
 
   // Cache to localStorage for next load
+  if (p.display_name) localStorage.setItem('unirenter_display_name', p.display_name);
   if (uni)       localStorage.setItem('ur_university',     uni);
   if (sleep)     localStorage.setItem('ur_sleep',          sleep);
   if (clean)     localStorage.setItem('ur_cleanliness',    clean);
@@ -12833,7 +12840,7 @@ function openCardPreview() {
 
   // Build a profile object from localStorage + any loaded profile data
   var email = localStorage.getItem('unirenter_email') || '';
-  var name = localStorage.getItem('unirenter_display_name') || email.split('@')[0] || 'You';
+  var name = localStorage.getItem('unirenter_display_name') || (window._loadedProfile && window._loadedProfile.display_name) || email.split('@')[0] || 'You';
   var uni = localStorage.getItem('ur_university') || window._loadedProfile && window._loadedProfile.university || '';
   var field = window._loadedProfile && window._loadedProfile.field_of_study || '';
   var year = window._loadedProfile && window._loadedProfile.year_of_study || '';
