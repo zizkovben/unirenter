@@ -32,6 +32,7 @@ body {
   background: var(--navy);
   color: var(--text);
   font-family: var(--font-body);
+  overflow-x: hidden;
   font-size: 14px;
   line-height: 1.6;
   min-height: 100vh;
@@ -412,6 +413,11 @@ body.light-mode {
   scrollbar-width: none;
 }
 .tab-bar::-webkit-scrollbar { display: none; }
+@media (max-width: 500px) {
+  .tab-btn { padding: 9px 10px; font-size: 12px; }
+  .tab-label { display: none; }
+  .tab-btn { gap: 0; }
+}
 .tab-btn {
   flex-shrink: 0;
   background: none; border: none; cursor: pointer;
@@ -1180,7 +1186,7 @@ body.light-mode {
 
 /* ── Messages tab ── */
 .msg-layout { display: grid; grid-template-columns: 300px 1fr; gap: 0; min-height: 500px; }
-@media (max-width: 700px) { .msg-layout { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .msg-layout { grid-template-columns: 1fr; } .msg-contact-info { min-width: 0; } }
 .msg-sidebar {
   background: var(--navy-card); border: 1px solid var(--navy-border);
   border-radius: var(--radius) 0 0 var(--radius); overflow: hidden;
