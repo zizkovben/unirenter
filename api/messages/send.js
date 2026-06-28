@@ -17,13 +17,11 @@ const BLOCKED_PATTERNS = [
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { sender_email, recipient_email, city, body } = req.body || {};
+  const { sender_email, recipient_email, recipient_id, city, body } = req.body || {};
 
-  if (!sender_email || !recipient_email || !city || !body) {
+  // S128: accept recipient_id (UUID from matches API) OR recipient_email
+  if (!sender_email || (!recipient_email && !recipient_id) || !city || !body) {
     return res.status(400).json({ error: 'Missing required fields' });
-  }
-  if (sender_email === recipient_email) {
-    return res.status(400).json({ error: 'Cannot message yourself' });
   }
   const trimmed = body.trim();
   if (!trimmed || trimmed.length > 2000) {
@@ -44,21 +42,48 @@ module.exports = async function handler(req, res) {
     return res.status(403).json({ error: 'Sender not verified' });
   }
 
-  // Verify recipient exists
-  const { data: recipientProfile, error: recipientErr } = await supabase
-    .from('profiles')
-    .select('email')
-    .eq('email', recipient_email)
-    .single();
+  // Resolve recipient — by id (preferred, from matches API) or by email
+  let resolvedRecipientEmail = recipient_email || null;
+  if (!resolvedRecipientEmail && recipient_id) {
+    const { data: recipById, error: recipByIdErr } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('id', recipient_id)
+      .single();
+    if (recipByIdErr || !recipById) {
+      return res.status(404).json({ error: 'Recipient not found' });
+    }
+    resolvedRecipientEmail = recipById.email;
+  } else {
+    // Verify recipient exists when using email directly
+    const { data: recipientProfile, error: recipientErr } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('email', resolvedRecipientEmail)
+      .single();
+    if (recipientErr || !recipientProfile) {
+      return res.status(404).json({ error: 'Recipient not found' });
+    }
+  }
 
-  if (recipientErr || !recipientProfile) {
-    return res.status(404).json({ error: 'Recipient not found' });
+  if (sender_email === resolvedRecipientEmail) {
+    return res.status(400).json({ error: 'Cannot message yourself' });
+  }
+
+  // Check for duplicate (already messaged this person)
+  const { count: existingCount } = await supabase
+    .from('messages')
+    .select('id', { count: 'exact', head: true })
+    .or(`and(sender_email.eq.${sender_email},recipient_email.eq.${resolvedRecipientEmail}),and(sender_email.eq.${resolvedRecipientEmail},recipient_email.eq.${sender_email})`);
+
+  if ((existingCount || 0) > 0) {
+    return res.status(409).json({ error: 'Already messaged this person' });
   }
 
   // Insert message
   const { data, error } = await supabase
     .from('messages')
-    .insert({ sender_email, recipient_email, city, body: trimmed })
+    .insert({ sender_email, recipient_email: resolvedRecipientEmail, city, body: trimmed })
     .select()
     .single();
 
@@ -67,24 +92,13 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to send message' });
   }
 
-  // Check if this is the first message in this conversation (avoid spam on every reply)
-  const { count } = await supabase
-    .from('messages')
-    .select('id', { count: 'exact', head: true })
-    .or(`and(sender_email.eq.${sender_email},recipient_email.eq.${recipient_email}),and(sender_email.eq.${recipient_email},recipient_email.eq.${sender_email})`);
-
-  // Send email notification — only if first message in thread, or recipient hasn't replied yet
-  // (avoids flooding on every message in an active back-and-forth)
-  const isFirstMessage = (count || 0) <= 1;
-  if (isFirstMessage) {
-    // Fire-and-forget — don't await, don't block response
-    notifyRecipient({
-      recipientEmail: recipient_email,
-      senderName: senderProfile.display_name || sender_email.split('@')[0],
-      messagePreview: trimmed,
-      city,
-    });
-  }
+  // Notify recipient on first message
+  notifyRecipient({
+    recipientEmail: resolvedRecipientEmail,
+    senderName: senderProfile.display_name || sender_email.split('@')[0],
+    messagePreview: trimmed,
+    city,
+  });
 
   return res.status(200).json({ ok: true, message: data });
 };
