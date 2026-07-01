@@ -78,17 +78,35 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Cannot message yourself' });
     }
 
-    // Check if THIS SENDER has already sent an opener to this recipient
-    // (only block duplicate openers — replies are always allowed)
-    const { count: existingCount } = await supabase
+    // S131: Check if a thread ALREADY EXISTS between these two people in EITHER direction.
+    // If a thread exists → allow send (it's a reply, not a duplicate opener).
+    // If NO thread exists AND sender has already sent to recipient → block (duplicate opener).
+    //
+    // A "thread exists" means at least one message exists where:
+    //   (sender=A, recipient=B) OR (sender=B, recipient=A)
+    const { count: threadCount } = await supabase
       .from('messages')
       .select('id', { count: 'exact', head: true })
-      .eq('sender_email', sender_email)
-      .eq('recipient_email', resolvedRecipientEmail);
+      .or(
+        `and(sender_email.eq.${sender_email},recipient_email.eq.${resolvedRecipientEmail}),` +
+        `and(sender_email.eq.${resolvedRecipientEmail},recipient_email.eq.${sender_email})`
+      );
 
-    if ((existingCount || 0) > 0) {
-      return res.status(409).json({ error: 'Already messaged this person' });
+    const threadExists = (threadCount || 0) > 0;
+
+    if (!threadExists) {
+      // No thread yet — check if THIS sender has already tried to open (duplicate opener guard)
+      const { count: senderCount } = await supabase
+        .from('messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('sender_email', sender_email)
+        .eq('recipient_email', resolvedRecipientEmail);
+
+      if ((senderCount || 0) > 0) {
+        return res.status(409).json({ error: 'Already messaged this person' });
+      }
     }
+    // If threadExists → fall through and allow the reply
 
     // Insert message
     const { data, error: insertErr } = await supabase
@@ -102,13 +120,15 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to send message', detail: insertErr.message });
     }
 
-    // Fire-and-forget notification
-    notifyRecipient({
-      recipientEmail: resolvedRecipientEmail,
-      senderName: senderProfile.display_name || sender_email.split('@')[0],
-      messagePreview: trimmed,
-      city,
-    });
+    // Fire notify only on first message in thread (i.e. threadCount was 0 before this insert)
+    if (!threadExists) {
+      notifyRecipient({
+        recipientEmail: resolvedRecipientEmail,
+        senderName: senderProfile.display_name || sender_email.split('@')[0],
+        messagePreview: trimmed,
+        city,
+      });
+    }
 
     return res.status(200).json({ ok: true, message: data });
 
