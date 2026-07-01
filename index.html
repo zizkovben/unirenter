@@ -250,6 +250,15 @@ input[type="range"] { flex: 1; accent-color: var(--brand-yellow); cursor: pointe
 .status-card .sc-title { font-family: var(--font-display); font-size: 13px; font-weight: 700; margin-bottom: 4px; }
 .status-card .sc-desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
 
+/* Inline email accordion inside status cards (S132) */
+.sc-email-inline { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(75,191,224,0.2); text-align: left; }
+.sc-email-copy { font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px; }
+.sc-email-row { display: flex; gap: 8px; }
+.sc-email-input { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(75,191,224,0.25); border-radius: 10px; padding: 10px 12px; color: var(--text); font-family: var(--font-body); font-size: 13px; outline: none; }
+.sc-email-input:focus { border-color: var(--brand-blue); }
+.status-cards { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.status-card.selected { grid-column: 1 / -1; }
+
 .cond-panel { display: none; background: rgba(75,191,224,0.04); border: 1px solid rgba(75,191,224,0.12); border-radius: 14px; padding: 22px; margin-bottom: 18px; }
 .cond-panel.visible { display: block; animation: fadeIn 0.2s ease; }
 .cond-title { font-size: 11px; font-weight: 600; color: var(--brand-blue); margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
@@ -1034,11 +1043,47 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
       <div class="step active" id="step-1">
         <div class="step-title">What brings you to Melbourne?</div>
         <div class="step-sub">This helps us personalise your experience — including how you verify your account. Future students welcome — no student ID required to get started.</div>
-        <div class="status-cards">
-          <div class="status-card" data-type="future" onclick="selectStatus('future',this)"><div class="sc-icon">✈️</div><div class="sc-title">Future student</div><div class="sc-desc">Accepted or applying — heading to Melbourne soon</div></div>
-          <div class="status-card" data-type="current" onclick="selectStatus('current',this)"><div class="sc-icon">🎓</div><div class="sc-title">Current student</div><div class="sc-desc">Enrolled and studying in Melbourne now</div></div>
-          <div class="status-card" data-type="ex" onclick="selectStatus('ex',this)"><div class="sc-icon">💼</div><div class="sc-title">Graduate / Alumni</div><div class="sc-desc">Finished studying, still need Melbourne accommodation</div></div>
-          <div class="status-card" data-type="other" onclick="selectStatus('other',this)"><div class="sc-icon">🌏</div><div class="sc-title">Community member</div><div class="sc-desc">Not currently a student — working holiday, young professional, or related community</div></div>
+        <div class="status-cards" id="status-cards">
+          <div class="status-card" data-type="future" onclick="selectStatus('future',this)">
+            <div class="sc-icon">✈️</div><div class="sc-title">Future student</div><div class="sc-desc">Accepted or applying — heading to Melbourne soon</div>
+            <div class="sc-email-inline" id="sc-email-future" style="display:none;">
+              <div class="sc-email-copy" id="sc-email-copy-future">Verify with your personal email to get started — once you're enrolled, add your uni email from your dashboard to earn the Verified Student badge.</div>
+              <div class="sc-email-row">
+                <input type="email" class="sc-email-input" id="sc-email-input-future" placeholder="you@email.com" oninput="onInlineEmailInput('future')" onclick="event.stopPropagation()" />
+              </div>
+              <div class="info-note" style="margin-top:10px;">🔒 A 6-digit code will be sent to verify — takes 30 seconds.</div>
+            </div>
+          </div>
+          <div class="status-card" data-type="current" onclick="selectStatus('current',this)">
+            <div class="sc-icon">🎓</div><div class="sc-title">Current student</div><div class="sc-desc">Enrolled and studying in Melbourne now</div>
+            <div class="sc-email-inline" id="sc-email-current" style="display:none;">
+              <div class="sc-email-copy" id="sc-email-copy-current">Use your uni email to verify — you'll get the Verified Student badge straight away. Prefer a personal email instead? You can add your uni email anytime from your dashboard.</div>
+              <div class="sc-email-row">
+                <input type="email" class="sc-email-input" id="sc-email-input-current" placeholder="you@student.unimelb.edu.au" oninput="onInlineEmailInput('current')" onclick="event.stopPropagation()" />
+              </div>
+              <div class="info-note" style="margin-top:10px;">🔒 A 6-digit code will be sent to verify — takes 30 seconds.</div>
+            </div>
+          </div>
+          <div class="status-card" data-type="ex" onclick="selectStatus('ex',this)">
+            <div class="sc-icon">💼</div><div class="sc-title">Graduate / Alumni</div><div class="sc-desc">Finished studying, still need Melbourne accommodation</div>
+            <div class="sc-email-inline" id="sc-email-ex" style="display:none;">
+              <div class="sc-email-copy" id="sc-email-copy-ex">Verify with your personal email to continue. Still have access to a uni email? Add it from your dashboard afterwards to pick up the Verified Student badge.</div>
+              <div class="sc-email-row">
+                <input type="email" class="sc-email-input" id="sc-email-input-ex" placeholder="you@email.com" oninput="onInlineEmailInput('ex')" onclick="event.stopPropagation()" />
+              </div>
+              <div class="info-note" style="margin-top:10px;">🔒 A 6-digit code will be sent to verify — takes 30 seconds.</div>
+            </div>
+          </div>
+          <div class="status-card" data-type="other" onclick="selectStatus('other',this)">
+            <div class="sc-icon">🌏</div><div class="sc-title">Community member</div><div class="sc-desc">Not currently a student — working holiday, young professional, or related community</div>
+            <div class="sc-email-inline" id="sc-email-other" style="display:none;">
+              <div class="sc-email-copy" id="sc-email-copy-other">Verify with your email to continue. This option doesn't currently earn the Verified Student badge, but you're welcome to browse and connect with student housemates.</div>
+              <div class="sc-email-row">
+                <input type="email" class="sc-email-input" id="sc-email-input-other" placeholder="you@email.com" oninput="onInlineEmailInput('other')" onclick="event.stopPropagation()" />
+              </div>
+              <div class="info-note" style="margin-top:10px;">🔒 A 6-digit code will be sent to verify — takes 30 seconds.</div>
+            </div>
+          </div>
         </div>
         <div class="cond-panel" id="panel-future">
           <div class="cond-title">Future student details</div>
@@ -1075,19 +1120,9 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           <div class="form-group"><label>What brings you to Melbourne?</label><div class="chips" id="chips-community-reason"><div class="chip" onclick="toggle(this)">Working holiday visa</div><div class="chip" onclick="toggle(this)">Young professional</div><div class="chip" onclick="toggle(this)">Considering studying here</div><div class="chip" onclick="toggle(this)">Family / partner of student</div><div class="chip" onclick="toggle(this)">Other</div></div></div>
           <div class="info-note">🌏 UniRenter is primarily for students and graduates — other young people in Melbourne's communities are welcome too.</div>
         </div>
-        <!-- Contextual email verification — appears once a status is selected (registration redesign S84) -->
-        <div class="email-ask-block" id="email-ask-block" style="display:none;">
-          <div class="phone-block">
-            <div class="phone-block-title">📧 Verify your email</div>
-            <div class="phone-block-sub" id="email-ask-copy">Select your status above to see what's next.</div>
-            <div class="phone-row">
-              <input type="email" id="email-input" placeholder="you@email.com" style="flex:1;" oninput="onEmailInput()" />
-            </div>
-            <div class="verified-badge" id="verified-badge" style="display:none;">✅ Email verified — you're good to go</div>
-          </div>
-          <div class="info-note">🔒 A 6-digit code will be sent to verify your email before you continue — takes 30 seconds.</div>
-        </div>
-        <div class="email-ask-prompt" id="email-ask-prompt" style="font-size:13px;color:var(--text-muted);padding:6px 0 18px;">👆 Select your status above to continue.</div>
+        <!-- Inline email verification now lives inside each status card (S132) -->
+        <!-- Hidden legacy input kept for compatibility with triggerStep1Verify / onEmailInput -->
+        <input type="email" id="email-input" style="display:none;" />
 
         <div class="step-nav">
           <div></div>
@@ -1890,15 +1925,31 @@ const emailAskPlaceholder = {
   other: 'you@email.com'
 };
 function updateEmailAskCopy(type) {
-  const copyEl = document.getElementById('email-ask-copy');
-  const inputEl = document.getElementById('email-input');
-  const blockEl = document.getElementById('email-ask-block');
-  const promptEl = document.getElementById('email-ask-prompt');
-  if (copyEl) copyEl.textContent = emailAskCopy[type] || '';
-  if (inputEl) inputEl.placeholder = emailAskPlaceholder[type] || 'you@email.com';
-  if (blockEl) blockEl.style.display = 'block';
-  if (promptEl) promptEl.style.display = 'none';
-  onEmailInput();
+  // S132: inline design — show email section inside selected card, hide others
+  ['future','current','ex','other'].forEach(function(t) {
+    const el = document.getElementById('sc-email-' + t);
+    if (el) el.style.display = (t === type) ? 'block' : 'none';
+  });
+  // Sync hidden legacy #email-input so triggerStep1Verify still works
+  const activeInput = document.getElementById('sc-email-input-' + type);
+  const legacyInput = document.getElementById('email-input');
+  if (legacyInput && activeInput) legacyInput.value = activeInput.value;
+  onInlineEmailInput(type);
+}
+
+// S132: enable Next button when inline email has @ and status selected
+function onInlineEmailInput(type) {
+  const activeInput = document.getElementById('sc-email-input-' + type);
+  const legacyInput = document.getElementById('email-input');
+  if (activeInput && legacyInput) legacyInput.value = activeInput.value;
+  const btn = document.getElementById('btn-step1-next');
+  const statusSelected = document.querySelector('.status-card.selected');
+  if (btn) {
+    const val = (activeInput ? activeInput.value : '').trim();
+    const ok = val.includes('@') && val.includes('.') && !!statusSelected;
+    btn.style.opacity = ok ? '1' : '0.4';
+    btn.style.pointerEvents = ok ? 'auto' : 'none';
+  }
 }
 
 function toggleReligion() {
@@ -1915,25 +1966,26 @@ function updateFlag(selectId, flagId) {
 }
 
 
-// ── Step 1 email input — enable Next as soon as @ is typed ──
+// ── Step 1 email input (legacy stub — S132 uses onInlineEmailInput) ──
 function onEmailInput() {
-  const emailEl = document.getElementById('email-input');
-  if (!emailEl) return;
-  const val = emailEl.value.trim();
+  // Delegate to inline handler if a status is selected
+  const sel = document.querySelector('.status-card.selected');
+  if (sel) { onInlineEmailInput(sel.dataset.type); return; }
   const btn = document.getElementById('btn-step1-next');
-  const statusSelected = document.querySelector('.status-card.selected');
-  if (btn) {
-    const ok = val.includes('@') && val.includes('.') && !!statusSelected;
-    btn.style.opacity = ok ? '1' : '0.4';
-    btn.style.pointerEvents = ok ? 'auto' : 'none';
-  }
+  if (btn) { btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; }
 }
 
 // ── Step 1: Verify email before proceeding to Step 2 ──
 let _verifyDestination = 'matches'; // 'step2' or 'matches'
 function triggerStep1Verify() {
-  const email = document.getElementById('email-input')?.value?.trim() || '';
   const statusSelected = document.querySelector('.status-card.selected');
+  if (!statusSelected) return;
+  // S132: read from the active inline input
+  const activeInput = document.getElementById('sc-email-input-' + statusSelected.dataset.type);
+  const email = (activeInput ? activeInput.value : document.getElementById('email-input')?.value || '').trim();
+  // Sync legacy hidden input
+  const legacyInput = document.getElementById('email-input');
+  if (legacyInput && email) legacyInput.value = email;
   if (!email.includes('@') || !email.includes('.') || !statusSelected) return;
   // If already verified, go straight to step 2
   if (localStorage.getItem('unirenter_email_verified') === '1') {
