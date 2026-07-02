@@ -3714,6 +3714,22 @@ body.light-mode {
 </style>
 </head>
 <body>
+<script>
+// S135: Auth guard — runs synchronously before any dashboard content paints.
+// Prevents an unsigned-in visitor from ever seeing a rendered dashboard
+// (which previously showed dummy/cached match cards that looked real).
+(function() {
+  try {
+    var email = localStorage.getItem('unirenter_email');
+    var verified = localStorage.getItem('unirenter_email_verified') === '1';
+    if (!email || !verified) {
+      window.location.replace('/');
+    }
+  } catch (e) {
+    window.location.replace('/');
+  }
+})();
+</script>
 
 <!-- NAV -->
 <nav>
