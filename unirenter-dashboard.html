@@ -3778,6 +3778,7 @@ body.light-mode {
         <a class="nav-dd-item" href="#" onclick="openSettingsPanel('notifications');return false;">🔔 Notifications</a>
         <a class="nav-dd-item" href="#" onclick="openSettingsPanel('sound');return false;">🔊 Sound effects</a>
         <a class="nav-dd-item" href="#" onclick="openSettingsPanel('account');return false;">👤 Account</a>
+        <a class="nav-dd-item" href="#" onclick="signOut();return false;">🚪 Sign out</a>
         <div class="nav-dd-divider"></div>
         <a class="nav-dd-item" href="/">🏠 Back to home</a>
         <div class="nav-dd-divider"></div>
@@ -7739,9 +7740,20 @@ function saveSetting(key, val) {
 }
 
 function signOut() {
-  if (!confirm('Sign out of UniRenter?')) return;
-  localStorage.removeItem('unirenter_email');
-  localStorage.removeItem('unirenter_profile_complete');
+  if (!confirm('Sign out of UniRenter? This clears your saved profile from this device so someone else can sign in.')) return;
+  try {
+    // S134: clear every ur_/unirenter_ prefixed key (identity + profile + cached data)
+    // EXCEPT genuine device-level preferences that should survive a switch of accounts.
+    var keepExact = ['unirenter_theme', 'ur_sound_pack', 'ur_sound_volume'];
+    var keysToRemove = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (!k) continue;
+      if (keepExact.indexOf(k) !== -1) continue;
+      if (k.indexOf('ur_') === 0 || k.indexOf('unirenter_') === 0) keysToRemove.push(k);
+    }
+    keysToRemove.forEach(function(k) { localStorage.removeItem(k); });
+  } catch (e) {}
   showToast('👋 Signed out', 'Redirecting to home…');
   setTimeout(() => window.location.href = '/', 1500);
 }
@@ -13170,7 +13182,7 @@ function closeCardPreview() {
         <div class="settings-row">
           <div class="settings-row-info">
             <div class="settings-row-label">Sign out</div>
-            <div class="settings-row-sub">Clear your session from this device</div>
+            <div class="settings-row-sub">Clear this profile from the device — use this to switch to a different account</div>
           </div>
           <button class="btn-danger" onclick="signOut()">Sign out</button>
         </div>

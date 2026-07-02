@@ -242,7 +242,8 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
 input[type="range"] { flex: 1; accent-color: var(--brand-yellow); cursor: pointer; }
 .slider-val { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--brand-yellow); min-width: 80px; }
 
-.status-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.status-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+@media (max-width: 600px) { .status-cards { grid-template-columns: repeat(2, 1fr); } }
 .status-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 18px 14px; cursor: pointer; transition: all 0.2s; text-align: center; }
 .status-card:hover { border-color: rgba(75,191,224,0.3); }
 .status-card.selected { background: rgba(75,191,224,0.08); border-color: var(--brand-blue); }
@@ -256,8 +257,8 @@ input[type="range"] { flex: 1; accent-color: var(--brand-yellow); cursor: pointe
 .sc-email-row { display: flex; gap: 8px; }
 .sc-email-input { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(75,191,224,0.25); border-radius: 10px; padding: 10px 12px; color: var(--text); font-family: var(--font-body); font-size: 13px; outline: none; }
 .sc-email-input:focus { border-color: var(--brand-blue); }
-.status-cards { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
-.status-card.selected { grid-column: 1 / -1; }
+/* S134: selected card keeps its normal grid column — stays same width as the other 3,
+   just grows taller to fit the inline email section. Keeps the row tidy/uniform. */
 
 .cond-panel { display: none; background: rgba(75,191,224,0.04); border: 1px solid rgba(75,191,224,0.12); border-radius: 14px; padding: 22px; margin-bottom: 18px; }
 .cond-panel.visible { display: block; animation: fadeIn 0.2s ease; }
@@ -1031,7 +1032,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
       <div>
         <div class="completeness-label">
           <span>Profile <strong id="complete-pct">14%</strong> complete</span>
-          <span class="completeness-tip" id="complete-tip">Add a photo to unlock more matches</span>
+          <span class="completeness-tip" id="complete-tip">Verify your email to get started</span>
         </div>
         <div class="completeness-bar-wrap"><div class="completeness-bar" id="complete-bar" style="width:14%"></div></div>
       </div>
@@ -1711,7 +1712,7 @@ function unlockAndGo(n) {
   // Assign Cob emoji after lifestyle step (step 4 → 5)
   if (n === 5) { setTimeout(cobAssignEmoji, 100); }
   // Fire-and-forget Supabase save AFTER navigation so mobile tap is never blocked
-  if (localStorage.getItem('unirenter_email_verified') === '1') {
+  if (isEmailAlreadyVerified(document.getElementById('email-input')?.value?.trim() || '')) {
     setTimeout(function() { saveProfileToSupabase(); }, 0);
   }
 }
@@ -1977,6 +1978,15 @@ function onEmailInput() {
 
 // ── Step 1: Verify email before proceeding to Step 2 ──
 let _verifyDestination = 'matches'; // 'step2' or 'matches'
+// S134: "verified" must be tied to the SPECIFIC email address, not a blanket flag.
+// Otherwise a returning browser with an old verified email skips OTP for a brand
+// new email typed in this session, and silently keeps operating as the old identity.
+function isEmailAlreadyVerified(email) {
+  if (!email) return false;
+  const storedEmail = (localStorage.getItem('unirenter_email') || '').trim().toLowerCase();
+  return localStorage.getItem('unirenter_email_verified') === '1' &&
+         storedEmail === email.trim().toLowerCase();
+}
 function triggerStep1Verify() {
   const statusSelected = document.querySelector('.status-card.selected');
   if (!statusSelected) return;
@@ -1987,8 +1997,8 @@ function triggerStep1Verify() {
   const legacyInput = document.getElementById('email-input');
   if (legacyInput && email) legacyInput.value = email;
   if (!email.includes('@') || !email.includes('.') || !statusSelected) return;
-  // If already verified, go straight to step 2
-  if (localStorage.getItem('unirenter_email_verified') === '1') {
+  // If THIS exact email was already verified on this browser, go straight to step 2
+  if (isEmailAlreadyVerified(email)) {
     unlockAndGo(2);
     return;
   }
@@ -1999,14 +2009,14 @@ function triggerStep1Verify() {
 // ── "Show my matches" → open verify modal ──
 function triggerMatchesVerify() {
   _verifyDestination = _verifyDestination || 'matches';
-  // If already verified this session, go straight through
-  if (localStorage.getItem('unirenter_email_verified') === '1') {
+  const stepEmail = document.getElementById('email-input')?.value?.trim() || '';
+  // If THIS exact email was already verified on this browser, go straight through
+  if (isEmailAlreadyVerified(stepEmail)) {
     if (_verifyDestination === 'step2') { _verifyDestination = 'matches'; unlockAndGo(2); }
     else showMatches();
     return;
   }
   // Pre-fill email from Step 1 input
-  const stepEmail = document.getElementById('email-input')?.value?.trim() || '';
   const modalInput = document.getElementById('verify-modal-email-input');
   if (modalInput && stepEmail) modalInput.value = stepEmail;
   // Reset modal state
@@ -2636,7 +2646,7 @@ function openChat(who) {
 const stepWeights = [17,33,50,67,83,100];
 const stepTips = [
   'Select your status and verify your email',
-  'Add a profile photo — gets 3× more connections',
+  'Tell us a bit about yourself — Cob will pick your vibe avatar',
   'Choose your accommodation preferences',
   'Complete your lifestyle preferences',
   'Select your preferred locations',
@@ -2654,9 +2664,8 @@ function updateCompleteness(step) {
 
 // ── Save progress ──
 function saveProgress() {
-  const email = document.getElementById('email-input')?.value?.trim() || localStorage.getItem('unirenter_email');
-  if (email) localStorage.setItem('unirenter_email', email);
-  if (localStorage.getItem('unirenter_email_verified') === '1') {
+  const email = document.getElementById('email-input')?.value?.trim() || '';
+  if (isEmailAlreadyVerified(email)) {
     saveProfileToSupabase();
   }
   showToast("💾 Progress saved", "You can return and continue from step " + currentStep + " — we'll remember your answers.");
