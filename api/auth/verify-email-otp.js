@@ -9,7 +9,16 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { email, otp } = req.body || {};
+  const { otp, city: reqCity } = req.body || {};
+  // S135: normalize casing at the source — Postgres string comparison is
+  // case-sensitive, so "User@Gmail.com" and "user@gmail.com" were being
+  // treated as different people throughout matching and messaging.
+  const email = ((req.body || {}).email || '').trim().toLowerCase();
+  // S135: city was previously hardcoded to 'melbourne' on new-profile insert
+  // regardless of which city page called this endpoint. Now accepts city
+  // from the request body (frontend passes it), defaulting to 'melbourne'
+  // only for backward compatibility with city pages not yet sending it.
+  const city = reqCity || 'melbourne';
   if (!email || !otp) {
     return res.status(400).json({ error: 'Email and OTP required' });
   }
@@ -97,7 +106,7 @@ module.exports = async function handler(req, res) {
           body: JSON.stringify({
             email,
             email_verified: true,
-            city:           'melbourne',
+            city:           city,
             updated_at:     new Date().toISOString(),
             last_seen:      new Date().toISOString(),
           }),

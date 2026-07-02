@@ -13,7 +13,11 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email } = req.body || {};
+  const rawEmail = (req.body || {}).email;
+  // S135: normalize casing at the source — Postgres string comparison is
+  // case-sensitive, so "User@Gmail.com" and "user@gmail.com" were being
+  // treated as different people throughout matching and messaging.
+  const email = (rawEmail || '').trim().toLowerCase();
   if (!email || !email.includes('@')) {
     return res.status(400).json({ error: 'Valid email required' });
   }
