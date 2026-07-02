@@ -2109,7 +2109,7 @@ async function vmCheckOTP() {
     const res = await fetch('/api/auth/verify-email-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, otp: entered }),
+      body: JSON.stringify({ email, otp: entered, city: 'melbourne' }),
     });
     const data = await res.json();
     if (res.ok && data.success) {
