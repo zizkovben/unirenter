@@ -11,7 +11,13 @@ const supabase = createClient(
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { email, other, city } = req.query || {};
+  const rawQuery = req.query || {};
+  // S135: normalize casing at the source — matches the same fix in send.js.
+  // Without this, "User@Gmail.com" and "user@gmail.com" show up as two
+  // separate conversation partners for the same real person.
+  const email = (rawQuery.email || '').trim().toLowerCase();
+  const other = rawQuery.other ? rawQuery.other.trim().toLowerCase() : undefined;
+  const city = rawQuery.city;
 
   if (!email) return res.status(400).json({ error: 'Missing email' });
 
@@ -59,11 +65,20 @@ module.exports = async function handler(req, res) {
       (profiles || []).forEach(p => { profileMap[p.email] = p; });
     }
 
+    // S135: fall back to a name derived from the partner's email local-part
+    // (matches the pattern already used in send.js's notify call) instead of
+    // a generic "Housemate" — this only fires for genuinely-incomplete
+    // profiles (display_name written on Step 2, so abandoned signups before
+    // that point have none), but a real name-ish fallback beats a placeholder.
+    function nameFromEmail(email) {
+      const local = (email || '').split('@')[0] || 'Student';
+      return local.charAt(0).toUpperCase() + local.slice(1);
+    }
     const conversations = Object.values(convMap).map(c => {
       const profile = profileMap[c.partner_email] || {};
       return {
         ...c,
-        display_name: profile.display_name || 'Housemate',
+        display_name: profile.display_name || nameFromEmail(c.partner_email),
         university: profile.university || null,
         suburb_preferences: profile.suburb_preferences || [],
       };

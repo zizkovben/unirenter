@@ -18,7 +18,14 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { sender_email, recipient_email, recipient_id, city, body } = req.body || {};
+    const rawBody = req.body || {};
+    // S135: normalize casing at the source — Postgres string comparison is
+    // case-sensitive, so "User@Gmail.com" and "user@gmail.com" were being
+    // treated as different people, producing phantom duplicate conversation
+    // threads for the same real person in the Messages tab.
+    const sender_email = (rawBody.sender_email || '').trim().toLowerCase();
+    const recipient_email = rawBody.recipient_email ? rawBody.recipient_email.trim().toLowerCase() : null;
+    const { recipient_id, city, body } = rawBody;
 
     // S128: accept recipient_id (UUID from matches API) OR recipient_email
     if (!sender_email || (!recipient_email && !recipient_id) || !city || !body) {
@@ -58,7 +65,7 @@ module.exports = async function handler(req, res) {
       if (recipByIdErr || !recipById || !recipById.email) {
         return res.status(404).json({ error: 'Recipient not found' });
       }
-      resolvedRecipientEmail = recipById.email;
+      resolvedRecipientEmail = recipById.email.trim().toLowerCase();
     } else if (resolvedRecipientEmail) {
       const { data: recipientProfile, error: recipientErr } = await supabase
         .from('profiles')
