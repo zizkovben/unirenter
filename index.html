@@ -942,6 +942,10 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           <div><div class="item-label">Getting Settled</div><div class="item-desc">Life in Melbourne for students</div></div>
         </button>
         <div class="nav-dropdown-divider"></div>
+        <button class="nav-dropdown-item" id="nav-dd-signin" onclick="openSignInModal();closeNavDropdown()">
+          <span class="item-icon">🔑</span>
+          <div><div class="item-label">Sign in</div><div class="item-desc">Already have a profile? Verify to continue</div></div>
+        </button>
         <button class="nav-dropdown-item" id="nav-dd-dashboard" style="display:none;" onclick="window.location='/dashboard';closeNavDropdown()">
           <span class="item-icon">&#128101;</span>
           <div><div class="item-label">My Dashboard</div><div class="item-desc">Track your search &amp; profile</div></div>
@@ -2006,6 +2010,24 @@ function triggerStep1Verify() {
   triggerMatchesVerify();
 }
 
+// ── "Sign in" nav link → open verify modal for a returning user ──
+function openSignInModal() {
+  _verifyDestination = 'signin';
+  // Reset modal state
+  document.getElementById('verify-modal-otp-row').classList.remove('visible');
+  document.getElementById('verify-modal-badge').classList.remove('show');
+  document.getElementById('verify-modal-status').textContent = '';
+  document.getElementById('verify-modal-status').className = 'verify-status';
+  ['vm-otp1','vm-otp2','vm-otp3','vm-otp4','vm-otp5','vm-otp6'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const modalInput = document.getElementById('verify-modal-email-input');
+  if (modalInput) modalInput.value = localStorage.getItem('unirenter_email') || '';
+  const sendBtn = document.getElementById('verify-modal-send-btn');
+  if (sendBtn) { sendBtn.textContent = 'Send code'; sendBtn.disabled = false; }
+  openModal('verify-modal');
+}
+
 // ── "Show my matches" → open verify modal ──
 function triggerMatchesVerify() {
   _verifyDestination = _verifyDestination || 'matches';
@@ -2095,15 +2117,31 @@ async function vmCheckOTP() {
       status.textContent = '✓ Verified successfully';
       localStorage.setItem('unirenter_email', email);
       localStorage.setItem('unirenter_email_verified', '1');
-      // Also update Step 1 email field if different
+      // Sync Step 1 email field to the verified identity
       const step1Input = document.getElementById('email-input');
-      if (step1Input && !step1Input.value.trim()) step1Input.value = email;
+      if (step1Input) step1Input.value = email;
       // Show badge, then proceed
       const badge = document.getElementById('verify-modal-badge');
       badge.classList.add('show');
+      // S136: smart resume — if this email already has a completed profile in
+      // Supabase, skip the registration steps entirely and show real matches
+      // instead of re-asking every question (and risking overwriting saved
+      // answers with whatever's currently blank in the form).
+      const p = data.profile || {};
+      // S137: A percentage threshold is a rough guess — profile_complete is only
+      // ever a reliable 100 when someone finished the flow, and an imprecise
+      // estimate otherwise. budget_max is a precise signal instead: it's only
+      // ever written on Step 6, the final step, so its presence means this
+      // person genuinely completed the flow at least once. No guessing needed.
+      const hasExistingProfile = !!(p.student_status && p.budget_max);
       setTimeout(() => {
         closeModal('verify-modal');
-        if (typeof _verifyDestination !== 'undefined' && _verifyDestination === 'step2') {
+        if (hasExistingProfile) {
+          welcomeBackFlow();
+        } else if (_verifyDestination === 'signin') {
+          showToast('👋 No profile found yet', "We couldn't find an existing profile for that email — pick a status below to get started.");
+          document.getElementById('setup')?.scrollIntoView({behavior:'smooth'});
+        } else if (typeof _verifyDestination !== 'undefined' && _verifyDestination === 'step2') {
           _verifyDestination = 'matches';
           unlockAndGo(2);
         } else {
@@ -2344,6 +2382,16 @@ async function registerComingSoonNotify(city, btn) {
     btn.textContent = 'Notify me';
   }
 }
+// S136: Returning user with a saved profile — show their real matches without
+// touching the (blank) registration form or risking an overwrite of saved answers.
+function welcomeBackFlow() {
+  generateMatches();
+  document.getElementById('matches').classList.add('visible');
+  setTimeout(() => document.getElementById('matches').scrollIntoView({behavior:'smooth'}), 100);
+  showToast('👋 Welcome back!', 'Here are your latest matches.');
+  const dp = document.getElementById('dashboard-prompt'); if (dp) dp.style.display = 'block';
+  syncAuthNav();
+}
 async function showMatches() {
   // S110: Reaching "Show my matches" means the user has completed all 6 steps.
   // Force profile_complete to 100 so intermediate step saves never leave a low value.
@@ -2362,7 +2410,15 @@ async function showMatches() {
   showToast('🎉 Profile saved!','Your matches are ready below.');
   setTimeout(maybeShowReviewNudge, 6000);
   const dp = document.getElementById('dashboard-prompt'); if (dp) dp.style.display = 'block';
-  const dd = document.getElementById('nav-dd-dashboard'); if (dd) dd.style.display = '';
+  syncAuthNav();
+}
+// S136: Sign in / Dashboard nav links are mutually exclusive based on current device auth state.
+function syncAuthNav() {
+  const signedIn = localStorage.getItem('unirenter_email_verified') === '1' && !!localStorage.getItem('unirenter_email');
+  const signIn = document.getElementById('nav-dd-signin');
+  const dash = document.getElementById('nav-dd-dashboard');
+  if (signIn) signIn.style.display = signedIn ? 'none' : '';
+  if (dash) dash.style.display = signedIn ? '' : 'none';
 }
 // -- Sent-requests store (S128) --
 const UR_SENT_KEY = 'ur_sent_requests';
@@ -2502,7 +2558,7 @@ function scrollToMatches() {
   setTimeout(() => document.getElementById('matches').scrollIntoView({behavior:'smooth'}), 100);
   setTimeout(maybeShowReviewNudge, 6000);
   const dp2 = document.getElementById('dashboard-prompt'); if (dp2) dp2.style.display = 'block';
-  const dd2 = document.getElementById('nav-dd-dashboard'); if (dd2) dd2.style.display = '';
+  syncAuthNav();
 }
 
 // ── Reporting ──
@@ -3152,14 +3208,9 @@ function fireCobPhase2Nudge() {
   }
 
 
-  // ── Show dashboard link if verified ──
+  // ── Sync Sign in / Dashboard nav links to current auth state ──
   renderTabLocks();
-  (function() {
-    if (localStorage.getItem('unirenter_email_verified') === '1') {
-      const el = document.getElementById('nav-dd-dashboard');
-      if (el) el.style.display = '';
-    }
-  })();
+  syncAuthNav();
 
 // ── Seasonal academic-calendar banner (dynamic, S82 — replaces static hardcoded banner) ──
 const ACADEMIC_CAL_MELBOURNE = [
@@ -3738,6 +3789,25 @@ function updateAvatarCircle() {
   else wireAvatar();
 })();
 
+// ── S138: Require at least some data before "Next" advances a step ──────────
+// Prevents blank steps from being unlocked, which previously let people click
+// straight through the whole registration with nothing filled in.
+function validateStepData(step) {
+  const container = document.getElementById('step-' + step);
+  if (!container) return true;
+  if (step === 2) {
+    const fname = document.getElementById('fname');
+    return !!(fname && fname.value.trim());
+  }
+  if (step === 3) {
+    return container.querySelectorAll('.accom-card.selected').length > 0;
+  }
+  if (step === 4 || step === 5) {
+    return container.querySelectorAll('.chip.selected').length > 0;
+  }
+  return true;
+}
+
 // ── Mobile-safe Next button handler (S126b) ──────────────────────────────────
 // Replaces inline onclick attributes which can silently fail on mobile Safari
 // inside scrollable containers. addEventListener is reliable across all devices.
@@ -3749,6 +3819,10 @@ function updateAvatarCircle() {
         var action = btn.getAttribute('data-action');
         var step   = parseInt(btn.getAttribute('data-step') || '0', 10);
         if (action === 'unlock' && step) {
+          if (!validateStepData(currentStep)) {
+            showToast('⚠️ Add a bit more first', 'Please fill in at least one field on this step before continuing.');
+            return;
+          }
           unlockAndGo(step);
         } else if (action === 'step1verify') {
           triggerStep1Verify();
