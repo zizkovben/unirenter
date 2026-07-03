@@ -1,4 +1,3 @@
-S
 // api/lease-companion/save.js
 // Saves or updates a user's lease companion data in Supabase.
 // Called via POST /api/lease-companion/save
@@ -46,7 +45,7 @@ module.exports = async function handler(req, res) {
  
     const fields = [
       'city', 'property_description', 'lease_start', 'lease_end',
-      'university', 'source', 'raw_ai_extract'
+      'university', 'source', 'raw_ai_extract', 'household_id'
     ];
     for (const f of fields) {
       if (body[f] !== undefined && body[f] !== null && body[f] !== '') {
