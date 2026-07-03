@@ -251,14 +251,17 @@ input[type="range"] { flex: 1; accent-color: var(--brand-yellow); cursor: pointe
 .status-card .sc-title { font-family: var(--font-display); font-size: 13px; font-weight: 700; margin-bottom: 4px; }
 .status-card .sc-desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
 
-/* Inline email accordion inside status cards (S132) */
-.sc-email-inline { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(75,191,224,0.2); text-align: left; }
-.sc-email-copy { font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px; }
+/* Shared email-ask bar below the status-card grid (S141 — replaces S132's per-card
+   inline accordion, which made the selected card grow taller than the other 3).
+   Copy/placeholder update dynamically based on the selected status; all 4 cards
+   now stay uniform height regardless of selection. */
+.email-ask-bar { margin-top: 14px; margin-bottom: 4px; padding: 16px 18px; background: rgba(75,191,224,0.05); border: 1px solid rgba(75,191,224,0.2); border-radius: 14px; text-align: left; animation: fadeIn 0.2s ease; }
+.sc-email-copy { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px; }
 .sc-email-row { display: flex; gap: 8px; }
 .sc-email-input { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(75,191,224,0.25); border-radius: 10px; padding: 10px 12px; color: var(--text); font-family: var(--font-body); font-size: 13px; outline: none; }
 .sc-email-input:focus { border-color: var(--brand-blue); }
-/* S134: selected card keeps its normal grid column — stays same width as the other 3,
-   just grows taller to fit the inline email section. Keeps the row tidy/uniform. */
+/* S141: all 4 status cards are now uniform height — the email-ask section lives in
+   a single shared bar below the grid, not inside the selected card. */
 
 .cond-panel { display: none; background: rgba(75,191,224,0.04); border: 1px solid rgba(75,191,224,0.12); border-radius: 14px; padding: 22px; margin-bottom: 18px; }
 .cond-panel.visible { display: block; animation: fadeIn 0.2s ease; }
@@ -1051,44 +1054,25 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         <div class="status-cards" id="status-cards">
           <div class="status-card" data-type="future" onclick="selectStatus('future',this)">
             <div class="sc-icon">✈️</div><div class="sc-title">Future student</div><div class="sc-desc">Accepted or applying — heading to Melbourne soon</div>
-            <div class="sc-email-inline" id="sc-email-future" style="display:none;">
-              <div class="sc-email-copy" id="sc-email-copy-future">Verify with your personal email to get started — once you're enrolled, add your uni email from your dashboard to earn the Verified Student badge.</div>
-              <div class="sc-email-row">
-                <input type="email" class="sc-email-input" id="sc-email-input-future" placeholder="you@email.com" oninput="onInlineEmailInput('future')" onclick="event.stopPropagation()" />
-              </div>
-              <div class="info-note" style="margin-top:10px;">🔒 A 6-digit code will be sent to verify — takes 30 seconds.</div>
-            </div>
           </div>
           <div class="status-card" data-type="current" onclick="selectStatus('current',this)">
             <div class="sc-icon">🎓</div><div class="sc-title">Current student</div><div class="sc-desc">Enrolled and studying in Melbourne now</div>
-            <div class="sc-email-inline" id="sc-email-current" style="display:none;">
-              <div class="sc-email-copy" id="sc-email-copy-current">Use your uni email to verify — you'll get the Verified Student badge straight away. Prefer a personal email instead? You can add your uni email anytime from your dashboard.</div>
-              <div class="sc-email-row">
-                <input type="email" class="sc-email-input" id="sc-email-input-current" placeholder="you@student.unimelb.edu.au" oninput="onInlineEmailInput('current')" onclick="event.stopPropagation()" />
-              </div>
-              <div class="info-note" style="margin-top:10px;">🔒 A 6-digit code will be sent to verify — takes 30 seconds.</div>
-            </div>
           </div>
           <div class="status-card" data-type="ex" onclick="selectStatus('ex',this)">
             <div class="sc-icon">💼</div><div class="sc-title">Graduate / Alumni</div><div class="sc-desc">Finished studying, still need Melbourne accommodation</div>
-            <div class="sc-email-inline" id="sc-email-ex" style="display:none;">
-              <div class="sc-email-copy" id="sc-email-copy-ex">Verify with your personal email to continue. Still have access to a uni email? Add it from your dashboard afterwards to pick up the Verified Student badge.</div>
-              <div class="sc-email-row">
-                <input type="email" class="sc-email-input" id="sc-email-input-ex" placeholder="you@email.com" oninput="onInlineEmailInput('ex')" onclick="event.stopPropagation()" />
-              </div>
-              <div class="info-note" style="margin-top:10px;">🔒 A 6-digit code will be sent to verify — takes 30 seconds.</div>
-            </div>
           </div>
           <div class="status-card" data-type="other" onclick="selectStatus('other',this)">
             <div class="sc-icon">🌏</div><div class="sc-title">Community member</div><div class="sc-desc">Not currently a student — working holiday, young professional, or related community</div>
-            <div class="sc-email-inline" id="sc-email-other" style="display:none;">
-              <div class="sc-email-copy" id="sc-email-copy-other">Verify with your email to continue. This option doesn't currently earn the Verified Student badge, but you're welcome to browse and connect with student housemates.</div>
-              <div class="sc-email-row">
-                <input type="email" class="sc-email-input" id="sc-email-input-other" placeholder="you@email.com" oninput="onInlineEmailInput('other')" onclick="event.stopPropagation()" />
-              </div>
-              <div class="info-note" style="margin-top:10px;">🔒 A 6-digit code will be sent to verify — takes 30 seconds.</div>
-            </div>
           </div>
+        </div>
+        <!-- Shared email-ask bar (S141) — replaces S132's per-card inline accordion.
+             Copy/placeholder update dynamically based on selected status via updateEmailAskCopy(). -->
+        <div class="email-ask-bar" id="email-ask-bar" style="display:none;">
+          <div class="sc-email-copy" id="email-ask-copy-text"></div>
+          <div class="sc-email-row">
+            <input type="email" class="sc-email-input" id="email-input" placeholder="you@email.com" oninput="onEmailInput()" />
+          </div>
+          <div class="info-note" style="margin-top:10px;">🔒 A 6-digit code will be sent to verify — takes 30 seconds.</div>
         </div>
         <div class="cond-panel" id="panel-future">
           <div class="cond-title">Future student details</div>
@@ -1125,10 +1109,6 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           <div class="form-group"><label>What brings you to Melbourne?</label><div class="chips" id="chips-community-reason"><div class="chip" onclick="toggle(this)">Working holiday visa</div><div class="chip" onclick="toggle(this)">Young professional</div><div class="chip" onclick="toggle(this)">Considering studying here</div><div class="chip" onclick="toggle(this)">Family / partner of student</div><div class="chip" onclick="toggle(this)">Other</div></div></div>
           <div class="info-note">🌏 UniRenter is primarily for students and graduates — other young people in Melbourne's communities are welcome too.</div>
         </div>
-        <!-- Inline email verification now lives inside each status card (S132) -->
-        <!-- Hidden legacy input kept for compatibility with triggerStep1Verify / onEmailInput -->
-        <input type="email" id="email-input" style="display:none;" />
-
         <div class="step-nav">
           <div></div>
           <button class="btn-next" id="btn-step1-next" data-action="step1verify" style="opacity:0.4;pointer-events:none;">Verify &amp; continue →</button>
@@ -1930,31 +1910,15 @@ const emailAskPlaceholder = {
   other: 'you@email.com'
 };
 function updateEmailAskCopy(type) {
-  // S132: inline design — show email section inside selected card, hide others
-  ['future','current','ex','other'].forEach(function(t) {
-    const el = document.getElementById('sc-email-' + t);
-    if (el) el.style.display = (t === type) ? 'block' : 'none';
-  });
-  // Sync hidden legacy #email-input so triggerStep1Verify still works
-  const activeInput = document.getElementById('sc-email-input-' + type);
-  const legacyInput = document.getElementById('email-input');
-  if (legacyInput && activeInput) legacyInput.value = activeInput.value;
-  onInlineEmailInput(type);
-}
-
-// S132: enable Next button when inline email has @ and status selected
-function onInlineEmailInput(type) {
-  const activeInput = document.getElementById('sc-email-input-' + type);
-  const legacyInput = document.getElementById('email-input');
-  if (activeInput && legacyInput) legacyInput.value = activeInput.value;
-  const btn = document.getElementById('btn-step1-next');
-  const statusSelected = document.querySelector('.status-card.selected');
-  if (btn) {
-    const val = (activeInput ? activeInput.value : '').trim();
-    const ok = val.includes('@') && val.includes('.') && !!statusSelected;
-    btn.style.opacity = ok ? '1' : '0.4';
-    btn.style.pointerEvents = ok ? 'auto' : 'none';
-  }
+  // S141: shared bar below the grid — copy/placeholder swap based on selected status,
+  // all 4 cards stay uniform height (replaces S132's per-card inline accordion).
+  const bar = document.getElementById('email-ask-bar');
+  const copyEl = document.getElementById('email-ask-copy-text');
+  const input = document.getElementById('email-input');
+  if (bar) bar.style.display = type ? 'block' : 'none';
+  if (copyEl) copyEl.textContent = emailAskCopy[type] || '';
+  if (input) input.placeholder = emailAskPlaceholder[type] || 'you@email.com';
+  onEmailInput();
 }
 
 function toggleReligion() {
@@ -1971,13 +1935,17 @@ function updateFlag(selectId, flagId) {
 }
 
 
-// ── Step 1 email input (legacy stub — S132 uses onInlineEmailInput) ──
+// ── Step 1 email input (S141: single shared #email-input, enables Next when valid) ──
 function onEmailInput() {
-  // Delegate to inline handler if a status is selected
-  const sel = document.querySelector('.status-card.selected');
-  if (sel) { onInlineEmailInput(sel.dataset.type); return; }
   const btn = document.getElementById('btn-step1-next');
-  if (btn) { btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; }
+  const statusSelected = document.querySelector('.status-card.selected');
+  const input = document.getElementById('email-input');
+  if (btn) {
+    const val = (input ? input.value : '').trim();
+    const ok = val.includes('@') && val.includes('.') && !!statusSelected;
+    btn.style.opacity = ok ? '1' : '0.4';
+    btn.style.pointerEvents = ok ? 'auto' : 'none';
+  }
 }
 
 // ── Step 1: Verify email before proceeding to Step 2 ──
@@ -1994,12 +1962,8 @@ function isEmailAlreadyVerified(email) {
 function triggerStep1Verify() {
   const statusSelected = document.querySelector('.status-card.selected');
   if (!statusSelected) return;
-  // S132: read from the active inline input
-  const activeInput = document.getElementById('sc-email-input-' + statusSelected.dataset.type);
-  const email = (activeInput ? activeInput.value : document.getElementById('email-input')?.value || '').trim();
-  // Sync legacy hidden input
-  const legacyInput = document.getElementById('email-input');
-  if (legacyInput && email) legacyInput.value = email;
+  // S141: single shared #email-input, no per-card sync needed
+  const email = (document.getElementById('email-input')?.value || '').trim();
   if (!email.includes('@') || !email.includes('.') || !statusSelected) return;
   // If THIS exact email was already verified on this browser, go straight to step 2
   if (isEmailAlreadyVerified(email)) {
