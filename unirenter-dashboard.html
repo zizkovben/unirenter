@@ -1237,6 +1237,34 @@ body.light-mode {
 .msg-archived-caption {
   padding: 0 18px 10px; font-size: 10px; color: var(--text-muted); line-height: 1.4;
 }
+/* S145: post-match follow-up nudge — shown above the thread once a real
+   conversation goes quiet. Coral accent to match the existing "expiring"
+   stage-badge language without being alarmist. */
+.msg-followup-card {
+  background: rgba(232,98,58,0.07);
+  border: 1px solid rgba(232,98,58,0.22);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 14px 16px 0;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.msg-followup-icon { font-size: 20px; flex-shrink: 0; }
+.msg-followup-body { flex: 1; min-width: 0; }
+.msg-followup-msg { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; line-height: 1.4; }
+.msg-followup-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.msg-followup-btn {
+  border: 1px solid var(--navy-border); background: rgba(255,255,255,0.03);
+  color: var(--text-body); font-size: 12px; font-weight: 600;
+  padding: 7px 12px; border-radius: 8px; cursor: pointer; transition: all 0.15s;
+  white-space: nowrap;
+}
+.msg-followup-btn:hover { border-color: var(--brand-coral); color: var(--brand-coral); }
+.msg-followup-btn.primary { background: var(--brand-coral); border-color: var(--brand-coral); color: #fff; }
+.msg-followup-btn.primary:hover { opacity: 0.9; color: #fff; }
+.msg-followup-dismiss { background: none; border: none; cursor: pointer; font-size: 15px; color: var(--text-muted); flex-shrink: 0; padding: 0; }
+.msg-followup-stars { display: flex; gap: 6px; margin-bottom: 10px; }
+.msg-followup-star { background: none; border: none; cursor: pointer; font-size: 22px; transition: transform 0.15s; filter: grayscale(0.5); padding: 0; }
+.msg-followup-star:hover, .msg-followup-star.on { transform: scale(1.15); filter: none; }
 .msg-main {
   background: var(--navy-mid);
   border: 1px solid var(--navy-border); border-left: none;
@@ -4113,6 +4141,7 @@ body.light-mode {
             <button class="msg-head-btn" onclick="blockUser()">&#10005; Block</button>
           </div>
         </div>
+        <div id="msg-followup-card" style="display:none;"></div>
         <div class="msg-messages" id="msg-messages">
           <div style="padding:40px 16px;text-align:center;color:var(--text-muted);font-size:13px;">
             Select a conversation to start chatting &#x1F4AC;
@@ -4953,6 +4982,31 @@ body.light-mode {
     </div>
   </div>
 </div>
+
+<!-- S145: post-match follow-up review modal — separate from the Matches-tab
+     cob-review-card so its state (rating, textarea) never collides with
+     that card's own multi-step flow. Posts to the same working
+     /api/reviews/submit endpoint. -->
+<div class="modal-overlay" id="followup-review-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('followup-review-modal')">✕</button>
+    <div class="modal-title">How's UniRenter going?</div>
+    <div class="modal-sub">A quick review helps other students find us. Takes 10 seconds.</div>
+    <div class="msg-followup-stars" id="followup-review-stars">
+      <button class="msg-followup-star" onclick="followupReviewStar(1)" title="1 star">⭐</button>
+      <button class="msg-followup-star" onclick="followupReviewStar(2)" title="2 stars">⭐</button>
+      <button class="msg-followup-star" onclick="followupReviewStar(3)" title="3 stars">⭐</button>
+      <button class="msg-followup-star" onclick="followupReviewStar(4)" title="4 stars">⭐</button>
+      <button class="msg-followup-star" onclick="followupReviewStar(5)" title="5 stars">⭐</button>
+    </div>
+    <textarea class="cob-review-input" id="followup-review-text" rows="3" placeholder="What's been most useful so far? (optional)"></textarea>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal('followup-review-modal')">Cancel</button>
+      <button class="btn-modal-submit" id="followup-review-submit-btn" onclick="followupReviewSubmit()">Submit review</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 // ── Auth guard — redirect unauthenticated users before DOM paint ──────────────
@@ -7317,6 +7371,10 @@ async function loadConversations() {
       if (totalUnread > 0) { badge.textContent = totalUnread; badge.style.display = ''; }
       else badge.style.display = 'none';
     }
+    // S145: stash full conversation objects (keyed by partner email) so
+    // openConversation() can look up show_followup without a second fetch.
+    window._followupMap = {};
+    convos.forEach(function(c) { window._followupMap[c.partner_email] = c; });
     if (mainConvos.length > 0 && !window._currentConvoEmail) {
       var first = list.querySelector('.msg-contact');
       if (first) openConversation(mainConvos[0].partner_email, mainConvos[0].display_name, mainConvos[0].university, first);
@@ -7336,6 +7394,102 @@ function toggleArchivedRequests() {
   if (chevron) chevron.classList.toggle('open', !open);
 }
 
+// ── S145: post-match follow-up nudge ─────────────────────────────────────────
+// "Still in touch with X? → Create a household / Leave a review / Not needed"
+// Shown once above the thread when a real (has_reply) conversation goes
+// quiet (cooling/archived), per the S144b/c design discussion. Dismissed
+// permanently (any of the 3 choices) via /api/messages/followup-action.
+function renderFollowupCard(partnerEmail, partnerName) {
+  var card = document.getElementById('msg-followup-card');
+  if (!card) return;
+  var convo = (window._followupMap || {})[partnerEmail];
+  if (!convo || !convo.show_followup) { card.style.display = 'none'; card.innerHTML = ''; return; }
+  var name = partnerName || 'them';
+  card.style.display = '';
+  card.innerHTML =
+    '<div class="msg-followup-icon">👋</div>' +
+    '<div class="msg-followup-body">' +
+      '<div class="msg-followup-msg">Still in touch with ' + escMsgText(name) + '?</div>' +
+      '<div class="msg-followup-actions">' +
+        '<button class="msg-followup-btn primary" onclick="followupCreateHousehold(\'' + escMsgAttr(partnerEmail) + '\')">🏠 Create a household</button>' +
+        '<button class="msg-followup-btn" onclick="followupOpenReview(\'' + escMsgAttr(partnerEmail) + '\')">⭐ Leave a review</button>' +
+        '<button class="msg-followup-btn" onclick="followupDismiss(\'' + escMsgAttr(partnerEmail) + '\',\'not_needed\')">No longer needed</button>' +
+      '</div>' +
+    '</div>' +
+    '<button class="msg-followup-dismiss" onclick="followupDismiss(\'' + escMsgAttr(partnerEmail) + '\',\'not_needed\')" title="Dismiss">✕</button>';
+}
+
+function escMsgAttr(s) {
+  return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+
+function followupDismiss(partnerEmail, action) {
+  var card = document.getElementById('msg-followup-card');
+  if (card) { card.style.display = 'none'; card.innerHTML = ''; }
+  if (window._followupMap && window._followupMap[partnerEmail]) window._followupMap[partnerEmail].show_followup = false;
+  var email = localStorage.getItem('unirenter_email');
+  if (!email) return;
+  fetch('/api/messages/followup-action', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, partner_email: partnerEmail, action: action })
+  }).catch(function() {});
+}
+
+function followupCreateHousehold(partnerEmail) {
+  followupDismiss(partnerEmail, 'household_created');
+  showToast('🏠 Setting up your household', 'Set it up, then share your invite link with them.');
+  switchTab('household');
+}
+
+window._followupReviewPartner = null;
+
+function followupOpenReview(partnerEmail) {
+  window._followupReviewPartner = partnerEmail;
+  window._followupReviewRating = 0;
+  document.querySelectorAll('#followup-review-stars .msg-followup-star').forEach(function(s) { s.classList.remove('on'); });
+  var t = document.getElementById('followup-review-text');
+  if (t) t.value = '';
+  openModal('followup-review-modal');
+}
+
+function followupReviewStar(n) {
+  window._followupReviewRating = n;
+  document.querySelectorAll('#followup-review-stars .msg-followup-star').forEach(function(s, i) {
+    s.classList.toggle('on', i < n);
+  });
+}
+
+function followupReviewSubmit() {
+  var rating = window._followupReviewRating || 0;
+  if (rating < 1) { showToast('⚠️ Pick a rating', 'Tap a star from 1–5 first.'); return; }
+  var btn = document.getElementById('followup-review-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  var text = (document.getElementById('followup-review-text').value || '').trim();
+  var email = localStorage.getItem('unirenter_email') || '';
+  var city = localStorage.getItem('ur_city') || 'melbourne';
+  fetch('/api/reviews/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      rating: rating,
+      text: text || 'Found a housemate through UniRenter.',
+      city: city,
+      reviewer_name: email.split('@')[0] || 'Student',
+      reviewer_uni: localStorage.getItem('ur_uni') || 'Student',
+      source: 'post-match-followup'
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .catch(function() { return { ok: false }; })
+  .finally(function() {
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit review'; }
+    closeModal('followup-review-modal');
+    showToast('Thanks! 🤠', 'Your review helps other students find UniRenter.');
+    if (window._followupReviewPartner) followupDismiss(window._followupReviewPartner, 'reviewed');
+  });
+}
+
 async function openConversation(partnerEmail, partnerName, partnerUni, el) {
   document.querySelectorAll('.msg-contact').forEach(function(c){ c.classList.remove('active'); });
   if (el) el.classList.add('active');
@@ -7353,6 +7507,7 @@ async function openConversation(partnerEmail, partnerName, partnerUni, el) {
   if (subEl) subEl.textContent = partnerUni || '';
   var headActions = document.getElementById('msg-head-actions');
   if (headActions) headActions.style.display = '';
+  renderFollowupCard(partnerEmail, partnerName);
   var inp = document.getElementById('msg-input');
   var sendBtn = document.getElementById('msg-send-btn');
   if (inp) { inp.disabled = false; inp.placeholder = 'Type a message…'; }
