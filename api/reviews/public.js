@@ -22,9 +22,14 @@ module.exports = async (req, res) => {
   try {
     const city = req.query.city || null;
 
+    // S145 fix: the underlying column is 'city' (matches api/reviews/submit.js's
+    // insert payload) — 'reviewer_city' never existed as a real column, which
+    // caused every call to this endpoint to 500. Aliased back to reviewer_city
+    // in the select so the response shape (and unirenter-guide.html's existing
+    // rv.reviewer_city read) doesn't need to change.
     let query = supabase
       .from('reviews')
-      .select('id, reviewer_name, reviewer_uni, reviewer_city, rating, review_text, created_at')
+      .select('id, reviewer_name, reviewer_uni, reviewer_city:city, rating, review_text, created_at')
       .eq('status', 'approved')
       .gte('rating', 4)
       .order('created_at', { ascending: false })
