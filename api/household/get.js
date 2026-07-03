@@ -75,9 +75,26 @@ module.exports = async function handler(req, res) {
     const profileMap = {};
     (profiles || []).forEach(function(p) { profileMap[p.email] = p; });
 
+    // S146: lease_companions lookup — one row per email, upserted from the
+    // Lease Companion tool. Powers the layered timeline widget (each
+    // member's own lease_start/lease_end shown individually, plus an
+    // earliest-start/latest-end household summary computed client-side).
+    // Non-fatal if it errors — household still renders without timeline data.
+    let leaseMap = {};
+    try {
+      const { data: leaseRows } = await supabase
+        .from('lease_companions')
+        .select('email, lease_start, lease_end, property_description')
+        .in('email', memberEmails);
+      (leaseRows || []).forEach(function(l) { leaseMap[l.email] = l; });
+    } catch (leaseErr) {
+      console.warn('lease_companions fetch error (non-fatal):', leaseErr.message);
+    }
+
     // Build member array in join order
     const members = (memberRows || []).map(function(m) {
       const p = profileMap[m.email] || {};
+      const l = leaseMap[m.email] || {};
       return {
         email:              m.email,
         joined_at:          m.joined_at,
@@ -90,7 +107,10 @@ module.exports = async function handler(req, res) {
         sleep_schedule:     p.sleep_schedule || null,
         cleanliness:        p.cleanliness   || null,
         guests:             p.guests        || null,
-        household_type:     p.household_type || null
+        household_type:     p.household_type || null,
+        lease_start:        l.lease_start   || null,
+        lease_end:          l.lease_end     || null,
+        lease_property:     l.property_description || null
       };
     });
 
