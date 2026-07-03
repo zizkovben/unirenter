@@ -64,25 +64,54 @@ module.exports = async function handler(req, res) {
       }
     });
 
+    // S144c: household exemption — confirmed schema (screenshot, this session):
+    // household_members(household_id uuid, email text, joined_at timestamptz).
+    // If two people share a household_id, they're living together — their
+    // thread should never silently archive/hide, they may still need it for
+    // day-to-day logistics regardless of how long since they last messaged.
+    let householdCoMembers = new Set();
+    try {
+      const { data: myHouseholds } = await supabase
+        .from('household_members')
+        .select('household_id')
+        .eq('email', email);
+      const householdIds = [...new Set((myHouseholds || []).map(r => r.household_id))];
+      if (householdIds.length > 0) {
+        const { data: coMembers } = await supabase
+          .from('household_members')
+          .select('email')
+          .in('household_id', householdIds)
+          .neq('email', email);
+        (coMembers || []).forEach(r => householdCoMembers.add(r.email));
+      }
+    } catch (householdErr) {
+      console.warn('household lookup error (non-fatal):', householdErr.message);
+    }
+
     // S144b: revised per Ben — ALL conversations decay by time-since-last-
     // activity, including ones with a real back-and-forth (has_reply=true).
     // Two people who matched, chatted, then went quiet are just as "stale"
     // as an unanswered opener — the goal is clearing redundant chat clutter,
     // not just flagging ignored requests. `has_reply` is still tracked and
     // returned (used to pick badge language — "no reply yet" vs "gone
-    // quiet after connecting" — and will later exempt confirmed households
-    // from decay once that check is built).
+    // quiet after connecting"). Confirmed households (S144c, above) are the
+    // one exception — full exemption, not just a clock reset (see bible note
+    // on this decision).
     const now = Date.now();
     Object.values(convMap).forEach(c => {
       const hasReply = c.sawFromMe && c.sawFromThem;
+      const isHousehold = householdCoMembers.has(c.partner_email);
       const daysSinceLast = (now - new Date(c.last_message_at).getTime()) / 86400000;
       let status = 'active';
       let expiresInDays = null;
-      if (daysSinceLast >= 90) status = 'deleted';
+      if (isHousehold) {
+        status = 'active'; // confirmed housemates — exempt from decay entirely
+      } else if (daysSinceLast >= 90) status = 'deleted';
       else if (daysSinceLast >= 30) status = 'archived';
       else if (daysSinceLast >= 7) status = 'cooling';
       else { status = 'active'; expiresInDays = Math.max(0, Math.ceil(7 - daysSinceLast)); }
       c.has_reply = hasReply;
+      c.is_household = isHousehold;
       c.status = status;
       c.expires_in_days = expiresInDays;
       c.days_inactive = Math.floor(daysSinceLast);
@@ -147,6 +176,7 @@ module.exports = async function handler(req, res) {
         expires_in_days: c.expires_in_days,
         days_inactive: c.days_inactive,
         has_reply: c.has_reply,
+        is_household: c.is_household,
         display_name: profile.display_name || nameFromEmail(c.partner_email),
         university: profile.university || null,
         suburb_preferences: profile.suburb_preferences || [],
