@@ -137,6 +137,58 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    // S144: keep message_threads (lifecycle status tracker) in sync.
+    // Never let a failure here block the send — it's a secondary write.
+    try {
+      const [participant_a, participant_b] = [sender_email, resolvedRecipientEmail].sort();
+      const nowIso = new Date().toISOString();
+
+      if (!threadExists) {
+        // First message ever in this thread — create the tracker row.
+        await supabase.from('message_threads').insert({
+          participant_a, participant_b,
+          first_sender: sender_email,
+          first_message_at: nowIso,
+          last_message_at: nowIso,
+          has_reply: false,
+          status: 'active',
+          status_updated_at: nowIso,
+        });
+      } else {
+        const { data: existingThread } = await supabase
+          .from('message_threads')
+          .select('first_sender, has_reply')
+          .eq('participant_a', participant_a)
+          .eq('participant_b', participant_b)
+          .maybeSingle();
+
+        if (existingThread) {
+          const hasReply = existingThread.has_reply || (sender_email !== existingThread.first_sender);
+          // Any new message means the thread is live again right now —
+          // reset status to 'active' and let get.js's lazy decay recompute
+          // cooling/archived over time from this fresh last_message_at.
+          await supabase.from('message_threads')
+            .update({ last_message_at: nowIso, has_reply: hasReply, status: 'active', status_updated_at: nowIso })
+            .eq('participant_a', participant_a)
+            .eq('participant_b', participant_b);
+        } else {
+          // Thread existed in messages but predates the message_threads table
+          // (pre-S144 conversation never yet backfilled by get.js) — create it now.
+          await supabase.from('message_threads').insert({
+            participant_a, participant_b,
+            first_sender: sender_email,
+            first_message_at: nowIso,
+            last_message_at: nowIso,
+            has_reply: true, // safe assumption: a reply-path send on an untracked existing thread
+            status: 'active',
+            status_updated_at: nowIso,
+          });
+        }
+      }
+    } catch (threadErr) {
+      console.warn('message_threads sync error (non-fatal):', threadErr.message);
+    }
+
     return res.status(200).json({ ok: true, message: data });
 
   } catch (err) {

@@ -46,16 +46,76 @@ module.exports = async function handler(req, res) {
           last_time: msg.created_at,
           unread: 0,
           city: msg.city,
+          // S144: lifecycle tracking fields, computed from the full message
+          // history already fetched above — no extra queries needed.
+          first_message_at: msg.created_at,
+          last_message_at: msg.created_at,
+          sawFromMe: false,
+          sawFromThem: false,
         };
       }
+      const c = convMap[partner];
+      if (new Date(msg.created_at) < new Date(c.first_message_at)) c.first_message_at = msg.created_at;
+      if (new Date(msg.created_at) > new Date(c.last_message_at)) c.last_message_at = msg.created_at;
+      if (msg.sender_email === email) c.sawFromMe = true; else c.sawFromThem = true;
       // Count unread (messages TO me that I haven't read)
       if (msg.recipient_email === email && !msg.read) {
         convMap[partner].unread++;
       }
     });
 
+    // S144: derive Active / Cooling / Archived / Deleted per conversation.
+    // A thread only "decays" while it's a one-sided, unanswered request
+    // (has_reply === false). The moment both people have sent at least one
+    // message, it's a real ongoing conversation and stays 'active' — pauses
+    // in an established conversation are normal and shouldn't get flagged
+    // as a stale lead the way an unanswered opener should.
+    const now = Date.now();
+    Object.values(convMap).forEach(c => {
+      const hasReply = c.sawFromMe && c.sawFromThem;
+      const daysSinceLast = (now - new Date(c.last_message_at).getTime()) / 86400000;
+      let status = 'active';
+      let expiresInDays = null;
+      if (!hasReply) {
+        if (daysSinceLast >= 90) status = 'deleted';
+        else if (daysSinceLast >= 30) status = 'archived';
+        else if (daysSinceLast >= 7) status = 'cooling';
+        else { status = 'active'; expiresInDays = Math.max(0, Math.ceil(7 - daysSinceLast)); }
+      }
+      c.has_reply = hasReply;
+      c.status = status;
+      c.expires_in_days = expiresInDays;
+    });
+
+    // S144: write-through sync to message_threads so a future scheduled job
+    // (e.g. the 7-day nudge email) can read authoritative status without
+    // re-scanning the full messages table. Non-blocking — never fails the request.
+    try {
+      const threadRows = Object.values(convMap).map(c => {
+        const [participant_a, participant_b] = [email, c.partner_email].sort();
+        return {
+          participant_a, participant_b,
+          first_sender: c.sawFromMe ? email : c.partner_email, // best-effort on backfill
+          first_message_at: c.first_message_at,
+          last_message_at: c.last_message_at,
+          has_reply: c.has_reply,
+          status: c.status,
+          status_updated_at: new Date().toISOString(),
+        };
+      });
+      if (threadRows.length > 0) {
+        await supabase.from('message_threads').upsert(threadRows, { onConflict: 'participant_a,participant_b' });
+      }
+    } catch (syncErr) {
+      console.warn('message_threads sync error (non-fatal):', syncErr.message);
+    }
+
+    // S144: 'deleted' (90+ days, never replied to) is a soft hide — the rows
+    // still exist in Supabase, they just drop out of the sidebar list.
+    const visiblePartners = Object.values(convMap).filter(c => c.status !== 'deleted');
+
     // Fetch display names for all partners
-    const partnerEmails = Object.keys(convMap);
+    const partnerEmails = visiblePartners.map(c => c.partner_email);
     let profileMap = {};
     if (partnerEmails.length > 0) {
       const { data: profiles } = await supabase
@@ -74,10 +134,16 @@ module.exports = async function handler(req, res) {
       const local = (email || '').split('@')[0] || 'Student';
       return local.charAt(0).toUpperCase() + local.slice(1);
     }
-    const conversations = Object.values(convMap).map(c => {
+    const conversations = visiblePartners.map(c => {
       const profile = profileMap[c.partner_email] || {};
       return {
-        ...c,
+        partner_email: c.partner_email,
+        last_message: c.last_message,
+        last_time: c.last_time,
+        unread: c.unread,
+        city: c.city,
+        status: c.status,
+        expires_in_days: c.expires_in_days,
         display_name: profile.display_name || nameFromEmail(c.partner_email),
         university: profile.university || null,
         suburb_preferences: profile.suburb_preferences || [],
