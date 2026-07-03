@@ -1189,6 +1189,20 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         </div>
 
         <div class="form-group">
+          <label>Age bracket <span style="font-weight:300;color:var(--text-muted)">(optional)</span></label>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;line-height:1.5;">Shown as a small compatibility badge — helps match you with housemates in a similar life stage. Never used to exclude you.</div>
+          <div class="chips" id="chips-age">
+            <div class="chip" onclick="toggleSingle(this,'chips-age')">18–20</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-age')">21–23</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-age')">24–26</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-age')">27–30</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-age')">31–40</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-age')">41–55</div>
+            <div class="chip" onclick="toggleSingle(this,'chips-age')">56+</div>
+          </div>
+        </div>
+
+        <div class="form-group">
           <label>What's your situation?</label>
           <div class="chips" id="chips-seeking">
             <div class="chip" onclick="toggle(this)">A room in a share house</div>
@@ -2118,6 +2132,7 @@ function renderMatchCard(p) {
     if (daysAgo <= 7) tags.push('🟢 Active');
   }
   if (p.student_status === 'other') tags.push('👤 Not a student');
+  if (p.age_bracket) tags.push(p.age_bracket);
   if (p.sleep_schedule) tags.push(p.sleep_schedule.replace('_',' '));
   if (p.cleanliness) tags.push(p.cleanliness.replace('_',' '));
   if (p.budget_max) tags.push(`$${p.budget_max}/wk`);
@@ -2760,6 +2775,7 @@ async function saveProfileToSupabase() {
   function getChips(groupId) {
     return Array.from(document.querySelectorAll('#' + groupId + ' .chip.selected')).map(function(c){ return c.textContent.trim(); });
   }
+  const ageBracket = getChip('chips-age');
   const sleepSchedule = getChip('chips-sleep');
   const cleanliness   = getChip('chips-clean');
   const studyLocation = getChip('chips-study');
@@ -2795,7 +2811,7 @@ async function saveProfileToSupabase() {
     suburb_preferences: suburbPrefs.length > 0 ? suburbPrefs : null,
     budget_min: budgetMin, budget_max: budgetMax,
     sleep_schedule: sleepSchedule, cleanliness, study_location: studyLocation,
-    guests, substances, dietary, pets, city: 'sydney', profile_complete: profileComplete,
+    guests, substances, dietary, pets, age_bracket: ageBracket, city: 'sydney', profile_complete: profileComplete,
     language_home: languageHome, languages_spoken: languagesSpoken.length > 0 ? languagesSpoken : null,
     stay_duration: stayDuration, cob_summary: cobSummary,
     vibe_emoji_primary: (localStorage.getItem('ur_avatar_emoji') || vibeEmojiPrimary), vibe_emoji_secondary: vibeEmojiSecondary,
@@ -2807,7 +2823,7 @@ async function saveProfileToSupabase() {
     email: profileData.email, name: profileData.display_name,
     sleep: profileData.sleep_schedule, clean: profileData.cleanliness,
     budget: profileData.budget_max, seeking: profileData.seeking,
-    status: profileData.student_status, pets: profileData.pets
+    status: profileData.student_status, pets: profileData.pets, age: profileData.age_bracket
   }));
   try {
     const res = await fetch('/api/profile/save', {
