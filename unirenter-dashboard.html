@@ -1233,6 +1233,9 @@ body.light-mode {
 .msg-archived-toggle:hover { color: var(--text-body); }
 .msg-archived-chevron { transition: transform 0.2s; font-size: 10px; }
 .msg-archived-chevron.open { transform: rotate(180deg); }
+.msg-archived-caption {
+  padding: 0 18px 10px; font-size: 10px; color: var(--text-muted); line-height: 1.4;
+}
 .msg-main {
   background: var(--navy-mid);
   border: 1px solid var(--navy-border); border-left: none;
@@ -4089,9 +4092,10 @@ body.light-mode {
         </div>
         <div id="msg-archived-section" style="display:none;">
           <div class="msg-archived-toggle" id="msg-archived-toggle" onclick="toggleArchivedRequests()">
-            <span id="msg-archived-label">Archived requests</span>
+            <span id="msg-archived-label">Archived</span>
             <span class="msg-archived-chevron" id="msg-archived-chevron">▾</span>
           </div>
+          <div class="msg-archived-caption">Conversations move here after 30 days of no activity, and are removed from view after 90.</div>
           <div id="msg-archived-list" style="display:none;"></div>
         </div>
       </div>
@@ -7254,8 +7258,17 @@ async function loadConversations() {
     var archivedConvos = convos.filter(function(c){ return c.status === 'archived'; });
 
     function stageBadge(c) {
-      if (c.status === 'cooling') return '<span class="msg-stage-badge cooling">No reply yet</span>';
-      if (c.expires_in_days != null) return '<span class="msg-stage-badge expiring">Expires in ' + c.expires_in_days + 'd</span>';
+      if (c.status === 'cooling') {
+        return c.has_reply
+          ? '<span class="msg-stage-badge cooling">Quiet · ' + c.days_inactive + 'd</span>'
+          : '<span class="msg-stage-badge cooling">No reply yet</span>';
+      }
+      if (c.expires_in_days != null) {
+        if (!c.has_reply) return '<span class="msg-stage-badge expiring">Expires in ' + c.expires_in_days + 'd</span>';
+        // For real conversations, only flag it once it's genuinely close to
+        // archiving — no point putting a countdown on every fresh chat.
+        if (c.expires_in_days <= 2) return '<span class="msg-stage-badge expiring">Archives in ' + c.expires_in_days + 'd</span>';
+      }
       return '';
     }
 
@@ -7288,7 +7301,7 @@ async function loadConversations() {
     if (archivedSection && archivedList) {
       if (archivedConvos.length > 0) {
         archivedSection.style.display = '';
-        document.getElementById('msg-archived-label').textContent = 'Archived requests (' + archivedConvos.length + ')';
+        document.getElementById('msg-archived-label').textContent = 'Archived (' + archivedConvos.length + ')';
         archivedList.innerHTML = '';
         archivedConvos.forEach(function(c, idx) { archivedList.appendChild(buildContactEl(c, idx, true)); });
       } else {
