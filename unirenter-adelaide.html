@@ -336,7 +336,8 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
 input[type="range"] { flex: 1; accent-color: var(--brand-yellow); cursor: pointer; }
 .slider-val { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--brand-yellow); min-width: 80px; }
 
-.status-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.status-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+@media (max-width: 600px) { .status-cards { grid-template-columns: repeat(2, 1fr); } }
 .status-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 18px 14px; cursor: pointer; transition: all 0.2s; text-align: center; }
 .status-card:hover { border-color: rgba(75,191,224,0.3); }
 .status-card.selected { background: rgba(75,191,224,0.08); border-color: var(--brand-blue); }
@@ -941,6 +942,10 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           <div><div class="item-label">Getting Settled</div><div class="item-desc">Life in Adelaide for students</div></div>
         </button>
         <div class="nav-dropdown-divider"></div>
+        <button class="nav-dropdown-item" id="nav-dd-signin" onclick="openSignInModal();closeNavDropdown()">
+          <span class="item-icon">🔑</span>
+          <div><div class="item-label">Sign in</div><div class="item-desc">Already have a profile? Verify to continue</div></div>
+        </button>
         <button class="nav-dropdown-item" id="nav-dd-dashboard" style="display:none;" onclick="window.location='/dashboard';closeNavDropdown()">
           <span class="item-icon">&#128101;</span>
           <div><div class="item-label">My Dashboard</div><div class="item-desc">Track your search &amp; profile</div></div>
@@ -1030,7 +1035,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
       <div>
         <div class="completeness-label">
           <span>Profile <strong id="complete-pct">14%</strong> complete</span>
-          <span class="completeness-tip" id="complete-tip">Add a photo to unlock more matches</span>
+          <span class="completeness-tip" id="complete-tip">Verify your email to get started</span>
         </div>
         <div class="completeness-bar-wrap"><div class="completeness-bar" id="complete-bar" style="width:14%"></div></div>
       </div>
@@ -1280,7 +1285,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(1)">← Back</button>
-          <button class="btn-next" onclick="unlockAndGo(3)">Next: Housing →</button>
+          <button class="btn-next" onclick="if(validateStepData(currentStep)){unlockAndGo(3)}else{showToast('⚠️ Add a bit more first','Please fill in at least one field on this step before continuing.')}">Next: Housing →</button>
         </div>
       </div>
 
@@ -1361,7 +1366,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(2)">← Back</button>
-          <button class="btn-next" onclick="unlockAndGo(4)">Next: Lifestyle →</button>
+          <button class="btn-next" onclick="if(validateStepData(currentStep)){unlockAndGo(4)}else{showToast('⚠️ Add a bit more first','Please fill in at least one field on this step before continuing.')}">Next: Lifestyle →</button>
         </div>
       </div>
 
@@ -1470,7 +1475,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
           <input type="hidden" id="vibe-summary-val" />
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(3)">← Back</button>
-          <button class="btn-next" onclick="unlockAndGo(5)">Next: Location →</button>
+          <button class="btn-next" onclick="if(validateStepData(currentStep)){unlockAndGo(5)}else{showToast('⚠️ Add a bit more first','Please fill in at least one field on this step before continuing.')}">Next: Location →</button>
         </div>
       </div>
 
@@ -1485,7 +1490,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         <div class="form-group" style="margin-top:20px;"><label>Maximum commute to campus</label><div class="chips" id="chips-commute"><div class="chip" onclick="toggle(this)">🚶 20 min walk</div><div class="chip" onclick="toggle(this)">🚌 30 min PT</div><div class="chip" onclick="toggle(this)">🚇 45 min PT</div><div class="chip" onclick="toggle(this)">🚆 Up to 60 min</div><div class="chip" onclick="toggle(this)">Flexible</div></div></div>
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(4)">← Back</button>
-          <button class="btn-next" onclick="unlockAndGo(6)">Next: Budget →</button>
+          <button class="btn-next" onclick="if(validateStepData(currentStep)){unlockAndGo(6)}else{showToast('⚠️ Add a bit more first','Please fill in at least one field on this step before continuing.')}">Next: Budget →</button>
         </div>
       </div>
 
@@ -1708,7 +1713,7 @@ function unlockAndGo(n) {
   // Assign Cob emoji after lifestyle step (step 4 → 5)
   if (n === 5) { setTimeout(cobAssignEmoji, 100); }
   // Fire-and-forget Supabase save AFTER navigation so mobile tap is never blocked
-  if (localStorage.getItem('unirenter_email_verified') === '1') {
+  if (isEmailAlreadyVerified(document.getElementById('email-input')?.value?.trim() || '')) {
     setTimeout(function() { saveProfileToSupabase(); }, 0);
   }
 }
@@ -1938,12 +1943,21 @@ function onEmailInput() {
 
 // ── Step 1: Verify email before proceeding to Step 2 ──
 let _verifyDestination = 'matches'; // 'step2' or 'matches'
+// S134: "verified" must be tied to the SPECIFIC email address, not a blanket flag.
+// Otherwise a returning browser with an old verified email skips OTP for a brand
+// new email typed in this session, and silently keeps operating as the old identity.
+function isEmailAlreadyVerified(email) {
+  if (!email) return false;
+  const storedEmail = (localStorage.getItem('unirenter_email') || '').trim().toLowerCase();
+  return localStorage.getItem('unirenter_email_verified') === '1' &&
+         storedEmail === email.trim().toLowerCase();
+}
 function triggerStep1Verify() {
   const email = document.getElementById('email-input')?.value?.trim() || '';
   const statusSelected = document.querySelector('.status-card.selected');
   if (!email.includes('@') || !email.includes('.') || !statusSelected) return;
-  // If already verified, go straight to step 2
-  if (localStorage.getItem('unirenter_email_verified') === '1') {
+  // If THIS exact email was already verified on this browser, go straight to step 2
+  if (isEmailAlreadyVerified(email)) {
     unlockAndGo(2);
     return;
   }
@@ -1951,17 +1965,35 @@ function triggerStep1Verify() {
   triggerMatchesVerify();
 }
 
+// ── "Sign in" nav link → open verify modal for a returning user ──
+function openSignInModal() {
+  _verifyDestination = 'signin';
+  // Reset modal state
+  document.getElementById('verify-modal-otp-row').classList.remove('visible');
+  document.getElementById('verify-modal-badge').classList.remove('show');
+  document.getElementById('verify-modal-status').textContent = '';
+  document.getElementById('verify-modal-status').className = 'verify-status';
+  ['vm-otp1','vm-otp2','vm-otp3','vm-otp4','vm-otp5','vm-otp6'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const modalInput = document.getElementById('verify-modal-email-input');
+  if (modalInput) modalInput.value = localStorage.getItem('unirenter_email') || '';
+  const sendBtn = document.getElementById('verify-modal-send-btn');
+  if (sendBtn) { sendBtn.textContent = 'Send code'; sendBtn.disabled = false; }
+  openModal('verify-modal');
+}
+
 // ── "Show my matches" → open verify modal ──
 function triggerMatchesVerify() {
   _verifyDestination = _verifyDestination || 'matches';
-  // If already verified this session, go straight through
-  if (localStorage.getItem('unirenter_email_verified') === '1') {
+  const stepEmail = document.getElementById('email-input')?.value?.trim() || '';
+  // If THIS exact email was already verified on this browser, go straight through
+  if (isEmailAlreadyVerified(stepEmail)) {
     if (_verifyDestination === 'step2') { _verifyDestination = 'matches'; unlockAndGo(2); }
     else showMatches();
     return;
   }
   // Pre-fill email from Step 1 input
-  const stepEmail = document.getElementById('email-input')?.value?.trim() || '';
   const modalInput = document.getElementById('verify-modal-email-input');
   if (modalInput && stepEmail) modalInput.value = stepEmail;
   // Reset modal state
@@ -2032,7 +2064,7 @@ async function vmCheckOTP() {
     const res = await fetch('/api/auth/verify-email-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, otp: entered }),
+      body: JSON.stringify({ email, otp: entered, city: 'adelaide' }),
     });
     const data = await res.json();
     if (res.ok && data.success) {
@@ -2046,9 +2078,21 @@ async function vmCheckOTP() {
       // Show badge, then proceed
       const badge = document.getElementById('verify-modal-badge');
       badge.classList.add('show');
+      // S134: smart resume — if this email already has a completed profile in
+      // Supabase, skip the registration steps entirely and show real matches
+      // instead of re-asking every question. budget_max is only ever written
+      // on Step 6, the final step, so its presence means this person genuinely
+      // completed the flow at least once. No percentage-threshold guessing needed.
+      const p = data.profile || {};
+      const hasExistingProfile = !!(p.student_status && p.budget_max);
       setTimeout(() => {
         closeModal('verify-modal');
-        if (typeof _verifyDestination !== 'undefined' && _verifyDestination === 'step2') {
+        if (hasExistingProfile) {
+          welcomeBackFlow();
+        } else if (_verifyDestination === 'signin') {
+          showToast('👋 No profile found yet', "We couldn't find an existing profile for that email — pick a status below to get started.");
+          document.getElementById('setup')?.scrollIntoView({behavior:'smooth'});
+        } else if (typeof _verifyDestination !== 'undefined' && _verifyDestination === 'step2') {
           _verifyDestination = 'matches';
           unlockAndGo(2);
         } else {
@@ -2298,7 +2342,25 @@ async function showMatches() {
   showToast('🎉 Profile saved!','Your matches are ready below.');
   setTimeout(maybeShowReviewNudge, 6000);
   const dp = document.getElementById('dashboard-prompt'); if (dp) dp.style.display = 'block';
-  const dd = document.getElementById('nav-dd-dashboard'); if (dd) dd.style.display = '';
+  syncAuthNav();
+}
+// S134: Returning user with a saved profile — show their real matches without
+// touching the (blank) registration form or risking an overwrite of saved answers.
+function welcomeBackFlow() {
+  generateMatches();
+  document.getElementById('matches').classList.add('visible');
+  setTimeout(() => document.getElementById('matches').scrollIntoView({behavior:'smooth'}), 100);
+  showToast('👋 Welcome back!', 'Here are your latest matches.');
+  const dp = document.getElementById('dashboard-prompt'); if (dp) dp.style.display = 'block';
+  syncAuthNav();
+}
+// S134: Sign in / Dashboard nav links are mutually exclusive based on current device auth state.
+function syncAuthNav() {
+  const signedIn = localStorage.getItem('unirenter_email_verified') === '1' && !!localStorage.getItem('unirenter_email');
+  const signIn = document.getElementById('nav-dd-signin');
+  const dash = document.getElementById('nav-dd-dashboard');
+  if (signIn) signIn.style.display = signedIn ? 'none' : '';
+  if (dash) dash.style.display = signedIn ? '' : 'none';
 }
 const UR_SENT_KEY = 'ur_sent_requests';
 function getSentRequests() {
@@ -2432,7 +2494,7 @@ function scrollToMatches() {
   setTimeout(() => document.getElementById('matches').scrollIntoView({behavior:'smooth'}), 100);
   setTimeout(maybeShowReviewNudge, 6000);
   const dp2 = document.getElementById('dashboard-prompt'); if (dp2) dp2.style.display = 'block';
-  const dd2 = document.getElementById('nav-dd-dashboard'); if (dd2) dd2.style.display = '';
+  syncAuthNav();
 }
 
 // ── Reporting ──
@@ -2576,7 +2638,7 @@ function openChat(who) {
 const stepWeights = [17,33,50,67,83,100];
 const stepTips = [
   'Select your status and verify your email',
-  'Add a profile photo — gets 3× more connections',
+  'Tell us a bit about yourself — Cob will pick your vibe avatar',
   'Choose your accommodation preferences',
   'Complete your lifestyle preferences',
   'Select your preferred locations',
@@ -2592,11 +2654,30 @@ function updateCompleteness(step) {
   if (tipEl) tipEl.textContent = stepTips[step-1] || '';
 }
 
+// ── S134: Require at least some data before "Next" advances a step ──────────
+// Prevents blank steps from being unlocked, which previously let people click
+// straight through the whole registration with nothing filled in.
+function validateStepData(step) {
+  const container = document.getElementById('step-' + step);
+  if (!container) return true;
+  if (step === 2) {
+    const fname = document.getElementById('fname');
+    return !!(fname && fname.value.trim());
+  }
+  if (step === 3) {
+    return container.querySelectorAll('.accom-card.selected').length > 0;
+  }
+  if (step === 4 || step === 5) {
+    return container.querySelectorAll('.chip.selected').length > 0;
+  }
+  return true;
+}
+
 // ── Save progress ──
 function saveProgress() {
   const email = document.getElementById('email-input')?.value?.trim() || localStorage.getItem('unirenter_email');
   if (email) localStorage.setItem('unirenter_email', email);
-  if (localStorage.getItem('unirenter_email_verified') === '1') {
+  if (isEmailAlreadyVerified(email || '')) {
     saveProfileToSupabase();
   }
   showToast("💾 Progress saved", "You can return and continue from step " + currentStep + " — we'll remember your answers.");
@@ -2735,7 +2816,7 @@ async function saveProfileToSupabase() {
     suburb_preferences: suburbPrefs.length > 0 ? suburbPrefs : null,
     budget_min: budgetMin, budget_max: budgetMax,
     sleep_schedule: sleepSchedule, cleanliness, study_location: studyLocation,
-    guests, substances, dietary, pets, city: 'melbourne', profile_complete: profileComplete,
+    guests, substances, dietary, pets, city: 'adelaide', profile_complete: profileComplete,
     language_home: languageHome, languages_spoken: languagesSpoken.length > 0 ? languagesSpoken : null,
     stay_duration: stayDuration, cob_summary: cobSummary,
     vibe_emoji_primary: (localStorage.getItem('ur_avatar_emoji') || vibeEmojiPrimary), vibe_emoji_secondary: vibeEmojiSecondary,
@@ -3079,14 +3160,9 @@ function fireCobPhase2Nudge() {
   }
 
 
-  // ── Show dashboard link if verified ──
+  // ── Sync Sign in / Dashboard nav links to current auth state ──
   renderTabLocks();
-  (function() {
-    if (localStorage.getItem('unirenter_email_verified') === '1') {
-      const el = document.getElementById('nav-dd-dashboard');
-      if (el) el.style.display = '';
-    }
-  })();
+  syncAuthNav();
 
 // ── Seasonal academic-calendar banner (dynamic, S82 — replaces static hardcoded banner) ──
 const ACADEMIC_CAL_ADELAIDE = [
@@ -3316,7 +3392,7 @@ function buildVibeQuestions() {
   // Q3 — what you're hoping for, personalised by status + move_in
   var q3;
   if (status === 'future' || status === 'arriving') {
-    q3 = 'You\u2019re about to arrive in Melbourne for the first time \u2014 what are you genuinely hoping living with other students is going to be like? Beyond just splitting the bills.';
+    q3 = 'You\u2019re about to arrive in Adelaide for the first time \u2014 what are you genuinely hoping living with other students is going to be like? Beyond just splitting the bills.';
   } else if (status === 'other') {
     q3 = 'You\u2019re joining a student share house \u2014 what kind of household dynamic are you hoping for? What would make it actually great?';
   } else if (langHome && langHome.toLowerCase() !== 'english') {
