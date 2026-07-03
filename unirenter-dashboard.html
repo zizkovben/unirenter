@@ -2913,6 +2913,57 @@ body.light-mode {
   text-align: right;
   flex-shrink: 0;
 }
+/* S146: Layered lease timeline widget */
+.household-timeline {
+  background: var(--navy-mid);
+  border: 1px solid var(--navy-border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.household-timeline-summary {
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.household-timeline-summary .muted {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.household-timeline-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-top: 1px solid var(--navy-border);
+}
+.household-timeline-row:first-of-type {
+  border-top: none;
+}
+.household-timeline-name {
+  font-size: 12px;
+  color: var(--text);
+  width: 90px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.household-timeline-bar-wrap {
+  flex: 1;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.household-timeline-dates {
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  text-align: right;
+}
+.household-timeline-dates.no-lease {
+  font-style: italic;
+}
 /* Cob tip */
 .household-cob-tip {
   background: rgba(245,184,0,0.06);
@@ -11781,9 +11832,13 @@ function householdRender(data, currentEmail) {
   // Vibe equation (primary + secondary)
   var vibeEqHtml = householdVibeEquation(members);
 
+  // S146: layered lease timeline
+  var timelineHtml = householdTimelineHtml(members);
+
   var html =
     '<div class="household-members-row">' + chipsHtml + '</div>' +
     (barsHtml ? '<div class="household-compat-grid">' + barsHtml + '</div>' : '') +
+    timelineHtml +
     (vibeEqHtml || '') +
     (cobTip ? '<div class="household-cob-tip">🤠 ' + cobTip + '</div>' : '') +
     actionsHtml +
@@ -11824,6 +11879,57 @@ function householdShareCard() {
 function householdShowInvite() {
   var wrap = document.getElementById('hh-invite-panel-wrap');
   if (wrap) wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+}
+
+function hhTimelineFmtDate(iso) {
+  if (!iso) return '';
+  try {
+    var d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch (e) { return iso; }
+}
+
+// S146: Layered lease timeline widget. Deliberately NOT a single shared
+// household-wide date — housemates are routinely on staggered lease terms
+// (someone joins mid-year, someone does a lease transfer out at month 8),
+// so each member's own lease_start/lease_end is shown individually, with an
+// earliest-start/latest-end summary line on top. Members with no lease on
+// file yet show "No lease on file" rather than being hidden — visibility of
+// the gap is more useful than pretending it doesn't exist.
+function householdTimelineHtml(members) {
+  var withLease = members.filter(function(m) { return m.lease_start || m.lease_end; });
+  var summaryHtml = '';
+  if (withLease.length > 0) {
+    var starts = withLease.map(function(m) { return m.lease_start; }).filter(Boolean);
+    var ends = withLease.map(function(m) { return m.lease_end; }).filter(Boolean);
+    var earliest = starts.length ? starts.reduce(function(a, b) { return a < b ? a : b; }) : null;
+    var latest = ends.length ? ends.reduce(function(a, b) { return a > b ? a : b; }) : null;
+    summaryHtml = '<div class="household-timeline-summary">' +
+      (earliest ? 'Household commenced ' + hhTimelineFmtDate(earliest) : '<span class="muted">Start date not yet on file</span>') +
+      (latest ? ' <span class="muted">·</span> currently extends to ' + hhTimelineFmtDate(latest) : '') +
+      '</div>';
+  } else {
+    summaryHtml = '<div class="household-timeline-summary muted">No lease dates on file yet — add yours in Lease Companion.</div>';
+  }
+
+  var rowsHtml = members.map(function(m) {
+    var name = m.display_name ? m.display_name.split(' ')[0] : 'Flatmate';
+    if (m.lease_start || m.lease_end) {
+      var range = (m.lease_start ? hhTimelineFmtDate(m.lease_start) : '?') + ' → ' + (m.lease_end ? hhTimelineFmtDate(m.lease_end) : 'ongoing');
+      return '<div class="household-timeline-row">' +
+        '<span class="household-timeline-name">' + name + '</span>' +
+        '<span class="household-timeline-bar-wrap">' + (m.lease_property ? m.lease_property : '') + '</span>' +
+        '<span class="household-timeline-dates">' + range + '</span>' +
+      '</div>';
+    }
+    return '<div class="household-timeline-row">' +
+      '<span class="household-timeline-name">' + name + '</span>' +
+      '<span class="household-timeline-bar-wrap"></span>' +
+      '<span class="household-timeline-dates no-lease">No lease on file</span>' +
+    '</div>';
+  }).join('');
+
+  return '<div class="household-timeline">' + summaryHtml + rowsHtml + '</div>';
 }
 
 function householdCalcCompat(members) {
