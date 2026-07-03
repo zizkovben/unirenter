@@ -159,6 +159,24 @@ a.nav-logo {
   cursor: pointer;
   flex-shrink: 0;
 }
+/* ── Notification bell (S143) ── */
+.nav-bell {
+  position: relative;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #e8f0f5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.nav-bell:hover { border-color: rgba(232,98,58,0.4); color: #E8623A; }
+.nav-bell-badge { position: absolute; top: -3px; right: -3px; background: #E8623A; color: #fff; font-family: var(--font-body,'Inter',sans-serif); font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 8px; align-items: center; justify-content: center; padding: 0 3px; border: 2px solid #0d1f2d; line-height: 1; }
 /* Dropdown */
 .nav-dropdown-wrap { position: relative; }
 .nav-dropdown { position: relative; }
@@ -950,6 +968,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         </button>
       </div>
     </div>
+    <button class="nav-bell" id="nav-bell" style="display:none;" onclick="window.location='/dashboard#messages'" title="Messages">🔔<span class="nav-bell-badge" id="nav-bell-badge" style="display:none;"></span></button>
     <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Toggle day/night mode">🌙</button>
   </div>
 </nav>
@@ -2356,6 +2375,7 @@ async function showMatches() {
   setTimeout(maybeShowReviewNudge, 6000);
   const dp = document.getElementById('dashboard-prompt'); if (dp) dp.style.display = 'block';
   syncAuthNav();
+  checkUnreadNotifications();
 }
 // S134: Returning user with a saved profile — show their real matches without
 // touching the (blank) registration form or risking an overwrite of saved answers.
@@ -2366,8 +2386,41 @@ function welcomeBackFlow() {
   showToast('👋 Welcome back!', 'Here are your latest matches.');
   const dp = document.getElementById('dashboard-prompt'); if (dp) dp.style.display = 'block';
   syncAuthNav();
+  checkUnreadNotifications();
 }
 // S134: Sign in / Dashboard nav links are mutually exclusive based on current device auth state.
+// S143: Notification bell — polls unread message count while signed in.
+let _urBellInterval = null;
+async function checkUnreadNotifications() {
+  const email = localStorage.getItem('unirenter_email');
+  const signedIn = localStorage.getItem('unirenter_email_verified') === '1' && !!email;
+  const bell = document.getElementById('nav-bell');
+  const badge = document.getElementById('nav-bell-badge');
+  if (!bell) return;
+  if (!signedIn) { bell.style.display = 'none'; return; }
+  bell.style.display = 'flex';
+  try {
+    const res = await fetch('/api/messages/get?email=' + encodeURIComponent(email));
+    if (!res.ok) return;
+    const data = await res.json();
+    const unread = data.totalUnread || 0;
+    if (badge) {
+      if (unread > 0) {
+        badge.textContent = unread > 9 ? '9+' : String(unread);
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+  } catch (e) { /* silent — a failed poll shouldn't disrupt the nav */ }
+}
+function startNotificationPolling() {
+  checkUnreadNotifications();
+  if (_urBellInterval) clearInterval(_urBellInterval);
+  _urBellInterval = setInterval(() => {
+    if (document.visibilityState === 'visible') checkUnreadNotifications();
+  }, 45000);
+}
 function syncAuthNav() {
   const signedIn = localStorage.getItem('unirenter_email_verified') === '1' && !!localStorage.getItem('unirenter_email');
   const signIn = document.getElementById('nav-dd-signin');
@@ -2508,6 +2561,7 @@ function scrollToMatches() {
   setTimeout(maybeShowReviewNudge, 6000);
   const dp2 = document.getElementById('dashboard-prompt'); if (dp2) dp2.style.display = 'block';
   syncAuthNav();
+  checkUnreadNotifications();
 }
 
 // ── Reporting ──
@@ -3177,6 +3231,7 @@ function fireCobPhase2Nudge() {
   // ── Sync Sign in / Dashboard nav links to current auth state ──
   renderTabLocks();
   syncAuthNav();
+  startNotificationPolling();
 
 // ── Seasonal academic-calendar banner (dynamic, S82 — replaces static hardcoded banner) ──
 const ACADEMIC_CAL_CANBERRA = [
