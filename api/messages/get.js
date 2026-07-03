@@ -88,15 +88,48 @@ module.exports = async function handler(req, res) {
       console.warn('household lookup error (non-fatal):', householdErr.message);
     }
 
+    // S146: per-pair, lease-aware exemption — replaces the S144c "forever"
+    // rule. A household pair should eventually re-enter the normal decay
+    // clock once BOTH people's leases have genuinely ended, rather than
+    // staying exempt indefinitely regardless of reality. Uses
+    // lease_companions.lease_end (one row per email, upserted from the
+    // Lease Companion tool). Missing lease data on either side still
+    // trusts the exemption — never penalise someone for not having filled
+    // Lease Companion in. The full Cob end-of-tenancy prompt (bible
+    // Household Ecosystem §2) is a future session; this only wires up the
+    // underlying decay logic it will eventually gate further.
+    const LEASE_GRACE_DAYS = 14;
+    let leaseEndByEmail = {};
+    if (householdCoMembers.size > 0) {
+      try {
+        const leaseEmails = [email, ...householdCoMembers];
+        const { data: leaseRows } = await supabase
+          .from('lease_companions')
+          .select('email, lease_end')
+          .in('email', leaseEmails);
+        (leaseRows || []).forEach(r => { if (r.lease_end) leaseEndByEmail[r.email] = r.lease_end; });
+      } catch (leaseErr) {
+        console.warn('lease_companions lookup error (non-fatal):', leaseErr.message);
+      }
+    }
+    function pairLeaseExpired(myEmail, partnerEmail) {
+      const myEnd = leaseEndByEmail[myEmail];
+      const theirEnd = leaseEndByEmail[partnerEmail];
+      if (!myEnd || !theirEnd) return false; // missing data on either side → trust the exemption
+      const graceMs = LEASE_GRACE_DAYS * 86400000;
+      const nowMs = Date.now();
+      return (nowMs - new Date(myEnd).getTime()) > graceMs && (nowMs - new Date(theirEnd).getTime()) > graceMs;
+    }
+
     // S144b: revised per Ben — ALL conversations decay by time-since-last-
     // activity, including ones with a real back-and-forth (has_reply=true).
     // Two people who matched, chatted, then went quiet are just as "stale"
     // as an unanswered opener — the goal is clearing redundant chat clutter,
     // not just flagging ignored requests. `has_reply` is still tracked and
     // returned (used to pick badge language — "no reply yet" vs "gone
-    // quiet after connecting"). Confirmed households (S144c, above) are the
-    // one exception — full exemption, not just a clock reset (see bible note
-    // on this decision).
+    // quiet after connecting"). Confirmed households (S144c) get a
+    // conditional exemption — see S146 pairLeaseExpired() above: exempt
+    // unless both people's leases have genuinely ended (+ grace period).
     const now = Date.now();
     Object.values(convMap).forEach(c => {
       const hasReply = c.sawFromMe && c.sawFromThem;
@@ -104,8 +137,13 @@ module.exports = async function handler(req, res) {
       const daysSinceLast = (now - new Date(c.last_message_at).getTime()) / 86400000;
       let status = 'active';
       let expiresInDays = null;
-      if (isHousehold) {
-        status = 'active'; // confirmed housemates — exempt from decay entirely
+      // S146: household exemption is now conditional, not unconditional.
+      // Still exempt (and stays that way) when either lease is missing or
+      // still active — only falls through to normal decay once BOTH
+      // people's leases have ended past the grace period.
+      const leaseExempt = isHousehold && !pairLeaseExpired(email, c.partner_email);
+      if (leaseExempt) {
+        status = 'active'; // confirmed housemates, lease still active (or unknown) — exempt
       } else if (daysSinceLast >= 90) status = 'deleted';
       else if (daysSinceLast >= 30) status = 'archived';
       else if (daysSinceLast >= 7) status = 'cooling';
