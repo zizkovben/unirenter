@@ -117,6 +117,28 @@ module.exports = async function handler(req, res) {
       c.days_inactive = Math.floor(daysSinceLast);
     });
 
+    // S145: post-match follow-up flow. Look up any existing message_threads
+    // rows for this user's conversations to read followup_dismissed — a
+    // one-time nudge ("Create a household / Leave a review / Not needed")
+    // should never reappear once the user has acted on or dismissed it for
+    // a given partner. Keyed by the same sorted participant_a/b pair used
+    // by the write-through sync below, so lookups line up exactly.
+    let followupDismissedSet = new Set();
+    try {
+      const pairKeys = Object.keys(convMap).map(partner => [email, partner].sort().join('|'));
+      if (pairKeys.length > 0) {
+        const { data: threadRows } = await supabase
+          .from('message_threads')
+          .select('participant_a, participant_b, followup_dismissed')
+          .or(`participant_a.eq.${email},participant_b.eq.${email}`);
+        (threadRows || []).forEach(r => {
+          if (r.followup_dismissed) followupDismissedSet.add([r.participant_a, r.participant_b].sort().join('|'));
+        });
+      }
+    } catch (followupErr) {
+      console.warn('followup_dismissed lookup error (non-fatal):', followupErr.message);
+    }
+
     // S144: write-through sync to message_threads so a future scheduled job
     // (e.g. the 7-day nudge email) can read authoritative status without
     // re-scanning the full messages table. Non-blocking — never fails the request.
@@ -166,6 +188,15 @@ module.exports = async function handler(req, res) {
     }
     const conversations = visiblePartners.map(c => {
       const profile = profileMap[c.partner_email] || {};
+      // S145: nudge shows for genuinely quiet, real (has_reply) conversations
+      // that aren't already a confirmed household — no point suggesting
+      // "create a household" to people already living together, and no
+      // point nudging an unanswered opener that was never a two-way chat.
+      const pairKey = [email, c.partner_email].sort().join('|');
+      const showFollowup = (c.status === 'cooling' || c.status === 'archived')
+        && c.has_reply
+        && !c.is_household
+        && !followupDismissedSet.has(pairKey);
       return {
         partner_email: c.partner_email,
         last_message: c.last_message,
@@ -177,6 +208,7 @@ module.exports = async function handler(req, res) {
         days_inactive: c.days_inactive,
         has_reply: c.has_reply,
         is_household: c.is_household,
+        show_followup: showFollowup,
         display_name: profile.display_name || nameFromEmail(c.partner_email),
         university: profile.university || null,
         suburb_preferences: profile.suburb_preferences || [],
