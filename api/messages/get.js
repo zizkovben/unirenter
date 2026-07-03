@@ -64,27 +64,28 @@ module.exports = async function handler(req, res) {
       }
     });
 
-    // S144: derive Active / Cooling / Archived / Deleted per conversation.
-    // A thread only "decays" while it's a one-sided, unanswered request
-    // (has_reply === false). The moment both people have sent at least one
-    // message, it's a real ongoing conversation and stays 'active' — pauses
-    // in an established conversation are normal and shouldn't get flagged
-    // as a stale lead the way an unanswered opener should.
+    // S144b: revised per Ben — ALL conversations decay by time-since-last-
+    // activity, including ones with a real back-and-forth (has_reply=true).
+    // Two people who matched, chatted, then went quiet are just as "stale"
+    // as an unanswered opener — the goal is clearing redundant chat clutter,
+    // not just flagging ignored requests. `has_reply` is still tracked and
+    // returned (used to pick badge language — "no reply yet" vs "gone
+    // quiet after connecting" — and will later exempt confirmed households
+    // from decay once that check is built).
     const now = Date.now();
     Object.values(convMap).forEach(c => {
       const hasReply = c.sawFromMe && c.sawFromThem;
       const daysSinceLast = (now - new Date(c.last_message_at).getTime()) / 86400000;
       let status = 'active';
       let expiresInDays = null;
-      if (!hasReply) {
-        if (daysSinceLast >= 90) status = 'deleted';
-        else if (daysSinceLast >= 30) status = 'archived';
-        else if (daysSinceLast >= 7) status = 'cooling';
-        else { status = 'active'; expiresInDays = Math.max(0, Math.ceil(7 - daysSinceLast)); }
-      }
+      if (daysSinceLast >= 90) status = 'deleted';
+      else if (daysSinceLast >= 30) status = 'archived';
+      else if (daysSinceLast >= 7) status = 'cooling';
+      else { status = 'active'; expiresInDays = Math.max(0, Math.ceil(7 - daysSinceLast)); }
       c.has_reply = hasReply;
       c.status = status;
       c.expires_in_days = expiresInDays;
+      c.days_inactive = Math.floor(daysSinceLast);
     });
 
     // S144: write-through sync to message_threads so a future scheduled job
@@ -144,6 +145,8 @@ module.exports = async function handler(req, res) {
         city: c.city,
         status: c.status,
         expires_in_days: c.expires_in_days,
+        days_inactive: c.days_inactive,
+        has_reply: c.has_reply,
         display_name: profile.display_name || nameFromEmail(c.partner_email),
         university: profile.university || null,
         suburb_preferences: profile.suburb_preferences || [],
