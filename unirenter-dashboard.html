@@ -9465,7 +9465,27 @@ function lcSaveDates(prefix) {
   var data = {lease_start:v(p+'-start'),lease_end:v(p+'-end'),rent_review_date:v(p+'-review'),rent_amount:v(p+'-rent'),bond_amount:v(p+'-bond'),property_address:v(p+'-addr')};
   var email = localStorage.getItem('unirenter_email') || '';
   if (!email) { lcCloseInline(); return; }
-  fetch('/api/lease-companion/save', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,data:data})})
+  // S146: flattened to match api/lease-companion/save.js's real expected body
+  // shape — it reads top-level body.lease_start/body.weekly_rent/etc, never
+  // body.data.*. The previous {email, data:{...}} nesting meant every field
+  // except email was silently dropped by save.js's own field-presence check
+  // on every save, ever — this was failing quietly regardless of the
+  // separate "stray S" crash bug (also fixed this session). Field names
+  // renamed to match the real lease_companions columns (rent_amount ->
+  // weekly_rent, property_address -> property_description). household_id
+  // included when the user belongs to one, so the entry feeds the household
+  // layered timeline widget.
+  var householdId = localStorage.getItem('ur_household_id') || '';
+  var payload = {
+    email: email,
+    lease_start: data.lease_start,
+    lease_end: data.lease_end,
+    weekly_rent: data.rent_amount,
+    bond_amount: data.bond_amount,
+    property_description: data.property_address
+  };
+  if (householdId) payload.household_id = householdId;
+  fetch('/api/lease-companion/save', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
   .then(function(r){return r.json();})
   .then(function() {
     if (data.lease_start) lcCalAdd('Lease starts', data.lease_start, 'lease');
