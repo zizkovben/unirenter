@@ -3155,6 +3155,87 @@ body.light-mode {
   font-size: 11px;
   color: var(--text-muted);
 }
+/* S148: Household calendar — read-only view assembled from accepted feed
+   items + the layered lease timeline. Deliberately NOT a merge of anyone's
+   personal calendar_events — see project bible §4 (Household Ecosystem
+   Expansion, step 5). */
+.household-calendar-section {
+  margin-bottom: 16px;
+}
+.household-calendar-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--navy-mid);
+  border: 1px solid var(--navy-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+.household-calendar-chevron {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.household-calendar-caption {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 6px 2px 0;
+  line-height: 1.4;
+}
+.household-calendar-body {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.household-calendar-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 16px 10px;
+}
+.household-calendar-event {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--navy-mid);
+  border: 1px solid var(--navy-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.household-calendar-event.past {
+  opacity: 0.5;
+}
+.household-calendar-event-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.household-calendar-event-body {
+  flex: 1;
+  min-width: 0;
+}
+.household-calendar-event-label {
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.household-calendar-event-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.household-calendar-event-date {
+  font-size: 11px;
+  color: var(--brand-yellow);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
 .household-action-btn {
   background: none;
   border: 1px solid rgba(255,255,255,0.18);
@@ -12027,6 +12108,7 @@ function householdRender(data, currentEmail) {
     '<div class="household-members-row">' + chipsHtml + '</div>' +
     (barsHtml ? '<div class="household-compat-grid">' + barsHtml + '</div>' : '') +
     timelineHtml +
+    '<div id="household-calendar-wrap"></div>' +
     (vibeEqHtml || '') +
     (cobTip ? '<div class="household-cob-tip">🤠 ' + cobTip + '</div>' : '') +
     actionsHtml +
@@ -12034,6 +12116,9 @@ function householdRender(data, currentEmail) {
     '<div id="household-feed-wrap"></div>';
 
   inner.innerHTML = html;
+
+  // S148: Household calendar — see build below (householdCalendarInit)
+  householdCalendarInit(members);
 
   if (subtitleEl) subtitleEl.textContent = members.length + ' member' + (members.length !== 1 ? 's' : '') + ' in your household';
 
@@ -12166,6 +12251,9 @@ function householdFeedLoad(householdId, email) {
   .then(function(d) {
     if (!d.ok) return;
     householdFeedRenderList(d.items || [], email);
+    // S148: feed items (with event_date + accepted_by_me) also drive the
+    // Household calendar — reuses this same fetch, no extra request needed.
+    householdCalendarUpdateFromFeed(d.items || []);
     // Mark read (non-blocking) and clear the tab badge
     fetch('/api/household/feed-mark-read', {
       method: 'POST',
@@ -12335,6 +12423,103 @@ function householdTimelineHtml(members) {
   }).join('');
 
   return '<div class="household-timeline">' + summaryHtml + rowsHtml + '</div>';
+}
+
+// ── S148: Household calendar — Household Ecosystem Expansion step 5 ────────
+// Read-only view assembled ONLY from: (1) each member's lease_start/lease_end
+// (the same layered-timeline data above), and (2) household_feed items
+// (note/todo/reminder) that the VIEWING member has personally accepted.
+// Deliberately NOT a merge of anyone's raw personal calendar_events — that
+// would leak private, non-household appointments to housemates who never
+// opted in. See project bible §4 for the full rationale.
+function householdCalendarInit(members) {
+  window._hhCalMembers = members || [];
+  var wrap = document.getElementById('household-calendar-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = householdCalendarSkeletonHtml();
+}
+
+function householdCalendarSkeletonHtml() {
+  return '<div class="household-calendar-section">' +
+    '<button class="household-calendar-toggle" onclick="toggleHouseholdCalendar()">' +
+      '<span>📅 Household calendar</span>' +
+      '<span class="household-calendar-chevron" id="hh-cal-chevron">▴</span>' +
+    '</button>' +
+    '<div class="household-calendar-caption">Lease dates and the notes, todos and reminders you\'ve accepted — never a raw merge of anyone\'s personal calendar.</div>' +
+    '<div id="household-calendar-body" class="household-calendar-body">' +
+      '<div class="household-calendar-empty">Loading…</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function toggleHouseholdCalendar() {
+  var body = document.getElementById('household-calendar-body');
+  var chev = document.getElementById('hh-cal-chevron');
+  if (!body) return;
+  var open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'flex';
+  if (chev) chev.textContent = open ? '▾' : '▴';
+}
+
+function householdCalendarUpdateFromFeed(feedItems) {
+  window._hhCalFeedItems = feedItems || [];
+  householdCalendarRenderBody();
+}
+
+function householdCalendarRenderBody() {
+  var body = document.getElementById('household-calendar-body');
+  if (!body) return;
+  var members = window._hhCalMembers || [];
+  var feedItems = window._hhCalFeedItems || [];
+  var events = householdCalendarBuildEvents(members, feedItems);
+  if (!events.length) {
+    body.innerHTML = '<div class="household-calendar-empty">Nothing here yet. Lease dates and any note, todo or reminder you accept in the feed below will show up here.</div>';
+    return;
+  }
+  body.innerHTML = events.slice(0, 30).map(householdCalendarEventHtml).join('');
+}
+
+function householdCalendarBuildEvents(members, feedItems) {
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var events = [];
+
+  members.forEach(function(m) {
+    var name = m.display_name ? m.display_name.split(' ')[0] : 'Flatmate';
+    if (m.lease_start) {
+      events.push({ date: m.lease_start, icon: '🔑', label: name + '\'s lease starts', sub: m.lease_property || '' });
+    }
+    if (m.lease_end) {
+      events.push({ date: m.lease_end, icon: '🔚', label: name + '\'s lease ends', sub: m.lease_property || '' });
+    }
+  });
+
+  var typeIcon = { note: '📝', todo: '✅', reminder: '⏰' };
+  (feedItems || []).forEach(function(item) {
+    if (!item.event_date) return;
+    if (item.type === 'chat') return;
+    if (!item.accepted_by_me) return; // only items the viewing member has accepted
+    var authorName = item.author_name ? item.author_name.split(' ')[0] : (item.author_email ? item.author_email.split('@')[0] : 'Housemate');
+    events.push({ date: item.event_date, icon: typeIcon[item.type] || '📌', label: item.text, sub: 'from ' + authorName });
+  });
+
+  events = events.filter(function(e) { return !!e.date; });
+  events.forEach(function(e) {
+    try { e.isPast = new Date(e.date + 'T00:00:00') < today; } catch (err) { e.isPast = false; }
+  });
+  events.sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
+
+  return events;
+}
+
+function householdCalendarEventHtml(e) {
+  return '<div class="household-calendar-event' + (e.isPast ? ' past' : '') + '">' +
+    '<span class="household-calendar-event-icon">' + e.icon + '</span>' +
+    '<div class="household-calendar-event-body">' +
+      '<div class="household-calendar-event-label">' + escHtml(e.label) + '</div>' +
+      (e.sub ? '<div class="household-calendar-event-sub">' + escHtml(e.sub) + '</div>' : '') +
+    '</div>' +
+    '<span class="household-calendar-event-date">' + hhTimelineFmtDate(e.date) + '</span>' +
+  '</div>';
 }
 
 function householdCalcCompat(members) {
