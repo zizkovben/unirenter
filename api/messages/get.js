@@ -24,10 +24,16 @@ module.exports = async function handler(req, res) {
   // ── Mode 1: return all conversations for sidebar ──────────────────────────
   if (!other) {
     // Get all messages involving this user
+    // S150: ilike here too (escaped) — eq() would silently miss any legacy
+    // row where the current user's own address was stored in a different
+    // case before the S135/S136 normalization fix, dropping that message
+    // (and possibly a whole conversation) from the sidebar entirely.
+    const escapeIlike0 = (s) => s.replace(/[%_]/g, ch => '\\' + ch);
+    const emailPat0 = escapeIlike0(email);
     const { data, error } = await supabase
       .from('messages')
       .select('*')
-      .or(`sender_email.eq.${email},recipient_email.eq.${email}`)
+      .or(`sender_email.ilike.${emailPat0},recipient_email.ilike.${emailPat0}`)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -36,9 +42,21 @@ module.exports = async function handler(req, res) {
     }
 
     // Group by conversation partner
+    // S150: normalize both sides to lowercase before comparing/grouping.
+    // Rows written before the S135/S136 case-normalization fix may still
+    // have mixed-case sender/recipient emails. Without this, a legacy
+    // mixed-case row (a) fails to match `email` in the eq() filter above
+    // for some rows, (b) can split one real conversation into two entries
+    // keyed by different casings, and (c) causes the profile lookup below
+    // to miss a genuinely-complete profile, wrongly falling back to the
+    // email-derived name — this was reported as "Steve" showing as
+    // "Benrsl" in Messages despite display_name being set and correctly
+    // shown on match cards (which don't share this lookup path).
     const convMap = {};
     (data || []).forEach(msg => {
-      const partner = msg.sender_email === email ? msg.recipient_email : msg.sender_email;
+      const senderLower = (msg.sender_email || '').toLowerCase();
+      const recipientLower = (msg.recipient_email || '').toLowerCase();
+      const partner = senderLower === email ? recipientLower : senderLower;
       if (!convMap[partner]) {
         convMap[partner] = {
           partner_email: partner,
@@ -57,9 +75,9 @@ module.exports = async function handler(req, res) {
       const c = convMap[partner];
       if (new Date(msg.created_at) < new Date(c.first_message_at)) c.first_message_at = msg.created_at;
       if (new Date(msg.created_at) > new Date(c.last_message_at)) c.last_message_at = msg.created_at;
-      if (msg.sender_email === email) c.sawFromMe = true; else c.sawFromThem = true;
+      if (senderLower === email) c.sawFromMe = true; else c.sawFromThem = true;
       // Count unread (messages TO me that I haven't read)
-      if (msg.recipient_email === email && !msg.read) {
+      if (recipientLower === email && !msg.read) {
         convMap[partner].unread++;
       }
     });
@@ -205,14 +223,26 @@ module.exports = async function handler(req, res) {
     const visiblePartners = Object.values(convMap).filter(c => c.status !== 'deleted');
 
     // Fetch display names for all partners
+    // S150: partnerEmails is now always lowercase (see grouping above), but
+    // profiles.email itself may still hold mixed case for accounts created
+    // before the S136 normalization fix. Use ilike (case-insensitive) per
+    // email rather than .in(), which is case-sensitive and would silently
+    // miss those rows — that miss was the actual cause of a real display
+    // name showing as the email-derived fallback instead.
     const partnerEmails = visiblePartners.map(c => c.partner_email);
     let profileMap = {};
     if (partnerEmails.length > 0) {
+      // Escape % and _ (SQL LIKE/ILIKE wildcards) since real email addresses
+      // commonly contain underscores — without this, "john_doe@x.com" would
+      // match "john%doe@x.com" style near-misses via the wildcard, not just
+      // the exact address.
+      const escapeIlike = (s) => s.replace(/[%_]/g, ch => '\\' + ch);
+      const orFilter = partnerEmails.map(e => `email.ilike.${escapeIlike(e)}`).join(',');
       const { data: profiles } = await supabase
         .from('profiles')
         .select('email, display_name, university, suburb_preferences, match_score')
-        .in('email', partnerEmails);
-      (profiles || []).forEach(p => { profileMap[p.email] = p; });
+        .or(orFilter);
+      (profiles || []).forEach(p => { profileMap[(p.email || '').toLowerCase()] = p; });
     }
 
     // S135: fall back to a name derived from the partner's email local-part
@@ -262,11 +292,18 @@ module.exports = async function handler(req, res) {
   }
 
   // ── Mode 2: return thread between email and other ─────────────────────────
+  // S150: same case-sensitivity issue as Mode 1 — eq() is case-sensitive,
+  // so legacy mixed-case rows could fail to match here and the thread would
+  // silently come back empty. ilike (with wildcards escaped) matches
+  // case-insensitively while still requiring an exact address otherwise.
+  const escapeIlike = (s) => s.replace(/[%_]/g, ch => '\\' + ch);
+  const emailPat = escapeIlike(email);
+  const otherPat = escapeIlike(other || '');
   const { data, error } = await supabase
     .from('messages')
     .select('*')
     .or(
-      `and(sender_email.eq.${email},recipient_email.eq.${other}),and(sender_email.eq.${other},recipient_email.eq.${email})`
+      `and(sender_email.ilike.${emailPat},recipient_email.ilike.${otherPat}),and(sender_email.ilike.${otherPat},recipient_email.ilike.${emailPat})`
     )
     .order('created_at', { ascending: true });
 
@@ -279,8 +316,8 @@ module.exports = async function handler(req, res) {
   await supabase
     .from('messages')
     .update({ read: true })
-    .eq('sender_email', other)
-    .eq('recipient_email', email)
+    .ilike('sender_email', otherPat)
+    .ilike('recipient_email', emailPat)
     .eq('read', false);
 
   return res.status(200).json({ messages: data || [] });
