@@ -238,10 +238,20 @@ module.exports = async function handler(req, res) {
       // the exact address.
       const escapeIlike = (s) => s.replace(/[%_]/g, ch => '\\' + ch);
       const orFilter = partnerEmails.map(e => `email.ilike.${escapeIlike(e)}`).join(',');
-      const { data: profiles } = await supabase
+      const { data: profiles, error: profilesErr } = await supabase
         .from('profiles')
-        .select('email, display_name, university, suburb_preferences, match_score')
+        .select('email, display_name, university, suburb_preferences')
         .or(orFilter);
+      // S150: this query was previously also selecting `match_score`, which
+      // is a value computed on the fly by api/matches.js's scoring algorithm
+      // — it has never been a real column on `profiles`. That made this
+      // select fail with a 42703 error on every single call, and because
+      // the error wasn't checked, it failed silently: profiles stayed
+      // undefined, profileMap stayed empty, and every display_name fell
+      // back to nameFromEmail() regardless of case. This was likely the
+      // primary cause of real names showing wrong in Messages while match
+      // cards (a different query, in api/matches.js) worked fine.
+      if (profilesErr) console.error('profiles lookup error:', profilesErr);
       (profiles || []).forEach(p => { profileMap[(p.email || '').toLowerCase()] = p; });
     }
 
