@@ -3249,6 +3249,25 @@ body.light-mode {
   white-space: nowrap;
 }
 .household-action-btn:hover { border-color: rgba(75,191,224,0.4); color: #4BBFE0; }
+/* S148: Cob end-of-tenancy prompt — Household Ecosystem Expansion step 7 */
+.hh-tenancy-check-card {
+  background: rgba(245,184,0,0.06);
+  border: 1px solid rgba(245,184,0,0.25);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.hh-tenancy-check-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.hh-tenancy-check-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 .household-action-btn.primary {
   background: rgba(245,184,0,0.1);
   border-color: rgba(245,184,0,0.3);
@@ -12093,6 +12112,12 @@ function householdRender(data, currentEmail) {
     '<button class="household-action-btn" onclick="householdShowInvite()">Find a new flatmate</button>';
   // 'Invite another' merged into 'Find a new flatmate' button
   actionsHtml += '</div>';
+  // S148: Leave household — separate, visually distinct (danger styling),
+  // two-step confirm inline (see householdLeaveClick) rather than a native
+  // confirm() dialog, consistent with this app's custom-UI convention.
+  actionsHtml += '<div style="margin-top:8px;">' +
+    '<button class="btn-danger" id="hh-leave-btn" onclick="householdLeaveClick()">Leave household</button>' +
+  '</div>';
 
   // Invite panel (collapsed by default, toggled by "Invite another" button)
   var invitePanelHtml = inviteToken ?
@@ -12104,7 +12129,13 @@ function householdRender(data, currentEmail) {
   // S146: layered lease timeline
   var timelineHtml = householdTimelineHtml(members);
 
+  // S148: Cob end-of-tenancy prompt — computed from the current user's own
+  // member row (lease_end + tenancy_confirmed_at re-ask window).
+  var myMember = members.find(function(m) { return m.email === currentEmail; }) || null;
+  var tenancyCheckHtml = householdTenancyCheckHtml(myMember);
+
   var html =
+    tenancyCheckHtml +
     '<div class="household-members-row">' + chipsHtml + '</div>' +
     (barsHtml ? '<div class="household-compat-grid">' + barsHtml + '</div>' : '') +
     timelineHtml +
@@ -12156,6 +12187,157 @@ function householdShareCard() {
 function householdShowInvite() {
   var wrap = document.getElementById('hh-invite-panel-wrap');
   if (wrap) wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+}
+
+// ── S148: Leave household — Household Ecosystem Expansion step 6 ───────────
+// Two-step inline confirm (click once to arm, click again within 4s to
+// actually leave) rather than a browser confirm() dialog or a full modal —
+// consistent with the lightweight interaction patterns already used
+// elsewhere in this file (e.g. hf-tick's tap-to-accept toggle).
+var _hhLeaveArmed = false;
+var _hhLeaveArmTimer = null;
+
+function householdLeaveClick() {
+  var btn = document.getElementById('hh-leave-btn');
+  if (!btn) return;
+
+  if (!_hhLeaveArmed) {
+    _hhLeaveArmed = true;
+    btn.textContent = 'Click again to confirm';
+    clearTimeout(_hhLeaveArmTimer);
+    _hhLeaveArmTimer = setTimeout(function() {
+      _hhLeaveArmed = false;
+      var b = document.getElementById('hh-leave-btn');
+      if (b) b.textContent = 'Leave household';
+    }, 4000);
+    return;
+  }
+
+  // Second click within the window — actually leave.
+  clearTimeout(_hhLeaveArmTimer);
+  _hhLeaveArmed = false;
+  householdLeaveConfirmed();
+}
+
+function householdLeaveConfirmed() {
+  var householdId = localStorage.getItem('ur_household_id');
+  var email = localStorage.getItem('unirenter_email');
+  var btn = document.getElementById('hh-leave-btn');
+  if (!householdId || !email) return;
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Leaving…'; }
+
+  fetch('/api/household/leave', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ household_id: householdId, email: email })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (!d.ok) throw new Error(d.error || 'Could not leave household.');
+    // Clear all local household state — household-specific data (feed cache,
+    // calendar cache) belongs to a household this account is no longer in.
+    localStorage.removeItem('ur_household_id');
+    localStorage.removeItem('ur_household_invite_token');
+    window._hhFeedHouseholdId = null;
+    window._hhFeedEmail = null;
+    window._hhCalMembers = null;
+    window._hhCalFeedItems = null;
+    window._householdLastData = null;
+    householdRenderEmpty();
+    showToast('🏠 You\'ve left the household', 'You can set up or join a new one any time.');
+  })
+  .catch(function(err) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Leave household'; }
+    showToast('❌ Could not leave', err.message || 'Check your connection and try again.');
+  });
+}
+
+// ── S148: Cob end-of-tenancy prompt — Household Ecosystem Expansion step 7 ─
+// Lazy-check-on-load, same no-cron pattern as the bell/decay/follow-up
+// nudge elsewhere in this file. Shown when the CURRENT user's own lease
+// (from lease_companions, via household/get.js) has ended more than
+// LEASE_GRACE_DAYS ago and hasn't been confirmed/dismissed recently.
+// No auto-removal ever happens from silence — only an explicit
+// "I've moved on" click routes into the leave-household flow (step 6).
+var HH_TENANCY_GRACE_DAYS = 14;   // matches api/messages/get.js's LEASE_GRACE_DAYS
+var HH_TENANCY_REASK_DAYS = 30;   // how long "Still together" / "Not now" silences the prompt
+
+function householdTenancyCheckHtml(myMember) {
+  if (!myMember || !myMember.lease_end) return '';
+  var endMs = new Date(myMember.lease_end + 'T00:00:00').getTime();
+  var nowMs = Date.now();
+  var graceMs = HH_TENANCY_GRACE_DAYS * 86400000;
+  if ((nowMs - endMs) <= graceMs) return ''; // lease hasn't been over long enough yet
+
+  if (myMember.tenancy_confirmed_at) {
+    var confirmedMs = new Date(myMember.tenancy_confirmed_at).getTime();
+    var reaskMs = HH_TENANCY_REASK_DAYS * 86400000;
+    if ((nowMs - confirmedMs) < reaskMs) return ''; // recently answered — don't nag
+  }
+
+  var dateStr = hhTimelineFmtDate(myMember.lease_end);
+  return '<div class="hh-tenancy-check-card" id="hh-tenancy-check-card">' +
+    '<div class="hh-tenancy-check-text">🤠 Your lease shows it ended ' + dateStr + ' — still living with your household?</div>' +
+    '<div class="hh-tenancy-check-actions">' +
+      '<button class="household-action-btn primary" onclick="hhTenancyRespond(\'still_together\')">Still together</button>' +
+      '<button class="btn-danger" onclick="hhTenancyRespond(\'moved_on\')">I\'ve moved on</button>' +
+      '<button class="household-action-btn" onclick="hhTenancyRespond(\'dismiss\')">Not now</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function hhTenancyRespond(action) {
+  var householdId = localStorage.getItem('ur_household_id');
+  var email = localStorage.getItem('unirenter_email');
+  if (!householdId || !email) return;
+
+  if (action === 'moved_on') {
+    hhTenancyMovedOn(householdId, email);
+    return;
+  }
+
+  // 'still_together' or 'dismiss' — both just record a response (resets the
+  // re-ask window) and hide the card immediately, no need to wait on the network.
+  var card = document.getElementById('hh-tenancy-check-card');
+  if (card) card.style.display = 'none';
+
+  fetch('/api/household/tenancy-check', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ household_id: householdId, email: email, action: action })
+  }).catch(function() { /* non-fatal — card already hidden client-side, worst case it reappears next visit */ });
+
+  if (action === 'still_together') {
+    showToast('🤠 Good to know', 'Thanks — carry on!');
+  }
+}
+
+function hhTenancyMovedOn(householdId, email) {
+  var card = document.getElementById('hh-tenancy-check-card');
+  if (card) { card.style.opacity = '0.5'; card.style.pointerEvents = 'none'; }
+  fetch('/api/household/leave', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ household_id: householdId, email: email })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (!d.ok) throw new Error(d.error || 'Could not update.');
+    localStorage.removeItem('ur_household_id');
+    localStorage.removeItem('ur_household_invite_token');
+    window._hhFeedHouseholdId = null;
+    window._hhFeedEmail = null;
+    window._hhCalMembers = null;
+    window._hhCalFeedItems = null;
+    window._householdLastData = null;
+    householdRenderEmpty();
+    showToast('🏠 Household updated', 'You can set up or join a new household any time.');
+  })
+  .catch(function(err) {
+    if (card) { card.style.opacity = ''; card.style.pointerEvents = ''; }
+    showToast('❌ Could not update', err.message || 'Check your connection and try again.');
+  });
 }
 
 // ── S147: Household Feed — chat/notes/todos/reminders unified ──────────────
