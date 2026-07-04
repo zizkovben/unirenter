@@ -5617,58 +5617,145 @@ function openSettingsCollapse() {
 const VIBE_PRIMARY_PALETTE = ['🌙','🐦','📚','🎓','💼','🗣️','🚪','🧹','🤷','🍳','🎮','🎵','🏋️','🌈','🌍','👥','🏠','🌿'];
 const VIBE_SECONDARY_EXTRAS = ['💻','🌙','💪','🧘','🎨','📖','🎬','📺','🌳','🪴','🔥','🚿','🚬','📦','🌱','🍖','☕','🍺','🥡','🛒','🐱','🐶','🐦','🐠','💑','👨‍👩‍👧','🤝','🗺️','🍽️','🌍','✈️','🎊','👶','♿'];
 
-const VIBE_QUESTIONS = [
-  {
-    type: 'emoji-grid',
-    q: 'Pick the emoji that best captures how you live as a housemate.',
-    hint: 'This becomes your primary vibe — the first thing potential housemates see.',
-    emojis: VIBE_PRIMARY_PALETTE
-  },
-  {
-    type: 'text-shortcuts',
-    q: 'Describe your typical day at home — morning to night.',
-    hint: 'When do you wake up? How do you use the space? When do you go to bed?',
-    max: 300,
-    shortcuts: ['Early riser 🐦', 'Night owl 🌙', 'Gym mornings 💪', 'Work from home 💻', 'Quiet evenings 🌿', 'Batch cook Sundays 🍳']
-  },
-  {
-    type: 'text-shortcuts',
-    q: 'What\'s your kitchen & food situation?',
-    hint: 'How often do you cook? Fridge-sharing? Any dietary needs worth knowing?',
-    max: 200,
-    shortcuts: ['Cook most nights 🍳', 'Mostly takeaway 🥡', 'Plant-based 🌱', 'Meat-eater 🍖', 'Coffee addict ☕', 'No fridge sharing 🛒']
-  },
-  {
-    type: 'multi-emoji',
-    q: 'Any pets — or pet dealbreakers?',
-    hint: 'Select all that apply. Pick what describes you.',
-    emojis: [
-      { e: '🐱', label: 'I have a cat' },
-      { e: '🐶', label: 'I have a dog' },
-      { e: '🐦', label: 'I have a bird' },
-      { e: '🐠', label: 'I have fish' },
-      { e: '🐾', label: 'Love all pets' },
-      { e: '🚫🐱', label: 'Allergic to cats' },
-      { e: '🚫🐶', label: 'No dogs please' },
-      { e: '🙅', label: 'No pets at all' },
-      { e: '✅', label: 'Happy with any pet' }
-    ]
-  },
-  {
-    type: 'text-shortcuts',
-    q: 'How do you handle shared spaces — kitchen, bathroom, living room?',
-    hint: 'Clean as you go? Roster? What matters to you day-to-day?',
-    max: 200,
-    shortcuts: ['Clean as I go 🧹', 'Weekly roster 🗓️', 'Pretty relaxed 🤷', 'Strict about kitchen ✨', 'Need my own shelf 🛒', 'Bathroom schedule ⏰']
-  },
-  {
-    type: 'text-shortcuts',
-    q: 'What kind of social vibe are you bringing to the house?',
-    hint: 'This is the most important one — be honest. Do you host friends? Keep to yourself? Somewhere in between?',
-    max: 300,
-    shortcuts: ['Mostly keep to myself 🚪', 'Occasional friends over 👥', 'Host regularly 🎊', 'Study house vibes 📚', 'Up for house dinners 🍽️', 'Need quiet after 10pm 🌙']
+// S150 rebuild — restores the Session 96 personalisation design that was
+// designed and built for the city-page registration flow, then removed
+// from there at S110b when the vibe quiz was relocated to be dashboard-only.
+// The dashboard's own quiz (built earlier, S42) was never updated to match
+// — it kept the original manual "pick your emoji" Q1 and generic Q2-6
+// copy. This replaces the manual emoji picker with a conversational,
+// profile-aware Q1 (no emoji grid at all — Cob infers the emoji equation
+// from everyone's answers together, same as it already does for Q2-6),
+// and personalises the other questions using data already collected
+// earlier in registration, with a graceful generic fallback wherever a
+// field is missing. Nothing about the quiz's mechanics changes — same
+// 6-step flow, same shortcuts/mic input, same single Cob call at the end,
+// same override picker for the resulting emojis.
+function _vibeGetProfileFields() {
+  var p = window._loadedProfile || {};
+  return {
+    field:  p.field_of_study  || localStorage.getItem('ur_field_of_study')  || '',
+    year:   p.year_of_study   || localStorage.getItem('ur_year_of_study')   || '',
+    status: p.student_status  || localStorage.getItem('ur_student_status')  || '',
+    sleep:  p.sleep_schedule  || localStorage.getItem('ur_sleep')           || '',
+    clean:  p.cleanliness     || localStorage.getItem('ur_cleanliness')     || '',
+    lang:   p.language_home   || localStorage.getItem('ur_language_home')   || '',
+    stay:   p.stay_duration   || localStorage.getItem('ur_stay_duration')   || '',
+    household: p.household_type || localStorage.getItem('ur_household')     || ''
+  };
+}
+
+function buildVibeQuestions() {
+  var f = _vibeGetProfileFields();
+
+  // Q1 — replaces the old manual emoji-grid entirely. Personalised by
+  // field of study + year where available; otherwise a generic but still
+  // conversational fallback. Cob reads this alongside Q2-6 to work out the
+  // emoji equation itself — nothing here is a forced pick.
+  var q1Text, q1Shortcuts;
+  if (f.field) {
+    q1Text = 'You\'re studying ' + f.field + (f.year ? ' (' + f.year + ')' : '') +
+      ' — when deadlines or exams hit, how does your home life actually change?';
+    q1Shortcuts = ['Library hermit 📚', 'Need the house quiet 🤫', 'Stress-clean 🧹', 'All-nighters 🌙', 'Barely notice, honestly 🤷', 'Group study at home 👥'];
+  } else {
+    q1Text = 'When deadlines, exams or a big week at work hit, how does your home life actually change?';
+    q1Shortcuts = ['Need it quiet 🤫', 'Stress-clean 🧹', 'All-nighters 🌙', 'Barely notice, honestly 🤷', 'Disappear into my room 🚪'];
   }
-];
+
+  // Q2 — personalised by sleep schedule + stay duration.
+  var q2Text, q2Shortcuts;
+  var sleepBit = f.sleep && SLEEP_LABELS[f.sleep] ? SLEEP_LABELS[f.sleep].replace(/^[^\s]+\s*/, '').toLowerCase() : '';
+  if (sleepBit) {
+    q2Text = 'You said you\'re more of a ' + sleepBit + ' — paint me a picture of a typical evening or weekend at home when you\'ve got nothing on.';
+  } else {
+    q2Text = 'Paint me a picture of a typical evening or weekend at home when you\'ve got nothing on — what\'s actually happening?';
+  }
+  q2Shortcuts = ['Early riser 🐦', 'Night owl 🌙', 'Gym mornings 💪', 'Work from home 💻', 'Quiet evenings 🌿', 'Batch cook Sundays 🍳'];
+
+  // Q3 — kept close to the original, nodding to shared language/cultural
+  // background if it's known, since food is often where that shows up.
+  var q3Text = f.lang && f.lang !== 'english_only'
+    ? 'What\'s your kitchen & food situation? (Fridge-sharing, dietary needs, anything cultural worth knowing.)'
+    : 'What\'s your kitchen & food situation?';
+  var q3Hint = 'How often do you cook? Fridge-sharing? Any dietary needs worth knowing?';
+
+  // Q5 — personalised by cleanliness level already selected earlier in
+  // registration, so it reads as a follow-up rather than repeating the question.
+  var q5Text, q5Hint;
+  var cleanBit = f.clean && CLEAN_LABELS[f.clean] ? CLEAN_LABELS[f.clean].replace(/^[^\s]+\s*/, '') : '';
+  if (cleanBit) {
+    q5Text = 'You told us you\'re on the ' + cleanBit.toLowerCase() + ' side — how does that actually play out in shared spaces day-to-day?';
+    q5Hint = 'Kitchen, bathroom, living room — clean as you go? Roster? What matters to you?';
+  } else {
+    q5Text = 'How do you handle shared spaces — kitchen, bathroom, living room?';
+    q5Hint = 'Clean as you go? Roster? What matters to you day-to-day?';
+  }
+
+  // Q6 — nods to student status / household type where known.
+  var q6Text;
+  if (f.status === 'other') {
+    q6Text = 'What kind of social vibe are you bringing to the house? Since you\'re not studying, this is often the main thing housemates want to know about you.';
+  } else if (f.household === 'couple') {
+    q6Text = 'What kind of social vibe are you bringing to the house — including how a partner staying over fits into it?';
+  } else {
+    q6Text = 'What kind of social vibe are you bringing to the house?';
+  }
+
+  return [
+    {
+      type: 'text-shortcuts',
+      q: q1Text,
+      hint: 'Cob uses this — along with everything else here — to work out your vibe equation. No right answer, just be honest.',
+      max: 300,
+      shortcuts: q1Shortcuts
+    },
+    {
+      type: 'text-shortcuts',
+      q: q2Text,
+      hint: 'When do you wake up? How do you use the space? When do you go to bed?',
+      max: 300,
+      shortcuts: q2Shortcuts
+    },
+    {
+      type: 'text-shortcuts',
+      q: q3Text,
+      hint: q3Hint,
+      max: 200,
+      shortcuts: ['Cook most nights 🍳', 'Mostly takeaway 🥡', 'Plant-based 🌱', 'Meat-eater 🍖', 'Coffee addict ☕', 'No fridge sharing 🛒']
+    },
+    {
+      type: 'multi-emoji',
+      q: 'Any pets — or pet dealbreakers?',
+      hint: 'Select all that apply. Pick what describes you.',
+      emojis: [
+        { e: '🐱', label: 'I have a cat' },
+        { e: '🐶', label: 'I have a dog' },
+        { e: '🐦', label: 'I have a bird' },
+        { e: '🐠', label: 'I have fish' },
+        { e: '🐾', label: 'Love all pets' },
+        { e: '🚫🐱', label: 'Allergic to cats' },
+        { e: '🚫🐶', label: 'No dogs please' },
+        { e: '🙅', label: 'No pets at all' },
+        { e: '✅', label: 'Happy with any pet' }
+      ]
+    },
+    {
+      type: 'text-shortcuts',
+      q: q5Text,
+      hint: q5Hint,
+      max: 200,
+      shortcuts: ['Clean as I go 🧹', 'Weekly roster 🗓️', 'Pretty relaxed 🤷', 'Strict about kitchen ✨', 'Need my own shelf 🛒', 'Bathroom schedule ⏰']
+    },
+    {
+      type: 'text-shortcuts',
+      q: q6Text,
+      hint: 'This is the most important one — be honest. Do you host friends? Keep to yourself? Somewhere in between?',
+      max: 300,
+      shortcuts: ['Mostly keep to myself 🚪', 'Occasional friends over 👥', 'Host regularly 🎊', 'Study house vibes 📚', 'Up for house dinners 🍽️', 'Need quiet after 10pm 🌙']
+    }
+  ];
+}
+
+var VIBE_QUESTIONS = [];
 
 var _vibeStep      = 0;
 var _vibeAnswers   = ['','','','','',''];
@@ -5715,6 +5802,7 @@ function _vibeSaveLocal(primary, secondary, summary) {
 function vibeStartQuiz() {
   var verified = localStorage.getItem('unirenter_email_verified') === '1';
   if (!verified) { showToast('🔒 Verify your email first', 'Complete your profile to unlock this.'); return; }
+  VIBE_QUESTIONS   = buildVibeQuestions();
   _vibeStep      = 0;
   _vibeAnswers   = ['','','','','',''];
   _vibePetEmojis = [];
@@ -5929,7 +6017,7 @@ async function _vibeGenerate() {
   }, 500);
 
   var _vibeQuizData = {
-    primary_picked: _vibeAnswers[0] || '',
+    exam_study: _vibeAnswers[0] || '',
     home_life: _vibeAnswers[1] || '',
     food_kitchen: _vibeAnswers[2] || '',
     pets: _vibeAnswers[3] || 'No preference',
@@ -5941,28 +6029,26 @@ async function _vibeGenerate() {
 
   var promptBody =
     'You are Cob — a warm AI assistant for UniRenter, an Australian student accommodation platform.\n\n' +
-    'A student has answered 6 questions about themselves as a housemate. Your job is to write a short, honest personality portrait for their profile.\n\n' +
-    'LOCKED PRIMARY EMOJI PALETTE (pick exactly one):\n' +
+    'A student has answered 6 questions about themselves as a housemate. Your job is to work out their vibe equation and write a short, honest personality portrait for their profile.\n\n' +
+    'LOCKED PRIMARY EMOJI PALETTE (pick exactly one, based on ALL the answers together — no single answer is a forced pick):\n' +
     '🌙 Night owl | 🐦 Early riser | 📚 Study-focused | 🎓 Postgrad | 💼 Young professional | 🗣️ Social & outgoing | 🚪 Keeps to themselves | 🧹 Neat freak | 🤷 Relaxed about mess | 🍳 Home cook | 🎮 Gamer | 🎵 Musician | 🏋️ Gym regular | 🌈 LGBTQ+ friendly | 🌍 International | 👥 Loves having guests | 🏠 Homebody | 🌿 Chill vibes\n\n' +
-    'NOTE: The student picked ' + _vibeQuizData.primary_picked + ' as their primary emoji in Q1. Respect this unless their other answers clearly override it.\n\n' +
     'SECONDARY EMOJI — pick one that adds personality flavour from this curated set (not restricted to):\n' +
     '💻 🌙 💪 🧘 🎨 📖 🎬 📺 🌳 🪴 🔥 🛀 🚫 📦 🌱 🍖 ☕ 🍺 🥡 🛍 🐱 🐶 🐦 🐠 💑 👨‍👩‍👧 🤝 🗺 🍽 🌍 ✈ 🎊 👶 ♿\n\n' +
     'RULES:\n' +
-    '- Respect Q1 primary emoji pick unless Q2–6 clearly override it\n' +
+    '- Weigh all 6 answers together — no single answer overrides the rest\n' +
     '- Secondary emoji adds personality flavour — be specific, not generic\n' +
     '- Write summary in third person, 1-2 sentences, warm and specific — not generic. Lead with their strongest coexistence trait.\n' +
     '- Summary format: starts with primary emoji, then a quoted sentence or two. Example: 🧹 "Neat freak who cooks every night and is strict about kitchen cleanliness — total homebody, quiet after 10pm."\n' +
     '- Do NOT give legal advice or housing recommendations. Just write the portrait.\n' +
     '- NEVER use the word "legal"\n\n' +
     'STUDENT ANSWERS:\n' +
-    'Q1 (Primary emoji picked): ' + _vibeQuizData.primary_picked + '\n' +
+    'Q1 (Exam/deadline behaviour at home): ' + (_vibeQuizData.exam_study || '(skipped)') + '\n' +
     'Q2 (Home life): ' + (_vibeQuizData.home_life || '(skipped)') + '\n' +
     'Q3 (Food & kitchen): ' + (_vibeQuizData.food_kitchen || '(skipped)') + '\n' +
     'Q4 (Pets): ' + _vibeQuizData.pets + '\n' +
     'Q5 (Shared spaces): ' + (_vibeQuizData.shared_spaces || '(skipped)') + '\n' +
     'Q6 (Social style — most important): ' + (_vibeQuizData.social_style || '(skipped)') + '\n\n' +
     'Respond ONLY with a JSON object, no preamble, no markdown fences:\n' +
-    '{"primary":"<emoji>","secondary":"<emoji>","summary":"<primary_emoji> \\"<1-2 sentences>\\""}'
     '{"primary":"<emoji>","secondary":"<emoji>","summary":"<primary_emoji> \\"<1-2 sentences>\\""}';
 
   try {
@@ -6149,6 +6235,7 @@ function vibeRetakeRequest() {
 
 function vibeConfirmRetake() {
   document.getElementById('vibe-retake-confirm').style.display = 'none';
+  VIBE_QUESTIONS = buildVibeQuestions();
   _vibeStep      = 0;
   _vibeAnswers   = ['','','','','',''];
   _vibePetEmojis = [];
