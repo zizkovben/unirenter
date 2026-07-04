@@ -123,6 +123,45 @@ a.nav-logo {
   cursor: pointer;
   flex-shrink: 0;
 }
+/* S148: Dashboard notification bell — mirrors the S143 city-page bell,
+   aggregating message unread + household feed unread into one nav-level
+   indicator, since the dashboard has its own per-tab badges that are only
+   visible while looking at the tab bar. */
+.nav-bell {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #e8f0f5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-bell-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--brand-coral);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
+}
+@media (max-width: 600px) {
+  .nav-bell { width: 32px; height: 32px; font-size: 13px; }
+}
 /* Dropdown */
 .nav-dropdown-wrap { position: relative; }
 .nav-dropdown {
@@ -4166,6 +4205,7 @@ body.light-mode {
         <a class="nav-dd-item" href="/agent-portal" id="nav-agent-link" style="color:var(--brand-blue);display:none;">🏡 Agent portal →</a>
       </div>
     </div>
+    <button class="nav-bell" id="nav-bell" onclick="navBellClick()" title="Notifications">🔔<span class="nav-bell-badge" id="nav-bell-badge"></span></button>
     <button class="btn-theme" id="mode-toggle" onclick="toggleMode()">🌙</button>
   </div>
 </nav>
@@ -5392,6 +5432,62 @@ function applyTheme(val) {
   }
 })();
 
+// ── S148: Dashboard notification bell ───────────────────────────────────────
+// Aggregates message unread (api/messages/get's existing totalUnread) and
+// household feed unread (api/household/feed-get's count_only mode) into a
+// single nav-level badge. Unlike the S143 city-page bell, this never needs
+// to hide for a signed-out state — the dashboard's own auth guard (S134)
+// already prevents the page from rendering at all without a verified
+// session, so the bell can assume a signed-in user throughout.
+var _navBellMsgUnread = 0;
+var _navBellHhUnread = 0;
+
+function checkNavBellUnread() {
+  var email = localStorage.getItem('unirenter_email');
+  var badge = document.getElementById('nav-bell-badge');
+  if (!email || !badge) return;
+
+  var householdId = localStorage.getItem('ur_household_id');
+
+  var msgPromise = fetch('/api/messages/get?email=' + encodeURIComponent(email))
+    .then(function(r) { return r.ok ? r.json() : { totalUnread: 0 }; })
+    .then(function(d) { return d.totalUnread || 0; })
+    .catch(function() { return 0; });
+
+  var hhPromise = householdId
+    ? fetch('/api/household/feed-get?household_id=' + encodeURIComponent(householdId) + '&email=' + encodeURIComponent(email) + '&count_only=1')
+        .then(function(r) { return r.ok ? r.json() : { unread_count: 0 }; })
+        .then(function(d) { return d.unread_count || 0; })
+        .catch(function() { return 0; })
+    : Promise.resolve(0);
+
+  Promise.all([msgPromise, hhPromise]).then(function(results) {
+    _navBellMsgUnread = results[0];
+    _navBellHhUnread = results[1];
+    var total = _navBellMsgUnread + _navBellHhUnread;
+    if (total > 0) {
+      badge.textContent = total > 9 ? '9+' : String(total);
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  });
+}
+
+function startNavBellPolling() {
+  checkNavBellUnread();
+  setInterval(function() {
+    if (document.visibilityState !== 'visible') return;
+    checkNavBellUnread();
+  }, 45000);
+}
+
+function navBellClick() {
+  if (_navBellMsgUnread > 0) { switchTab('messages'); return; }
+  if (_navBellHhUnread > 0) { switchTab('household'); return; }
+  switchTab('messages');
+}
+
 // ── Tab switching (V46 — 4 tabs) ──────────────────────────────────────────────
 function switchTab(name) {
   // Backwards compat: old tab names redirect
@@ -5425,7 +5521,10 @@ function switchTab(name) {
   if (name === 'household') {
     householdInit();
   }
-  
+  // S148: refresh the nav bell after any tab switch — messages/household
+  // both clear their own tab-level badges above, so this reflects that
+  // immediately rather than waiting for the next 45s poll.
+  checkNavBellUnread();
 }
 
 // ── switchTenancySection (kept for backwards compat — V54: no sub-nav, all visible)
@@ -10469,6 +10568,7 @@ window.addEventListener('DOMContentLoaded', function() {
     vibeInit();
     vibeShareInit();
     householdFeedCheckUnreadBadge();
+    startNavBellPolling();
     // Only init household if that tab is currently active (avoids flash on other tabs)
     var hhPanel = document.getElementById('panel-household');
     if (hhPanel && hhPanel.classList.contains('active')) {
