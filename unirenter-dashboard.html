@@ -2989,6 +2989,172 @@ body.light-mode {
   flex-wrap: wrap;
   margin-top: 4px;
 }
+/* S147: Household Feed */
+.household-feed-section {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--navy-border);
+}
+.household-feed-header {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.household-feed-composer {
+  background: var(--navy-mid);
+  border: 1px solid var(--navy-border);
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 12px;
+}
+.household-feed-type-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.hf-type-chip {
+  background: transparent;
+  border: 1px solid var(--navy-border);
+  color: var(--text-muted);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.hf-type-chip.active {
+  background: var(--brand-blue);
+  border-color: var(--brand-blue);
+  color: #05141d;
+  font-weight: 600;
+}
+.household-feed-input-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.hf-text-input {
+  flex: 1;
+  min-width: 140px;
+  background: var(--navy-deep, #0a1620);
+  border: 1px solid var(--navy-border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+.hf-date-input {
+  background: var(--navy-deep, #0a1620);
+  border: 1px solid var(--navy-border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+.hf-send-btn {
+  background: var(--brand-coral);
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.hf-send-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.household-feed-list {
+  max-height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 2px;
+}
+.household-feed-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 20px 10px;
+}
+.hf-item.hf-chat {
+  max-width: 85%;
+}
+.hf-item.hf-chat.is-me {
+  align-self: flex-end;
+  text-align: right;
+}
+.hf-chat-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+}
+.hf-chat-bubble {
+  background: var(--navy-mid);
+  border: 1px solid var(--navy-border);
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text);
+  display: inline-block;
+}
+.hf-item.hf-chat.is-me .hf-chat-bubble {
+  background: rgba(75,191,224,0.15);
+  border-color: var(--brand-blue);
+}
+.hf-item.hf-card {
+  background: var(--navy-mid);
+  border: 1px solid var(--navy-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.hf-card-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.hf-card-author {
+  font-weight: 600;
+  color: var(--text);
+}
+.hf-card-date {
+  margin-left: auto;
+  color: var(--brand-yellow);
+}
+.hf-card-text {
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.hf-card-bottom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hf-tick {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand-coral);
+  border: 1px solid var(--brand-coral);
+  border-radius: 20px;
+  padding: 3px 10px;
+  cursor: pointer;
+  display: inline-block;
+}
+.hf-tick.checked {
+  color: var(--brand-green);
+  border-color: var(--brand-green);
+}
+.hf-accepted-count {
+  font-size: 11px;
+  color: var(--text-muted);
+}
 .household-action-btn {
   background: none;
   border: 1px solid rgba(255,255,255,0.18);
@@ -4005,7 +4171,7 @@ body.light-mode {
       🗓️ <span class="tab-label">Planner</span>
     </button>
     <button class="tab-btn" id="tab-btn-household" role="tab" onclick="switchTab('household')">
-      👥 <span class="tab-label">Household</span>
+      👥 <span class="tab-label">Household</span> <span class="tab-badge" id="household-feed-badge" style="display:none;">0</span>
     </button>
     <button class="tab-btn" id="tab-btn-profile" role="tab" onclick="switchTab('profile')">
       👤 <span class="tab-label">Profile</span>
@@ -8597,6 +8763,7 @@ function todoItemHTML(item) {
       '</div>' +
     '</div>' +
     '<div class="todo-item-actions">' +
+      (localStorage.getItem('ur_household_id') ? '<button class="todo-action-btn" onclick="todoShareToHousehold(\'' + item.id + '\')" title="Share to household">🏠</button>' : '') +
       '<button class="todo-action-btn" onclick="todoDelete(\'' + item.id + '\')" title="Delete">🗑</button>' +
     '</div>' +
   '</div>';
@@ -10201,6 +10368,7 @@ window.addEventListener('DOMContentLoaded', function() {
     calcRenderHistory();
     vibeInit();
     vibeShareInit();
+    householdFeedCheckUnreadBadge();
     // Only init household if that tab is currently active (avoids flash on other tabs)
     var hhPanel = document.getElementById('panel-household');
     if (hhPanel && hhPanel.classList.contains('active')) {
@@ -11862,7 +12030,8 @@ function householdRender(data, currentEmail) {
     (vibeEqHtml || '') +
     (cobTip ? '<div class="household-cob-tip">🤠 ' + cobTip + '</div>' : '') +
     actionsHtml +
-    invitePanelHtml;
+    invitePanelHtml +
+    '<div id="household-feed-wrap"></div>';
 
   inner.innerHTML = html;
 
@@ -11877,6 +12046,9 @@ function householdRender(data, currentEmail) {
     if (agSub) agSub.textContent = 'Sort the house rules before someone needs to guess. Tap to start or review your agreement.';
     hhAgLoadEntryState(localStorage.getItem('ur_household_id'), currentEmail);
   }
+
+  // S147: Household Feed (chat/notes/todos/reminders, tick-to-accept)
+  householdFeedInit(data.id, currentEmail);
 }
 
 function householdShareCard() {
@@ -11899,6 +12071,219 @@ function householdShareCard() {
 function householdShowInvite() {
   var wrap = document.getElementById('hh-invite-panel-wrap');
   if (wrap) wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+}
+
+// ── S147: Household Feed — chat/notes/todos/reminders unified ──────────────
+// Household Ecosystem Expansion step 4. See project bible for full spec.
+var _hfSelectedType = 'chat';
+
+function householdFeedInit(householdId, email) {
+  var wrap = document.getElementById('household-feed-wrap');
+  if (!wrap || !householdId) return;
+  window._hhFeedHouseholdId = householdId;
+  window._hhFeedEmail = email;
+  wrap.innerHTML = householdFeedComposerHtml() +
+    '<div id="household-feed-list" class="household-feed-list"><div class="household-feed-empty">Loading feed…</div></div>';
+  householdFeedLoad(householdId, email);
+}
+
+function householdFeedComposerHtml() {
+  return '<div class="household-feed-section">' +
+    '<div class="household-feed-header">🏠 Household Feed</div>' +
+    '<div class="household-feed-composer">' +
+      '<div class="household-feed-type-chips">' +
+        '<button class="hf-type-chip active" data-type="chat" onclick="hfSelectType(this,\'chat\')">💬 Chat</button>' +
+        '<button class="hf-type-chip" data-type="note" onclick="hfSelectType(this,\'note\')">📝 Note</button>' +
+        '<button class="hf-type-chip" data-type="todo" onclick="hfSelectType(this,\'todo\')">✅ Todo</button>' +
+        '<button class="hf-type-chip" data-type="reminder" onclick="hfSelectType(this,\'reminder\')">⏰ Reminder</button>' +
+      '</div>' +
+      '<div class="household-feed-input-row">' +
+        '<input type="text" id="hf-text-input" class="hf-text-input" placeholder="Message the household…" maxlength="500">' +
+        '<input type="date" id="hf-date-input" class="hf-date-input" style="display:none;">' +
+        '<button class="hf-send-btn" onclick="householdFeedSend()">Send</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function hfSelectType(btn, type) {
+  _hfSelectedType = type;
+  document.querySelectorAll('.hf-type-chip').forEach(function(c) { c.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  var dateInput = document.getElementById('hf-date-input');
+  if (dateInput) dateInput.style.display = (type === 'todo' || type === 'reminder') ? 'inline-block' : 'none';
+  var textInput = document.getElementById('hf-text-input');
+  if (textInput) {
+    var placeholders = {
+      chat: 'Message the household…',
+      note: 'Leave a note for the house…',
+      todo: 'What needs doing?',
+      reminder: 'What should the house remember?'
+    };
+    textInput.placeholder = placeholders[type] || 'Message the household…';
+  }
+}
+
+function householdFeedSend() {
+  var input = document.getElementById('hf-text-input');
+  var dateInput = document.getElementById('hf-date-input');
+  var text = input ? input.value.trim() : '';
+  if (!text) return;
+  var householdId = window._hhFeedHouseholdId;
+  var email = window._hhFeedEmail;
+  if (!householdId || !email) return;
+
+  var payload = { household_id: householdId, email: email, type: _hfSelectedType, text: text };
+  if ((_hfSelectedType === 'todo' || _hfSelectedType === 'reminder') && dateInput && dateInput.value) {
+    payload.event_date = dateInput.value;
+  }
+
+  var btn = document.querySelector('.hf-send-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+
+  fetch('/api/household/feed-add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+    if (!d.ok) { showToast('❌ Could not post', d.error || 'Try again.'); return; }
+    if (input) input.value = '';
+    if (dateInput) dateInput.value = '';
+    householdFeedLoad(householdId, email);
+  })
+  .catch(function() {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+    showToast('❌ Could not post', 'Check your connection and try again.');
+  });
+}
+
+function householdFeedLoad(householdId, email) {
+  fetch('/api/household/feed-get?household_id=' + encodeURIComponent(householdId) + '&email=' + encodeURIComponent(email))
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (!d.ok) return;
+    householdFeedRenderList(d.items || [], email);
+    // Mark read (non-blocking) and clear the tab badge
+    fetch('/api/household/feed-mark-read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ household_id: householdId, email: email })
+    }).catch(function() {});
+    var badge = document.getElementById('household-feed-badge');
+    if (badge) badge.style.display = 'none';
+  })
+  .catch(function() {});
+}
+
+function householdFeedRenderList(items, myEmail) {
+  var list = document.getElementById('household-feed-list');
+  if (!list) return;
+  if (!items.length) {
+    list.innerHTML = '<div class="household-feed-empty">No messages yet. Say hi to your household 👋</div>';
+    return;
+  }
+  list.innerHTML = items.map(function(item) { return householdFeedItemHtml(item, myEmail); }).join('');
+  list.scrollTop = list.scrollHeight;
+}
+
+function householdFeedItemHtml(item, myEmail) {
+  var isMe = item.author_email === myEmail;
+  var name = item.author_name ? item.author_name.split(' ')[0] : (item.author_email ? item.author_email.split('@')[0] : 'Housemate');
+  var typeIcon = { chat: '💬', note: '📝', todo: '✅', reminder: '⏰' }[item.type] || '💬';
+  var dateStr = item.event_date ? hhTimelineFmtDate(item.event_date) : '';
+  var when = new Date(item.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+
+  if (item.type === 'chat') {
+    return '<div class="hf-item hf-chat' + (isMe ? ' is-me' : '') + '">' +
+      '<div class="hf-chat-meta">' + escHtml(name) + (isMe ? ' (you)' : '') + ' · ' + when + '</div>' +
+      '<div class="hf-chat-bubble">' + escHtml(item.text) + '</div>' +
+    '</div>';
+  }
+
+  var accepted = item.acked_by || [];
+  var iAccepted = !!item.accepted_by_me;
+  return '<div class="hf-item hf-card hf-' + item.type + '">' +
+    '<div class="hf-card-top">' +
+      '<span class="hf-card-icon">' + typeIcon + '</span>' +
+      '<span class="hf-card-author">' + escHtml(name) + (isMe ? ' (you)' : '') + '</span>' +
+      (dateStr ? '<span class="hf-card-date">' + dateStr + '</span>' : '') +
+    '</div>' +
+    '<div class="hf-card-text">' + escHtml(item.text) + '</div>' +
+    '<div class="hf-card-bottom">' +
+      '<div class="hf-tick' + (iAccepted ? ' checked' : '') + '" onclick="householdFeedTick(\'' + item.id + '\',' + (!iAccepted) + ')">' +
+        (iAccepted ? '✓ Accepted' : 'Tap to accept') +
+      '</div>' +
+      (accepted.length ? '<span class="hf-accepted-count">' + accepted.length + ' accepted</span>' : '') +
+    '</div>' +
+  '</div>';
+}
+
+function householdFeedTick(feedId, acked) {
+  var householdId = window._hhFeedHouseholdId;
+  var email = window._hhFeedEmail;
+  if (!householdId || !email) return;
+  fetch('/api/household/feed-tick', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ feed_id: feedId, email: email, acked: acked })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (!d.ok) { showToast('❌ Could not update', d.error || 'Try again.'); return; }
+    householdFeedLoad(householdId, email);
+  })
+  .catch(function() { showToast('❌ Could not update', 'Check your connection and try again.'); });
+}
+
+function householdFeedCheckUnreadBadge() {
+  var householdId = localStorage.getItem('ur_household_id');
+  var email = localStorage.getItem('unirenter_email');
+  if (!householdId || !email) return;
+  fetch('/api/household/feed-get?household_id=' + encodeURIComponent(householdId) + '&email=' + encodeURIComponent(email) + '&count_only=1')
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (!d.ok) return;
+    var badge = document.getElementById('household-feed-badge');
+    if (!badge) return;
+    var hhPanel = document.getElementById('panel-household');
+    var hhActive = hhPanel && hhPanel.classList.contains('active');
+    if (d.unread_count > 0 && !hhActive) {
+      badge.textContent = d.unread_count > 9 ? '9+' : String(d.unread_count);
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  })
+  .catch(function() {});
+}
+
+// S147: "Share to household" — one-way snapshot from a personal to-do item
+// into the household feed. Editing the original personal to-do afterward
+// does NOT update the shared copy (deliberate — see project bible §3).
+function todoShareToHousehold(id) {
+  var items = todoGetAll();
+  var item = items.find(function(i) { return i.id === id; });
+  if (!item) return;
+  var householdId = localStorage.getItem('ur_household_id');
+  var email = localStorage.getItem('unirenter_email');
+  if (!householdId || !email) {
+    showToast('🏠 No household yet', 'Set up or join a household first from the Household tab.');
+    return;
+  }
+  fetch('/api/household/feed-add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ household_id: householdId, email: email, type: 'todo', text: item.title, event_date: item.date || null })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (!d.ok) { showToast('❌ Could not share', d.error || 'Try again.'); return; }
+    showToast('🏠 Shared to household', 'Your housemates can now see and accept this.');
+  })
+  .catch(function() { showToast('❌ Could not share', 'Check your connection and try again.'); });
 }
 
 function hhTimelineFmtDate(iso) {
