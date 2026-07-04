@@ -49,7 +49,7 @@ module.exports = async function handler(req, res) {
     // Fetch members
     const { data: memberRows, error: memberErr } = await supabase
       .from('household_members')
-      .select('email, joined_at')
+      .select('email, joined_at, tenancy_confirmed_at')
       .eq('household_id', household_id)
       .order('joined_at', { ascending: true });
 
@@ -110,7 +110,9 @@ module.exports = async function handler(req, res) {
         household_type:     p.household_type || null,
         lease_start:        l.lease_start   || null,
         lease_end:          l.lease_end     || null,
-        lease_property:     l.property_description || null
+        lease_property:     l.property_description || null,
+        // S148: Cob end-of-tenancy prompt re-ask timing (see tenancy-check.js)
+        tenancy_confirmed_at: m.tenancy_confirmed_at || null
       };
     });
 
