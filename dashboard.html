@@ -12630,7 +12630,7 @@ function householdCopyLink(link) {
   });
 }
 
-function householdRender(data, currentEmail) {
+function _origHouseholdRender(data, currentEmail) {
   var members = data.members || [];
   var inner = document.getElementById('household-inner');
   var clusterEl = document.getElementById('household-cluster');
@@ -13581,7 +13581,16 @@ function hhReviewSubmit() {
   })
   .catch(function(err){if(nb){nb.disabled=false;nb.textContent='Submit review';} showToast('❌ Could not submit', err.message||'Check your connection and try again.');});
 }
-var _origHouseholdRender = householdRender;
+// S152 fix: this used to be "var _origHouseholdRender = householdRender;" placed
+// right before a second, separately-named householdRender wrapper declared below.
+// Because both were function declarations sharing the same name, hoisting resolved
+// householdRender to the SECOND (this wrapper) definition before this assignment
+// line ever ran — so _origHouseholdRender ended up pointing at itself, and every
+// call recursed infinitely (RangeError: Maximum call stack exceeded), which the
+// household-load fetch chain's .catch() silently reported as "Could not reach
+// the server" even though the server had responded successfully. Fixed by naming
+// the original implementation _origHouseholdRender directly (see above) instead
+// of aliasing it — no runtime reassignment needed.
 function householdRender(data, currentEmail) {
   window._householdLastData = data;
   _origHouseholdRender(data, currentEmail);
