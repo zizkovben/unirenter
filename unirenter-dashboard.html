@@ -5456,13 +5456,13 @@ function checkNavBellUnread() {
 
   var householdId = localStorage.getItem('ur_household_id');
 
-  var msgPromise = fetch('/api/messages/get?email=' + encodeURIComponent(email))
+  var msgPromise = fetch('/api/messages/get?email=' + encodeURIComponent(email), { cache: 'no-store' })
     .then(function(r) { return r.ok ? r.json() : { totalUnread: 0 }; })
     .then(function(d) { return d.totalUnread || 0; })
     .catch(function() { return 0; });
 
   var hhPromise = householdId
-    ? fetch('/api/household/feed-get?household_id=' + encodeURIComponent(householdId) + '&email=' + encodeURIComponent(email) + '&count_only=1')
+    ? fetch('/api/household/feed-get?household_id=' + encodeURIComponent(householdId) + '&email=' + encodeURIComponent(email) + '&count_only=1', { cache: 'no-store' })
         .then(function(r) { return r.ok ? r.json() : { unread_count: 0 }; })
         .then(function(d) { return d.unread_count || 0; })
         .catch(function() { return 0; })
@@ -7627,7 +7627,7 @@ async function renderMatches() {
   window._connectedHasReply = {};
   if (isVerified && email) {
     try {
-      var convRes = await fetch('/api/messages/get?email=' + encodeURIComponent(email));
+      var convRes = await fetch('/api/messages/get?email=' + encodeURIComponent(email), { cache: 'no-store' });
       if (convRes.ok) {
         var convData = await convRes.json();
         (convData.conversations || []).forEach(function(c) {
@@ -7851,7 +7851,7 @@ async function loadConversations() {
     return;
   }
   try {
-    var res = await fetch('/api/messages/get?email=' + encodeURIComponent(email));
+    var res = await fetch('/api/messages/get?email=' + encodeURIComponent(email), { cache: 'no-store' });
     if (!res.ok) throw new Error('API error');
     var data = await res.json();
     var convos = data.conversations || [];
@@ -8136,7 +8136,7 @@ function msgStartPolling() {
     var partnerEmail = window._currentConvoEmail;
     var myEmail = localStorage.getItem('unirenter_email');
     if (!partnerEmail || !myEmail) return;
-    fetch('/api/messages/get?email=' + encodeURIComponent(myEmail) + '&other=' + encodeURIComponent(partnerEmail))
+    fetch('/api/messages/get?email=' + encodeURIComponent(myEmail) + '&other=' + encodeURIComponent(partnerEmail), { cache: 'no-store' })
       .then(function(r){ return r.json(); })
       .then(function(data) {
         var msgs = data.messages || [];
@@ -8152,7 +8152,7 @@ async function loadConversationsSilent() {
   var email = localStorage.getItem('unirenter_email');
   if (!email) return;
   try {
-    var res = await fetch('/api/messages/get?email=' + encodeURIComponent(email));
+    var res = await fetch('/api/messages/get?email=' + encodeURIComponent(email), { cache: 'no-store' });
     if (!res.ok) return;
     var data = await res.json();
     var totalUnread = data.totalUnread || 0;
@@ -12257,7 +12257,7 @@ function householdLoad(householdId, freshCreate) {
   var emptyState = document.getElementById('household-empty-state');
   if (loading) loading.style.display = 'block';
   if (emptyState) emptyState.style.display = 'none';
-  fetch('/api/household/get?household_id=' + encodeURIComponent(householdId) + '&email=' + encodeURIComponent(email))
+  fetch('/api/household/get?household_id=' + encodeURIComponent(householdId) + '&email=' + encodeURIComponent(email), { cache: 'no-store' })
   .then(function(r) { return r.json(); })
   .then(function(d) {
     if (loading) loading.style.display = 'none';
@@ -12698,7 +12698,7 @@ function householdFeedSend() {
 }
 
 function householdFeedLoad(householdId, email) {
-  fetch('/api/household/feed-get?household_id=' + encodeURIComponent(householdId) + '&email=' + encodeURIComponent(email))
+  fetch('/api/household/feed-get?household_id=' + encodeURIComponent(householdId) + '&email=' + encodeURIComponent(email), { cache: 'no-store' })
   .then(function(r) { return r.json(); })
   .then(function(d) {
     if (!d.ok) return;
@@ -12782,7 +12782,7 @@ function householdFeedCheckUnreadBadge() {
   var householdId = localStorage.getItem('ur_household_id');
   var email = localStorage.getItem('unirenter_email');
   if (!householdId || !email) return;
-  fetch('/api/household/feed-get?household_id=' + encodeURIComponent(householdId) + '&email=' + encodeURIComponent(email) + '&count_only=1')
+  fetch('/api/household/feed-get?household_id=' + encodeURIComponent(householdId) + '&email=' + encodeURIComponent(email) + '&count_only=1', { cache: 'no-store' })
   .then(function(r) { return r.json(); })
   .then(function(d) {
     if (!d.ok) return;
