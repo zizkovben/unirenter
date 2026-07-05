@@ -7275,6 +7275,18 @@ function renderMatchCard(p) {
   const cobPreviewHtml = p.cob_summary
     ? `<div class="match-cob-summary">${p.cob_summary}</div>`
     : '';
+  // S151: already-connected state — if we already have a message thread with
+  // this person, show "Message" (jumps to Messages tab + opens the thread)
+  // instead of Connect/Skip, rather than implying no contact has happened yet.
+  var isAlreadyConnected = !!(p.email && window._connectedEmails && window._connectedEmails.has(p.email.toLowerCase()));
+  var actionsHtml = isAlreadyConnected
+    ? `<div class="match-actions">
+      <button class="btn-connect" style="background:#3DAA5C;" onclick="openConversationFor('${p.email.replace(/'/g, "\\'")}')">Message</button>
+    </div>`
+    : `<div class="match-actions">
+      <button class="btn-connect" data-name="${p.name}" data-email="${p.email||''}" onclick="connectWith(this.dataset.name,this.dataset.email)">Connect</button>
+      <button class="btn-skip" onclick="skipCard(this)">Skip</button>
+    </div>`;
   card.innerHTML = `
     <div class="match-card-header">
       <div class="match-avatar" style="background:${p.bg};">${p.initials}</div>
@@ -7289,10 +7301,7 @@ function renderMatchCard(p) {
     <div class="match-compat"><div class="match-compat-bar" style="width:${p.score}%"></div></div>
     <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">✓ ${p.reason}</div>
     ${eqHtml}
-    <div class="match-actions">
-      <button class="btn-connect" data-name="${p.name}" data-email="${p.email||''}" onclick="connectWith(this.dataset.name,this.dataset.email)">Connect</button>
-      <button class="btn-skip" onclick="skipCard(this)">Skip</button>
-    </div>`;
+    ${actionsHtml}`;
   playSound('match_found');
   return card;
 }
@@ -7590,6 +7599,25 @@ async function renderMatches() {
   var leaseListings = [];
   if (isVerified && email) {
     leaseListings = await fetchLeaseListingsForSeeker(city, budgetMax);
+  }
+
+  // ── S151: fetch existing conversations so match cards can recognise an
+  // already-open chat instead of always showing "Connect" — cards for people
+  // you've already connected with now show "Message" and jump straight to
+  // that conversation in the Messages tab. ─────────────────────────────────
+  window._connectedEmails = new Set();
+  if (isVerified && email) {
+    try {
+      var convRes = await fetch('/api/messages/get?email=' + encodeURIComponent(email));
+      if (convRes.ok) {
+        var convData = await convRes.json();
+        (convData.conversations || []).forEach(function(c) {
+          if (c.partner_email) window._connectedEmails.add(c.partner_email.toLowerCase());
+        });
+      }
+    } catch (err) {
+      console.warn('Could not load existing conversations for match cards:', err.message);
+    }
   }
 
   grid.innerHTML = '';
@@ -7991,6 +8019,27 @@ function followupReviewSubmit() {
     showToast('Thanks! 🤠', 'Your review helps other students find UniRenter.');
     if (window._followupReviewPartner) followupDismiss(window._followupReviewPartner, 'reviewed');
   });
+}
+
+// S151: jump from a match card straight into an existing Messages thread.
+// Switches to the Messages tab, waits for the contact list to render, then
+// opens the matching conversation. Retries briefly since loadConversations()
+// is async and the DOM row may not exist yet on the first check.
+function openConversationFor(partnerEmail) {
+  switchTab('messages');
+  var target = (partnerEmail || '').toLowerCase();
+  var attempts = 0;
+  var tryFind = function() {
+    attempts++;
+    var rows = document.querySelectorAll('.msg-contact');
+    var match = null;
+    rows.forEach(function(r) {
+      if ((r.dataset.email || '').toLowerCase() === target) match = r;
+    });
+    if (match) { match.click(); return; }
+    if (attempts < 10) setTimeout(tryFind, 200);
+  };
+  setTimeout(tryFind, 150);
 }
 
 async function openConversation(partnerEmail, partnerName, partnerUni, el) {
@@ -12089,6 +12138,13 @@ function householdRenderEmpty() {
   if (!inner) return;
   // Hide loading skeleton
   if (loading) loading.style.display = 'none';
+  // S151: reset the setup button every time we land back on the empty state —
+  // it may have been left disabled/"Setting up…" by a prior attempt that
+  // failed after household creation succeeded (e.g. the household/get call
+  // not finding membership yet). Without this it stays visually frozen
+  // even though the click is fully re-clickable underneath.
+  var setupBtn = document.querySelector('.household-setup-btn');
+  if (setupBtn) { setupBtn.disabled = false; setupBtn.textContent = 'Set up my household →'; }
   // If invite token exists, show the invite panel
   var token = localStorage.getItem('ur_household_invite_token');
   if (token && emptyState) {
@@ -12191,6 +12247,9 @@ function householdLoad(householdId, freshCreate) {
       // Stale household ID — clear it and show empty state
       localStorage.removeItem('ur_household_id');
       householdRenderEmpty();
+      // S151: surface what actually happened instead of failing silently —
+      // this was previously indistinguishable from "nothing happened."
+      householdSetupError((d && d.error) ? ('Could not load your household: ' + d.error + ' — try again.') : 'Could not load your household — please try again.');
       return;
     }
     // Clear invite token — no longer needed once household is confirmed loaded
@@ -12203,6 +12262,7 @@ function householdLoad(householdId, freshCreate) {
       localStorage.removeItem('ur_household_id');
     }
     householdRenderEmpty();
+    householdSetupError('Could not reach the server — check your connection and try again.');
   });
 }
 
