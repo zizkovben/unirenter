@@ -566,6 +566,21 @@ body.light-mode {
   display: none;
 }
 .qa-date-input.visible { display: block; }
+/* Recurring entries (S152) — shared between Quick Add and the manual date form */
+.qa-recur-toggle-row { display: flex; align-items: center; gap: 8px; margin: 4px 0 10px; }
+.qa-recur-toggle-row input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--brand-blue); cursor: pointer; }
+.qa-recur-toggle-row label { font-size: 12px; color: var(--text-muted); cursor: pointer; }
+.qa-recur-panel { border-top: 1px dashed var(--navy-border); padding-top: 10px; margin-bottom: 10px; }
+.qa-recur-label { font-size: 11px; color: var(--text-muted); margin: 8px 0 6px; }
+.qa-weekday-row { display: flex; gap: 5px; flex-wrap: wrap; }
+.qa-weekday-chip {
+  background: rgba(255,255,255,0.05); border: 1px solid var(--navy-border);
+  border-radius: 14px; padding: 5px 10px; font-size: 11px; font-weight: 500;
+  cursor: pointer; color: var(--text-muted); font-family: var(--font-body);
+  transition: all 0.15s;
+}
+.qa-weekday-chip:hover { color: var(--text); background: rgba(255,255,255,0.09); }
+.qa-weekday-chip.selected { background: rgba(75,191,224,0.15); border-color: rgba(75,191,224,0.4); color: var(--brand-blue); }
 .qa-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .qa-save-btn {
   background: var(--brand-blue); color: #fff; border: none;
@@ -4284,6 +4299,32 @@ body.light-mode {
         <button class="qa-date-chip" data-date="pick" onclick="qaSelectDate('pick')">Pick date…</button>
         <input class="qa-date-input" id="qa-date-picker" type="date" onchange="qaDatePicked()">
       </div>
+      <!-- Recurring (S152) -->
+      <div class="qa-recur-toggle-row">
+        <input type="checkbox" id="qa-recur-checkbox" onchange="qaToggleRecurring(this.checked)">
+        <label for="qa-recur-checkbox">🔁 Recurring</label>
+      </div>
+      <div class="qa-recur-panel" id="qa-recur-panel" style="display:none;">
+        <div class="qa-recur-label">Repeats on</div>
+        <div class="qa-weekday-row">
+          <button class="qa-weekday-chip" data-day="1" onclick="qaToggleWeekday(1,this)">Mon</button>
+          <button class="qa-weekday-chip" data-day="2" onclick="qaToggleWeekday(2,this)">Tue</button>
+          <button class="qa-weekday-chip" data-day="3" onclick="qaToggleWeekday(3,this)">Wed</button>
+          <button class="qa-weekday-chip" data-day="4" onclick="qaToggleWeekday(4,this)">Thu</button>
+          <button class="qa-weekday-chip" data-day="5" onclick="qaToggleWeekday(5,this)">Fri</button>
+          <button class="qa-weekday-chip" data-day="6" onclick="qaToggleWeekday(6,this)">Sat</button>
+          <button class="qa-weekday-chip" data-day="0" onclick="qaToggleWeekday(0,this)">Sun</button>
+        </div>
+        <div class="qa-recur-label">Starting from</div>
+        <input class="qa-date-input visible" id="qa-recur-start-date" type="date" onchange="qaCheckCanSave()">
+        <div class="qa-recur-label">Ends</div>
+        <div class="qa-date-row">
+          <button class="qa-date-chip selected" data-end="count" onclick="qaSelectRecurEnd('count')">After N times</button>
+          <button class="qa-date-chip" data-end="until" onclick="qaSelectRecurEnd('until')">Until a date</button>
+        </div>
+        <input class="qa-text-input" id="qa-recur-count" type="number" min="1" max="52" value="5" style="max-width:90px;margin-top:6px;" onchange="qaCheckCanSave()">
+        <input class="qa-date-input" id="qa-recur-until" type="date" style="margin-top:6px;" onchange="qaCheckCanSave()">
+      </div>
       <!-- Footer -->
       <div class="qa-footer">
         <div style="font-size:11px;color:var(--text-muted);">Category + date is all you need</div>
@@ -4683,6 +4724,30 @@ body.light-mode {
           <label class="cal-field-label">Notes (optional)</label>
           <input class="cal-input" id="cal-input-notes" type="text" placeholder="Any details…" maxlength="100">
         </div>
+      </div>
+      <!-- Recurring (S152) — reuses the Date field above as the start date -->
+      <div class="qa-recur-toggle-row" id="cal-recur-toggle-row">
+        <input type="checkbox" id="cal-recur-checkbox" onchange="calToggleRecurring(this.checked)">
+        <label for="cal-recur-checkbox">🔁 Recurring</label>
+      </div>
+      <div class="qa-recur-panel" id="cal-recur-panel" style="display:none;">
+        <div class="qa-recur-label">Repeats on</div>
+        <div class="qa-weekday-row">
+          <button class="qa-weekday-chip" data-day="1" onclick="calToggleWeekday(1,this)">Mon</button>
+          <button class="qa-weekday-chip" data-day="2" onclick="calToggleWeekday(2,this)">Tue</button>
+          <button class="qa-weekday-chip" data-day="3" onclick="calToggleWeekday(3,this)">Wed</button>
+          <button class="qa-weekday-chip" data-day="4" onclick="calToggleWeekday(4,this)">Thu</button>
+          <button class="qa-weekday-chip" data-day="5" onclick="calToggleWeekday(5,this)">Fri</button>
+          <button class="qa-weekday-chip" data-day="6" onclick="calToggleWeekday(6,this)">Sat</button>
+          <button class="qa-weekday-chip" data-day="0" onclick="calToggleWeekday(0,this)">Sun</button>
+        </div>
+        <div class="qa-recur-label">Ends (starting from the Date field above)</div>
+        <div class="qa-date-row">
+          <button class="qa-date-chip selected" data-end="count" onclick="calSelectRecurEnd('count')">After N times</button>
+          <button class="qa-date-chip" data-end="until" onclick="calSelectRecurEnd('until')">Until a date</button>
+        </div>
+        <input class="cal-input" id="cal-recur-count" type="number" min="1" max="52" value="5" style="max-width:90px;margin-top:6px;">
+        <input class="cal-input" id="cal-recur-until" type="date" style="margin-top:6px;display:none;">
       </div>
       <input type="hidden" id="cal-edit-id">
       <button class="cal-add-btn" id="cal-add-btn" onclick="calSaveEvent()">Add date</button>
@@ -8628,6 +8693,34 @@ const CAT_META = {
 // Filter groups — stored in ur_cal_filters
 const ALL_FILTERS = ['housing','uni','public_holidays','work','other'];
 
+// ── Recurring entries (S152) ──────────────────────────────────────────────────
+// Deliberately NOT a recurrence-rule engine: generates N individual dated rows
+// up front (weekday-based, ending after a count or an end date). Each row is
+// fully independent afterwards — no special edit/delete-single-occurrence logic
+// needed, at the cost of not supporting "edit the whole series" later. Shared
+// `recurrence_id` tag is stamped on each row for potential future bulk actions,
+// but nothing currently reads it.
+const WEEKDAY_LABELS = { 0:'Sun', 1:'Mon', 2:'Tue', 3:'Wed', 4:'Thu', 5:'Fri', 6:'Sat' };
+const MAX_RECUR_OCCURRENCES = 52; // safety cap — one year of weekly, avoids accidental flooding
+
+function generateRecurringDates(startStr, weekdays, endMode, endValue) {
+  const dates = [];
+  if (!startStr || !weekdays || !weekdays.length) return dates;
+  const cursor = new Date(startStr + 'T00:00:00');
+  if (isNaN(cursor.getTime())) return dates;
+  const endDate = (endMode === 'until' && endValue) ? new Date(endValue + 'T00:00:00') : null;
+  const targetCount = (endMode === 'count') ? Math.max(1, parseInt(endValue, 10) || 1) : Infinity;
+  let safety = 0;
+  while (dates.length < targetCount && safety < 3660) { // ~10yr day-by-day cap, belt-and-braces
+    if (endDate && cursor > endDate) break;
+    if (weekdays.includes(cursor.getDay())) dates.push(cursor.toISOString().split('T')[0]);
+    cursor.setDate(cursor.getDate() + 1);
+    safety++;
+  }
+  if (dates.length > MAX_RECUR_OCCURRENCES) dates.length = MAX_RECUR_OCCURRENCES;
+  return dates;
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 // ── Flatmate Wanted generator ─────────────────────────────────────────────────
@@ -8817,6 +8910,14 @@ function calLoadEvents() {
   } catch(e) {}
   return events;
 }
+// S152 fix: calLoadEvents() merges todos in for DISPLAY purposes only. Saving that
+// merged result back via calSaveEvents() would permanently bake stale todo copies
+// into the raw ur_calendar_events store (compounding on every save/edit/delete, and
+// rendering blank since todos use `title` not `name`). Persistence functions must
+// only ever read/write the raw store — use this helper instead of calLoadEvents().
+function calLoadRawEvents() {
+  try { return JSON.parse(localStorage.getItem(CAL_STORE_KEY) || '[]'); } catch(e) { return []; }
+}
 function calSaveEvents(events) {
   localStorage.setItem(CAL_STORE_KEY, JSON.stringify(events));
 }
@@ -8881,6 +8982,10 @@ let qaSelectedSub = null;
 let qaDateMode    = 'this_week';
 let qaPickedDate  = null;
 let qaLastSavedId = null;
+// Recurring (S152)
+let qaIsRecurring   = false;
+let qaRecurWeekdays = [];
+let qaRecurEndMode  = 'count';
 
 // Local store for to-do items (backed by api/calendar/add when user signed in)
 // Shape: { id, title, category, sub_type, date, status, reminder_date, source, notes, created_at }
@@ -8912,9 +9017,24 @@ function qaOpen() {
   document.getElementById('qa-subtypes').innerHTML = '';
   const ti = document.getElementById('qa-title-input');
   if (ti) ti.value = '';
-  document.querySelectorAll('.qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.date === 'this_week'));
+  document.querySelectorAll('#qa-date-row .qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.date === 'this_week'));
   const dp = document.getElementById('qa-date-picker');
   if (dp) { dp.classList.remove('visible'); dp.value = ''; }
+  // Reset recurring (S152)
+  qaIsRecurring   = false;
+  qaRecurWeekdays = [];
+  qaRecurEndMode  = 'count';
+  const recurCb = document.getElementById('qa-recur-checkbox');
+  if (recurCb) recurCb.checked = false;
+  const recurPanel = document.getElementById('qa-recur-panel');
+  if (recurPanel) recurPanel.style.display = 'none';
+  const qaDateRow = document.getElementById('qa-date-row');
+  if (qaDateRow) qaDateRow.style.display = '';
+  document.querySelectorAll('.qa-recur-panel .qa-weekday-chip').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.qa-recur-panel .qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.end === 'count'));
+  const recurStart = document.getElementById('qa-recur-start-date'); if (recurStart) recurStart.value = '';
+  const recurCount = document.getElementById('qa-recur-count'); if (recurCount) { recurCount.value = '5'; recurCount.style.display = ''; }
+  const recurUntil = document.getElementById('qa-recur-until'); if (recurUntil) { recurUntil.value = ''; recurUntil.classList.remove('visible'); }
   qaCheckCanSave();
 }
 
@@ -8960,7 +9080,7 @@ function qaSelectSub(sub, chip) {
 
 function qaSelectDate(mode) {
   qaDateMode = mode;
-  document.querySelectorAll('.qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.date === mode));
+  document.querySelectorAll('#qa-date-row .qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.date === mode));
   const dp = document.getElementById('qa-date-picker');
   if (dp) dp.classList.toggle('visible', mode === 'pick');
   qaPickedDate = null;
@@ -8973,9 +9093,52 @@ function qaDatePicked() {
   qaCheckCanSave();
 }
 
+// ── Recurring entries (S152) ──────────────────────────────────────────────────
+function qaToggleRecurring(checked) {
+  qaIsRecurring = checked;
+  const panel = document.getElementById('qa-recur-panel');
+  if (panel) panel.style.display = checked ? '' : 'none';
+  // Plain date chips (This week/Next week/Pick date) don't apply once recurring
+  const dateRow = document.getElementById('qa-date-row');
+  if (dateRow) dateRow.style.display = checked ? 'none' : '';
+  qaCheckCanSave();
+}
+
+function qaToggleWeekday(day, chip) {
+  const idx = qaRecurWeekdays.indexOf(day);
+  if (idx === -1) qaRecurWeekdays.push(day); else qaRecurWeekdays.splice(idx, 1);
+  chip.classList.toggle('selected');
+  qaCheckCanSave();
+}
+
+function qaSelectRecurEnd(mode) {
+  qaRecurEndMode = mode;
+  document.querySelectorAll('.qa-recur-panel .qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.end === mode));
+  const countEl = document.getElementById('qa-recur-count');
+  const untilEl = document.getElementById('qa-recur-until');
+  if (countEl) countEl.style.display = (mode === 'count') ? '' : 'none';
+  if (untilEl) untilEl.classList.toggle('visible', mode === 'until');
+  qaCheckCanSave();
+}
+
 function qaCheckCanSave() {
   const btn = document.getElementById('qa-save-btn');
   if (!btn) return;
+  if (qaIsRecurring) {
+    const startEl = document.getElementById('qa-recur-start-date');
+    const hasStart = !!(startEl && startEl.value);
+    const hasWeekdays = qaRecurWeekdays.length > 0;
+    let hasEnd = false;
+    if (qaRecurEndMode === 'count') {
+      const c = document.getElementById('qa-recur-count');
+      hasEnd = !!(c && parseInt(c.value, 10) > 0);
+    } else {
+      const u = document.getElementById('qa-recur-until');
+      hasEnd = !!(u && u.value);
+    }
+    btn.disabled = !(qaSelectedCat && hasStart && hasWeekdays && hasEnd);
+    return;
+  }
   const hasDate = (qaDateMode !== 'pick') || (qaPickedDate && qaPickedDate.length > 0);
   btn.disabled = !(qaSelectedCat && hasDate);
 }
@@ -8999,6 +9162,64 @@ function qaResolveDate() {
 async function qaSave() {
   const btn = document.getElementById('qa-save-btn');
   if (!qaSelectedCat) return;
+
+  // ── Recurring branch (S152) ──────────────────────────────────────────────
+  if (qaIsRecurring) {
+    const startDate = (document.getElementById('qa-recur-start-date') || {}).value || '';
+    const endValue = qaRecurEndMode === 'count'
+      ? (document.getElementById('qa-recur-count') || {}).value
+      : (document.getElementById('qa-recur-until') || {}).value;
+    const dates = generateRecurringDates(startDate, qaRecurWeekdays, qaRecurEndMode, endValue);
+    if (!dates.length) return;
+
+    const rawTitle = (document.getElementById('qa-title-input') || {}).value || '';
+    const baseTitle = rawTitle.trim() || (qaSelectedSub || (qaSelectedCat.charAt(0).toUpperCase() + qaSelectedCat.slice(1) + ' reminder'));
+    const recurId = 'recur-' + Date.now();
+    const email = localStorage.getItem('unirenter_email');
+
+    const items = todoGetAll();
+    dates.forEach(function(d, i) {
+      items.push({
+        id: 'todo-' + Date.now() + '-' + i,
+        title: baseTitle,
+        category: qaSelectedCat,
+        sub_type: qaSelectedSub || null,
+        date: d,
+        reminder_date: null,
+        source: 'todo',
+        status: 'pending',
+        notes: null,
+        recurrence_id: recurId,
+        created_at: new Date().toISOString(),
+      });
+    });
+    todoSave(items);
+
+    // Best-effort backend persistence — one call per occurrence, non-blocking on failure
+    if (email) {
+      for (const d of dates) {
+        try {
+          await fetch('/api/calendar/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, title: baseTitle, category: qaSelectedCat, sub_type: qaSelectedSub, date: d, source: 'todo', recurrence_id: recurId }),
+          });
+        } catch(e) { /* silent — localStorage is the source of truth */ }
+      }
+    }
+
+    if (btn) btn.textContent = '✓ Saved';
+    setTimeout(() => { if (btn) btn.textContent = 'Save'; }, 2000);
+    const dayLabel = qaRecurWeekdays.slice().sort().map(d => WEEKDAY_LABELS[d]).join('/');
+    showToast('🔁 ' + dates.length + ' reminders added', baseTitle + ' — every ' + dayLabel + '.');
+
+    if (calCurrentView === 'todo') renderTodoList();
+    qaRefreshUpcomingPills();
+    calRender();
+    return;
+  }
+
+  // ── Single entry (existing behaviour) ────────────────────────────────────
   const date  = qaResolveDate();
   const rawTitle = (document.getElementById('qa-title-input') || {}).value || '';
   const title = rawTitle.trim() || (qaSelectedSub || (qaSelectedCat.charAt(0).toUpperCase() + qaSelectedCat.slice(1) + ' reminder'));
@@ -9291,7 +9512,7 @@ function calChipGoTodo(evId) {
   calSetView('todo');
   if (!evId) return;
   setTimeout(function() {
-    var el = document.querySelector('.todo-item[data-id="' + evId + '"]');
+    var el = document.querySelector('.todo-item[data-todo-id="' + evId + '"]');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       el.classList.add('todo-highlight');
@@ -9524,6 +9745,41 @@ function calRenderEvents(events) {
 // ── Sticky strip renderer ──
 
 // ── Save / edit / delete ──
+// Recurring state for the manual add-date form (S152) — mirrors qa* equivalents
+let calIsRecurring   = false;
+let calRecurWeekdays = [];
+let calRecurEndMode  = 'count';
+
+function calToggleRecurring(checked) {
+  calIsRecurring = checked;
+  const panel = document.getElementById('cal-recur-panel');
+  if (panel) panel.style.display = checked ? '' : 'none';
+}
+function calToggleWeekday(day, chip) {
+  const idx = calRecurWeekdays.indexOf(day);
+  if (idx === -1) calRecurWeekdays.push(day); else calRecurWeekdays.splice(idx, 1);
+  chip.classList.toggle('selected');
+}
+function calSelectRecurEnd(mode) {
+  calRecurEndMode = mode;
+  document.querySelectorAll('#cal-recur-panel .qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.end === mode));
+  const countEl = document.getElementById('cal-recur-count');
+  const untilEl = document.getElementById('cal-recur-until');
+  if (countEl) countEl.style.display = (mode === 'count') ? '' : 'none';
+  if (untilEl) untilEl.style.display = (mode === 'until') ? '' : 'none';
+}
+function calResetRecurForm() {
+  calIsRecurring = false;
+  calRecurWeekdays = [];
+  calRecurEndMode = 'count';
+  const cb = document.getElementById('cal-recur-checkbox'); if (cb) cb.checked = false;
+  const panel = document.getElementById('cal-recur-panel'); if (panel) panel.style.display = 'none';
+  document.querySelectorAll('#cal-recur-panel .qa-weekday-chip').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('#cal-recur-panel .qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.end === 'count'));
+  const count = document.getElementById('cal-recur-count'); if (count) { count.value = '5'; count.style.display = ''; }
+  const until = document.getElementById('cal-recur-until'); if (until) { until.value = ''; until.style.display = 'none'; }
+}
+
 function calSaveEvent() {
   const name  = document.getElementById('cal-input-name').value.trim();
   const date  = document.getElementById('cal-input-date').value;
@@ -9531,7 +9787,32 @@ function calSaveEvent() {
   const notes = document.getElementById('cal-input-notes').value.trim();
   if (!name) { showToast('⚠️ Name required', 'Please enter a name for this date.'); return; }
   if (!date) { showToast('⚠️ Date required', 'Please pick a date.'); return; }
-  const events = calLoadEvents();
+  const events = calLoadRawEvents();
+
+  // ── Recurring branch (S152) — only available for new entries, not edits ──
+  if (calIsRecurring && !calEditingId) {
+    if (!calRecurWeekdays.length) { showToast('⚠️ Pick weekdays', 'Select at least one day for the recurrence.'); return; }
+    const endValue = calRecurEndMode === 'count'
+      ? (document.getElementById('cal-recur-count') || {}).value
+      : (document.getElementById('cal-recur-until') || {}).value;
+    const dates = generateRecurringDates(date, calRecurWeekdays, calRecurEndMode, endValue);
+    if (!dates.length) { showToast('⚠️ No dates generated', 'Check your start date, weekdays, and end condition.'); return; }
+    const recurId = 'recur-' + Date.now();
+    dates.forEach(function(d, i) {
+      events.push({ id: 'cal_' + Date.now() + '_' + i, name, date: d, cat, notes, source: 'manual', recurrence_id: recurId });
+    });
+    calSaveEvents(events);
+    document.getElementById('cal-input-name').value = '';
+    document.getElementById('cal-input-date').value = '';
+    document.getElementById('cal-input-cat').value  = 'lease';
+    document.getElementById('cal-input-notes').value = '';
+    calResetRecurForm();
+    calRender();
+    const dayLabel = calRecurWeekdays.slice().sort().map(d => WEEKDAY_LABELS[d]).join('/');
+    showToast('🔁 ' + dates.length + ' dates added', name + ' — every ' + dayLabel + '.');
+    return;
+  }
+
   if (calEditingId) {
     const idx = events.findIndex(e => e.id === calEditingId);
     if (idx !== -1) events[idx] = { ...events[idx], name, date, cat, notes };
@@ -9539,6 +9820,8 @@ function calSaveEvent() {
     document.getElementById('cal-form-title').textContent = '+ Add a date';
     document.getElementById('cal-add-btn').textContent = 'Add date';
     document.getElementById('cal-edit-id').value = '';
+    const toggleRow = document.getElementById('cal-recur-toggle-row');
+    if (toggleRow) toggleRow.style.display = '';
   } else {
     events.push({ id: 'cal_' + Date.now(), name, date, cat, notes, source: 'manual' });
   }
@@ -9552,8 +9835,14 @@ function calSaveEvent() {
 }
 
 function calEditEvent(id) {
+  // Lookup uses the merged (display) view — fine for read-only lookup.
   const ev = calLoadEvents().find(e => e.id === id);
   if (!ev) return;
+  if (ev.source === 'todo') {
+    // Todos are edited from the To Do tab, not this form — jump there instead.
+    calChipGoTodo(id);
+    return;
+  }
   calEditingId = id;
   document.getElementById('cal-input-name').value  = ev.name;
   document.getElementById('cal-input-date').value  = ev.date;
@@ -9561,11 +9850,21 @@ function calEditEvent(id) {
   document.getElementById('cal-input-notes').value = ev.notes || '';
   document.getElementById('cal-form-title').textContent = 'Edit date';
   document.getElementById('cal-add-btn').textContent = 'Save changes';
+  // Recurring doesn't apply to editing a single existing entry
+  calResetRecurForm();
+  const toggleRow = document.getElementById('cal-recur-toggle-row');
+  if (toggleRow) toggleRow.style.display = 'none';
   document.querySelector('.cal-add-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function calDeleteEvent(id) {
-  const events = calLoadEvents().filter(e => e.id !== id);
+  // Lookup uses the merged (display) view to determine the real source of truth.
+  const ev = calLoadEvents().find(e => e.id === id);
+  if (ev && ev.source === 'todo') {
+    todoDelete(id); // removes from ur_todos (the real store) and re-renders
+    return;
+  }
+  const events = calLoadRawEvents().filter(e => e.id !== id);
   calSaveEvents(events);
   calRender();
   showToast('🗑️ Removed', 'Date removed from your calendar.');
