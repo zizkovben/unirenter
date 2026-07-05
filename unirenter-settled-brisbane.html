@@ -468,7 +468,7 @@ footer{position:relative;z-index:1;text-align:center;padding:32px;border-top:1px
       <p>Many Brisbane universities have good cycling infrastructure. Hire e-scooters (Lime, Neuron, Beam) are available in inner areas — scan via app, wear a helmet (legally required in Australia), and park responsibly or you'll be fined.</p>
     </div>
 
-    <a href="https://www.translink.com.au" target="_blank" class="resource-link"><div class="rl-icon">🔗</div><div class="rl-body"><h4>TransLink journey planner</h4></div><div class="rl-arrow">→</div></a><a href="https://www.translink.com.au/tickets-and-fares/go-card/concession" target="_blank" class="resource-link"><div class="rl-icon">🔗</div><div class="rl-body"><h4>go card concession</h4></div><div class="rl-arrow">→</div></a>
+    <a href="https://www.translink.com.au" target="_blank" class="resource-link"><div class="rl-icon">🔗</div><div class="rl-body"><h4>TransLink journey planner</h4></div><div class="rl-arrow">→</div></a><a href="https://translink.com.au/tickets-and-fares/concessions/tertiary" target="_blank" class="resource-link"><div class="rl-icon">🔗</div><div class="rl-body"><h4>go card concession</h4></div><div class="rl-arrow">→</div></a>
   </div>
 
   <!-- MONEY -->
@@ -886,7 +886,7 @@ footer{position:relative;z-index:1;text-align:center;padding:32px;border-top:1px
       <p><strong>Ibis (everywhere):</strong> Large white birds known as "bin chickens" — they rummage through rubbish. They're a beloved Australian joke. Don't feed them.</p>
     </div>
 
-    <a href="https://www.stjohn.org.au/first-aid/first-aid-fact-sheets/" target="_blank" class="resource-link"><div class="rl-icon">🐍</div><div class="rl-body"><h4>Red Cross — Snakebite first aid guide</h4></div><div class="rl-arrow">→</div></a>
+    <a href="https://www.stjohnqld.com.au/news/be-prepared-with-our-guide-to-snake-bite-first-aid/" target="_blank" class="resource-link"><div class="rl-icon">🐍</div><div class="rl-body"><h4>St John Ambulance QLD — Snakebite first aid guide</h4></div><div class="rl-arrow">→</div></a>
     <a href="https://www.health.gov.au/contacts/poisons-information-centre" target="_blank" class="resource-link"><div class="rl-icon">☎️</div><div class="rl-body"><h4>Poisons Information Centre — 13 11 26 (24/7)</h4><p>Call for advice on any suspected poisoning including bites and stings</p></div><div class="rl-arrow">→</div></a>
 
   <div class="info-card" style="border-top:3px solid var(--yellow)">
@@ -1138,6 +1138,22 @@ function toggleTheme() {
       if (el) el.style.display = '';
     }
   })();
+
+  // ── Explore dropdown ── (S151: this whole function was missing from this
+  // file — the button and menu markup existed, but nothing was wired up to
+  // toggle it, so clicking "Explore" silently did nothing on every load.)
+  function toggleNavDropdown() {
+    const dd = document.getElementById('nav-dropdown');
+    if (!dd) return;
+    dd.classList.toggle('open');
+  }
+  document.addEventListener('click', function(e) {
+    const wrap = document.querySelector('.nav-dropdown-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+      const dd = document.getElementById('nav-dropdown');
+      if (dd) dd.classList.remove('open');
+    }
+  });
 
 
 function translatePage(lang) {
