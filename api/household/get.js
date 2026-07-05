@@ -18,8 +18,12 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ ok: false, error: 'Method not allowed' });
 
   try {
-    const { household_id, email } = req.query || {};
+    const { household_id, email: rawEmail } = req.query || {};
     if (!household_id) return res.status(400).json({ ok: false, error: 'household_id required' });
+    // S151: same normalisation fix as api/messages/get.js (S150) and
+    // api/household/create.js (S151) — a mixed-case email at signup should
+    // never make this membership check silently fail.
+    const email = rawEmail ? rawEmail.toLowerCase().trim() : rawEmail;
 
     // Verify caller is a member of this household (if email provided)
     if (email) {
@@ -27,7 +31,7 @@ module.exports = async function handler(req, res) {
         .from('household_members')
         .select('household_id')
         .eq('household_id', household_id)
-        .eq('email', email)
+        .ilike('email', email)
         .maybeSingle();
 
       if (!membership) {

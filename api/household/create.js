@@ -20,14 +20,18 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method not allowed' });
  
   try {
-    const { email } = req.body || {};
-    if (!email) return res.status(400).json({ ok: false, error: 'email required' });
+    const { email: rawEmail } = req.body || {};
+    if (!rawEmail) return res.status(400).json({ ok: false, error: 'email required' });
+    // S151: normalise case here, the same way api/messages/get.js was fixed at
+    // S150 — every lookup/insert below uses this normalised value so a mixed-
+    // case email typed at signup can never cause a membership mismatch later.
+    const email = rawEmail.toLowerCase().trim();
  
     // Verify email is a known verified profile
     const { data: profile, error: profileErr } = await supabase
       .from('profiles')
       .select('email, email_verified')
-      .eq('email', email)
+      .ilike('email', email)
       .single();
  
     if (profileErr || !profile) {
