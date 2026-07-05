@@ -1786,7 +1786,10 @@ function unlockAndGo(n) {
   // Assign Cob emoji after lifestyle step (step 4 → 5)
   if (n === 5) { setTimeout(cobAssignEmoji, 100); }
   // Fire-and-forget Supabase save AFTER navigation so mobile tap is never blocked
-  if (isEmailAlreadyVerified(document.getElementById('email-input')?.value?.trim() || '')) {
+  // S152 fix: check actual sign-in state (localStorage), not the on-screen email-input
+  // value — that field is empty for returning verified users who never retype their
+  // email, which silently skipped every intermediate save for them.
+  if (localStorage.getItem('unirenter_email_verified') === '1' && localStorage.getItem('unirenter_email')) {
     setTimeout(function() { saveProfileToSupabase(); }, 0);
   }
 }
