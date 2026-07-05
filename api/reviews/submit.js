@@ -46,12 +46,16 @@ module.exports = async function handler(req, res) {
     const status = rating >= 4 ? 'approved' : 'pending';
 
     // --- Sanitise ---
+    // S150 fix: the real column is 'text' (confirmed via
+    // information_schema.columns), not 'review_text' — this insert has
+    // been failing (500) on every submission, meaning no review has ever
+    // actually been saved to the database.
     const payload = {
       city:          city.toLowerCase().trim(),
       reviewer_name: reviewer_name.trim().slice(0, 80),
       reviewer_uni:  reviewer_uni.trim().slice(0, 120),
       rating,
-      review_text:   text.trim().slice(0, 1000),
+      text:          text.trim().slice(0, 1000),
       suburb:        suburb ? suburb.trim().slice(0, 80) : null,
       status,
       created_at:    new Date().toISOString(),
