@@ -85,7 +85,7 @@ module.exports = async function handler(req, res) {
       'suburb_preferences', 'budget_min', 'budget_max',
       'sleep_schedule', 'cleanliness', 'study_location',
       'guests', 'substances', 'dietary', 'pets',
-      'vibe_emoji_primary', 'vibe_emoji_secondary', 'cob_summary',
+      'vibe_emoji_primary', 'vibe_emoji_secondary', 'cob_summary', 'cob_narrative',
       'star_sign', 'generation', 'vibe_lifestyle', 'vibe_quiz_answers',
       'language_home', 'languages_spoken', 'english_practice',
       'chinese_zodiac', 'sleep_mode', 'listing_token', 'listing_expires_at',
