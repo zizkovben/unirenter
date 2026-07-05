@@ -2183,7 +2183,6 @@ body.light-mode {
 /* Picker */
 .vibe-emoji-picker { background:var(--navy-mid); border:1px solid var(--navy-border); border-radius:10px; padding:12px; margin-bottom:12px; }
 .vibe-picker-label { font-size:12px; color:var(--text-muted); margin-bottom:8px; }
-.vibe-picker-type { display:none; }
 .vibe-picker-grid { display:flex; flex-wrap:wrap; gap:6px; }
 .vibe-picker-emoji {
   font-size:22px; cursor:pointer; padding:6px;
@@ -3927,8 +3926,9 @@ body.light-mode {
   margin: 6px 0 10px;
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 1;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
   opacity: 0.75;
 }
 
@@ -5047,7 +5047,10 @@ body.light-mode {
           <div class="vibe-result-emoji" id="vibe-primary-emoji">🌿</div>
           <div class="vibe-result-text" id="vibe-summary-text">"Your vibe summary will appear here."</div>
         </div>
-        <!-- Emoji override row -->
+        <!-- Emoji override row — secondary override removed (S152): Cob already
+             assigns both primary and secondary emoji together from the same quiz
+             answers, so a manual secondary picker was redundant. Primary keeps its
+             override since it's constrained to a locked, curated palette. -->
         <div class="vibe-override-row">
           <div class="vibe-override-group">
             <div class="vibe-chip-label">Primary emoji</div>
@@ -5056,18 +5059,10 @@ body.light-mode {
               <span class="vibe-override-edit">✏️</span>
             </div>
           </div>
-          <div class="vibe-override-group">
-            <div class="vibe-chip-label">Secondary emoji</div>
-            <div class="vibe-emoji-override" id="vibe-override-secondary" onclick="vibeOverrideSecondary()" title="Change secondary emoji">
-              <span id="vibe-override-secondary-val">☕</span>
-              <span class="vibe-override-edit">✏️</span>
-            </div>
-          </div>
         </div>
         <!-- Emoji picker (hidden by default) -->
         <div id="vibe-emoji-picker" class="vibe-emoji-picker" style="display:none;">
           <div class="vibe-picker-label" id="vibe-picker-label">Pick primary emoji</div>
-          <div class="vibe-picker-type" id="vibe-picker-type">primary</div>
           <div class="vibe-picker-grid" id="vibe-picker-grid"></div>
           <button class="vibe-nav-btn secondary" style="margin-top:8px;font-size:12px;" onclick="vibeClosePicker()">Cancel</button>
         </div>
@@ -5669,7 +5664,6 @@ function openSettingsCollapse() {
 // ══════════════════════════════════════════════════════════════
 
 const VIBE_PRIMARY_PALETTE = ['🌙','🐦','📚','🎓','💼','🗣️','🚪','🧹','🤷','🍳','🎮','🎵','🏋️','🌈','🌍','👥','🏠','🌿'];
-const VIBE_SECONDARY_EXTRAS = ['💻','🌙','💪','🧘','🎨','📖','🎬','📺','🌳','🪴','🔥','🚿','🚬','📦','🌱','🍖','☕','🍺','🥡','🛒','🐱','🐶','🐦','🐠','💑','👨‍👩‍👧','🤝','🗺️','🍽️','🌍','✈️','🎊','👶','♿'];
 
 // S150 rebuild — restores the Session 96 personalisation design that was
 // designed and built for the city-page registration flow, then removed
@@ -6145,7 +6139,6 @@ function _vibeShowDone(primary, secondary, summary) {
   document.getElementById('vibe-primary-emoji').textContent      = primary;
   document.getElementById('vibe-summary-text').textContent       = '"' + displayText + '"';
   document.getElementById('vibe-override-primary-val').textContent  = primary;
-  document.getElementById('vibe-override-secondary-val').textContent = secondary;
   document.getElementById('vibe-chip-primary').textContent       = primary;
   document.getElementById('vibe-chip-secondary').textContent     = secondary;
 
@@ -6163,12 +6156,10 @@ function _vibeShowDone(primary, secondary, summary) {
 // ── Emoji override ──
 function vibeOverridePrimary() {
   var picker     = document.getElementById('vibe-emoji-picker');
-  var typeEl     = document.getElementById('vibe-picker-type');
   var labelEl    = document.getElementById('vibe-picker-label');
   var gridEl     = document.getElementById('vibe-picker-grid');
   var currentVal = document.getElementById('vibe-override-primary-val').textContent;
 
-  if (typeEl)  typeEl.textContent  = 'primary';
   if (labelEl) labelEl.textContent = 'Pick primary emoji';
 
   // Render palette-only grid
@@ -6179,44 +6170,19 @@ function vibeOverridePrimary() {
   if (picker) picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
 }
 
-function vibeOverrideSecondary() {
-  var picker     = document.getElementById('vibe-emoji-picker');
-  var typeEl     = document.getElementById('vibe-picker-type');
-  var labelEl    = document.getElementById('vibe-picker-label');
-  var gridEl     = document.getElementById('vibe-picker-grid');
-  var currentVal = document.getElementById('vibe-override-secondary-val').textContent;
-
-  if (typeEl)  typeEl.textContent  = 'secondary';
-  if (labelEl) labelEl.textContent = 'Pick secondary emoji (or type any emoji)';
-
-  var allEmojis = VIBE_PRIMARY_PALETTE.concat(VIBE_SECONDARY_EXTRAS);
-  gridEl.innerHTML = allEmojis.map(function(e) {
-    return '<span class="vibe-picker-emoji' + (e === currentVal ? ' selected' : '') + '" onclick="vibePickEmoji(\'' + e + '\')">' + e + '</span>';
-  }).join('');
-
-  if (picker) picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
-}
-
 function vibePickEmoji(emoji) {
-  var typeEl = document.getElementById('vibe-picker-type');
-  var type   = typeEl ? typeEl.textContent : 'primary';
-
-  if (type === 'primary') {
-    document.getElementById('vibe-override-primary-val').textContent = emoji;
-    document.getElementById('vibe-primary-emoji').textContent        = emoji;
-    document.getElementById('vibe-chip-primary').textContent         = emoji;
-    _vibePending.primary = emoji;
-    // Update summary text to swap leading emoji
-    var summaryEl = document.getElementById('vibe-summary-text');
-    var txt = summaryEl.textContent.replace(/^[^\s"]+\s*/, '');
-    summaryEl.textContent = txt;
-    // Update pending summary leading emoji
-    _vibePending.summary = emoji + ' ' + _vibePending.summary.replace(/^[^\s"]+\s*/, '');
-  } else {
-    document.getElementById('vibe-override-secondary-val').textContent = emoji;
-    document.getElementById('vibe-chip-secondary').textContent         = emoji;
-    _vibePending.secondary = emoji;
-  }
+  // S152: secondary override removed — this only ever handles primary now
+  // (Cob assigns secondary automatically from the quiz answers).
+  document.getElementById('vibe-override-primary-val').textContent = emoji;
+  document.getElementById('vibe-primary-emoji').textContent        = emoji;
+  document.getElementById('vibe-chip-primary').textContent         = emoji;
+  _vibePending.primary = emoji;
+  // Update summary text to swap leading emoji
+  var summaryEl = document.getElementById('vibe-summary-text');
+  var txt = summaryEl.textContent.replace(/^[^\s"]+\s*/, '');
+  summaryEl.textContent = txt;
+  // Update pending summary leading emoji
+  _vibePending.summary = emoji + ' ' + _vibePending.summary.replace(/^[^\s"]+\s*/, '');
   vibeClosePicker();
 }
 
@@ -6234,7 +6200,7 @@ async function vibeSave() {
   if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
 
   var primary   = _vibePending.primary   || document.getElementById('vibe-override-primary-val').textContent;
-  var secondary = _vibePending.secondary || document.getElementById('vibe-override-secondary-val').textContent;
+  var secondary = _vibePending.secondary || document.getElementById('vibe-chip-secondary').textContent;
   var summary   = _vibePending.summary   || '';
   var narrative = _vibePending.narrative || null;
 
