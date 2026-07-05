@@ -14,6 +14,12 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  // S151: this is a dynamic, frequently-repeated GET (household composition
+  // rarely changes call-to-call) — confirmed via live Network tab that it was
+  // being served as a 304 with no body, which made res.json() throw client-
+  // side and surfaced as a generic "could not reach the server" failure.
+  // Explicitly disabling caching stops any CDN/browser layer from doing this.
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'GET') return res.status(405).json({ ok: false, error: 'Method not allowed' });
 
