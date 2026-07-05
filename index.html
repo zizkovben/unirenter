@@ -2192,8 +2192,18 @@ function renderMatchCard(p) {
     social:      ['mr-social','🎉 Social match'],
   };
   const reasons = (p.match_reasons||[]).map(r => reasonMap[r]).filter(Boolean);
+  // S152: fuller expanded-profile modal — store this profile for lookup by id
+  // (dummy/example profiles lack a real id, so fall back to a name-based key).
+  const pdmKey = p.id || ('dummy-' + (p.display_name || 'student'));
+  window._matchProfilesById = window._matchProfilesById || {};
+  window._matchProfilesById[pdmKey] = p;
   const card = document.createElement('div');
   card.className = 'match-card';
+  card.style.cursor = 'pointer';
+  card.onclick = function(e) {
+    if (e.target.closest('button')) return; // let card buttons handle their own clicks
+    pdmOpen(pdmKey);
+  };
   const vibeHtml = (p.vibe_emoji_primary)
     ? '<div class="card-vibe" style="font-size:18px;letter-spacing:3px;margin:6px 0 2px;opacity:0.85;padding:0 20px;">' + (p.vibe_emoji_primary || '') + (p.vibe_emoji_secondary ? ' ' + p.vibe_emoji_secondary : '') + '</div>'
     : '';
@@ -2220,6 +2230,87 @@ function renderMatchCard(p) {
       <button class="report-btn" onclick="showToast('🚫 Blocked','This profile has been blocked and removed from your matches.')" style="color:var(--text-muted)">✕ Block</button>
     </div>`;
   return card;
+}
+
+// ── S152: Expanded profile modal ──────────────────────────────────────────────
+// Fuller detail view, opened by tapping a match card (not its buttons). Shows
+// the same avatar/vibe-equation logic as the card, plus every lifestyle field
+// and Cob's longer narrative paragraph (cob_narrative) — kept separate from the
+// short one-liner (cob_summary) which stays on the card as-is.
+function pdmDetailRow(label, value) {
+  if (!value) return '';
+  return '<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">' +
+    '<span style="color:var(--text-muted);">' + label + '</span>' +
+    '<span style="text-align:right;">' + value + '</span></div>';
+}
+
+function pdmOpen(key) {
+  const p = (window._matchProfilesById || {})[key];
+  if (!p) return;
+
+  const initials = p.display_name
+    ? p.display_name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
+    : '??';
+  const bgColors = ['#1a3a4a','#2a1a3a','#1a3a2a','#3a2a1a','#2a1a1a','#1a2a3a'];
+  const fgColors = ['#4BBFE0','#c87dff','#47d4a0','#ffb347','#ff8a8a','#47b4d4'];
+  const idx = Math.abs((p.display_name||'').charCodeAt(0) || 0) % 6;
+  const photoEl = document.getElementById('pdm-photo');
+  if (photoEl) {
+    photoEl.style.cssText = 'width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0;background:' + bgColors[idx] + ';color:' + fgColors[idx] + ';';
+    photoEl.textContent = initials;
+  }
+
+  document.getElementById('pdm-name').textContent = p.display_name || 'Student';
+  const subParts = [p.university, p.field_of_study, p.year_of_study].filter(Boolean);
+  document.getElementById('pdm-sub').textContent = subParts.join(' · ') || 'Student';
+
+  const vibeRow = document.getElementById('pdm-vibe-row');
+  if (vibeRow) vibeRow.textContent = p.vibe_emoji_primary ? (p.vibe_emoji_primary + (p.vibe_emoji_secondary ? ' ' + p.vibe_emoji_secondary : '')) : '';
+
+  const narrativeEl = document.getElementById('pdm-narrative');
+  if (narrativeEl) {
+    if (p.cob_narrative) {
+      narrativeEl.style.display = '';
+      narrativeEl.textContent = p.cob_narrative;
+    } else if (p.cob_summary) {
+      // Fallback for profiles that haven't regenerated their vibe since this
+      // feature shipped — show the short summary rather than an empty box.
+      narrativeEl.style.display = '';
+      narrativeEl.textContent = p.cob_summary.replace(/^[^\s"]+\s*/, '').replace(/^"|"$/g,'');
+    } else {
+      narrativeEl.style.display = 'none';
+    }
+  }
+
+  const tags = [];
+  if (p.last_seen) {
+    const daysAgo = (Date.now() - new Date(p.last_seen).getTime()) / 86400000;
+    if (daysAgo <= 7) tags.push('🟢 Active');
+  }
+  if (p.student_status === 'other') tags.push('👤 Not a student');
+  if (p.email_verified) tags.push('Verified ✓');
+  if (p.uni_email_verified) tags.push('🎓 Uni verified');
+  if (p.age_bracket) tags.push(p.age_bracket);
+  const tagsEl = document.getElementById('pdm-tags');
+  if (tagsEl) tagsEl.innerHTML = tags.map(t => '<span class="tag">' + t + '</span>').join('');
+
+  const suburbs = (p.suburb_preferences || []).join(', ') || null;
+  const detailsHtml =
+    pdmDetailRow('Looking for', p.seeking) +
+    pdmDetailRow('Household type', p.household_type) +
+    pdmDetailRow('Budget', p.budget_max ? ('$' + (p.budget_min ? (p.budget_min + '–') : '') + p.budget_max + '/wk') : null) +
+    pdmDetailRow('Preferred suburbs', suburbs) +
+    pdmDetailRow('Stay duration', p.stay_duration) +
+    pdmDetailRow('Sleep schedule', p.sleep_schedule ? p.sleep_schedule.replace(/_/g,' ') : null) +
+    pdmDetailRow('Cleanliness', p.cleanliness ? p.cleanliness.replace(/_/g,' ') : null) +
+    pdmDetailRow('Guests', p.guests) +
+    pdmDetailRow('Pets', p.pets ? p.pets.replace(/_/g,' ') : null) +
+    pdmDetailRow('Dietary', p.dietary) +
+    pdmDetailRow('Substances', p.substances ? p.substances.replace(/_/g,' ') : null);
+  const detailsEl = document.getElementById('pdm-details');
+  if (detailsEl) detailsEl.innerHTML = detailsHtml;
+
+  openModal('profile-detail-modal');
 }
 
 // ── Dummy fallback profiles ───────────────────────────────────────────────────
@@ -3957,6 +4048,31 @@ function validateStepData(step) {
     <div class="modal-actions">
       <button class="btn-modal-cancel" onclick="closeModal('report-modal')">Cancel</button>
       <button class="btn-modal-submit" onclick="submitReport()">Submit report</button>
+    </div>
+  </div>
+</div>
+
+<!-- S152: Expanded profile modal — fuller detail + Cob's longer narrative paragraph.
+     Deliberately kept separate from the match-card's short emoji + one-liner (which
+     stays as-is) — this is shown only when someone taps into a profile. -->
+<div class="modal-overlay" id="profile-detail-modal">
+  <div class="modal" style="max-width:520px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+      <div style="display:flex;gap:14px;align-items:center;">
+        <div id="pdm-photo"></div>
+        <div>
+          <div class="modal-title" id="pdm-name" style="margin-bottom:2px;"></div>
+          <div class="modal-sub" style="margin-bottom:0;" id="pdm-sub"></div>
+        </div>
+      </div>
+      <button onclick="closeModal('profile-detail-modal')" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;line-height:1;padding:0 0 0 12px;">✕</button>
+    </div>
+    <div id="pdm-vibe-row" style="font-size:22px;letter-spacing:4px;margin-bottom:12px;"></div>
+    <div id="pdm-narrative" style="font-size:13px;line-height:1.65;color:var(--text);background:rgba(255,255,255,0.04);border-radius:12px;padding:14px 16px;margin-bottom:16px;"></div>
+    <div id="pdm-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;"></div>
+    <div id="pdm-details" style="display:flex;flex-direction:column;gap:9px;margin-bottom:6px;font-size:13px;"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal('profile-detail-modal')">Close</button>
     </div>
   </div>
 </div>

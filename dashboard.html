@@ -2199,25 +2199,6 @@ body.light-mode {
 .vibe-retake-actions { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
 /* Locked notice */
 .vibe-locked-notice { font-size:13px; color:var(--text-muted); padding:10px 14px; background:rgba(255,255,255,0.03); border-radius:8px; margin-bottom:12px; }
-/* Extras card (star sign + generation) */
-.vibe-extras-card {
-  background:var(--navy-card); border:1px solid var(--navy-border);
-  border-radius:var(--radius); padding:18px 20px; margin-top:12px;
-}
-.vibe-extras-row { display:flex; gap:16px; flex-wrap:wrap; }
-.vibe-extras-group { display:flex; flex-direction:column; gap:6px; flex:1; min-width:140px; }
-.vibe-extras-label { font-size:12px; color:var(--text-muted); }
-.vibe-extras-select {
-  background:var(--navy-mid); border:1px solid var(--navy-border);
-  color:var(--text); border-radius:8px; padding:8px 10px;
-  font-size:13px; font-family:var(--font-body); cursor:pointer;
-  transition:border-color 0.2s;
-}
-.vibe-extras-select:focus { outline:none; border-color:var(--brand-yellow); }
-
-/* ── Vibe inline extras (star sign + gen inside done state) ── */
-.vibe-inline-extras { margin-bottom: 12px; padding-top: 10px; border-top: 1px solid var(--navy-border); }
-.vibe-inline-extras-row { display:flex; gap:12px; flex-wrap:wrap; }
 
 /* ── Vibe quiz Q1 emoji grid ── */
 .vibe-q1-grid { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
@@ -5083,43 +5064,10 @@ body.light-mode {
         <div class="vibe-chips-row">
           <div class="vibe-chip-group"><div class="vibe-chip-label">Primary</div><div class="vibe-chip-val" id="vibe-chip-primary">—</div></div>
           <div class="vibe-chip-group"><div class="vibe-chip-label">Secondary</div><div class="vibe-chip-val" id="vibe-chip-secondary">—</div></div>
-          <div class="vibe-chip-group"><div class="vibe-chip-label">Star sign</div><div class="vibe-chip-val" id="vibe-chip-star">—</div></div>
-          <div class="vibe-chip-group"><div class="vibe-chip-label">Gen</div><div class="vibe-chip-val" id="vibe-chip-gen">—</div></div>
         </div>
-        <!-- Star sign + generation selects — inline inside done state -->
-        <div class="vibe-inline-extras">
-          <div class="vibe-inline-extras-row">
-            <div class="vibe-extras-group">
-              <label class="vibe-extras-label" for="select-star-sign-inline">⭐ Star sign</label>
-              <select id="select-star-sign-inline" class="vibe-extras-select" onchange="vibeExtrasChangeInline()">
-                <option value="">Prefer not to say</option>
-                <option value="Aries">Aries ♈</option>
-                <option value="Taurus">Taurus ♉</option>
-                <option value="Gemini">Gemini ♊</option>
-                <option value="Cancer">Cancer ♋</option>
-                <option value="Leo">Leo ♌</option>
-                <option value="Virgo">Virgo ♍</option>
-                <option value="Libra">Libra ♎</option>
-                <option value="Scorpio">Scorpio ♏</option>
-                <option value="Sagittarius">Sagittarius ♐</option>
-                <option value="Capricorn">Capricorn ♑</option>
-                <option value="Aquarius">Aquarius ♒</option>
-                <option value="Pisces">Pisces ♓</option>
-              </select>
-            </div>
-            <div class="vibe-extras-group">
-              <label class="vibe-extras-label" for="select-generation-inline">🧬 Generation</label>
-              <select id="select-generation-inline" class="vibe-extras-select" onchange="vibeExtrasChangeInline()">
-                <option value="">Prefer not to say</option>
-                <option value="Gen Z">Gen Z (1997–2012)</option>
-                <option value="Millennial">Millennial (1981–1996)</option>
-                <option value="Gen X">Gen X (1965–1980)</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-          </div>
-          <div id="vibe-inline-extras-saved" style="display:none;" class="vibe-saved-notice">✅ Saved</div>
-        </div>
+        <!-- Star sign + Generation inline panel removed entirely (S152): both were
+             pure duplicates of the About Me extras sidebar fields, and neither was
+             prefilling correctly here. -->
         <div class="vibe-save-row">
           <button class="vibe-save-btn" id="vibe-save-btn" onclick="vibeSave()">Save vibe ✓</button>
           <button class="vibe-retake-btn" onclick="vibeRetakeRequest()">Retake</button>
@@ -5741,7 +5689,7 @@ function buildVibeQuestions() {
   } else {
     q2Text = 'Paint me a picture of a typical evening or weekend at home when you\'ve got nothing on — what\'s actually happening?';
   }
-  q2Shortcuts = ['Early riser 🐦', 'Night owl 🌙', 'Gym mornings 💪', 'Work from home 💻', 'Quiet evenings 🌿', 'Batch cook Sundays 🍳'];
+  q2Shortcuts = ['Chilling out 🛋️', 'TV / gaming / book 📺', 'Takeaway + a show 🥡', 'Catching up with friends 📱', 'Cooking something nice 🍳', 'Early night in 🌙'];
 
   // Q3 — kept close to the original, nodding to shared language/cultural
   // background if it's known, since food is often where that shows up.
@@ -5792,7 +5740,7 @@ function buildVibeQuestions() {
       q: q3Text,
       hint: q3Hint,
       max: 200,
-      shortcuts: ['Cook most nights 🍳', 'Mostly takeaway 🥡', 'Plant-based 🌱', 'Meat-eater 🍖', 'Coffee addict ☕', 'No fridge sharing 🛒']
+      shortcuts: ['Cook most nights 🍳', 'Mostly takeaway 🥡', 'Plant-based 🌱', 'Meat-eater 🍖', 'Allergies / dietary needs ⚠️', 'No fridge sharing 🛒']
     },
     {
       type: 'multi-emoji',
@@ -5849,15 +5797,9 @@ function vibeInit() {
       if (startBtn) startBtn.style.display = 'none';
     }
   }
-  // Load extras (star sign + generation)
+  // Load extras — About Me sidebar star sign / generation selects (S59).
+  // Both were removed from this vibe-card done-state entirely at S152.
   _vibeExtrasLoad();
-  // Refresh chip-star and chip-gen in done state
-  var star = localStorage.getItem('ur_star_sign') || '';
-  var gen  = localStorage.getItem('ur_generation') || '';
-  var chipStar = document.getElementById('vibe-chip-star');
-  var chipGen  = document.getElementById('vibe-chip-gen');
-  if (chipStar) chipStar.textContent = star || '—';
-  if (chipGen)  chipGen.textContent  = gen  || '—';
 }
 
 function _vibeLoadSaved() {
@@ -6101,7 +6043,7 @@ async function _vibeGenerate() {
 
   var promptBody =
     'You are Cob — a warm AI assistant for UniRenter, an Australian student accommodation platform.\n\n' +
-    'A student has answered 6 questions about themselves as a housemate. Your job is to work out their vibe equation and write a short, honest personality portrait for their profile.\n\n' +
+    'A student has answered 6 questions about themselves as a housemate. Your job is to work out their vibe equation and write two things: a short one-line portrait, and a fuller narrative paragraph, both for their profile.\n\n' +
     'LOCKED PRIMARY EMOJI PALETTE (pick exactly one, based on ALL the answers together — no single answer is a forced pick):\n' +
     '🌙 Night owl | 🐦 Early riser | 📚 Study-focused | 🎓 Postgrad | 💼 Young professional | 🗣️ Social & outgoing | 🚪 Keeps to themselves | 🧹 Neat freak | 🤷 Relaxed about mess | 🍳 Home cook | 🎮 Gamer | 🎵 Musician | 🏋️ Gym regular | 🌈 LGBTQ+ friendly | 🌍 International | 👥 Loves having guests | 🏠 Homebody | 🌿 Chill vibes\n\n' +
     'SECONDARY EMOJI — pick one that adds personality flavour from this curated set (not restricted to):\n' +
@@ -6109,8 +6051,9 @@ async function _vibeGenerate() {
     'RULES:\n' +
     '- Weigh all 6 answers together — no single answer overrides the rest\n' +
     '- Secondary emoji adds personality flavour — be specific, not generic\n' +
-    '- Write summary in third person, 1-2 sentences, warm and specific — not generic. Lead with their strongest coexistence trait.\n' +
+    '- "summary" is 1-2 sentences, warm and specific — not generic. Lead with their strongest coexistence trait.\n' +
     '- Summary format: starts with primary emoji, then a quoted sentence or two. Example: 🧹 "Neat freak who cooks every night and is strict about kitchen cleanliness — total homebody, quiet after 10pm."\n' +
+    '- "narrative" is a fuller, 3-5 sentence third-person paragraph weaving together ALL 6 answers into a rounded picture of them as a housemate — sleep habits, social style, cleanliness, food/kitchen, pets if relevant. Warmer and more descriptive than the summary, but still honest and specific rather than generic filler. No quotes, no emoji, plain prose. This is shown on their full profile (not the match card), so it can go into more depth than the summary.\n' +
     '- Do NOT give legal advice or housing recommendations. Just write the portrait.\n' +
     '- NEVER use the word "legal"\n\n' +
     'STUDENT ANSWERS:\n' +
@@ -6121,7 +6064,7 @@ async function _vibeGenerate() {
     'Q5 (Shared spaces): ' + (_vibeQuizData.shared_spaces || '(skipped)') + '\n' +
     'Q6 (Social style — most important): ' + (_vibeQuizData.social_style || '(skipped)') + '\n\n' +
     'Respond ONLY with a JSON object, no preamble, no markdown fences:\n' +
-    '{"primary":"<emoji>","secondary":"<emoji>","summary":"<primary_emoji> \\"<1-2 sentences>\\""}';
+    '{"primary":"<emoji>","secondary":"<emoji>","summary":"<primary_emoji> \\"<1-2 sentences>\\"","narrative":"<3-5 sentence paragraph, plain prose>"}';
 
   try {
     var res = await fetch('/api/cob', {
@@ -6144,11 +6087,13 @@ async function _vibeGenerate() {
     var primary   = parsed.primary   || '🌿';
     var secondary = parsed.secondary || '☕';
     var summary   = parsed.summary   || primary + ' "' + 'A thoughtful housemate with their own rhythm."';
+    var narrative = (parsed.narrative || '').trim() || null;
 
     // Validate primary is in palette
     if (VIBE_PRIMARY_PALETTE.indexOf(primary) === -1) primary = '🌿';
 
-    _vibePending = { primary:primary, secondary:secondary, summary:summary };
+    _vibePending = { primary:primary, secondary:secondary, summary:summary, narrative:narrative,
+                      lifestyle: _vibePending.lifestyle, quiz_answers: _vibePending.quiz_answers };
     _vibeShowDone(primary, secondary, summary);
 
   } catch(err) {
@@ -6169,11 +6114,6 @@ function _vibeShowDone(primary, secondary, summary) {
   document.getElementById('vibe-override-secondary-val').textContent = secondary;
   document.getElementById('vibe-chip-primary').textContent       = primary;
   document.getElementById('vibe-chip-secondary').textContent     = secondary;
-
-  var star = localStorage.getItem('ur_star_sign')  || '';
-  var gen  = localStorage.getItem('ur_generation') || '';
-  document.getElementById('vibe-chip-star').textContent = star || '—';
-  document.getElementById('vibe-chip-gen').textContent  = gen  || '—';
 
   document.getElementById('vibe-card-empty').style.display       = 'none';
   document.getElementById('vibe-card-quiz').style.display        = 'none';
@@ -6262,6 +6202,7 @@ async function vibeSave() {
   var primary   = _vibePending.primary   || document.getElementById('vibe-override-primary-val').textContent;
   var secondary = _vibePending.secondary || document.getElementById('vibe-override-secondary-val').textContent;
   var summary   = _vibePending.summary   || '';
+  var narrative = _vibePending.narrative || null;
 
   // Persist locally first
   _vibeSaveLocal(primary, secondary, summary);
@@ -6282,6 +6223,7 @@ async function vibeSave() {
         vibe_emoji_primary:   primary,
         vibe_emoji_secondary: secondary,
         cob_summary:          summary,
+        cob_narrative:        narrative,
         star_sign:            star,
         generation:           gen,
         vibe_lifestyle:       _vibePending.lifestyle    || null,
@@ -6464,12 +6406,6 @@ function vibeExtrasChange() {
 
     if (star) localStorage.setItem('ur_star_sign',  star);
     if (gen)  localStorage.setItem('ur_generation', gen);
-
-    // Update chips in vibe-done state
-    var chipStar = document.getElementById('vibe-chip-star');
-    var chipGen  = document.getElementById('vibe-chip-gen');
-    if (chipStar) chipStar.textContent = star || '—';
-    if (chipGen)  chipGen.textContent  = gen  || '—';
 
     if (email) {
       try {
@@ -8387,66 +8323,6 @@ function sswWakeUp() {
     });
   }
 })();
-
-// ── vibeExtrasChangeInline — mirrors vibeExtrasChange but reads from inline selects ──
-var _vibeExtrasInlineTimer = null;
-function vibeExtrasChangeInline() {
-  clearTimeout(_vibeExtrasInlineTimer);
-  _vibeExtrasInlineTimer = setTimeout(async function() {
-    var star  = (document.getElementById('select-star-sign-inline')  || {}).value || '';
-    var gen   = (document.getElementById('select-generation-inline') || {}).value || '';
-    var email = localStorage.getItem('unirenter_email') || '';
-
-    if (star) localStorage.setItem('ur_star_sign',  star);
-    if (gen)  localStorage.setItem('ur_generation', gen);
-
-    // Keep standalone selects in sync if they exist
-    var ss = document.getElementById('select-star-sign');
-    var sg = document.getElementById('select-generation');
-    if (ss && star) ss.value = star;
-    if (sg && gen)  sg.value = gen;
-
-    // Update chips
-    var chipStar = document.getElementById('vibe-chip-star');
-    var chipGen  = document.getElementById('vibe-chip-gen');
-    if (chipStar) chipStar.textContent = star || '—';
-    if (chipGen)  chipGen.textContent  = gen  || '—';
-
-    if (email) {
-      try {
-        await fetch('/api/profile/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: email,
-            city:  localStorage.getItem('ur_city') || 'melbourne',
-            star_sign:  star,
-            generation: gen
-          })
-        });
-      } catch(e) { /* non-fatal */ }
-    }
-
-    var savedEl = document.getElementById('vibe-inline-extras-saved');
-    if (savedEl) {
-      savedEl.style.display = 'block';
-      setTimeout(function() { savedEl.style.display = 'none'; }, 2000);
-    }
-  }, 600);
-}
-
-// ── Restore inline selects on vibeInit ──
-// (patch vibeInit to also populate inline selects)
-var _origVibeInit = vibeInit;
-vibeInit = function() {
-  _origVibeInit();
-  var star = localStorage.getItem('ur_star_sign')  || '';
-  var gen  = localStorage.getItem('ur_generation') || '';
-  var ss   = document.getElementById('select-star-sign-inline');
-  var sg   = document.getElementById('select-generation-inline');
-  if (ss && star) ss.value = star;
-  if (sg && gen)  sg.value = gen;
-};
 
 function selectSleep(el, mode) {
   document.querySelectorAll('.sleep-card').forEach(c => c.classList.remove('selected'));
