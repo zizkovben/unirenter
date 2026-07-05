@@ -199,11 +199,18 @@ a.nav-logo {
   .nav-explore-btn { font-size: 0; padding: 7px 10px; letter-spacing: 0; }
   .nav-explore-btn::after { content: '▾'; font-size: 14px; }
   .btn-theme { width: 32px; height: 32px; font-size: 14px; }
+  /* S151: status pill ("🟢 Active" / "🟡 Sleeping") had no mobile rule at
+     all, unlike every other nav element — it stayed full-size and, combined
+     with Settings + bell + theme toggle, overflowed the nav on narrower
+     phones. body's overflow-x:hidden then silently clipped whatever didn't
+     fit, which is what showed up as content missing off the right edge. */
+  .status-pill { font-size: 11px; padding: 6px 8px; }
 }
 @media (max-width: 380px) {
   nav { padding: 0 10px; gap: 4px; }
   nav .nav-logo img { height: 26px; }
   .nav-cta { font-size: 11px; padding: 6px 8px; }
+  .status-pill { font-size: 10px; padding: 5px 6px; }
 }
 
 
@@ -7275,18 +7282,28 @@ function renderMatchCard(p) {
   const cobPreviewHtml = p.cob_summary
     ? `<div class="match-cob-summary">${p.cob_summary}</div>`
     : '';
-  // S151: already-connected state — if we already have a message thread with
-  // this person, show "Message" (jumps to Messages tab + opens the thread)
-  // instead of Connect/Skip, rather than implying no contact has happened yet.
+  // S151: already-connected state — mirrors the two states connectWith()
+  // used to draw: a one-way message with no reply yet ("Request sent" +
+  // "Go to messages"), vs. a genuine back-and-forth ("Message").
   var isAlreadyConnected = !!(p.email && window._connectedEmails && window._connectedEmails.has(p.email.toLowerCase()));
-  var actionsHtml = isAlreadyConnected
-    ? `<div class="match-actions">
+  var hasReply = isAlreadyConnected && window._connectedHasReply[p.email.toLowerCase()];
+  var actionsHtml;
+  if (isAlreadyConnected && hasReply) {
+    actionsHtml = `<div class="match-actions">
       <button class="btn-connect" style="background:#3DAA5C;" onclick="openConversationFor('${p.email.replace(/'/g, "\\'")}')">Message</button>
-    </div>`
-    : `<div class="match-actions">
+    </div>`;
+  } else if (isAlreadyConnected) {
+    actionsHtml = `<div style="font-size:12px;color:#E8623A;margin-bottom:10px;">Message sent — awaiting reply</div>
+    <div class="match-actions">
+      <button class="btn-connect" disabled style="background:#E8623A;color:#fff;">Request sent</button>
+      <button class="btn-skip" onclick="openConversationFor('${p.email.replace(/'/g, "\\'")}')">Go to messages</button>
+    </div>`;
+  } else {
+    actionsHtml = `<div class="match-actions">
       <button class="btn-connect" data-name="${p.name}" data-email="${p.email||''}" onclick="connectWith(this.dataset.name,this.dataset.email)">Connect</button>
       <button class="btn-skip" onclick="skipCard(this)">Skip</button>
     </div>`;
+  }
   card.innerHTML = `
     <div class="match-card-header">
       <div class="match-avatar" style="background:${p.bg};">${p.initials}</div>
@@ -7603,16 +7620,22 @@ async function renderMatches() {
 
   // ── S151: fetch existing conversations so match cards can recognise an
   // already-open chat instead of always showing "Connect" — cards for people
-  // you've already connected with now show "Message" and jump straight to
-  // that conversation in the Messages tab. ─────────────────────────────────
+  // you've already connected with now show "Message" (real back-and-forth) or
+  // "Request sent — awaiting reply" (one-way so far), same distinction the
+  // old connectWith() success state used to draw. ───────────────────────────
   window._connectedEmails = new Set();
+  window._connectedHasReply = {};
   if (isVerified && email) {
     try {
       var convRes = await fetch('/api/messages/get?email=' + encodeURIComponent(email));
       if (convRes.ok) {
         var convData = await convRes.json();
         (convData.conversations || []).forEach(function(c) {
-          if (c.partner_email) window._connectedEmails.add(c.partner_email.toLowerCase());
+          if (c.partner_email) {
+            var key = c.partner_email.toLowerCase();
+            window._connectedEmails.add(key);
+            window._connectedHasReply[key] = !!c.has_reply;
+          }
         });
       }
     } catch (err) {

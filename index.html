@@ -702,8 +702,10 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
   }
 }
 
-/* Extra narrow — Galaxy Z Fold single panel and similar (~360px) */
-@media (max-width: 400px) {
+/* Narrow phones — widened S151 from 400px to 480px: confirmed via live
+   testing that phones in the ~410-430px range (e.g. Pro Max-class devices)
+   were still overflowing the nav because this rule never applied to them. */
+@media (max-width: 480px) {
   nav {
     padding: 8px 6px;
     overflow: visible;
@@ -724,7 +726,7 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
     padding: 5px 6px;
     gap: 3px;
   }
-  /* On very narrow screens, hide "Explore" text, keep just the chevron */
+  /* Hide "Explore" text on narrow screens, keep just the chevron */
   .nav-dropdown-btn-label {
     display: none;
   }

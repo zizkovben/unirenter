@@ -858,6 +858,46 @@ footer { position: relative; z-index: 1; text-align: center; padding: 32px; bord
   }
 }
 
+/* Narrow phones — hide "Explore" text, keep just the chevron. Added S151:
+   this rule existed on Melbourne/Sydney only and was never propagated to
+   this city during the original clone — confirmed via fresh GitHub fetch,
+   this file had zero .nav-dropdown-btn-label rule anywhere before this. */
+@media (max-width: 480px) {
+  nav {
+    padding: 8px 6px;
+    overflow: visible;
+  }
+  .nav-logo img {
+    height: 26px;
+  }
+  .nav-logo {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  .nav-cta {
+    font-size: 10px;
+    padding: 6px 7px;
+  }
+  .nav-dropdown-btn {
+    font-size: 10px;
+    padding: 5px 6px;
+    gap: 3px;
+  }
+  .nav-dropdown-btn-label {
+    display: none;
+  }
+  .nav-dropdown-btn .chevron {
+    font-size: 14px;
+  }
+  .btn-theme {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-right: 0;
+  }
+}
+
 @media (max-width: 400px) {
   .hero {
     padding: 80px 16px 40px;
