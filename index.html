@@ -310,6 +310,15 @@ input[type="range"] { flex: 1; accent-color: var(--brand-yellow); cursor: pointe
 .card-photo { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(75,191,224,0.25); }
 .card-photo-initials { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; font-family: var(--font-display); border: 2px solid rgba(75,191,224,0.2); }
 .avatar-flag { position: absolute; bottom: -2px; right: -4px; font-size: 14px; line-height: 1; }
+/* S152: small badge circle bottom-right of an avatar, holding the vibe primary emoji */
+.avatar-emoji-badge {
+  position: absolute; bottom: -2px; right: -2px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #1a3040; border: 2px solid var(--card-bg, #0d1f2d);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; line-height: 1;
+}
+.avatar-emoji-badge:empty { display: none; }
 .score-badge { background: rgba(245,184,0,0.12); border: 1px solid rgba(245,184,0,0.35); color: var(--brand-yellow); font-family: var(--font-display); font-size: 14px; font-weight: 700; padding: 5px 11px; border-radius: 20px; white-space: nowrap; }
 .card-name { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin: 13px 20px 3px; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; }
 .card-sub { font-size: 12px; color: var(--text-muted); margin: 0 20px 4px; }
@@ -2212,7 +2221,7 @@ function renderMatchCard(p) {
     : '';
   card.innerHTML = `
     <div class="card-header">
-      <div class="card-photo-wrap">${photoHtml}</div>
+      <div class="card-photo-wrap">${photoHtml}<div class="avatar-emoji-badge">${p.vibe_emoji_primary || ''}</div></div>
       <div class="score-badge">${p.match_score || 0}% match</div>
     </div>
     <div class="card-name">${p.display_name || 'Student'}</div>
@@ -2234,16 +2243,10 @@ function renderMatchCard(p) {
 
 // ── S152: Expanded profile modal ──────────────────────────────────────────────
 // Fuller detail view, opened by tapping a match card (not its buttons). Shows
-// the same avatar/vibe-equation logic as the card, plus every lifestyle field
-// and Cob's longer narrative paragraph (cob_narrative) — kept separate from the
-// short one-liner (cob_summary) which stays on the card as-is.
-function pdmDetailRow(label, value) {
-  if (!value) return '';
-  return '<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">' +
-    '<span style="color:var(--text-muted);">' + label + '</span>' +
-    '<span style="text-align:right;">' + value + '</span></div>';
-}
-
+// the same avatar/vibe-emoji logic as the card, plus Cob's longer narrative
+// paragraph (cob_narrative) — kept separate from the short one-liner
+// (cob_summary) which stays on the card as-is. Scaled back after first review:
+// no full lifestyle-detail dump, just avatar, name, vibe emojis, narrative.
 function pdmOpen(key) {
   const p = (window._matchProfilesById || {})[key];
   if (!p) return;
@@ -2259,6 +2262,8 @@ function pdmOpen(key) {
     photoEl.style.cssText = 'width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0;background:' + bgColors[idx] + ';color:' + fgColors[idx] + ';';
     photoEl.textContent = initials;
   }
+  const badgeEl = document.getElementById('pdm-emoji-badge');
+  if (badgeEl) badgeEl.textContent = p.vibe_emoji_primary || '';
 
   document.getElementById('pdm-name').textContent = p.display_name || 'Student';
   const subParts = [p.university, p.field_of_study, p.year_of_study].filter(Boolean);
@@ -2281,34 +2286,6 @@ function pdmOpen(key) {
       narrativeEl.style.display = 'none';
     }
   }
-
-  const tags = [];
-  if (p.last_seen) {
-    const daysAgo = (Date.now() - new Date(p.last_seen).getTime()) / 86400000;
-    if (daysAgo <= 7) tags.push('🟢 Active');
-  }
-  if (p.student_status === 'other') tags.push('👤 Not a student');
-  if (p.email_verified) tags.push('Verified ✓');
-  if (p.uni_email_verified) tags.push('🎓 Uni verified');
-  if (p.age_bracket) tags.push(p.age_bracket);
-  const tagsEl = document.getElementById('pdm-tags');
-  if (tagsEl) tagsEl.innerHTML = tags.map(t => '<span class="tag">' + t + '</span>').join('');
-
-  const suburbs = (p.suburb_preferences || []).join(', ') || null;
-  const detailsHtml =
-    pdmDetailRow('Looking for', p.seeking) +
-    pdmDetailRow('Household type', p.household_type) +
-    pdmDetailRow('Budget', p.budget_max ? ('$' + (p.budget_min ? (p.budget_min + '–') : '') + p.budget_max + '/wk') : null) +
-    pdmDetailRow('Preferred suburbs', suburbs) +
-    pdmDetailRow('Stay duration', p.stay_duration) +
-    pdmDetailRow('Sleep schedule', p.sleep_schedule ? p.sleep_schedule.replace(/_/g,' ') : null) +
-    pdmDetailRow('Cleanliness', p.cleanliness ? p.cleanliness.replace(/_/g,' ') : null) +
-    pdmDetailRow('Guests', p.guests) +
-    pdmDetailRow('Pets', p.pets ? p.pets.replace(/_/g,' ') : null) +
-    pdmDetailRow('Dietary', p.dietary) +
-    pdmDetailRow('Substances', p.substances ? p.substances.replace(/_/g,' ') : null);
-  const detailsEl = document.getElementById('pdm-details');
-  if (detailsEl) detailsEl.innerHTML = detailsHtml;
 
   openModal('profile-detail-modal');
 }
@@ -4052,14 +4029,18 @@ function validateStepData(step) {
   </div>
 </div>
 
-<!-- S152: Expanded profile modal — fuller detail + Cob's longer narrative paragraph.
-     Deliberately kept separate from the match-card's short emoji + one-liner (which
-     stays as-is) — this is shown only when someone taps into a profile. -->
+<!-- S152: Expanded profile modal — Cob's longer narrative paragraph, shown when
+     someone taps into a profile. Deliberately kept separate from the match-card's
+     short emoji + one-liner (which stays as-is). Scaled back after first review —
+     no full lifestyle-detail dump, just avatar, name, vibe equation, narrative. -->
 <div class="modal-overlay" id="profile-detail-modal">
-  <div class="modal" style="max-width:520px;">
+  <div class="modal" style="max-width:480px;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
       <div style="display:flex;gap:14px;align-items:center;">
-        <div id="pdm-photo"></div>
+        <div id="pdm-photo-wrap" style="position:relative;display:inline-block;">
+          <div id="pdm-photo"></div>
+          <div id="pdm-emoji-badge" class="avatar-emoji-badge"></div>
+        </div>
         <div>
           <div class="modal-title" id="pdm-name" style="margin-bottom:2px;"></div>
           <div class="modal-sub" style="margin-bottom:0;" id="pdm-sub"></div>
@@ -4068,9 +4049,7 @@ function validateStepData(step) {
       <button onclick="closeModal('profile-detail-modal')" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;line-height:1;padding:0 0 0 12px;">✕</button>
     </div>
     <div id="pdm-vibe-row" style="font-size:22px;letter-spacing:4px;margin-bottom:12px;"></div>
-    <div id="pdm-narrative" style="font-size:13px;line-height:1.65;color:var(--text);background:rgba(255,255,255,0.04);border-radius:12px;padding:14px 16px;margin-bottom:16px;"></div>
-    <div id="pdm-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;"></div>
-    <div id="pdm-details" style="display:flex;flex-direction:column;gap:9px;margin-bottom:6px;font-size:13px;"></div>
+    <div id="pdm-narrative" style="font-size:13px;line-height:1.65;color:var(--text);background:rgba(255,255,255,0.04);border-radius:12px;padding:14px 16px;margin-bottom:4px;"></div>
     <div class="modal-actions">
       <button class="btn-modal-cancel" onclick="closeModal('profile-detail-modal')">Close</button>
     </div>

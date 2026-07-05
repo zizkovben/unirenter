@@ -1153,11 +1153,21 @@ body.light-mode {
 }
 .match-vibe-eq-nudge:hover { color: var(--brand-yellow); }
 .match-card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.match-avatar-wrap { position: relative; flex-shrink: 0; }
 .match-avatar {
   width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: 18px; font-weight: 700; overflow: hidden;
 }
+/* S152: small badge circle bottom-right of an avatar, holding the vibe primary emoji */
+.avatar-emoji-badge {
+  position: absolute; bottom: -2px; right: -2px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #1a3040; border: 2px solid var(--navy-bg, #0d1f2d);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; line-height: 1;
+}
+.avatar-emoji-badge:empty { display: none; }
 .match-info { flex: 1; }
 .match-name { font-family: var(--font-display); font-weight: 700; font-size: 15px; }
 .match-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
@@ -5384,6 +5394,30 @@ body.light-mode {
   </div>
 </div>
 
+<!-- S152: Expanded profile modal — Cob's longer narrative paragraph, shown when
+     someone taps into a match card (not its buttons). Match card's short emoji +
+     one-liner stays as-is. Kept lean — avatar, name, vibe emojis, narrative only. -->
+<div class="modal-overlay" id="profile-detail-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('profile-detail-modal')">✕</button>
+    <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px;">
+      <div class="match-avatar-wrap">
+        <div class="match-avatar" id="pdm-photo" style="width:52px;height:52px;font-size:18px;"></div>
+        <div class="avatar-emoji-badge" id="pdm-emoji-badge" style="width:20px;height:20px;font-size:11px;"></div>
+      </div>
+      <div>
+        <div class="modal-title" id="pdm-name" style="margin-bottom:2px;"></div>
+        <div class="modal-sub" style="margin-bottom:0;" id="pdm-sub"></div>
+      </div>
+    </div>
+    <div id="pdm-vibe-row" style="font-size:22px;letter-spacing:4px;margin-bottom:12px;"></div>
+    <div id="pdm-narrative" style="font-size:13px;line-height:1.65;color:var(--text);background:rgba(255,255,255,0.04);border-radius:12px;padding:14px 16px;margin-bottom:4px;"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal('profile-detail-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 // ── Auth guard — redirect unauthenticated users before DOM paint ──────────────
@@ -7247,6 +7281,16 @@ function renderMatchCard(p) {
   const card = document.createElement('div');
   card.className = 'match-card';
   if (p.vibe_emoji_primary) card.dataset.vibe = p.vibe_emoji_primary;
+  // S152: expanded profile modal — key by email when available (real matches),
+  // fall back to name for DUMMY_MATCHES which have no email.
+  const pdmKey = p.email || p.name;
+  window._matchProfilesById = window._matchProfilesById || {};
+  window._matchProfilesById[pdmKey] = p;
+  card.style.cursor = 'pointer';
+  card.onclick = function(e) {
+    if (e.target.closest('button')) return; // let card buttons handle their own clicks
+    pdmOpen(pdmKey);
+  };
   const tags = p.tags.map((t,i) =>
     `<span class="match-tag ${p.tagClass[i] || ''}">${t}</span>`
   ).join('');
@@ -7307,7 +7351,10 @@ function renderMatchCard(p) {
   }
   card.innerHTML = `
     <div class="match-card-header">
-      <div class="match-avatar" style="background:${p.bg};">${p.initials}</div>
+      <div class="match-avatar-wrap">
+        <div class="match-avatar" style="background:${p.bg};">${p.initials}</div>
+        <div class="avatar-emoji-badge">${p.vibe_emoji_primary || ''}</div>
+      </div>
       <div class="match-info">
         <div class="match-name">${p.name}</div>
         <div class="match-sub">${p.sub}</div>
@@ -7322,6 +7369,43 @@ function renderMatchCard(p) {
     ${actionsHtml}`;
   playSound('match_found');
   return card;
+}
+
+// ── S152: Expanded profile modal ──────────────────────────────────────────────
+// Reuses the already-adapted card data (name/initials/bg/sub/vibe emojis/
+// cob_narrative) — no extra fetch needed since adaptApiMatchForCard() carries
+// everything this scaled-back modal needs.
+function pdmOpen(key) {
+  const p = (window._matchProfilesById || {})[key];
+  if (!p) return;
+
+  const photoEl = document.getElementById('pdm-photo');
+  if (photoEl) { photoEl.style.background = p.bg; photoEl.textContent = p.initials; }
+  const badgeEl = document.getElementById('pdm-emoji-badge');
+  if (badgeEl) badgeEl.textContent = p.vibe_emoji_primary || '';
+
+  document.getElementById('pdm-name').textContent = p.name || 'Student';
+  document.getElementById('pdm-sub').textContent  = p.sub  || 'Student';
+
+  const vibeRow = document.getElementById('pdm-vibe-row');
+  if (vibeRow) vibeRow.textContent = p.vibe_emoji_primary ? (p.vibe_emoji_primary + (p.vibe_emoji_secondary ? ' ' + p.vibe_emoji_secondary : '')) : '';
+
+  const narrativeEl = document.getElementById('pdm-narrative');
+  if (narrativeEl) {
+    if (p.cob_narrative) {
+      narrativeEl.style.display = '';
+      narrativeEl.textContent = p.cob_narrative;
+    } else if (p.cob_summary) {
+      // Fallback for profiles that haven't regenerated their vibe since this
+      // feature shipped — show the short summary rather than an empty box.
+      narrativeEl.style.display = '';
+      narrativeEl.textContent = p.cob_summary;
+    } else {
+      narrativeEl.style.display = 'none';
+    }
+  }
+
+  openModal('profile-detail-modal');
 }
 
 // ── Vibe emoji filter chips (Session 43) ─────────────────────────────────────
@@ -7536,6 +7620,7 @@ function adaptApiMatchForCard(p) {
     vibe_emoji_primary: p.vibe_emoji_primary || null,
     vibe_emoji_secondary: p.vibe_emoji_secondary || null,
     cob_summary: p.cob_summary || null,
+    cob_narrative: p.cob_narrative || null,
     field_of_study: p.field_of_study || null,
     email: p.email || null,
   };
