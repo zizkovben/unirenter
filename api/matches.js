@@ -244,6 +244,7 @@ function scoreCandidate(c, myProfile, city) {
     vibe_emoji_primary:   c.vibe_emoji_primary   || null,
     vibe_emoji_secondary: c.vibe_emoji_secondary || null,
     cob_summary:          c.cob_summary          || null,
+    cob_narrative:        c.cob_narrative        || null,
     profile_complete:     c.profile_complete     || 0,
     last_seen:          c.last_seen || null,
     match_score:        Math.round(score),
