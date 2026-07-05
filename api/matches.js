@@ -220,6 +220,7 @@ function scoreCandidate(c, myProfile, city) {
  
   return {
     id:                 c.id,
+    email:              c.email || null,
     display_name:       c.display_name || 'Student',
     university:         c.university || null,
     student_status:     c.student_status || null,
