@@ -10,6 +10,13 @@ const supabase = createClient(
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  // S151: confirmed via live Network tab that a sibling endpoint (household/get.js)
+  // was being served as a cached 304 with no body on repeat identical calls,
+  // which throws client-side on res.json(). This endpoint is called just as
+  // repetitively (45s polling, tab switches, and the new S151 match-card
+  // connected-state check) so it gets the same explicit no-store treatment
+  // pre-emptively rather than waiting for it to fail the same way.
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
 
   const rawQuery = req.query || {};
   // S135: normalize casing at the source — matches the same fix in send.js.
