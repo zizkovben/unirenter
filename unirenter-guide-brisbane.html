@@ -192,7 +192,13 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .lt-list li{font-size:12px;color:var(--muted);line-height:1.6;padding-left:16px;position:relative;list-style:none}
 .lt-list li::before{content:'→';position:absolute;left:0;opacity:0.5}
 
-.resource-link{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:10px;text-decoration:none;color:var(--text);transition:all 0.2s}
+.resource-link{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:10px;text-decoration:none;color:var(--text);transition:all 0.2s;position:relative}
+/* S151: report-broken-link flag — auto-injected by JS into every .resource-link,
+   works for any current or future resource card with zero per-link markup. */
+.rl-flag-btn{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;opacity:0.45;transition:opacity 0.2s,background 0.2s,border-color 0.2s;z-index:2}
+.rl-flag-btn:hover{opacity:1;background:rgba(232,98,58,0.15);border-color:rgba(232,98,58,0.4)}
+.rl-flag-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid rgba(75,191,224,0.3);color:var(--text);padding:12px 18px;border-radius:10px;font-size:13px;max-width:320px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.3);z-index:3000;opacity:0;transition:opacity 0.25s,transform 0.25s;pointer-events:none}
+.rl-flag-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .resource-link:hover{border-color:rgba(75,191,224,0.4);transform:translateY(-1px)}
 .resource-link .rl-icon{font-size:22px;flex-shrink:0}
 .resource-link .rl-body h4{font-family:var(--fd);font-size:14px;font-weight:700;margin-bottom:2px}
@@ -1004,6 +1010,69 @@ function scrollCob() {
   var m = document.getElementById('cob-msgs');
   setTimeout(function(){ if(m) m.scrollTop = m.scrollHeight; }, 80);
 }
+
+// ── S151: Report broken link — auto-injects a 🚩 into every .resource-link
+// card so students can flag dead/wrong links the moment they hit one, rather
+// than relying only on periodic manual audits. To propagate to another
+// city/page, just change the two constants below — no other markup needed.
+var REPORT_LINK_CITY = 'brisbane';
+var REPORT_LINK_PAGE = 'guide';
+
+function rlShowToast(msg) {
+  var toast = document.getElementById('rl-flag-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'rl-flag-toast';
+    toast.className = 'rl-flag-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(function() { toast.classList.remove('show'); }, 3200);
+}
+
+function rlReportBrokenLink(url, label) {
+  var email = null;
+  try { email = localStorage.getItem('unirenter_email') || null; } catch (e) {}
+  fetch('/api/report-broken-link', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+    body: JSON.stringify({
+      url: url,
+      label: label,
+      city: REPORT_LINK_CITY,
+      page: REPORT_LINK_PAGE,
+      page_path: window.location.pathname,
+      user_email: email
+    })
+  }).catch(function(err) { console.warn('Broken link report failed to send:', err); });
+  rlShowToast("Thanks — you're helping other students by keeping this info accurate 🙌");
+}
+
+function rlInitBrokenLinkReporting() {
+  document.querySelectorAll('a.resource-link').forEach(function(link) {
+    if (link.querySelector('.rl-flag-btn')) return;
+    var url = link.getAttribute('href') || '';
+    var titleEl = link.querySelector('h4');
+    var label = titleEl ? titleEl.textContent.trim() : (link.textContent || '').trim().slice(0, 80);
+    var btn = document.createElement('span');
+    btn.className = 'rl-flag-btn';
+    btn.title = 'Report broken link';
+    btn.setAttribute('aria-label', 'Report broken link');
+    btn.textContent = '🚩';
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      rlReportBrokenLink(url, label);
+    });
+    link.appendChild(btn);
+  });
+}
+
+if (document.readyState !== 'loading') rlInitBrokenLinkReporting();
+else document.addEventListener('DOMContentLoaded', rlInitBrokenLinkReporting);
 </script>
 <!-- ── Cob assistant ── -->
 <div class="cob-label" id="cob-label">👋 Ask me about your renter rights</div>
