@@ -2246,7 +2246,18 @@ function renderMatchCard(p) {
 // the same avatar/vibe-emoji logic as the card, plus Cob's longer narrative
 // paragraph (cob_narrative) — kept separate from the short one-liner
 // (cob_summary) which stays on the card as-is. Scaled back after first review:
-// no full lifestyle-detail dump, just avatar, name, vibe emojis, narrative.
+// no full lifestyle-detail dump — just avatar, name, vibe emojis (with
+// tooltips), a few key highlight tags, and the narrative.
+const VIBE_LABELS = {
+  '🌙':'Night owl', '🐦':'Early riser', '📚':'Study-focused', '🎓':'Postgrad',
+  '💼':'Young professional', '🗣️':'Social & outgoing', '🚪':'Keeps to themselves',
+  '🧹':'Neat freak', '🤷':'Relaxed about mess', '🍳':'Home cook', '🎮':'Gamer',
+  '🎵':'Musician', '🏋️':'Gym regular', '🌈':'LGBTQ+ friendly', '🌍':'International',
+  '👥':'Loves having guests', '🏠':'Homebody', '🌿':'Chill vibes'
+};
+const PDM_SLEEP_LABELS = { early_bird: '🌅 Early bird', night_owl: '🌃 Night owl', flexible: '🔄 Flexible' };
+const PDM_CLEAN_LABELS = { very_tidy: '🧹 Very tidy', tidy: '🧹 Tidy', average: '⚖️ Average clean', relaxed: '😌 Relaxed' };
+
 function pdmOpen(key) {
   const p = (window._matchProfilesById || {})[key];
   if (!p) return;
@@ -2269,21 +2280,56 @@ function pdmOpen(key) {
   const subParts = [p.university, p.field_of_study, p.year_of_study].filter(Boolean);
   document.getElementById('pdm-sub').textContent = subParts.join(' · ') || 'Student';
 
+  // Household indicator — boolean only, no household details exposed (S152)
+  const hhEl = document.getElementById('pdm-household');
+  if (hhEl) hhEl.style.display = p.in_household ? '' : 'none';
+
+  // Vibe emoji row — tooltips explain what each emoji means (S152)
   const vibeRow = document.getElementById('pdm-vibe-row');
-  if (vibeRow) vibeRow.textContent = p.vibe_emoji_primary ? (p.vibe_emoji_primary + (p.vibe_emoji_secondary ? ' ' + p.vibe_emoji_secondary : '')) : '';
+  if (vibeRow) {
+    if (p.vibe_emoji_primary) {
+      var vHtml = '<span title="' + (VIBE_LABELS[p.vibe_emoji_primary] || 'Vibe type') + '">' + p.vibe_emoji_primary + '</span>';
+      if (p.vibe_emoji_secondary) {
+        vHtml += ' <span title="' + (VIBE_LABELS[p.vibe_emoji_secondary] || 'Vibe type') + '" style="font-size:16px;">' + p.vibe_emoji_secondary + '</span>';
+      }
+      vibeRow.innerHTML = vHtml;
+    } else {
+      vibeRow.innerHTML = '';
+    }
+  }
+
+  // Key highlight tags — sleep, cleanliness, suburb, budget, active (S152)
+  const pdmTags = [];
+  if (p.last_seen) {
+    const daysAgo = (Date.now() - new Date(p.last_seen).getTime()) / 86400000;
+    if (daysAgo <= 7) pdmTags.push('🟢 Active');
+  }
+  if (p.sleep_schedule && PDM_SLEEP_LABELS[p.sleep_schedule]) pdmTags.push(PDM_SLEEP_LABELS[p.sleep_schedule]);
+  if (p.cleanliness && PDM_CLEAN_LABELS[p.cleanliness]) pdmTags.push(PDM_CLEAN_LABELS[p.cleanliness]);
+  if (p.suburb_preferences && p.suburb_preferences[0]) pdmTags.push(p.suburb_preferences[0]);
+  if (p.budget_max) pdmTags.push('$' + p.budget_max + '/wk');
+  const tagsEl = document.getElementById('pdm-tags');
+  if (tagsEl) tagsEl.innerHTML = pdmTags.map(t => '<span class="tag">' + t + '</span>').join('');
 
   const narrativeEl = document.getElementById('pdm-narrative');
   if (narrativeEl) {
     if (p.cob_narrative) {
       narrativeEl.style.display = '';
+      narrativeEl.style.fontStyle = 'normal';
       narrativeEl.textContent = p.cob_narrative;
     } else if (p.cob_summary) {
       // Fallback for profiles that haven't regenerated their vibe since this
       // feature shipped — show the short summary rather than an empty box.
       narrativeEl.style.display = '';
+      narrativeEl.style.fontStyle = 'normal';
       narrativeEl.textContent = p.cob_summary.replace(/^[^\s"]+\s*/, '').replace(/^"|"$/g,'');
     } else {
-      narrativeEl.style.display = 'none';
+      // S152: nicer empty state instead of a blank box — modal stays
+      // clickable either way, it just explains there's nothing yet.
+      narrativeEl.style.display = '';
+      narrativeEl.style.fontStyle = 'italic';
+      narrativeEl.style.color = 'var(--text-muted)';
+      narrativeEl.textContent = (p.display_name || 'This student') + ' hasn\'t completed their vibe quiz yet — check back soon for a fuller picture of their vibe.';
     }
   }
 
@@ -4032,7 +4078,8 @@ function validateStepData(step) {
 <!-- S152: Expanded profile modal — Cob's longer narrative paragraph, shown when
      someone taps into a profile. Deliberately kept separate from the match-card's
      short emoji + one-liner (which stays as-is). Scaled back after first review —
-     no full lifestyle-detail dump, just avatar, name, vibe equation, narrative. -->
+     no full lifestyle-detail dump, just avatar, name, vibe equation, a few key
+     highlight tags, and the narrative. -->
 <div class="modal-overlay" id="profile-detail-modal">
   <div class="modal" style="max-width:480px;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
@@ -4048,7 +4095,9 @@ function validateStepData(step) {
       </div>
       <button onclick="closeModal('profile-detail-modal')" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;line-height:1;padding:0 0 0 12px;">✕</button>
     </div>
-    <div id="pdm-vibe-row" style="font-size:22px;letter-spacing:4px;margin-bottom:12px;"></div>
+    <div id="pdm-household" style="font-size:12px;color:var(--brand-blue);margin-bottom:10px;display:none;">🏠 Already in a household</div>
+    <div id="pdm-vibe-row" style="font-size:22px;letter-spacing:8px;margin-bottom:12px;"></div>
+    <div class="card-tags" id="pdm-tags" style="padding:0;margin-bottom:14px;"></div>
     <div id="pdm-narrative" style="font-size:13px;line-height:1.65;color:var(--text);background:rgba(255,255,255,0.04);border-radius:12px;padding:14px 16px;margin-bottom:4px;"></div>
     <div class="modal-actions">
       <button class="btn-modal-cancel" onclick="closeModal('profile-detail-modal')">Close</button>

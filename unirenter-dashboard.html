@@ -5389,9 +5389,9 @@ body.light-mode {
   </div>
 </div>
 
-<!-- S152: Expanded profile modal — Cob's longer narrative paragraph, shown when
-     someone taps into a match card (not its buttons). Match card's short emoji +
-     one-liner stays as-is. Kept lean — avatar, name, vibe emojis, narrative only. -->
+<!-- S152: Expanded profile modal — Cob's longer narrative paragraph plus a few key
+     preference highlights, shown when someone taps into a match card (not its
+     buttons). Match card's short emoji + one-liner stays as-is. -->
 <div class="modal-overlay" id="profile-detail-modal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('profile-detail-modal')">✕</button>
@@ -5405,7 +5405,9 @@ body.light-mode {
         <div class="modal-sub" style="margin-bottom:0;" id="pdm-sub"></div>
       </div>
     </div>
-    <div id="pdm-vibe-row" style="font-size:22px;letter-spacing:4px;margin-bottom:12px;"></div>
+    <div id="pdm-household" style="font-size:12px;color:var(--brand-blue);margin-bottom:10px;display:none;">🏠 Already in a household</div>
+    <div id="pdm-vibe-row" style="font-size:22px;letter-spacing:8px;margin-bottom:12px;"></div>
+    <div class="match-tags" id="pdm-tags" style="margin-bottom:14px;"></div>
     <div id="pdm-narrative" style="font-size:13px;line-height:1.65;color:var(--text);background:rgba(255,255,255,0.04);border-radius:12px;padding:14px 16px;margin-bottom:4px;"></div>
     <div class="modal-actions">
       <button class="btn-modal-cancel" onclick="closeModal('profile-detail-modal')">Close</button>
@@ -5664,6 +5666,15 @@ function openSettingsCollapse() {
 // ══════════════════════════════════════════════════════════════
 
 const VIBE_PRIMARY_PALETTE = ['🌙','🐦','📚','🎓','💼','🗣️','🚪','🧹','🤷','🍳','🎮','🎵','🏋️','🌈','🌍','👥','🏠','🌿'];
+// S152: hoisted to global scope (was local to renderVibeFilterChips only) so
+// pdmOpen()'s emoji tooltips can share the same explanation text.
+const VIBE_LABELS = {
+  '🌙':'Night owl', '🐦':'Early riser', '📚':'Study-focused', '🎓':'Postgrad',
+  '💼':'Young professional', '🗣️':'Social & outgoing', '🚪':'Keeps to themselves',
+  '🧹':'Neat freak', '🤷':'Relaxed about mess', '🍳':'Home cook', '🎮':'Gamer',
+  '🎵':'Musician', '🏋️':'Gym regular', '🌈':'LGBTQ+ friendly', '🌍':'International',
+  '👥':'Loves having guests', '🏠':'Homebody', '🌿':'Chill vibes'
+};
 
 // S150 rebuild — restores the Session 96 personalisation design that was
 // designed and built for the city-page registration flow, then removed
@@ -7353,21 +7364,54 @@ function pdmOpen(key) {
   document.getElementById('pdm-name').textContent = p.name || 'Student';
   document.getElementById('pdm-sub').textContent  = p.sub  || 'Student';
 
+  // Household indicator — boolean only, no household details exposed (S152)
+  const hhEl = document.getElementById('pdm-household');
+  if (hhEl) hhEl.style.display = p.in_household ? '' : 'none';
+
+  // Vibe emoji row — each emoji gets its own tooltip explaining what it means,
+  // rather than the row just being decorative (S152).
   const vibeRow = document.getElementById('pdm-vibe-row');
-  if (vibeRow) vibeRow.textContent = p.vibe_emoji_primary ? (p.vibe_emoji_primary + (p.vibe_emoji_secondary ? ' ' + p.vibe_emoji_secondary : '')) : '';
+  if (vibeRow) {
+    if (p.vibe_emoji_primary) {
+      var vHtml = '<span title="' + (VIBE_LABELS[p.vibe_emoji_primary] || 'Vibe type') + '">' + p.vibe_emoji_primary + '</span>';
+      if (p.vibe_emoji_secondary) {
+        vHtml += ' <span title="' + (VIBE_LABELS[p.vibe_emoji_secondary] || 'Vibe type') + '" style="font-size:16px;">' + p.vibe_emoji_secondary + '</span>';
+      }
+      vibeRow.innerHTML = vHtml;
+    } else {
+      vibeRow.innerHTML = '';
+    }
+  }
+
+  // Key highlight tags — same sleep/cleanliness/suburb/budget/active tags
+  // already shown on the card face, reused here for a fuller-feeling modal
+  // without dumping the entire lifestyle field list (S152).
+  const tagsEl = document.getElementById('pdm-tags');
+  if (tagsEl) {
+    tagsEl.innerHTML = (p.tags || []).map((t, i) =>
+      '<span class="match-tag ' + (p.tagClass && p.tagClass[i] || '') + '">' + t + '</span>'
+    ).join('');
+  }
 
   const narrativeEl = document.getElementById('pdm-narrative');
   if (narrativeEl) {
     if (p.cob_narrative) {
       narrativeEl.style.display = '';
+      narrativeEl.style.fontStyle = 'normal';
       narrativeEl.textContent = p.cob_narrative;
     } else if (p.cob_summary) {
       // Fallback for profiles that haven't regenerated their vibe since this
       // feature shipped — show the short summary rather than an empty box.
       narrativeEl.style.display = '';
+      narrativeEl.style.fontStyle = 'normal';
       narrativeEl.textContent = p.cob_summary;
     } else {
-      narrativeEl.style.display = 'none';
+      // S152: nicer empty state instead of a blank box when someone hasn't
+      // done their vibe quiz yet — modal stays clickable either way.
+      narrativeEl.style.display = '';
+      narrativeEl.style.fontStyle = 'italic';
+      narrativeEl.style.color = 'var(--text-muted)';
+      narrativeEl.textContent = (p.name || 'This student') + ' hasn\'t completed their vibe quiz yet — check back soon for a fuller picture of their vibe.';
     }
   }
 
@@ -7433,13 +7477,6 @@ function renderVibeFilterChips() {
   row.appendChild(allChip);
 
   // Emoji chips — only emojis present in pool
-  const VIBE_LABELS = {
-    '🌙':'Night owl','🐦':'Early riser','📚':'Study-focused','🎓':'Postgrad',
-    '💼':'Young professional','🗣️':'Social & outgoing','🚪':'Keeps to themselves',
-    '🧹':'Neat freak','🤷':'Relaxed about mess','🍳':'Home cook','🎮':'Gamer',
-    '🎵':'Musician','🏋️':'Gym regular','🌈':'LGBTQ+ friendly','🌍':'International',
-    '👥':'Loves having guests','🏠':'Homebody','🌿':'Chill vibes'
-  };
   emojis.forEach(emoji => {
     const chip = document.createElement('button');
     const isActive = activeFilters.includes(emoji);
@@ -7589,6 +7626,7 @@ function adaptApiMatchForCard(p) {
     cob_narrative: p.cob_narrative || null,
     field_of_study: p.field_of_study || null,
     email: p.email || null,
+    in_household: !!p.in_household,
   };
 }
 
@@ -7629,6 +7667,39 @@ function cobExamClashNudge(matches) {
     '<button class="exam-clash-nudge-dismiss" onclick="var n=document.getElementById(\'exam-clash-nudge\');if(n)n.remove();" title="Dismiss">✕</button>';
 
   // Insert above the match grid
+  var grid = document.getElementById('match-grid');
+  if (grid && grid.parentNode) {
+    grid.parentNode.insertBefore(nudge, grid);
+  }
+}
+
+// ── S152: Encourage household setup ──────────────────────────────────────────
+// Households unlock compatibility tracking, shared calendar, and lease
+// reminders across everyone in it — but only if people actually set one up.
+// Shown once real matches exist (so there's something to act on), skipped
+// entirely if the user already has a household, and dismissible with a
+// persisted "don't show again" rather than reappearing every visit.
+function cobHouseholdSetupNudge() {
+  var existing = document.getElementById('household-setup-nudge');
+  if (existing) existing.remove();
+
+  if (localStorage.getItem('ur_household_id')) return; // already has one
+  if (localStorage.getItem('ur_household_nudge_dismissed') === '1') return;
+
+  var nudge = document.createElement('div');
+  nudge.className = 'exam-clash-nudge';
+  nudge.id = 'household-setup-nudge';
+  nudge.innerHTML =
+    '<span class="exam-clash-nudge-icon">🏠</span>' +
+    '<div class="exam-clash-nudge-body">' +
+      '<div class="exam-clash-nudge-title">Get more from your matches — set up a household</div>' +
+      '<div class="exam-clash-nudge-msg">' +
+        'Once you\'ve connected with housemates, setting up a household unlocks compatibility tracking, a shared calendar, and lease reminders for everyone in it. ' +
+        '<a href="#" onclick="switchTab(\'household\');return false;" style="color:var(--brand-blue);">Set up your household →</a>' +
+      '</div>' +
+    '</div>' +
+    '<button class="exam-clash-nudge-dismiss" onclick="localStorage.setItem(\'ur_household_nudge_dismissed\',\'1\');var n=document.getElementById(\'household-setup-nudge\');if(n)n.remove();" title="Dismiss">✕</button>';
+
   var grid = document.getElementById('match-grid');
   if (grid && grid.parentNode) {
     grid.parentNode.insertBefore(nudge, grid);
@@ -7712,6 +7783,7 @@ async function renderMatches() {
     } else {
       realMatches.forEach(p => grid.appendChild(renderMatchCard(adaptApiMatchForCard(p))));
       cobExamClashNudge(realMatches);
+      cobHouseholdSetupNudge();
     }
     // ── Inject lease cards after regular match cards (S113) ──────────────────
     if (leaseListings.length > 0) {
