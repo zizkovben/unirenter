@@ -104,6 +104,32 @@ module.exports = async function handler(req, res) {
       return true;
     });
 
+    // ── S152: household membership flag — best-effort, non-fatal ────────────
+    // Only checked for the emails actually being returned (not the full candidate
+    // pool) to keep this cheap. Exposes only a boolean — never which household
+    // or any of its private details (lease dates, calendar, etc.) to a viewer
+    // who isn't a member of it.
+    try {
+      const topEmails = safeTop.map(p => p.email).filter(Boolean);
+      if (topEmails.length > 0) {
+        const emailList = topEmails.map(e => encodeURIComponent(e)).join(',');
+        const hmRes = await fetch(
+          `${supabaseUrl}/rest/v1/household_members?select=email&email=in.(${emailList})`,
+          { headers: { 'apikey': serviceKey, 'Authorization': `Bearer ${serviceKey}` } }
+        );
+        const hmRows = await hmRes.json();
+        if (Array.isArray(hmRows)) {
+          const inHouseholdSet = new Set(hmRows.map(r => (r.email || '').toLowerCase()));
+          safeTop.forEach(p => {
+            p.in_household = !!(p.email && inHouseholdSet.has(p.email.toLowerCase()));
+          });
+        }
+      }
+    } catch (hmErr) {
+      console.warn('household membership check failed (non-fatal):', hmErr.message);
+    }
+    safeTop.forEach(p => { if (p.in_household === undefined) p.in_household = false; });
+
     return res.status(200).json({
       matches:     safeTop,
       near_misses,
