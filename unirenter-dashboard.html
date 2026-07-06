@@ -3262,6 +3262,14 @@ body.light-mode {
 .household-calendar-event.past {
   opacity: 0.5;
 }
+.household-calendar-event.clickable {
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.household-calendar-event.clickable:hover {
+  border-color: rgba(75,191,224,0.35);
+  background: rgba(75,191,224,0.06);
+}
 .household-calendar-event-icon {
   font-size: 15px;
   flex-shrink: 0;
@@ -12711,15 +12719,20 @@ function _origHouseholdRender(data, currentEmail) {
 
   var html =
     tenancyCheckHtml +
+    // S152: Household calendar (accepted items) + Household Feed moved to the
+    // top together, keeping their existing relative order — mirrors the
+    // personal dashboard's pattern of surfacing to-dos/messages first, so
+    // housemates see what's going on the moment they land on the tab, not
+    // after scrolling past member chips/compat bars/actions.
+    '<div id="household-calendar-wrap"></div>' +
+    '<div id="household-feed-wrap"></div>' +
     '<div class="household-members-row">' + chipsHtml + '</div>' +
     (barsHtml ? '<div class="household-compat-grid">' + barsHtml + '</div>' : '') +
     timelineHtml +
-    '<div id="household-calendar-wrap"></div>' +
     (vibeEqHtml || '') +
     (cobTip ? '<div class="household-cob-tip">🤠 ' + cobTip + '</div>' : '') +
     actionsHtml +
-    invitePanelHtml +
-    '<div id="household-feed-wrap"></div>';
+    invitePanelHtml;
 
   inner.innerHTML = html;
 
@@ -13007,6 +13020,9 @@ function householdFeedLoad(householdId, email) {
   .then(function(r) { return r.json(); })
   .then(function(d) {
     if (!d.ok) return;
+    // S152: cache so householdFeedTick can look up full item data (text/date/
+    // type) when accepting/un-accepting, without a second request.
+    window._hhFeedItemsCache = d.items || [];
     householdFeedRenderList(d.items || [], email);
     // S148: feed items (with event_date + accepted_by_me) also drive the
     // Household calendar — reuses this same fetch, no extra request needed.
@@ -13070,6 +13086,40 @@ function householdFeedTick(feedId, acked) {
   var householdId = window._hhFeedHouseholdId;
   var email = window._hhFeedEmail;
   if (!householdId || !email) return;
+
+  // S152: accepting a household todo/reminder now genuinely adds it to your
+  // own personal Calendar/To Do (not just a household-side tick) — un-
+  // accepting removes it again. Chat/note items have no date and aren't
+  // synced. This is a one-way sync: deleting/completing the synced entry
+  // from the personal To Do side does not un-accept it on the household
+  // side — a known, deliberate scope boundary for now.
+  var item = (window._hhFeedItemsCache || []).find(function(i) { return i.id === feedId; });
+  if (item && (item.type === 'todo' || item.type === 'reminder')) {
+    var syncId = 'hf-' + feedId;
+    var items = todoGetAll();
+    if (acked) {
+      if (!items.some(function(t) { return t.id === syncId; })) {
+        items.push({
+          id: syncId,
+          title: item.text,
+          category: 'housing',
+          sub_type: null,
+          date: item.event_date || null,
+          reminder_date: null,
+          source: 'household',
+          status: 'pending',
+          notes: null,
+          household_feed_id: feedId,
+          created_at: new Date().toISOString(),
+        });
+      }
+    } else {
+      items = items.filter(function(t) { return t.id !== syncId; });
+    }
+    todoSave(items);
+    calRender();
+  }
+
   fetch('/api/household/feed-tick', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -13256,7 +13306,7 @@ function householdCalendarBuildEvents(members, feedItems) {
     if (item.type === 'chat') return;
     if (!item.accepted_by_me) return; // only items the viewing member has accepted
     var authorName = item.author_name ? item.author_name.split(' ')[0] : (item.author_email ? item.author_email.split('@')[0] : 'Housemate');
-    events.push({ date: item.event_date, icon: typeIcon[item.type] || '📌', label: item.text, sub: 'from ' + authorName });
+    events.push({ date: item.event_date, icon: typeIcon[item.type] || '📌', label: item.text, sub: 'from ' + authorName, feedId: item.id });
   });
 
   events = events.filter(function(e) { return !!e.date; });
@@ -13269,7 +13319,12 @@ function householdCalendarBuildEvents(members, feedItems) {
 }
 
 function householdCalendarEventHtml(e) {
-  return '<div class="household-calendar-event' + (e.isPast ? ' past' : '') + '">' +
+  // S152: feed-sourced accepted items (todo/reminder) link straight through
+  // to the matching personal to-do — lease dates have no personal to-do
+  // counterpart, so those stay non-clickable.
+  var clickable = !!e.feedId;
+  return '<div class="household-calendar-event' + (e.isPast ? ' past' : '') + (clickable ? ' clickable' : '') + '"' +
+    (clickable ? ' onclick="hhGoToPersonalTodo(\'' + e.feedId + '\')" title="View in your To Do list"' : '') + '>' +
     '<span class="household-calendar-event-icon">' + e.icon + '</span>' +
     '<div class="household-calendar-event-body">' +
       '<div class="household-calendar-event-label">' + escHtml(e.label) + '</div>' +
@@ -13277,6 +13332,19 @@ function householdCalendarEventHtml(e) {
     '</div>' +
     '<span class="household-calendar-event-date">' + hhTimelineFmtDate(e.date) + '</span>' +
   '</div>';
+}
+
+// S152: jump from an accepted household item straight to the matching entry
+// in the signed-in user's own personal Calendar/To Do — accepting a household
+// todo/reminder syncs it into your own planning (see householdFeedTick), so
+// this is a real link, not just a preview.
+function hhGoToPersonalTodo(feedId) {
+  var syncId = 'hf-' + feedId;
+  switchTab('tenancy');
+  setTimeout(function() {
+    _calInit();
+    calChipGoTodo(syncId);
+  }, 80);
 }
 
 function householdCalcCompat(members) {
