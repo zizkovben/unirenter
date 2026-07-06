@@ -566,6 +566,21 @@ body.light-mode {
   display: none;
 }
 .qa-date-input.visible { display: block; }
+/* Recurring entries (S152) — shared between Quick Add and the manual date form */
+.qa-recur-toggle-row { display: flex; align-items: center; gap: 8px; margin: 4px 0 10px; }
+.qa-recur-toggle-row input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--brand-blue); cursor: pointer; }
+.qa-recur-toggle-row label { font-size: 12px; color: var(--text-muted); cursor: pointer; }
+.qa-recur-panel { border-top: 1px dashed var(--navy-border); padding-top: 10px; margin-bottom: 10px; }
+.qa-recur-label { font-size: 11px; color: var(--text-muted); margin: 8px 0 6px; }
+.qa-weekday-row { display: flex; gap: 5px; flex-wrap: wrap; }
+.qa-weekday-chip {
+  background: rgba(255,255,255,0.05); border: 1px solid var(--navy-border);
+  border-radius: 14px; padding: 5px 10px; font-size: 11px; font-weight: 500;
+  cursor: pointer; color: var(--text-muted); font-family: var(--font-body);
+  transition: all 0.15s;
+}
+.qa-weekday-chip:hover { color: var(--text); background: rgba(255,255,255,0.09); }
+.qa-weekday-chip.selected { background: rgba(75,191,224,0.15); border-color: rgba(75,191,224,0.4); color: var(--brand-blue); }
 .qa-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .qa-save-btn {
   background: var(--brand-blue); color: #fff; border: none;
@@ -1138,11 +1153,21 @@ body.light-mode {
 }
 .match-vibe-eq-nudge:hover { color: var(--brand-yellow); }
 .match-card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.match-avatar-wrap { position: relative; flex-shrink: 0; }
 .match-avatar {
   width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: 18px; font-weight: 700; overflow: hidden;
 }
+/* S152: small badge circle bottom-right of an avatar, holding the vibe primary emoji */
+.avatar-emoji-badge {
+  position: absolute; bottom: -2px; right: -2px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #1a3040; border: 2px solid var(--navy-bg, #0d1f2d);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; line-height: 1;
+}
+.avatar-emoji-badge:empty { display: none; }
 .match-info { flex: 1; }
 .match-name { font-family: var(--font-display); font-weight: 700; font-size: 15px; }
 .match-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
@@ -2158,7 +2183,6 @@ body.light-mode {
 /* Picker */
 .vibe-emoji-picker { background:var(--navy-mid); border:1px solid var(--navy-border); border-radius:10px; padding:12px; margin-bottom:12px; }
 .vibe-picker-label { font-size:12px; color:var(--text-muted); margin-bottom:8px; }
-.vibe-picker-type { display:none; }
 .vibe-picker-grid { display:flex; flex-wrap:wrap; gap:6px; }
 .vibe-picker-emoji {
   font-size:22px; cursor:pointer; padding:6px;
@@ -2184,25 +2208,6 @@ body.light-mode {
 .vibe-retake-actions { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
 /* Locked notice */
 .vibe-locked-notice { font-size:13px; color:var(--text-muted); padding:10px 14px; background:rgba(255,255,255,0.03); border-radius:8px; margin-bottom:12px; }
-/* Extras card (star sign + generation) */
-.vibe-extras-card {
-  background:var(--navy-card); border:1px solid var(--navy-border);
-  border-radius:var(--radius); padding:18px 20px; margin-top:12px;
-}
-.vibe-extras-row { display:flex; gap:16px; flex-wrap:wrap; }
-.vibe-extras-group { display:flex; flex-direction:column; gap:6px; flex:1; min-width:140px; }
-.vibe-extras-label { font-size:12px; color:var(--text-muted); }
-.vibe-extras-select {
-  background:var(--navy-mid); border:1px solid var(--navy-border);
-  color:var(--text); border-radius:8px; padding:8px 10px;
-  font-size:13px; font-family:var(--font-body); cursor:pointer;
-  transition:border-color 0.2s;
-}
-.vibe-extras-select:focus { outline:none; border-color:var(--brand-yellow); }
-
-/* ── Vibe inline extras (star sign + gen inside done state) ── */
-.vibe-inline-extras { margin-bottom: 12px; padding-top: 10px; border-top: 1px solid var(--navy-border); }
-.vibe-inline-extras-row { display:flex; gap:12px; flex-wrap:wrap; }
 
 /* ── Vibe quiz Q1 emoji grid ── */
 .vibe-q1-grid { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
@@ -3921,8 +3926,9 @@ body.light-mode {
   margin: 6px 0 10px;
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 1;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
   opacity: 0.75;
 }
 
@@ -4283,6 +4289,32 @@ body.light-mode {
         <button class="qa-date-chip" data-date="next_week" onclick="qaSelectDate('next_week')">Next week</button>
         <button class="qa-date-chip" data-date="pick" onclick="qaSelectDate('pick')">Pick date…</button>
         <input class="qa-date-input" id="qa-date-picker" type="date" onchange="qaDatePicked()">
+      </div>
+      <!-- Recurring (S152) -->
+      <div class="qa-recur-toggle-row">
+        <input type="checkbox" id="qa-recur-checkbox" onchange="qaToggleRecurring(this.checked)">
+        <label for="qa-recur-checkbox">🔁 Recurring</label>
+      </div>
+      <div class="qa-recur-panel" id="qa-recur-panel" style="display:none;">
+        <div class="qa-recur-label">Repeats on</div>
+        <div class="qa-weekday-row">
+          <button class="qa-weekday-chip" data-day="1" onclick="qaToggleWeekday(1,this)">Mon</button>
+          <button class="qa-weekday-chip" data-day="2" onclick="qaToggleWeekday(2,this)">Tue</button>
+          <button class="qa-weekday-chip" data-day="3" onclick="qaToggleWeekday(3,this)">Wed</button>
+          <button class="qa-weekday-chip" data-day="4" onclick="qaToggleWeekday(4,this)">Thu</button>
+          <button class="qa-weekday-chip" data-day="5" onclick="qaToggleWeekday(5,this)">Fri</button>
+          <button class="qa-weekday-chip" data-day="6" onclick="qaToggleWeekday(6,this)">Sat</button>
+          <button class="qa-weekday-chip" data-day="0" onclick="qaToggleWeekday(0,this)">Sun</button>
+        </div>
+        <div class="qa-recur-label">Starting from</div>
+        <input class="qa-date-input visible" id="qa-recur-start-date" type="date" onchange="qaCheckCanSave()">
+        <div class="qa-recur-label">Ends</div>
+        <div class="qa-date-row">
+          <button class="qa-date-chip selected" data-end="count" onclick="qaSelectRecurEnd('count')">After N times</button>
+          <button class="qa-date-chip" data-end="until" onclick="qaSelectRecurEnd('until')">Until a date</button>
+        </div>
+        <input class="qa-text-input" id="qa-recur-count" type="number" min="1" max="52" value="5" style="max-width:90px;margin-top:6px;" onchange="qaCheckCanSave()">
+        <input class="qa-date-input" id="qa-recur-until" type="date" style="margin-top:6px;" onchange="qaCheckCanSave()">
       </div>
       <!-- Footer -->
       <div class="qa-footer">
@@ -4684,6 +4716,30 @@ body.light-mode {
           <input class="cal-input" id="cal-input-notes" type="text" placeholder="Any details…" maxlength="100">
         </div>
       </div>
+      <!-- Recurring (S152) — reuses the Date field above as the start date -->
+      <div class="qa-recur-toggle-row" id="cal-recur-toggle-row">
+        <input type="checkbox" id="cal-recur-checkbox" onchange="calToggleRecurring(this.checked)">
+        <label for="cal-recur-checkbox">🔁 Recurring</label>
+      </div>
+      <div class="qa-recur-panel" id="cal-recur-panel" style="display:none;">
+        <div class="qa-recur-label">Repeats on</div>
+        <div class="qa-weekday-row">
+          <button class="qa-weekday-chip" data-day="1" onclick="calToggleWeekday(1,this)">Mon</button>
+          <button class="qa-weekday-chip" data-day="2" onclick="calToggleWeekday(2,this)">Tue</button>
+          <button class="qa-weekday-chip" data-day="3" onclick="calToggleWeekday(3,this)">Wed</button>
+          <button class="qa-weekday-chip" data-day="4" onclick="calToggleWeekday(4,this)">Thu</button>
+          <button class="qa-weekday-chip" data-day="5" onclick="calToggleWeekday(5,this)">Fri</button>
+          <button class="qa-weekday-chip" data-day="6" onclick="calToggleWeekday(6,this)">Sat</button>
+          <button class="qa-weekday-chip" data-day="0" onclick="calToggleWeekday(0,this)">Sun</button>
+        </div>
+        <div class="qa-recur-label">Ends (starting from the Date field above)</div>
+        <div class="qa-date-row">
+          <button class="qa-date-chip selected" data-end="count" onclick="calSelectRecurEnd('count')">After N times</button>
+          <button class="qa-date-chip" data-end="until" onclick="calSelectRecurEnd('until')">Until a date</button>
+        </div>
+        <input class="cal-input" id="cal-recur-count" type="number" min="1" max="52" value="5" style="max-width:90px;margin-top:6px;">
+        <input class="cal-input" id="cal-recur-until" type="date" style="margin-top:6px;display:none;">
+      </div>
       <input type="hidden" id="cal-edit-id">
       <button class="cal-add-btn" id="cal-add-btn" onclick="calSaveEvent()">Add date</button>
     </div>
@@ -4991,7 +5047,10 @@ body.light-mode {
           <div class="vibe-result-emoji" id="vibe-primary-emoji">🌿</div>
           <div class="vibe-result-text" id="vibe-summary-text">"Your vibe summary will appear here."</div>
         </div>
-        <!-- Emoji override row -->
+        <!-- Emoji override row — secondary override removed (S152): Cob already
+             assigns both primary and secondary emoji together from the same quiz
+             answers, so a manual secondary picker was redundant. Primary keeps its
+             override since it's constrained to a locked, curated palette. -->
         <div class="vibe-override-row">
           <div class="vibe-override-group">
             <div class="vibe-chip-label">Primary emoji</div>
@@ -5000,61 +5059,20 @@ body.light-mode {
               <span class="vibe-override-edit">✏️</span>
             </div>
           </div>
-          <div class="vibe-override-group">
-            <div class="vibe-chip-label">Secondary emoji</div>
-            <div class="vibe-emoji-override" id="vibe-override-secondary" onclick="vibeOverrideSecondary()" title="Change secondary emoji">
-              <span id="vibe-override-secondary-val">☕</span>
-              <span class="vibe-override-edit">✏️</span>
-            </div>
-          </div>
         </div>
         <!-- Emoji picker (hidden by default) -->
         <div id="vibe-emoji-picker" class="vibe-emoji-picker" style="display:none;">
           <div class="vibe-picker-label" id="vibe-picker-label">Pick primary emoji</div>
-          <div class="vibe-picker-type" id="vibe-picker-type">primary</div>
           <div class="vibe-picker-grid" id="vibe-picker-grid"></div>
           <button class="vibe-nav-btn secondary" style="margin-top:8px;font-size:12px;" onclick="vibeClosePicker()">Cancel</button>
         </div>
         <div class="vibe-chips-row">
           <div class="vibe-chip-group"><div class="vibe-chip-label">Primary</div><div class="vibe-chip-val" id="vibe-chip-primary">—</div></div>
           <div class="vibe-chip-group"><div class="vibe-chip-label">Secondary</div><div class="vibe-chip-val" id="vibe-chip-secondary">—</div></div>
-          <div class="vibe-chip-group"><div class="vibe-chip-label">Star sign</div><div class="vibe-chip-val" id="vibe-chip-star">—</div></div>
-          <div class="vibe-chip-group"><div class="vibe-chip-label">Gen</div><div class="vibe-chip-val" id="vibe-chip-gen">—</div></div>
         </div>
-        <!-- Star sign + generation selects — inline inside done state -->
-        <div class="vibe-inline-extras">
-          <div class="vibe-inline-extras-row">
-            <div class="vibe-extras-group">
-              <label class="vibe-extras-label" for="select-star-sign-inline">⭐ Star sign</label>
-              <select id="select-star-sign-inline" class="vibe-extras-select" onchange="vibeExtrasChangeInline()">
-                <option value="">Prefer not to say</option>
-                <option value="Aries">Aries ♈</option>
-                <option value="Taurus">Taurus ♉</option>
-                <option value="Gemini">Gemini ♊</option>
-                <option value="Cancer">Cancer ♋</option>
-                <option value="Leo">Leo ♌</option>
-                <option value="Virgo">Virgo ♍</option>
-                <option value="Libra">Libra ♎</option>
-                <option value="Scorpio">Scorpio ♏</option>
-                <option value="Sagittarius">Sagittarius ♐</option>
-                <option value="Capricorn">Capricorn ♑</option>
-                <option value="Aquarius">Aquarius ♒</option>
-                <option value="Pisces">Pisces ♓</option>
-              </select>
-            </div>
-            <div class="vibe-extras-group">
-              <label class="vibe-extras-label" for="select-generation-inline">🧬 Generation</label>
-              <select id="select-generation-inline" class="vibe-extras-select" onchange="vibeExtrasChangeInline()">
-                <option value="">Prefer not to say</option>
-                <option value="Gen Z">Gen Z (1997–2012)</option>
-                <option value="Millennial">Millennial (1981–1996)</option>
-                <option value="Gen X">Gen X (1965–1980)</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-          </div>
-          <div id="vibe-inline-extras-saved" style="display:none;" class="vibe-saved-notice">✅ Saved</div>
-        </div>
+        <!-- Star sign + Generation inline panel removed entirely (S152): both were
+             pure duplicates of the About Me extras sidebar fields, and neither was
+             prefilling correctly here. -->
         <div class="vibe-save-row">
           <button class="vibe-save-btn" id="vibe-save-btn" onclick="vibeSave()">Save vibe ✓</button>
           <button class="vibe-retake-btn" onclick="vibeRetakeRequest()">Retake</button>
@@ -5371,6 +5389,30 @@ body.light-mode {
   </div>
 </div>
 
+<!-- S152: Expanded profile modal — Cob's longer narrative paragraph, shown when
+     someone taps into a match card (not its buttons). Match card's short emoji +
+     one-liner stays as-is. Kept lean — avatar, name, vibe emojis, narrative only. -->
+<div class="modal-overlay" id="profile-detail-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('profile-detail-modal')">✕</button>
+    <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px;">
+      <div class="match-avatar-wrap">
+        <div class="match-avatar" id="pdm-photo" style="width:52px;height:52px;font-size:18px;"></div>
+        <div class="avatar-emoji-badge" id="pdm-emoji-badge" style="width:20px;height:20px;font-size:11px;"></div>
+      </div>
+      <div>
+        <div class="modal-title" id="pdm-name" style="margin-bottom:2px;"></div>
+        <div class="modal-sub" style="margin-bottom:0;" id="pdm-sub"></div>
+      </div>
+    </div>
+    <div id="pdm-vibe-row" style="font-size:22px;letter-spacing:4px;margin-bottom:12px;"></div>
+    <div id="pdm-narrative" style="font-size:13px;line-height:1.65;color:var(--text);background:rgba(255,255,255,0.04);border-radius:12px;padding:14px 16px;margin-bottom:4px;"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal('profile-detail-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 // ── Auth guard — redirect unauthenticated users before DOM paint ──────────────
@@ -5622,7 +5664,6 @@ function openSettingsCollapse() {
 // ══════════════════════════════════════════════════════════════
 
 const VIBE_PRIMARY_PALETTE = ['🌙','🐦','📚','🎓','💼','🗣️','🚪','🧹','🤷','🍳','🎮','🎵','🏋️','🌈','🌍','👥','🏠','🌿'];
-const VIBE_SECONDARY_EXTRAS = ['💻','🌙','💪','🧘','🎨','📖','🎬','📺','🌳','🪴','🔥','🚿','🚬','📦','🌱','🍖','☕','🍺','🥡','🛒','🐱','🐶','🐦','🐠','💑','👨‍👩‍👧','🤝','🗺️','🍽️','🌍','✈️','🎊','👶','♿'];
 
 // S150 rebuild — restores the Session 96 personalisation design that was
 // designed and built for the city-page registration flow, then removed
@@ -5676,7 +5717,7 @@ function buildVibeQuestions() {
   } else {
     q2Text = 'Paint me a picture of a typical evening or weekend at home when you\'ve got nothing on — what\'s actually happening?';
   }
-  q2Shortcuts = ['Early riser 🐦', 'Night owl 🌙', 'Gym mornings 💪', 'Work from home 💻', 'Quiet evenings 🌿', 'Batch cook Sundays 🍳'];
+  q2Shortcuts = ['Chilling out 🛋️', 'TV / gaming / book 📺', 'Takeaway + a show 🥡', 'Catching up with friends 📱', 'Cooking something nice 🍳', 'Early night in 🌙'];
 
   // Q3 — kept close to the original, nodding to shared language/cultural
   // background if it's known, since food is often where that shows up.
@@ -5727,7 +5768,7 @@ function buildVibeQuestions() {
       q: q3Text,
       hint: q3Hint,
       max: 200,
-      shortcuts: ['Cook most nights 🍳', 'Mostly takeaway 🥡', 'Plant-based 🌱', 'Meat-eater 🍖', 'Coffee addict ☕', 'No fridge sharing 🛒']
+      shortcuts: ['Cook most nights 🍳', 'Mostly takeaway 🥡', 'Plant-based 🌱', 'Meat-eater 🍖', 'Allergies / dietary needs ⚠️', 'No fridge sharing 🛒']
     },
     {
       type: 'multi-emoji',
@@ -5784,15 +5825,9 @@ function vibeInit() {
       if (startBtn) startBtn.style.display = 'none';
     }
   }
-  // Load extras (star sign + generation)
+  // Load extras — About Me sidebar star sign / generation selects (S59).
+  // Both were removed from this vibe-card done-state entirely at S152.
   _vibeExtrasLoad();
-  // Refresh chip-star and chip-gen in done state
-  var star = localStorage.getItem('ur_star_sign') || '';
-  var gen  = localStorage.getItem('ur_generation') || '';
-  var chipStar = document.getElementById('vibe-chip-star');
-  var chipGen  = document.getElementById('vibe-chip-gen');
-  if (chipStar) chipStar.textContent = star || '—';
-  if (chipGen)  chipGen.textContent  = gen  || '—';
 }
 
 function _vibeLoadSaved() {
@@ -6036,7 +6071,7 @@ async function _vibeGenerate() {
 
   var promptBody =
     'You are Cob — a warm AI assistant for UniRenter, an Australian student accommodation platform.\n\n' +
-    'A student has answered 6 questions about themselves as a housemate. Your job is to work out their vibe equation and write a short, honest personality portrait for their profile.\n\n' +
+    'A student has answered 6 questions about themselves as a housemate. Your job is to work out their vibe equation and write two things: a short one-line portrait, and a fuller narrative paragraph, both for their profile.\n\n' +
     'LOCKED PRIMARY EMOJI PALETTE (pick exactly one, based on ALL the answers together — no single answer is a forced pick):\n' +
     '🌙 Night owl | 🐦 Early riser | 📚 Study-focused | 🎓 Postgrad | 💼 Young professional | 🗣️ Social & outgoing | 🚪 Keeps to themselves | 🧹 Neat freak | 🤷 Relaxed about mess | 🍳 Home cook | 🎮 Gamer | 🎵 Musician | 🏋️ Gym regular | 🌈 LGBTQ+ friendly | 🌍 International | 👥 Loves having guests | 🏠 Homebody | 🌿 Chill vibes\n\n' +
     'SECONDARY EMOJI — pick one that adds personality flavour from this curated set (not restricted to):\n' +
@@ -6044,8 +6079,9 @@ async function _vibeGenerate() {
     'RULES:\n' +
     '- Weigh all 6 answers together — no single answer overrides the rest\n' +
     '- Secondary emoji adds personality flavour — be specific, not generic\n' +
-    '- Write summary in third person, 1-2 sentences, warm and specific — not generic. Lead with their strongest coexistence trait.\n' +
+    '- "summary" is 1-2 sentences, warm and specific — not generic. Lead with their strongest coexistence trait.\n' +
     '- Summary format: starts with primary emoji, then a quoted sentence or two. Example: 🧹 "Neat freak who cooks every night and is strict about kitchen cleanliness — total homebody, quiet after 10pm."\n' +
+    '- "narrative" is a fuller, 3-5 sentence third-person paragraph weaving together ALL 6 answers into a rounded picture of them as a housemate — sleep habits, social style, cleanliness, food/kitchen, pets if relevant. Warmer and more descriptive than the summary, but still honest and specific rather than generic filler. No quotes, no emoji, plain prose. This is shown on their full profile (not the match card), so it can go into more depth than the summary.\n' +
     '- Do NOT give legal advice or housing recommendations. Just write the portrait.\n' +
     '- NEVER use the word "legal"\n\n' +
     'STUDENT ANSWERS:\n' +
@@ -6056,7 +6092,7 @@ async function _vibeGenerate() {
     'Q5 (Shared spaces): ' + (_vibeQuizData.shared_spaces || '(skipped)') + '\n' +
     'Q6 (Social style — most important): ' + (_vibeQuizData.social_style || '(skipped)') + '\n\n' +
     'Respond ONLY with a JSON object, no preamble, no markdown fences:\n' +
-    '{"primary":"<emoji>","secondary":"<emoji>","summary":"<primary_emoji> \\"<1-2 sentences>\\""}';
+    '{"primary":"<emoji>","secondary":"<emoji>","summary":"<primary_emoji> \\"<1-2 sentences>\\"","narrative":"<3-5 sentence paragraph, plain prose>"}';
 
   try {
     var res = await fetch('/api/cob', {
@@ -6079,11 +6115,13 @@ async function _vibeGenerate() {
     var primary   = parsed.primary   || '🌿';
     var secondary = parsed.secondary || '☕';
     var summary   = parsed.summary   || primary + ' "' + 'A thoughtful housemate with their own rhythm."';
+    var narrative = (parsed.narrative || '').trim() || null;
 
     // Validate primary is in palette
     if (VIBE_PRIMARY_PALETTE.indexOf(primary) === -1) primary = '🌿';
 
-    _vibePending = { primary:primary, secondary:secondary, summary:summary };
+    _vibePending = { primary:primary, secondary:secondary, summary:summary, narrative:narrative,
+                      lifestyle: _vibePending.lifestyle, quiz_answers: _vibePending.quiz_answers };
     _vibeShowDone(primary, secondary, summary);
 
   } catch(err) {
@@ -6101,14 +6139,8 @@ function _vibeShowDone(primary, secondary, summary) {
   document.getElementById('vibe-primary-emoji').textContent      = primary;
   document.getElementById('vibe-summary-text').textContent       = '"' + displayText + '"';
   document.getElementById('vibe-override-primary-val').textContent  = primary;
-  document.getElementById('vibe-override-secondary-val').textContent = secondary;
   document.getElementById('vibe-chip-primary').textContent       = primary;
   document.getElementById('vibe-chip-secondary').textContent     = secondary;
-
-  var star = localStorage.getItem('ur_star_sign')  || '';
-  var gen  = localStorage.getItem('ur_generation') || '';
-  document.getElementById('vibe-chip-star').textContent = star || '—';
-  document.getElementById('vibe-chip-gen').textContent  = gen  || '—';
 
   document.getElementById('vibe-card-empty').style.display       = 'none';
   document.getElementById('vibe-card-quiz').style.display        = 'none';
@@ -6124,12 +6156,10 @@ function _vibeShowDone(primary, secondary, summary) {
 // ── Emoji override ──
 function vibeOverridePrimary() {
   var picker     = document.getElementById('vibe-emoji-picker');
-  var typeEl     = document.getElementById('vibe-picker-type');
   var labelEl    = document.getElementById('vibe-picker-label');
   var gridEl     = document.getElementById('vibe-picker-grid');
   var currentVal = document.getElementById('vibe-override-primary-val').textContent;
 
-  if (typeEl)  typeEl.textContent  = 'primary';
   if (labelEl) labelEl.textContent = 'Pick primary emoji';
 
   // Render palette-only grid
@@ -6140,44 +6170,19 @@ function vibeOverridePrimary() {
   if (picker) picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
 }
 
-function vibeOverrideSecondary() {
-  var picker     = document.getElementById('vibe-emoji-picker');
-  var typeEl     = document.getElementById('vibe-picker-type');
-  var labelEl    = document.getElementById('vibe-picker-label');
-  var gridEl     = document.getElementById('vibe-picker-grid');
-  var currentVal = document.getElementById('vibe-override-secondary-val').textContent;
-
-  if (typeEl)  typeEl.textContent  = 'secondary';
-  if (labelEl) labelEl.textContent = 'Pick secondary emoji (or type any emoji)';
-
-  var allEmojis = VIBE_PRIMARY_PALETTE.concat(VIBE_SECONDARY_EXTRAS);
-  gridEl.innerHTML = allEmojis.map(function(e) {
-    return '<span class="vibe-picker-emoji' + (e === currentVal ? ' selected' : '') + '" onclick="vibePickEmoji(\'' + e + '\')">' + e + '</span>';
-  }).join('');
-
-  if (picker) picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
-}
-
 function vibePickEmoji(emoji) {
-  var typeEl = document.getElementById('vibe-picker-type');
-  var type   = typeEl ? typeEl.textContent : 'primary';
-
-  if (type === 'primary') {
-    document.getElementById('vibe-override-primary-val').textContent = emoji;
-    document.getElementById('vibe-primary-emoji').textContent        = emoji;
-    document.getElementById('vibe-chip-primary').textContent         = emoji;
-    _vibePending.primary = emoji;
-    // Update summary text to swap leading emoji
-    var summaryEl = document.getElementById('vibe-summary-text');
-    var txt = summaryEl.textContent.replace(/^[^\s"]+\s*/, '');
-    summaryEl.textContent = txt;
-    // Update pending summary leading emoji
-    _vibePending.summary = emoji + ' ' + _vibePending.summary.replace(/^[^\s"]+\s*/, '');
-  } else {
-    document.getElementById('vibe-override-secondary-val').textContent = emoji;
-    document.getElementById('vibe-chip-secondary').textContent         = emoji;
-    _vibePending.secondary = emoji;
-  }
+  // S152: secondary override removed — this only ever handles primary now
+  // (Cob assigns secondary automatically from the quiz answers).
+  document.getElementById('vibe-override-primary-val').textContent = emoji;
+  document.getElementById('vibe-primary-emoji').textContent        = emoji;
+  document.getElementById('vibe-chip-primary').textContent         = emoji;
+  _vibePending.primary = emoji;
+  // Update summary text to swap leading emoji
+  var summaryEl = document.getElementById('vibe-summary-text');
+  var txt = summaryEl.textContent.replace(/^[^\s"]+\s*/, '');
+  summaryEl.textContent = txt;
+  // Update pending summary leading emoji
+  _vibePending.summary = emoji + ' ' + _vibePending.summary.replace(/^[^\s"]+\s*/, '');
   vibeClosePicker();
 }
 
@@ -6195,8 +6200,9 @@ async function vibeSave() {
   if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
 
   var primary   = _vibePending.primary   || document.getElementById('vibe-override-primary-val').textContent;
-  var secondary = _vibePending.secondary || document.getElementById('vibe-override-secondary-val').textContent;
+  var secondary = _vibePending.secondary || document.getElementById('vibe-chip-secondary').textContent;
   var summary   = _vibePending.summary   || '';
+  var narrative = _vibePending.narrative || null;
 
   // Persist locally first
   _vibeSaveLocal(primary, secondary, summary);
@@ -6217,6 +6223,7 @@ async function vibeSave() {
         vibe_emoji_primary:   primary,
         vibe_emoji_secondary: secondary,
         cob_summary:          summary,
+        cob_narrative:        narrative,
         star_sign:            star,
         generation:           gen,
         vibe_lifestyle:       _vibePending.lifestyle    || null,
@@ -6399,12 +6406,6 @@ function vibeExtrasChange() {
 
     if (star) localStorage.setItem('ur_star_sign',  star);
     if (gen)  localStorage.setItem('ur_generation', gen);
-
-    // Update chips in vibe-done state
-    var chipStar = document.getElementById('vibe-chip-star');
-    var chipGen  = document.getElementById('vibe-chip-gen');
-    if (chipStar) chipStar.textContent = star || '—';
-    if (chipGen)  chipGen.textContent  = gen  || '—';
 
     if (email) {
       try {
@@ -7246,6 +7247,16 @@ function renderMatchCard(p) {
   const card = document.createElement('div');
   card.className = 'match-card';
   if (p.vibe_emoji_primary) card.dataset.vibe = p.vibe_emoji_primary;
+  // S152: expanded profile modal — key by email when available (real matches),
+  // fall back to name for DUMMY_MATCHES which have no email.
+  const pdmKey = p.email || p.name;
+  window._matchProfilesById = window._matchProfilesById || {};
+  window._matchProfilesById[pdmKey] = p;
+  card.style.cursor = 'pointer';
+  card.onclick = function(e) {
+    if (e.target.closest('button')) return; // let card buttons handle their own clicks
+    pdmOpen(pdmKey);
+  };
   const tags = p.tags.map((t,i) =>
     `<span class="match-tag ${p.tagClass[i] || ''}">${t}</span>`
   ).join('');
@@ -7306,7 +7317,10 @@ function renderMatchCard(p) {
   }
   card.innerHTML = `
     <div class="match-card-header">
-      <div class="match-avatar" style="background:${p.bg};">${p.initials}</div>
+      <div class="match-avatar-wrap">
+        <div class="match-avatar" style="background:${p.bg};">${p.initials}</div>
+        <div class="avatar-emoji-badge">${p.vibe_emoji_primary || ''}</div>
+      </div>
       <div class="match-info">
         <div class="match-name">${p.name}</div>
         <div class="match-sub">${p.sub}</div>
@@ -7321,6 +7335,43 @@ function renderMatchCard(p) {
     ${actionsHtml}`;
   playSound('match_found');
   return card;
+}
+
+// ── S152: Expanded profile modal ──────────────────────────────────────────────
+// Reuses the already-adapted card data (name/initials/bg/sub/vibe emojis/
+// cob_narrative) — no extra fetch needed since adaptApiMatchForCard() carries
+// everything this scaled-back modal needs.
+function pdmOpen(key) {
+  const p = (window._matchProfilesById || {})[key];
+  if (!p) return;
+
+  const photoEl = document.getElementById('pdm-photo');
+  if (photoEl) { photoEl.style.background = p.bg; photoEl.textContent = p.initials; }
+  const badgeEl = document.getElementById('pdm-emoji-badge');
+  if (badgeEl) badgeEl.textContent = p.vibe_emoji_primary || '';
+
+  document.getElementById('pdm-name').textContent = p.name || 'Student';
+  document.getElementById('pdm-sub').textContent  = p.sub  || 'Student';
+
+  const vibeRow = document.getElementById('pdm-vibe-row');
+  if (vibeRow) vibeRow.textContent = p.vibe_emoji_primary ? (p.vibe_emoji_primary + (p.vibe_emoji_secondary ? ' ' + p.vibe_emoji_secondary : '')) : '';
+
+  const narrativeEl = document.getElementById('pdm-narrative');
+  if (narrativeEl) {
+    if (p.cob_narrative) {
+      narrativeEl.style.display = '';
+      narrativeEl.textContent = p.cob_narrative;
+    } else if (p.cob_summary) {
+      // Fallback for profiles that haven't regenerated their vibe since this
+      // feature shipped — show the short summary rather than an empty box.
+      narrativeEl.style.display = '';
+      narrativeEl.textContent = p.cob_summary;
+    } else {
+      narrativeEl.style.display = 'none';
+    }
+  }
+
+  openModal('profile-detail-modal');
 }
 
 // ── Vibe emoji filter chips (Session 43) ─────────────────────────────────────
@@ -7394,7 +7445,7 @@ function renderVibeFilterChips() {
     const isActive = activeFilters.includes(emoji);
     chip.className = 'vibe-chip' + (isActive ? ' active' : '');
     chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-    chip.title = VIBE_LABELS[emoji] || emoji;
+    chip.title = VIBE_LABELS[emoji] || 'Vibe type';
     chip.textContent = emoji;
     chip.onclick = () => {
       const idx = activeFilters.indexOf(emoji);
@@ -7535,6 +7586,7 @@ function adaptApiMatchForCard(p) {
     vibe_emoji_primary: p.vibe_emoji_primary || null,
     vibe_emoji_secondary: p.vibe_emoji_secondary || null,
     cob_summary: p.cob_summary || null,
+    cob_narrative: p.cob_narrative || null,
     field_of_study: p.field_of_study || null,
     email: p.email || null,
   };
@@ -8323,66 +8375,6 @@ function sswWakeUp() {
   }
 })();
 
-// ── vibeExtrasChangeInline — mirrors vibeExtrasChange but reads from inline selects ──
-var _vibeExtrasInlineTimer = null;
-function vibeExtrasChangeInline() {
-  clearTimeout(_vibeExtrasInlineTimer);
-  _vibeExtrasInlineTimer = setTimeout(async function() {
-    var star  = (document.getElementById('select-star-sign-inline')  || {}).value || '';
-    var gen   = (document.getElementById('select-generation-inline') || {}).value || '';
-    var email = localStorage.getItem('unirenter_email') || '';
-
-    if (star) localStorage.setItem('ur_star_sign',  star);
-    if (gen)  localStorage.setItem('ur_generation', gen);
-
-    // Keep standalone selects in sync if they exist
-    var ss = document.getElementById('select-star-sign');
-    var sg = document.getElementById('select-generation');
-    if (ss && star) ss.value = star;
-    if (sg && gen)  sg.value = gen;
-
-    // Update chips
-    var chipStar = document.getElementById('vibe-chip-star');
-    var chipGen  = document.getElementById('vibe-chip-gen');
-    if (chipStar) chipStar.textContent = star || '—';
-    if (chipGen)  chipGen.textContent  = gen  || '—';
-
-    if (email) {
-      try {
-        await fetch('/api/profile/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: email,
-            city:  localStorage.getItem('ur_city') || 'melbourne',
-            star_sign:  star,
-            generation: gen
-          })
-        });
-      } catch(e) { /* non-fatal */ }
-    }
-
-    var savedEl = document.getElementById('vibe-inline-extras-saved');
-    if (savedEl) {
-      savedEl.style.display = 'block';
-      setTimeout(function() { savedEl.style.display = 'none'; }, 2000);
-    }
-  }, 600);
-}
-
-// ── Restore inline selects on vibeInit ──
-// (patch vibeInit to also populate inline selects)
-var _origVibeInit = vibeInit;
-vibeInit = function() {
-  _origVibeInit();
-  var star = localStorage.getItem('ur_star_sign')  || '';
-  var gen  = localStorage.getItem('ur_generation') || '';
-  var ss   = document.getElementById('select-star-sign-inline');
-  var sg   = document.getElementById('select-generation-inline');
-  if (ss && star) ss.value = star;
-  if (sg && gen)  sg.value = gen;
-};
-
 function selectSleep(el, mode) {
   document.querySelectorAll('.sleep-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
@@ -8628,6 +8620,34 @@ const CAT_META = {
 // Filter groups — stored in ur_cal_filters
 const ALL_FILTERS = ['housing','uni','public_holidays','work','other'];
 
+// ── Recurring entries (S152) ──────────────────────────────────────────────────
+// Deliberately NOT a recurrence-rule engine: generates N individual dated rows
+// up front (weekday-based, ending after a count or an end date). Each row is
+// fully independent afterwards — no special edit/delete-single-occurrence logic
+// needed, at the cost of not supporting "edit the whole series" later. Shared
+// `recurrence_id` tag is stamped on each row for potential future bulk actions,
+// but nothing currently reads it.
+const WEEKDAY_LABELS = { 0:'Sun', 1:'Mon', 2:'Tue', 3:'Wed', 4:'Thu', 5:'Fri', 6:'Sat' };
+const MAX_RECUR_OCCURRENCES = 52; // safety cap — one year of weekly, avoids accidental flooding
+
+function generateRecurringDates(startStr, weekdays, endMode, endValue) {
+  const dates = [];
+  if (!startStr || !weekdays || !weekdays.length) return dates;
+  const cursor = new Date(startStr + 'T00:00:00');
+  if (isNaN(cursor.getTime())) return dates;
+  const endDate = (endMode === 'until' && endValue) ? new Date(endValue + 'T00:00:00') : null;
+  const targetCount = (endMode === 'count') ? Math.max(1, parseInt(endValue, 10) || 1) : Infinity;
+  let safety = 0;
+  while (dates.length < targetCount && safety < 3660) { // ~10yr day-by-day cap, belt-and-braces
+    if (endDate && cursor > endDate) break;
+    if (weekdays.includes(cursor.getDay())) dates.push(cursor.toISOString().split('T')[0]);
+    cursor.setDate(cursor.getDate() + 1);
+    safety++;
+  }
+  if (dates.length > MAX_RECUR_OCCURRENCES) dates.length = MAX_RECUR_OCCURRENCES;
+  return dates;
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 // ── Flatmate Wanted generator ─────────────────────────────────────────────────
@@ -8817,6 +8837,14 @@ function calLoadEvents() {
   } catch(e) {}
   return events;
 }
+// S152 fix: calLoadEvents() merges todos in for DISPLAY purposes only. Saving that
+// merged result back via calSaveEvents() would permanently bake stale todo copies
+// into the raw ur_calendar_events store (compounding on every save/edit/delete, and
+// rendering blank since todos use `title` not `name`). Persistence functions must
+// only ever read/write the raw store — use this helper instead of calLoadEvents().
+function calLoadRawEvents() {
+  try { return JSON.parse(localStorage.getItem(CAL_STORE_KEY) || '[]'); } catch(e) { return []; }
+}
 function calSaveEvents(events) {
   localStorage.setItem(CAL_STORE_KEY, JSON.stringify(events));
 }
@@ -8881,6 +8909,10 @@ let qaSelectedSub = null;
 let qaDateMode    = 'this_week';
 let qaPickedDate  = null;
 let qaLastSavedId = null;
+// Recurring (S152)
+let qaIsRecurring   = false;
+let qaRecurWeekdays = [];
+let qaRecurEndMode  = 'count';
 
 // Local store for to-do items (backed by api/calendar/add when user signed in)
 // Shape: { id, title, category, sub_type, date, status, reminder_date, source, notes, created_at }
@@ -8912,9 +8944,24 @@ function qaOpen() {
   document.getElementById('qa-subtypes').innerHTML = '';
   const ti = document.getElementById('qa-title-input');
   if (ti) ti.value = '';
-  document.querySelectorAll('.qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.date === 'this_week'));
+  document.querySelectorAll('#qa-date-row .qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.date === 'this_week'));
   const dp = document.getElementById('qa-date-picker');
   if (dp) { dp.classList.remove('visible'); dp.value = ''; }
+  // Reset recurring (S152)
+  qaIsRecurring   = false;
+  qaRecurWeekdays = [];
+  qaRecurEndMode  = 'count';
+  const recurCb = document.getElementById('qa-recur-checkbox');
+  if (recurCb) recurCb.checked = false;
+  const recurPanel = document.getElementById('qa-recur-panel');
+  if (recurPanel) recurPanel.style.display = 'none';
+  const qaDateRow = document.getElementById('qa-date-row');
+  if (qaDateRow) qaDateRow.style.display = '';
+  document.querySelectorAll('.qa-recur-panel .qa-weekday-chip').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.qa-recur-panel .qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.end === 'count'));
+  const recurStart = document.getElementById('qa-recur-start-date'); if (recurStart) recurStart.value = '';
+  const recurCount = document.getElementById('qa-recur-count'); if (recurCount) { recurCount.value = '5'; recurCount.style.display = ''; }
+  const recurUntil = document.getElementById('qa-recur-until'); if (recurUntil) { recurUntil.value = ''; recurUntil.classList.remove('visible'); }
   qaCheckCanSave();
 }
 
@@ -8960,7 +9007,7 @@ function qaSelectSub(sub, chip) {
 
 function qaSelectDate(mode) {
   qaDateMode = mode;
-  document.querySelectorAll('.qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.date === mode));
+  document.querySelectorAll('#qa-date-row .qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.date === mode));
   const dp = document.getElementById('qa-date-picker');
   if (dp) dp.classList.toggle('visible', mode === 'pick');
   qaPickedDate = null;
@@ -8973,9 +9020,52 @@ function qaDatePicked() {
   qaCheckCanSave();
 }
 
+// ── Recurring entries (S152) ──────────────────────────────────────────────────
+function qaToggleRecurring(checked) {
+  qaIsRecurring = checked;
+  const panel = document.getElementById('qa-recur-panel');
+  if (panel) panel.style.display = checked ? '' : 'none';
+  // Plain date chips (This week/Next week/Pick date) don't apply once recurring
+  const dateRow = document.getElementById('qa-date-row');
+  if (dateRow) dateRow.style.display = checked ? 'none' : '';
+  qaCheckCanSave();
+}
+
+function qaToggleWeekday(day, chip) {
+  const idx = qaRecurWeekdays.indexOf(day);
+  if (idx === -1) qaRecurWeekdays.push(day); else qaRecurWeekdays.splice(idx, 1);
+  chip.classList.toggle('selected');
+  qaCheckCanSave();
+}
+
+function qaSelectRecurEnd(mode) {
+  qaRecurEndMode = mode;
+  document.querySelectorAll('.qa-recur-panel .qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.end === mode));
+  const countEl = document.getElementById('qa-recur-count');
+  const untilEl = document.getElementById('qa-recur-until');
+  if (countEl) countEl.style.display = (mode === 'count') ? '' : 'none';
+  if (untilEl) untilEl.classList.toggle('visible', mode === 'until');
+  qaCheckCanSave();
+}
+
 function qaCheckCanSave() {
   const btn = document.getElementById('qa-save-btn');
   if (!btn) return;
+  if (qaIsRecurring) {
+    const startEl = document.getElementById('qa-recur-start-date');
+    const hasStart = !!(startEl && startEl.value);
+    const hasWeekdays = qaRecurWeekdays.length > 0;
+    let hasEnd = false;
+    if (qaRecurEndMode === 'count') {
+      const c = document.getElementById('qa-recur-count');
+      hasEnd = !!(c && parseInt(c.value, 10) > 0);
+    } else {
+      const u = document.getElementById('qa-recur-until');
+      hasEnd = !!(u && u.value);
+    }
+    btn.disabled = !(qaSelectedCat && hasStart && hasWeekdays && hasEnd);
+    return;
+  }
   const hasDate = (qaDateMode !== 'pick') || (qaPickedDate && qaPickedDate.length > 0);
   btn.disabled = !(qaSelectedCat && hasDate);
 }
@@ -8999,6 +9089,64 @@ function qaResolveDate() {
 async function qaSave() {
   const btn = document.getElementById('qa-save-btn');
   if (!qaSelectedCat) return;
+
+  // ── Recurring branch (S152) ──────────────────────────────────────────────
+  if (qaIsRecurring) {
+    const startDate = (document.getElementById('qa-recur-start-date') || {}).value || '';
+    const endValue = qaRecurEndMode === 'count'
+      ? (document.getElementById('qa-recur-count') || {}).value
+      : (document.getElementById('qa-recur-until') || {}).value;
+    const dates = generateRecurringDates(startDate, qaRecurWeekdays, qaRecurEndMode, endValue);
+    if (!dates.length) return;
+
+    const rawTitle = (document.getElementById('qa-title-input') || {}).value || '';
+    const baseTitle = rawTitle.trim() || (qaSelectedSub || (qaSelectedCat.charAt(0).toUpperCase() + qaSelectedCat.slice(1) + ' reminder'));
+    const recurId = 'recur-' + Date.now();
+    const email = localStorage.getItem('unirenter_email');
+
+    const items = todoGetAll();
+    dates.forEach(function(d, i) {
+      items.push({
+        id: 'todo-' + Date.now() + '-' + i,
+        title: baseTitle,
+        category: qaSelectedCat,
+        sub_type: qaSelectedSub || null,
+        date: d,
+        reminder_date: null,
+        source: 'todo',
+        status: 'pending',
+        notes: null,
+        recurrence_id: recurId,
+        created_at: new Date().toISOString(),
+      });
+    });
+    todoSave(items);
+
+    // Best-effort backend persistence — one call per occurrence, non-blocking on failure
+    if (email) {
+      for (const d of dates) {
+        try {
+          await fetch('/api/calendar/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, title: baseTitle, category: qaSelectedCat, sub_type: qaSelectedSub, date: d, source: 'todo', recurrence_id: recurId }),
+          });
+        } catch(e) { /* silent — localStorage is the source of truth */ }
+      }
+    }
+
+    if (btn) btn.textContent = '✓ Saved';
+    setTimeout(() => { if (btn) btn.textContent = 'Save'; }, 2000);
+    const dayLabel = qaRecurWeekdays.slice().sort().map(d => WEEKDAY_LABELS[d]).join('/');
+    showToast('🔁 ' + dates.length + ' reminders added', baseTitle + ' — every ' + dayLabel + '.');
+
+    if (calCurrentView === 'todo') renderTodoList();
+    qaRefreshUpcomingPills();
+    calRender();
+    return;
+  }
+
+  // ── Single entry (existing behaviour) ────────────────────────────────────
   const date  = qaResolveDate();
   const rawTitle = (document.getElementById('qa-title-input') || {}).value || '';
   const title = rawTitle.trim() || (qaSelectedSub || (qaSelectedCat.charAt(0).toUpperCase() + qaSelectedCat.slice(1) + ' reminder'));
@@ -9047,6 +9195,11 @@ async function qaSave() {
   // If in To Do view, refresh it
   if (calCurrentView === 'todo') renderTodoList();
   qaRefreshUpcomingPills();
+  // S152 fix: refresh the calendar grid/event list too — calLoadEvents() already
+  // merges ur_todos in, but nothing was re-triggering that render after a Quick Add
+  // save, so a freshly-added to-do's chip stayed invisible until the user switched
+  // tabs away and back (which happens to call calRender() via calSetView()).
+  calRender();
 }
 
 function qaSetReminder(yes) {
@@ -9168,6 +9321,7 @@ function todoToggleDone(id) {
   todoSave(items);
   renderTodoList();
   qaRefreshUpcomingPills();
+  calRender(); // S152 fix: keep calendar grid chips in sync with todo status
 }
 
 function todoDelete(id) {
@@ -9175,6 +9329,7 @@ function todoDelete(id) {
   todoSave(items);
   renderTodoList();
   qaRefreshUpcomingPills();
+  calRender(); // S152 fix: keep calendar grid chips in sync with todo deletion
 }
 
 
@@ -9284,7 +9439,7 @@ function calChipGoTodo(evId) {
   calSetView('todo');
   if (!evId) return;
   setTimeout(function() {
-    var el = document.querySelector('.todo-item[data-id="' + evId + '"]');
+    var el = document.querySelector('.todo-item[data-todo-id="' + evId + '"]');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       el.classList.add('todo-highlight');
@@ -9517,6 +9672,41 @@ function calRenderEvents(events) {
 // ── Sticky strip renderer ──
 
 // ── Save / edit / delete ──
+// Recurring state for the manual add-date form (S152) — mirrors qa* equivalents
+let calIsRecurring   = false;
+let calRecurWeekdays = [];
+let calRecurEndMode  = 'count';
+
+function calToggleRecurring(checked) {
+  calIsRecurring = checked;
+  const panel = document.getElementById('cal-recur-panel');
+  if (panel) panel.style.display = checked ? '' : 'none';
+}
+function calToggleWeekday(day, chip) {
+  const idx = calRecurWeekdays.indexOf(day);
+  if (idx === -1) calRecurWeekdays.push(day); else calRecurWeekdays.splice(idx, 1);
+  chip.classList.toggle('selected');
+}
+function calSelectRecurEnd(mode) {
+  calRecurEndMode = mode;
+  document.querySelectorAll('#cal-recur-panel .qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.end === mode));
+  const countEl = document.getElementById('cal-recur-count');
+  const untilEl = document.getElementById('cal-recur-until');
+  if (countEl) countEl.style.display = (mode === 'count') ? '' : 'none';
+  if (untilEl) untilEl.style.display = (mode === 'until') ? '' : 'none';
+}
+function calResetRecurForm() {
+  calIsRecurring = false;
+  calRecurWeekdays = [];
+  calRecurEndMode = 'count';
+  const cb = document.getElementById('cal-recur-checkbox'); if (cb) cb.checked = false;
+  const panel = document.getElementById('cal-recur-panel'); if (panel) panel.style.display = 'none';
+  document.querySelectorAll('#cal-recur-panel .qa-weekday-chip').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('#cal-recur-panel .qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.end === 'count'));
+  const count = document.getElementById('cal-recur-count'); if (count) { count.value = '5'; count.style.display = ''; }
+  const until = document.getElementById('cal-recur-until'); if (until) { until.value = ''; until.style.display = 'none'; }
+}
+
 function calSaveEvent() {
   const name  = document.getElementById('cal-input-name').value.trim();
   const date  = document.getElementById('cal-input-date').value;
@@ -9524,7 +9714,32 @@ function calSaveEvent() {
   const notes = document.getElementById('cal-input-notes').value.trim();
   if (!name) { showToast('⚠️ Name required', 'Please enter a name for this date.'); return; }
   if (!date) { showToast('⚠️ Date required', 'Please pick a date.'); return; }
-  const events = calLoadEvents();
+  const events = calLoadRawEvents();
+
+  // ── Recurring branch (S152) — only available for new entries, not edits ──
+  if (calIsRecurring && !calEditingId) {
+    if (!calRecurWeekdays.length) { showToast('⚠️ Pick weekdays', 'Select at least one day for the recurrence.'); return; }
+    const endValue = calRecurEndMode === 'count'
+      ? (document.getElementById('cal-recur-count') || {}).value
+      : (document.getElementById('cal-recur-until') || {}).value;
+    const dates = generateRecurringDates(date, calRecurWeekdays, calRecurEndMode, endValue);
+    if (!dates.length) { showToast('⚠️ No dates generated', 'Check your start date, weekdays, and end condition.'); return; }
+    const recurId = 'recur-' + Date.now();
+    dates.forEach(function(d, i) {
+      events.push({ id: 'cal_' + Date.now() + '_' + i, name, date: d, cat, notes, source: 'manual', recurrence_id: recurId });
+    });
+    calSaveEvents(events);
+    document.getElementById('cal-input-name').value = '';
+    document.getElementById('cal-input-date').value = '';
+    document.getElementById('cal-input-cat').value  = 'lease';
+    document.getElementById('cal-input-notes').value = '';
+    calResetRecurForm();
+    calRender();
+    const dayLabel = calRecurWeekdays.slice().sort().map(d => WEEKDAY_LABELS[d]).join('/');
+    showToast('🔁 ' + dates.length + ' dates added', name + ' — every ' + dayLabel + '.');
+    return;
+  }
+
   if (calEditingId) {
     const idx = events.findIndex(e => e.id === calEditingId);
     if (idx !== -1) events[idx] = { ...events[idx], name, date, cat, notes };
@@ -9532,6 +9747,8 @@ function calSaveEvent() {
     document.getElementById('cal-form-title').textContent = '+ Add a date';
     document.getElementById('cal-add-btn').textContent = 'Add date';
     document.getElementById('cal-edit-id').value = '';
+    const toggleRow = document.getElementById('cal-recur-toggle-row');
+    if (toggleRow) toggleRow.style.display = '';
   } else {
     events.push({ id: 'cal_' + Date.now(), name, date, cat, notes, source: 'manual' });
   }
@@ -9545,8 +9762,14 @@ function calSaveEvent() {
 }
 
 function calEditEvent(id) {
+  // Lookup uses the merged (display) view — fine for read-only lookup.
   const ev = calLoadEvents().find(e => e.id === id);
   if (!ev) return;
+  if (ev.source === 'todo') {
+    // Todos are edited from the To Do tab, not this form — jump there instead.
+    calChipGoTodo(id);
+    return;
+  }
   calEditingId = id;
   document.getElementById('cal-input-name').value  = ev.name;
   document.getElementById('cal-input-date').value  = ev.date;
@@ -9554,11 +9777,21 @@ function calEditEvent(id) {
   document.getElementById('cal-input-notes').value = ev.notes || '';
   document.getElementById('cal-form-title').textContent = 'Edit date';
   document.getElementById('cal-add-btn').textContent = 'Save changes';
+  // Recurring doesn't apply to editing a single existing entry
+  calResetRecurForm();
+  const toggleRow = document.getElementById('cal-recur-toggle-row');
+  if (toggleRow) toggleRow.style.display = 'none';
   document.querySelector('.cal-add-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function calDeleteEvent(id) {
-  const events = calLoadEvents().filter(e => e.id !== id);
+  // Lookup uses the merged (display) view to determine the real source of truth.
+  const ev = calLoadEvents().find(e => e.id === id);
+  if (ev && ev.source === 'todo') {
+    todoDelete(id); // removes from ur_todos (the real store) and re-renders
+    return;
+  }
+  const events = calLoadRawEvents().filter(e => e.id !== id);
   calSaveEvents(events);
   calRender();
   showToast('🗑️ Removed', 'Date removed from your calendar.');
@@ -12324,7 +12557,7 @@ function householdCopyLink(link) {
   });
 }
 
-function householdRender(data, currentEmail) {
+function _origHouseholdRender(data, currentEmail) {
   var members = data.members || [];
   var inner = document.getElementById('household-inner');
   var clusterEl = document.getElementById('household-cluster');
@@ -13275,7 +13508,16 @@ function hhReviewSubmit() {
   })
   .catch(function(err){if(nb){nb.disabled=false;nb.textContent='Submit review';} showToast('❌ Could not submit', err.message||'Check your connection and try again.');});
 }
-var _origHouseholdRender = householdRender;
+// S152 fix: this used to be "var _origHouseholdRender = householdRender;" placed
+// right before a second, separately-named householdRender wrapper declared below.
+// Because both were function declarations sharing the same name, hoisting resolved
+// householdRender to the SECOND (this wrapper) definition before this assignment
+// line ever ran — so _origHouseholdRender ended up pointing at itself, and every
+// call recursed infinitely (RangeError: Maximum call stack exceeded), which the
+// household-load fetch chain's .catch() silently reported as "Could not reach
+// the server" even though the server had responded successfully. Fixed by naming
+// the original implementation _origHouseholdRender directly (see above) instead
+// of aliasing it — no runtime reassignment needed.
 function householdRender(data, currentEmail) {
   window._householdLastData = data;
   _origHouseholdRender(data, currentEmail);
