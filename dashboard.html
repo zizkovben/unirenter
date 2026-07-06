@@ -7445,7 +7445,7 @@ function renderVibeFilterChips() {
     const isActive = activeFilters.includes(emoji);
     chip.className = 'vibe-chip' + (isActive ? ' active' : '');
     chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-    chip.title = VIBE_LABELS[emoji] || emoji;
+    chip.title = VIBE_LABELS[emoji] || 'Vibe type';
     chip.textContent = emoji;
     chip.onclick = () => {
       const idx = activeFilters.indexOf(emoji);
