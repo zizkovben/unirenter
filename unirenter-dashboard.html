@@ -1597,6 +1597,22 @@ body.light-mode {
 .toast-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 3px; }
 .toast-msg { font-size: 12px; color: var(--text-muted); }
 
+/* ── S153: Report a problem — shared pattern (see report-modal for the
+   pre-existing "report a profile" feature, unrelated). Reuses .modal-overlay/
+   .modal/.modal-title/.modal-sub/.modal-actions/.cob-review-input as-is. ── */
+.rp-auto-banner {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(10px);
+  background: var(--navy-card); border: 1px solid rgba(232,98,58,0.4);
+  color: var(--text); font-size: 12px; padding: 10px 16px; border-radius: 20px;
+  cursor: pointer; z-index: 2500; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s; box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  max-width: 300px; text-align: center;
+}
+.rp-auto-banner.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+.rp-quiet-link { margin-top: 10px; }
+.rp-quiet-link a { font-size: 12px; color: var(--text-muted); text-decoration: none; }
+.rp-quiet-link a:hover { color: var(--brand-coral); text-decoration: underline; }
+
 /* ── Report modal ── */
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.7);
@@ -4602,6 +4618,7 @@ body.light-mode {
         <div class="lc-entry-next-date" id="lc-entry-next-date" style="display:none;"></div>
         <button class="lc-entry-btn lc-btn-secondary" onclick="lcOpenInline('manage')">Manage my lease ↗</button>
       </div>
+      <div class="rp-quiet-link"><a href="#" onclick="rpOpen('lease_companion_photo');return false;">⚠️ Something not working? Report a problem</a></div>
     </div>
 
     <!-- ── CALENDAR ── -->
@@ -5396,6 +5413,30 @@ body.light-mode {
     </div>
   </div>
 </div>
+
+<!-- S153: Report a problem — shared, reusable modal. One JS entry point
+     (rpOpen), one API endpoint (/api/report-problem), one Supabase table
+     (problem_reports). Metadata only — never re-uploads the original photo
+     or document. Pilot: Lease Companion only, this session. -->
+<div class="modal-overlay" id="rp-problem-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('rp-problem-modal')">✕</button>
+    <div class="modal-title">⚠️ Report a problem</div>
+    <div class="modal-sub" id="rp-feature-label">Something not right? Tell us what happened.</div>
+    <div class="modal-sub" id="rp-specific-label" style="display:none;margin-bottom:6px;font-weight:600;color:var(--text);"></div>
+    <textarea class="cob-review-input" id="rp-specific-input" rows="2" style="display:none;" placeholder="e.g. it said 12 July, should be 12 June"></textarea>
+    <textarea class="cob-review-input" id="rp-desc-input" rows="3" placeholder="Anything else you want to tell us? (optional)"></textarea>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal('rp-problem-modal')">Cancel</button>
+      <button class="btn-modal-submit" onclick="rpSubmit()">Send report</button>
+    </div>
+  </div>
+</div>
+
+<!-- S153: auto-attached banner — shown briefly alongside an existing error
+     toast when a feature visibly fails. Kept separate from #toast so the two
+     never collide/overwrite each other. -->
+<div class="rp-auto-banner" id="rp-auto-banner">⚠️ That didn't look right? Report a problem →</div>
 
 <!-- S152: Expanded profile modal — Cob's longer narrative paragraph plus a few key
      preference highlights, shown when someone taps into a match card (not its
@@ -10116,6 +10157,95 @@ function calcRunIncrease(silent) {
 // ══════════════════════════════════════════════════════════════
 
 
+// ── Report a problem (S153) ──────────────────────────────────────────────────
+// Shared, reusable pattern — same spirit as S151's report-broken-link feature.
+// One JS entry point (rpOpen), one API endpoint (/api/report-problem), one new
+// Supabase table (problem_reports). Metadata only — never re-uploads the
+// original photo/document. The feature-specific "expected vs actual" prompt
+// covers the common misread-a-date/name case without the storage/privacy
+// cost of holding onto lease documents or other uploads.
+// Pilot: Lease Companion only, this session. To propagate to another feature
+// (Entry Condition Report, tenancy agreement/house rules, review mic input —
+// all already keyed below), just call rpOpen()/rpShowAutoPrompt() from that
+// feature's own manual-link and error-handling code. No other changes needed.
+var RP_FEATURE_LABELS = {
+  lease_companion_photo:  { label: 'Lease Companion — photo upload',  prompt: 'What date, name, or detail did Cob get wrong?' },
+  entry_condition_report: { label: 'Entry Condition Report',          prompt: 'What did Cob get wrong in the report?' },
+  tenancy_agreement:      { label: 'Tenancy agreement / house rules', prompt: "What's incorrect in what Cob generated?" },
+  review_mic_input:       { label: 'Review — voice input',           prompt: 'What did you say vs. what got transcribed?' }
+};
+
+var _rpFeature = null;
+var _rpAutoError = null;
+
+function rpOpen(feature, autoErrorContext) {
+  _rpFeature = feature;
+  _rpAutoError = autoErrorContext || null;
+  var meta = RP_FEATURE_LABELS[feature] || { label: feature, prompt: null };
+  var featEl = document.getElementById('rp-feature-label');
+  if (featEl) featEl.textContent = 'Reporting: ' + meta.label;
+  var specLabel = document.getElementById('rp-specific-label');
+  var specInput = document.getElementById('rp-specific-input');
+  if (specLabel && specInput) {
+    if (meta.prompt) {
+      specLabel.textContent = meta.prompt;
+      specLabel.style.display = 'block';
+      specInput.style.display = 'block';
+      specInput.value = '';
+    } else {
+      specLabel.style.display = 'none';
+      specInput.style.display = 'none';
+    }
+  }
+  var descEl = document.getElementById('rp-desc-input');
+  if (descEl) descEl.value = '';
+  openModal('rp-problem-modal');
+}
+
+function rpSubmit() {
+  var feature = _rpFeature;
+  if (!feature) { closeModal('rp-problem-modal'); return; }
+  var specInput = document.getElementById('rp-specific-input');
+  var descInput = document.getElementById('rp-desc-input');
+  var expectedVsActual = (specInput && specInput.style.display !== 'none') ? specInput.value.trim() : '';
+  var description = descInput ? descInput.value.trim() : '';
+  var email = null;
+  try { email = localStorage.getItem('unirenter_email') || null; } catch (e) {}
+
+  fetch('/api/report-problem', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
+    body: JSON.stringify({
+      feature: feature,
+      trigger_type: _rpAutoError ? 'auto_error' : 'manual',
+      expected_vs_actual: expectedVsActual || null,
+      description: description || null,
+      error_message: _rpAutoError || null,
+      page_path: window.location.pathname,
+      user_email: email,
+      browser_info: navigator.userAgent
+    })
+  }).catch(function(err) { console.warn('Report-a-problem failed to send:', err); });
+
+  closeModal('rp-problem-modal');
+  _rpFeature = null;
+  _rpAutoError = null;
+  if (typeof showToast === 'function') showToast('✅ Thanks for the heads up', "We've logged this and will take a look.");
+}
+
+// Auto-attach: call alongside any existing error toast/fallback message where
+// a feature visibly failed. Shows a small, separate, self-dismissing banner —
+// never touches the main #toast, so it can't collide with it.
+function rpShowAutoPrompt(feature, errorContext) {
+  var bar = document.getElementById('rp-auto-banner');
+  if (!bar) return;
+  bar.onclick = function() { rpOpen(feature, errorContext); bar.classList.remove('show'); };
+  bar.classList.add('show');
+  clearTimeout(bar._rpHideTimer);
+  bar._rpHideTimer = setTimeout(function() { bar.classList.remove('show'); }, 8000);
+}
+
 // Inline Lease Companion S55
 var _lcConsentGranted = false;
 var _lcConsentChecked = false;
@@ -10248,9 +10378,15 @@ function lcHandleFile(input) {
       try {
         var parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
         lcShowExtracted(parsed, body, title);
-      } catch(e) { lcShowManual(body, title, 'Cob had trouble reading that page. Please enter the dates below.'); }
+      } catch(e) {
+        lcShowManual(body, title, 'Cob had trouble reading that page. Please enter the dates below.');
+        rpShowAutoPrompt('lease_companion_photo', 'Failed to parse extracted JSON from lease photo');
+      }
     })
-    .catch(function(){lcShowManual(body, title, 'Something went wrong. Please enter the dates below.');});
+    .catch(function(){
+      lcShowManual(body, title, 'Something went wrong. Please enter the dates below.');
+      rpShowAutoPrompt('lease_companion_photo', 'Network/API error during lease photo extraction');
+    });
   };
   reader.readAsDataURL(file);
   input.value = '';
@@ -10275,7 +10411,8 @@ function lcShowExtracted(parsed, body, title) {
     '<div class="lc-modal-btn-row">' +
       '<button class="lc-modal-btn-primary" onclick="lcSaveDates(\'x\')">Save to my calendar &#8594;</button>' +
       '<button class="lc-modal-btn-secondary" onclick="lcB(\'lc-file-input\').click()">Retake photo</button>' +
-    '</div>';
+    '</div>' +
+    '<div class="rp-quiet-link"><a href="#" onclick="rpOpen(\'lease_companion_photo\');return false;">⚠️ One of these look wrong? Report a problem</a></div>';
 }
 
 function lcShowManual(body, title, msg) {
