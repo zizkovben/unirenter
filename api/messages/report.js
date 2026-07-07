@@ -10,6 +10,7 @@
 // "pending manual review" framing in the original spec applies regardless
 // of how the flag was raised.
 const { createClient } = require('@supabase/supabase-js');
+const { applyFastTrackSuspension, checkStandardLadder } = require('./_trust-safety');
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -56,14 +57,15 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to submit report', detail: insertErr.message });
     }
 
+    // S155c: same enforcement paths as auto-detection — fast-track reports
+    // suspend immediately (with an admin email + 7-day lazy auto-clear);
+    // standard-category reports feed the same 3-distinct-people ladder
+    // check as auto-detected flags (a "fake" report also counts, even
+    // though there's no auto-detection pattern for it).
     if (isFasttrack) {
-      try {
-        await supabase.from('profiles')
-          .update({ account_status: 'suspended_pending_review' })
-          .eq('email', reported_email);
-      } catch (suspendErr) {
-        console.warn('report.js suspend error (non-fatal):', suspendErr.message);
-      }
+      await applyFastTrackSuspension(supabase, reported_email, category, 'reported');
+    } else {
+      await checkStandardLadder(supabase, reported_email, category);
     }
 
     return res.status(200).json({ ok: true });

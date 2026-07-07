@@ -1,6 +1,7 @@
 // api/messages/send.js — POST /api/messages/send
 const { createClient } = require('@supabase/supabase-js');
 const notifyRecipient = require('./notify');
+const { applyFastTrackSuspension, checkStandardLadder, checkAccountEnforcement } = require('./_trust-safety');
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -107,7 +108,7 @@ module.exports = async function handler(req, res) {
     // Verify sender exists and is verified
     const { data: senderProfile, error: senderErr } = await supabase
       .from('profiles')
-      .select('email, email_verified, display_name, account_status')
+      .select('email, email_verified, display_name')
       .eq('email', sender_email)
       .single();
 
@@ -117,11 +118,12 @@ module.exports = async function handler(req, res) {
     if (!senderProfile.email_verified) {
       return res.status(403).json({ error: 'Sender not verified — please verify your email first' });
     }
-    // S155b: a fast-track match (this session or a prior one) sets
-    // account_status to 'suspended_pending_review'. Same generic error as
-    // a block — no distinction surfaced between "blocked by someone" and
-    // "account under review".
-    if (senderProfile.account_status === 'suspended_pending_review') {
+    // S155c: replaces the old inline `account_status === 'suspended_pending_review'`
+    // check — now handles all enforcement states (fast-track suspension,
+    // both ban tiers) and lazily auto-clears suspended_pending_review /
+    // banned_2wk once their window has passed. 'warned' never blocks.
+    const enforcement = await checkAccountEnforcement(supabase, sender_email);
+    if (enforcement.blocked) {
       return res.status(403).json({ error: 'Message could not be sent' });
     }
 
@@ -157,16 +159,14 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Cannot message yourself' });
     }
 
-    // S155b: fast-track categories — block outright (never delivered) and
-    // suspend the sender immediately, pending manual review, independent
-    // of the 155c ladder. Checked here (recipient now resolved) rather
-    // than earlier, so the flag row can record who actually received it.
+    // S155b/c: fast-track categories — block outright (never delivered)
+    // and suspend the sender immediately, pending manual review,
+    // independent of the standard ladder. applyFastTrackSuspension() also
+    // sends Ben an admin email (S155c) and stamps account_status_since so
+    // it lazily auto-clears after 7 days if untouched.
     const fasttrackMatches = matchFasttrackPatterns(trimmed);
     if (fasttrackMatches.length > 0) {
       try {
-        await supabase.from('profiles')
-          .update({ account_status: 'suspended_pending_review' })
-          .eq('email', sender_email);
         await supabase.from('message_flags').insert({
           message_id: null, // message was never inserted — nothing to reference it by
           sender_email,
@@ -177,8 +177,9 @@ module.exports = async function handler(req, res) {
           severity: 'fast_track',
         });
       } catch (fastErr) {
-        console.warn('fast-track suspend/flag error (non-fatal, still blocking send):', fastErr.message);
+        console.warn('fast-track flag insert error (non-fatal, still blocking send):', fastErr.message);
       }
+      await applyFastTrackSuspension(supabase, sender_email, fasttrackMatches[0].category, 'detected');
       return res.status(400).json({ error: 'Message contains blocked content' });
     }
 
@@ -257,6 +258,9 @@ module.exports = async function handler(req, res) {
           source: 'detected',
           severity: 'standard',
         });
+        // S155c: check after every insert — cheap no-op unless this flag
+        // happens to be the 3rd distinct person against this category.
+        await checkStandardLadder(supabase, sender_email, 'scam');
       }
       const standardMatched = matchStandardPatterns(trimmed);
       for (const m of standardMatched) {
@@ -269,6 +273,7 @@ module.exports = async function handler(req, res) {
           source: 'detected',
           severity: 'standard',
         });
+        await checkStandardLadder(supabase, sender_email, m.category);
       }
     } catch (flagErr) {
       console.warn('message_flags insert error (non-fatal):', flagErr.message);
