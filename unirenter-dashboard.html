@@ -5400,6 +5400,30 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
         <div class="report-cat-icon">🚫</div>
         <div><div class="report-cat-title">Harassment or bullying</div><div class="report-cat-desc">Threatening, abusive, or inappropriate messages</div></div>
       </div>
+      <div class="report-cat" onclick="selectReport(this,'hate_speech')">
+        <div class="report-cat-icon">⚠️</div>
+        <div><div class="report-cat-title">Hate speech</div><div class="report-cat-desc">Discriminatory or hateful language</div></div>
+      </div>
+      <div class="report-cat" onclick="selectReport(this,'spam')">
+        <div class="report-cat-icon">📢</div>
+        <div><div class="report-cat-title">Spam</div><div class="report-cat-desc">Unsolicited promotion or repeated unwanted messages</div></div>
+      </div>
+      <div class="report-cat" onclick="selectReport(this,'visa_marriage_dating')">
+        <div class="report-cat-icon">💍</div>
+        <div><div class="report-cat-title">Visa, marriage or dating solicitation</div><div class="report-cat-desc">Offering or requesting a visa/marriage arrangement</div></div>
+      </div>
+      <div class="report-cat" onclick="selectReport(this,'violence')">
+        <div class="report-cat-icon">🆘</div>
+        <div><div class="report-cat-title">Threats or violence</div><div class="report-cat-desc">Reviewed immediately — the account is suspended pending review</div></div>
+      </div>
+      <div class="report-cat" onclick="selectReport(this,'sexual_exploitation')">
+        <div class="report-cat-icon">🆘</div>
+        <div><div class="report-cat-title">Sexual exploitation</div><div class="report-cat-desc">Reviewed immediately — the account is suspended pending review</div></div>
+      </div>
+      <div class="report-cat" onclick="selectReport(this,'illegal_goods')">
+        <div class="report-cat-icon">🆘</div>
+        <div><div class="report-cat-title">Illegal goods</div><div class="report-cat-desc">Reviewed immediately — the account is suspended pending review</div></div>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-modal-cancel" onclick="closeModal('report-modal')">Cancel</button>
@@ -8334,18 +8358,19 @@ function renderThread(messages, partnerName) {
       '<div class="chat-bubble">' + escMsgText(m.body) + '</div>' +
       '<div class="chat-meta">' + (isMe ? 'You' : (partnerName || 'Them')) + ' · ' + timeStr + (isMe ? ' · ✓' : '') + '</div>';
     msgs.appendChild(div);
-    // S155a: confidential scam-pattern warning — only ever attached to
+    // S155a/b: confidential pattern warning — only ever attached to
     // messages the server has already scoped to "incoming, flagged for me"
     // (see get.js). The sender's own view of this same message never
-    // carries scam_flag:true, so no bubble renders for them.
-    if (!isMe && m.scam_flag) {
+    // carries any flag_categories, so no bubble renders for them.
+    var flagCats = m.flag_categories || [];
+    if (!isMe && flagCats.length > 0) {
       var warn = document.createElement('div');
       warn.className = 'chat-msg cob-nudge';
       warn.innerHTML =
         '<div class="cob-nudge-inner cob-nudge-warn">' +
           '<span class="cob-nudge-avatar">🤠</span>' +
           '<div class="cob-nudge-body">' +
-            '<div class="cob-nudge-text">This message has some common scam warning signs. Never send money, gift cards, or bank details to someone you haven\'t met in person — and always view a property before paying anything.</div>' +
+            '<div class="cob-nudge-text">' + msgFlagBubbleText(flagCats) + '</div>' +
           '</div>' +
         '</div>';
       msgs.appendChild(warn);
@@ -8357,6 +8382,23 @@ function renderThread(messages, partnerName) {
 
 function escMsgText(t) {
   return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// S155b: category-specific Cob safety copy. Stays at the pattern level —
+// what to watch for and what to do — never echoes back the matched terms.
+function msgFlagBubbleText(categories) {
+  var TEXT = {
+    scam: 'This message has some common scam warning signs. Never send money, gift cards, or bank details to someone you haven\'t met in person — and always view a property before paying anything.',
+    harassment: 'This message contains language that can read as threatening. If you feel unsafe, you can block this contact and report it — you don\'t have to keep replying.',
+    hate_speech: 'This message contains language that may violate UniRenter\'s community standards. You can block this contact and report it if you\'d like our team to take a look.',
+    spam: 'This looks like it may be unsolicited promotion rather than a genuine message. Worth being cautious about any links included.',
+    impersonation: 'This message claims an official or staff role. UniRenter staff will never ask for payment or personal details over chat — if in doubt, contact us directly.',
+    visa_marriage_dating: 'This message mentions visa or marriage arrangements in exchange for payment. This is illegal under Australian immigration law — please don\'t engage, and consider reporting it.',
+  };
+  for (var i = 0; i < categories.length; i++) {
+    if (TEXT[categories[i]]) return TEXT[categories[i]];
+  }
+  return 'Cob flagged this message as worth a closer look — take a moment before responding.';
 }
 
 function msgStartPolling() {
@@ -8804,10 +8846,28 @@ function selectReport(el, type) {
   el.classList.add('selected');
   selectedReport = type;
 }
+// S155b: previously a pure front-end stub (toast + nothing else) — same
+// class of gap as the old blockUser(). Now posts to /api/messages/report,
+// which logs into the same message_flags table S155a built for automatic
+// detection, and immediately suspends the reported account if the chosen
+// category is one of the fast-track ones.
 function submitReport() {
   if (!selectedReport) { showToast('⚠️ Select a reason', 'Please choose a report category.'); return; }
+  var reportedEmail = window._currentConvoEmail;
+  var myEmail = localStorage.getItem('unirenter_email');
+  if (!reportedEmail || !myEmail) { showToast('⚠️ No conversation open', 'Select a conversation first.'); return; }
+  var category = selectedReport;
   closeModal('report-modal');
-  showToast('✅ Report submitted', 'Our team will review within 24 hours.');
+  fetch('/api/messages/report', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reporter_email: myEmail, reported_email: reportedEmail, category: category })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (!data.ok) { showToast('⚠️ Not submitted', data.error || 'Could not submit report.'); return; }
+    showToast('✅ Report submitted', 'Our team will review within 24 hours.');
+  }).catch(function() {
+    showToast('⚠️ Not submitted', 'Check your connection and try again.');
+  });
   selectedReport = null;
 }
 
