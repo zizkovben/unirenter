@@ -273,6 +273,12 @@ function scoreCandidate(c, myProfile, city) {
     cob_narrative:        c.cob_narrative        || null,
     profile_complete:     c.profile_complete     || 0,
     last_seen:          c.last_seen || null,
+    // S156: optional profile badges — display-only, deliberately excluded
+    // from the scoring function above. Not a match factor, just surfaced
+    // on the card the same way vibe_emoji already is.
+    star_sign:          c.star_sign || null,
+    generation:         c.generation || null,
+    chinese_zodiac:     c.chinese_zodiac || null,
     match_score:        Math.round(score),
     match_reasons:      reasons,
   };
