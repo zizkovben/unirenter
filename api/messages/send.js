@@ -32,6 +32,53 @@ function matchScamPatterns(text) {
   return SCAM_PATTERNS.filter(p => p.pattern.test(text)).map(p => p.label);
 }
 
+// S155b: remaining "standard" categories — same soft-flag behaviour as
+// SCAM_PATTERNS above (message still sends, confidential flag logged,
+// counts toward 155c's 3-strike ladder). Kept as separate category groups
+// rather than one big list so each match records which category it was.
+//
+// hate_speech intentionally ships with NO real terms below. A regex list of
+// slurs is something Claude won't hand-author, and a hard-coded list is a
+// poor fit for this category anyway (adversarial spelling variants evade it
+// fast). Ben: either paste your own vetted term list into HATE_SPEECH_TERMS,
+// or point this category at a dedicated moderation API/vendor instead — the
+// category, logging, and bubble all already work end-to-end once matches
+// start coming in from either source.
+const HATE_SPEECH_TERMS = []; // Ben: populate or replace with a vendor call
+const STANDARD_PATTERNS = [
+  { category: 'harassment',         label: 'threat_language',        pattern: /\b(i('| a)?ll find you|i know where you live|watch your back|you'?ll regret this)\b/i },
+  { category: 'hate_speech',        label: 'term_match',             pattern: HATE_SPEECH_TERMS.length ? new RegExp('\\b(' + HATE_SPEECH_TERMS.join('|') + ')\\b', 'i') : null },
+  { category: 'spam',               label: 'promotional_link',       pattern: /\b(click\s+here|buy\s+now|limited\s+time\s+offer|check\s+out\s+my\s+(page|shop|store))\b/i },
+  { category: 'impersonation',      label: 'claims_official_role',   pattern: /\b(official\s+unirenter\s+(support|staff|admin)|i\s+work\s+for\s+unirenter|this\s+is\s+an?\s+official\s+(message|notice))\b/i },
+  { category: 'visa_marriage_dating', label: 'visa_marriage_offer',  pattern: /\b(marry\s+me\s+for\s+a?\s*visa|pay\s+you\s+to\s+marry|fake\s+marriage\s+for\s+visa|need\s+a\s+partner\s+visa)\b/i },
+].filter(p => p.pattern); // drops hate_speech until HATE_SPEECH_TERMS is populated
+
+function matchStandardPatterns(text) {
+  return STANDARD_PATTERNS.filter(p => p.pattern.test(text)).map(p => ({ category: p.category, label: p.label }));
+}
+
+// S155b: fast-track categories — unlike everything else in this file, a
+// match here (a) BLOCKS the send outright, like BLOCKED_PATTERNS, and
+// (b) immediately suspends the sender's account pending manual review,
+// independent of the 155c ladder. No admin review surface ships this
+// session (155c) — a suspended account just can't send further messages
+// until Ben manually reviews and clears account_status in Supabase.
+//
+// sexual_exploitation and illegal_goods ship as placeholders for the same
+// reason as HATE_SPEECH_TERMS above — these categories deserve a properly
+// vetted term list or a dedicated safety vendor, not a regex list
+// hand-authored here. violence ships with a small set of concrete threat
+// phrases since those are unambiguous and low false-positive.
+const FASTTRACK_PATTERNS = [
+  { category: 'violence',            label: 'direct_threat', pattern: /\b(i'?m\s+going\s+to\s+(hurt|kill|attack)\s+you|i'?ll\s+hurt\s+you|bringing\s+a\s+weapon\s+to)\b/i },
+  { category: 'sexual_exploitation', label: 'term_match',    pattern: null }, // Ben: populate or use a vendor
+  { category: 'illegal_goods',       label: 'term_match',    pattern: null }, // Ben: populate or use a vendor
+].filter(p => p.pattern);
+
+function matchFasttrackPatterns(text) {
+  return FASTTRACK_PATTERNS.filter(p => p.pattern.test(text)).map(p => ({ category: p.category, label: p.label }));
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -60,7 +107,7 @@ module.exports = async function handler(req, res) {
     // Verify sender exists and is verified
     const { data: senderProfile, error: senderErr } = await supabase
       .from('profiles')
-      .select('email, email_verified, display_name')
+      .select('email, email_verified, display_name, account_status')
       .eq('email', sender_email)
       .single();
 
@@ -69,6 +116,13 @@ module.exports = async function handler(req, res) {
     }
     if (!senderProfile.email_verified) {
       return res.status(403).json({ error: 'Sender not verified — please verify your email first' });
+    }
+    // S155b: a fast-track match (this session or a prior one) sets
+    // account_status to 'suspended_pending_review'. Same generic error as
+    // a block — no distinction surfaced between "blocked by someone" and
+    // "account under review".
+    if (senderProfile.account_status === 'suspended_pending_review') {
+      return res.status(403).json({ error: 'Message could not be sent' });
     }
 
     // Resolve recipient email — by id (from matches API) or directly
@@ -101,6 +155,31 @@ module.exports = async function handler(req, res) {
 
     if (sender_email === resolvedRecipientEmail) {
       return res.status(400).json({ error: 'Cannot message yourself' });
+    }
+
+    // S155b: fast-track categories — block outright (never delivered) and
+    // suspend the sender immediately, pending manual review, independent
+    // of the 155c ladder. Checked here (recipient now resolved) rather
+    // than earlier, so the flag row can record who actually received it.
+    const fasttrackMatches = matchFasttrackPatterns(trimmed);
+    if (fasttrackMatches.length > 0) {
+      try {
+        await supabase.from('profiles')
+          .update({ account_status: 'suspended_pending_review' })
+          .eq('email', sender_email);
+        await supabase.from('message_flags').insert({
+          message_id: null, // message was never inserted — nothing to reference it by
+          sender_email,
+          recipient_email: resolvedRecipientEmail,
+          category: fasttrackMatches[0].category,
+          matched_terms: fasttrackMatches.map(m => m.label),
+          source: 'detected',
+          severity: 'fast_track',
+        });
+      } catch (fastErr) {
+        console.warn('fast-track suspend/flag error (non-fatal, still blocking send):', fastErr.message);
+      }
+      return res.status(400).json({ error: 'Message contains blocked content' });
     }
 
     // S155a: block check — deliberately checked BOTH directions but with a
@@ -162,19 +241,33 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to send message', detail: insertErr.message });
     }
 
-    // S155a: confidential scam-pattern flag — never blocks the send, never
-    // surfaced to the sender. Recorded against the actual recipient so a
-    // later session's cross-user aggregation (3-strike ladder, V170 spec)
-    // can count distinct reporters per category per sender.
+    // S155a/b: confidential pattern flags — never block the send, never
+    // surfaced to the sender. Recorded against the actual recipient so
+    // 155c's cross-user aggregation (3-strike ladder) can count distinct
+    // reporters per category per sender.
     try {
-      const matched = matchScamPatterns(trimmed);
-      if (matched.length > 0) {
+      const scamMatched = matchScamPatterns(trimmed);
+      if (scamMatched.length > 0) {
         await supabase.from('message_flags').insert({
           message_id: data.id,
           sender_email,
           recipient_email: resolvedRecipientEmail,
           category: 'scam',
-          matched_terms: matched,
+          matched_terms: scamMatched,
+          source: 'detected',
+          severity: 'standard',
+        });
+      }
+      const standardMatched = matchStandardPatterns(trimmed);
+      for (const m of standardMatched) {
+        await supabase.from('message_flags').insert({
+          message_id: data.id,
+          sender_email,
+          recipient_email: resolvedRecipientEmail,
+          category: m.category,
+          matched_terms: [m.label],
+          source: 'detected',
+          severity: 'standard',
         });
       }
     } catch (flagErr) {

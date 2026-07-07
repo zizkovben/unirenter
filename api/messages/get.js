@@ -349,19 +349,24 @@ module.exports = async function handler(req, res) {
     .ilike('recipient_email', emailPat)
     .eq('read', false);
 
-  // S155a: confidential scam-flag lookup — deliberately scoped to
+  // S155a/b: confidential flag lookup — deliberately scoped to
   // recipient_email = email (the viewer). If the viewer is the sender of a
-  // flagged message, this query returns nothing for it, so the flag (and
-  // Cob's bubble) is only ever visible on the recipient's own fetch of the
-  // thread, never the sender's.
-  let flaggedMessageIds = new Set();
+  // flagged message, this query returns nothing for it, so flags (and
+  // Cob's bubble) are only ever visible on the recipient's own fetch of
+  // the thread, never the sender's. Category-aware since S155b added
+  // categories beyond scam (harassment, spam, impersonation, etc).
+  let flagCategoriesByMessage = {};
   try {
     const { data: flagRows } = await supabase
       .from('message_flags')
-      .select('message_id')
+      .select('message_id, category')
       .eq('recipient_email', email)
       .eq('sender_email', other);
-    (flagRows || []).forEach(r => { if (r.message_id) flaggedMessageIds.add(r.message_id); });
+    (flagRows || []).forEach(r => {
+      if (!r.message_id) return; // manual reports / fast-track blocks aren't tied to a message
+      if (!flagCategoriesByMessage[r.message_id]) flagCategoriesByMessage[r.message_id] = [];
+      flagCategoriesByMessage[r.message_id].push(r.category);
+    });
   } catch (flagErr) {
     console.warn('message_flags lookup error (non-fatal):', flagErr.message);
   }
@@ -384,7 +389,7 @@ module.exports = async function handler(req, res) {
 
   const messagesWithFlags = (data || []).map(m => ({
     ...m,
-    scam_flag: flaggedMessageIds.has(m.id),
+    flag_categories: flagCategoriesByMessage[m.id] || [],
   }));
 
   return res.status(200).json({ messages: messagesWithFlags, you_blocked_them: youBlockedThem });
