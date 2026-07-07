@@ -227,7 +227,19 @@ module.exports = async function handler(req, res) {
 
     // S144: 'deleted' (90+ days, never replied to) is a soft hide — the rows
     // still exist in Supabase, they just drop out of the sidebar list.
-    const visiblePartners = Object.values(convMap).filter(c => c.status !== 'deleted');
+    // S155a: also hide anyone *I've* blocked — confidential, so this only
+    // ever looks at blocks where I'm the blocker, never the blocked side.
+    let blockedByMeSet = new Set();
+    try {
+      const { data: blockRows } = await supabase
+        .from('user_blocks')
+        .select('blocked_email')
+        .eq('blocker_email', email);
+      (blockRows || []).forEach(r => blockedByMeSet.add((r.blocked_email || '').toLowerCase()));
+    } catch (blockErr) {
+      console.warn('user_blocks lookup error (non-fatal):', blockErr.message);
+    }
+    const visiblePartners = Object.values(convMap).filter(c => c.status !== 'deleted' && !blockedByMeSet.has(c.partner_email));
 
     // Fetch display names for all partners
     // S150: partnerEmails is now always lowercase (see grouping above), but
@@ -337,5 +349,43 @@ module.exports = async function handler(req, res) {
     .ilike('recipient_email', emailPat)
     .eq('read', false);
 
-  return res.status(200).json({ messages: data || [] });
+  // S155a: confidential scam-flag lookup — deliberately scoped to
+  // recipient_email = email (the viewer). If the viewer is the sender of a
+  // flagged message, this query returns nothing for it, so the flag (and
+  // Cob's bubble) is only ever visible on the recipient's own fetch of the
+  // thread, never the sender's.
+  let flaggedMessageIds = new Set();
+  try {
+    const { data: flagRows } = await supabase
+      .from('message_flags')
+      .select('message_id')
+      .eq('recipient_email', email)
+      .eq('sender_email', other);
+    (flagRows || []).forEach(r => { if (r.message_id) flaggedMessageIds.add(r.message_id); });
+  } catch (flagErr) {
+    console.warn('message_flags lookup error (non-fatal):', flagErr.message);
+  }
+
+  // S155a: tell the viewer's own client whether *they* blocked this
+  // contact (never whether the contact blocked them) so the composer can
+  // be disabled with an honest "you've blocked this contact" state.
+  let youBlockedThem = false;
+  try {
+    const { data: blockRow } = await supabase
+      .from('user_blocks')
+      .select('id')
+      .eq('blocker_email', email)
+      .eq('blocked_email', other)
+      .maybeSingle();
+    youBlockedThem = !!blockRow;
+  } catch (blockErr) {
+    console.warn('user_blocks lookup error (non-fatal):', blockErr.message);
+  }
+
+  const messagesWithFlags = (data || []).map(m => ({
+    ...m,
+    scam_flag: flaggedMessageIds.has(m.id),
+  }));
+
+  return res.status(200).json({ messages: messagesWithFlags, you_blocked_them: youBlockedThem });
 };
