@@ -2673,6 +2673,17 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 .cob-nudge-text { font-size:13px; color:var(--text-primary); line-height:1.5; margin-bottom:8px; }
 .cob-nudge-btn { background:var(--brand-yellow); color:#0d1f2d; border:none; border-radius:7px; padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:Inter,sans-serif; }
 .cob-nudge-btn:hover { opacity:0.88; }
+.cob-nudge-inner.cob-nudge-warn { background:rgba(232,98,58,0.08); border-color:rgba(232,98,58,0.3); }
+.msg-blocked-bar {
+  padding: 12px 18px; border-top: 1px solid var(--navy-border);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  font-size: 12px; color: var(--text-muted);
+}
+.msg-blocked-bar button {
+  background: none; border: 1px solid var(--navy-border); color: var(--text-muted);
+  font-family: var(--font-body); font-size: 11px; padding: 5px 10px; border-radius: 6px; cursor: pointer;
+}
+.msg-blocked-bar button:hover { border-color: rgba(75,191,224,0.3); color: var(--brand-blue); }
 /* ── Household Agreement (S52) ── */
 .hh-agreement-entry-card {
   background: linear-gradient(135deg, rgba(245,184,0,0.08), rgba(75,191,224,0.06));
@@ -4573,9 +4584,13 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
         <div class="msg-safety-bar">
           &#x1F512; Never share your home address, bank details, or pay a deposit before inspecting a property in person.
         </div>
-        <div class="msg-input-row">
+        <div class="msg-input-row" id="msg-input-row">
           <input type="text" class="msg-input" id="msg-input" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendMessage()" disabled>
           <button class="msg-send" id="msg-send-btn" onclick="sendMessage()" disabled>Send</button>
+        </div>
+        <div class="msg-blocked-bar" id="msg-blocked-bar" style="display:none;">
+          <span>&#128683; You've blocked this contact — they can't message you.</span>
+          <button onclick="unblockCurrentContact()">Unblock</button>
         </div>
       </div>
     </div>
@@ -8267,6 +8282,7 @@ async function openConversation(partnerEmail, partnerName, partnerUni, el) {
   var sendBtn = document.getElementById('msg-send-btn');
   if (inp) { inp.disabled = false; inp.placeholder = 'Type a message…'; }
   if (sendBtn) sendBtn.disabled = false;
+  msgSetBlockedUi(false); // reset to the normal composer until we know otherwise
   var msgs = document.getElementById('msg-messages');
   msgs.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Loading…</div>';
   try {
@@ -8275,11 +8291,28 @@ async function openConversation(partnerEmail, partnerName, partnerUni, el) {
     if (!res.ok) throw new Error('Thread load failed');
     var data = await res.json();
     renderThread(data.messages || [], partnerName);
+    msgSetBlockedUi(!!data.you_blocked_them);
   } catch(err) {
     console.warn('openConversation thread error:', err);
     msgs.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Could not load messages.</div>';
   }
   msgStartPolling();
+}
+
+// S155a: toggles the composer vs. the "you've blocked this contact" bar.
+// Only ever reflects blocks I made myself — never reveals if the other
+// person has blocked me (see get.js's confidentiality note).
+function msgSetBlockedUi(blocked) {
+  var row = document.getElementById('msg-input-row');
+  var bar = document.getElementById('msg-blocked-bar');
+  var inp = document.getElementById('msg-input');
+  var sendBtn = document.getElementById('msg-send-btn');
+  if (row) row.style.display = blocked ? 'none' : '';
+  if (bar) bar.style.display = blocked ? '' : 'none';
+  if (blocked) {
+    if (inp) inp.disabled = true;
+    if (sendBtn) sendBtn.disabled = true;
+  }
 }
 
 function renderThread(messages, partnerName) {
@@ -8301,6 +8334,22 @@ function renderThread(messages, partnerName) {
       '<div class="chat-bubble">' + escMsgText(m.body) + '</div>' +
       '<div class="chat-meta">' + (isMe ? 'You' : (partnerName || 'Them')) + ' · ' + timeStr + (isMe ? ' · ✓' : '') + '</div>';
     msgs.appendChild(div);
+    // S155a: confidential scam-pattern warning — only ever attached to
+    // messages the server has already scoped to "incoming, flagged for me"
+    // (see get.js). The sender's own view of this same message never
+    // carries scam_flag:true, so no bubble renders for them.
+    if (!isMe && m.scam_flag) {
+      var warn = document.createElement('div');
+      warn.className = 'chat-msg cob-nudge';
+      warn.innerHTML =
+        '<div class="cob-nudge-inner cob-nudge-warn">' +
+          '<span class="cob-nudge-avatar">🤠</span>' +
+          '<div class="cob-nudge-body">' +
+            '<div class="cob-nudge-text">This message has some common scam warning signs. Never send money, gift cards, or bank details to someone you haven\'t met in person — and always view a property before paying anything.</div>' +
+          '</div>' +
+        '</div>';
+      msgs.appendChild(warn);
+    }
   });
   msgs.scrollTop = msgs.scrollHeight;
   _msgLastCount = messages.length;
@@ -8412,8 +8461,50 @@ function msgCheckAgreementNudge(text) {
 }
 
 function blockUser() {
-  closeModal && closeModal('report-modal');
-  showToast('🚫 Blocked', 'This user has been blocked and removed from your matches.');
+  var partnerEmail = window._currentConvoEmail;
+  var myEmail = localStorage.getItem('unirenter_email');
+  if (!partnerEmail || !myEmail) { showToast('⚠️ No conversation open', 'Select a conversation first.'); return; }
+  if (!confirm('Block this contact? They will no longer be able to message you.')) return;
+  fetch('/api/messages/block', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ blocker_email: myEmail, blocked_email: partnerEmail })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (!data.ok) { showToast('⚠️ Not blocked', data.error || 'Could not block this contact.'); return; }
+    closeModal && closeModal('report-modal');
+    msgSetBlockedUi(true);
+    // S155a: block is confidential and, from my side, also hides the
+    // contact from my own sidebar (matches get.js's blockedByMeSet filter)
+    // — the row disappears on next load, but remove it immediately too so
+    // the UI doesn't wait on a re-fetch.
+    var row = document.querySelector('.msg-contact[data-email="' + partnerEmail.replace(/"/g,'') + '"]');
+    if (row) row.remove();
+    showToast('🚫 Blocked', 'This contact has been blocked and can no longer message you.');
+  }).catch(function() {
+    showToast('⚠️ Not blocked', 'Check your connection and try again.');
+  });
+}
+
+// S155a: small bonus affordance (not originally in scope) — lets a
+// misclick be undone. Re-shows the contact only after the sidebar next
+// reloads (loadConversations), not instantly, since the row was removed
+// from the DOM on block.
+function unblockCurrentContact() {
+  var partnerEmail = window._currentConvoEmail;
+  var myEmail = localStorage.getItem('unirenter_email');
+  if (!partnerEmail || !myEmail) return;
+  fetch('/api/messages/block', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ blocker_email: myEmail, blocked_email: partnerEmail })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (!data.ok) { showToast('⚠️ Not unblocked', data.error || 'Could not unblock this contact.'); return; }
+    msgSetBlockedUi(false);
+    showToast('✅ Unblocked', 'This contact can message you again.');
+    loadConversations();
+  }).catch(function() {
+    showToast('⚠️ Not unblocked', 'Check your connection and try again.');
+  });
 }
 
 // ── Sleep mode ────────────────────────────────────────────────────────────────
