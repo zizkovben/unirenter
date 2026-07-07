@@ -835,6 +835,9 @@ body.light-mode {
   width: 100%; outline: none; transition: border-color 0.2s;
 }
 .cal-input:focus, .cal-select:focus { border-color: var(--brand-blue); }
+/* S154: native date-picker icon rendered dark-on-dark on this navy theme */
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; cursor: pointer; }
+input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 .cal-select option { background: var(--navy-mid); }
 .cal-add-btn {
   background: var(--brand-yellow); color: #0d1f2d;
@@ -6287,7 +6290,11 @@ async function vibeSave() {
         star_sign:            star,
         generation:           gen,
         vibe_lifestyle:       _vibePending.lifestyle    || null,
-        vibe_quiz_answers:    _vibePending.quiz_answers || null
+        vibe_quiz_answers:    _vibePending.quiz_answers || null,
+        // S154: persist the food/kitchen vibe-quiz answer as its own column —
+        // previously only ever sent inside vibe_quiz_answers JSON, never saved
+        // as a real field, so it couldn't be used for household compat scoring.
+        kitchen_habits:       (_vibePending.quiz_answers && _vibePending.quiz_answers.food_kitchen) || null
       })
     });
   } catch(err) {
@@ -9863,7 +9870,14 @@ function calSaveEvent() {
 
   if (calEditingId) {
     const idx = events.findIndex(e => e.id === calEditingId);
-    if (idx !== -1) events[idx] = { ...events[idx], name, date, cat, notes };
+    if (idx !== -1) {
+      events[idx] = { ...events[idx], name, date, cat, notes };
+    } else {
+      // S154 fix: the event being edited no longer exists (e.g. it was
+      // deleted directly from the list while this form was still open) —
+      // treat this as a new entry instead of silently discarding the input.
+      events.push({ id: 'cal_' + Date.now(), name, date, cat, notes, source: 'manual' });
+    }
     calEditingId = null;
     document.getElementById('cal-form-title').textContent = '+ Add a date';
     document.getElementById('cal-add-btn').textContent = 'Add date';
@@ -9911,6 +9925,22 @@ function calDeleteEvent(id) {
   if (ev && ev.source === 'todo') {
     todoDelete(id); // removes from ur_todos (the real store) and re-renders
     return;
+  }
+  // S154 fix: if the item being deleted is the one currently open in the edit
+  // form, reset the form back to "Add a date" state. Previously calEditingId
+  // was left pointing at the now-deleted event, so the next Save silently
+  // no-op'd (findIndex returned -1) instead of adding a new date — this is
+  // what looked like "can't add a new appointment" right after a delete.
+  if (calEditingId === id) {
+    calEditingId = null;
+    const titleEl = document.getElementById('cal-form-title');
+    const btnEl   = document.getElementById('cal-add-btn');
+    const idEl    = document.getElementById('cal-edit-id');
+    if (titleEl) titleEl.textContent = '+ Add a date';
+    if (btnEl)   btnEl.textContent   = 'Add date';
+    if (idEl)    idEl.value = '';
+    const toggleRow = document.getElementById('cal-recur-toggle-row');
+    if (toggleRow) toggleRow.style.display = '';
   }
   const events = calLoadRawEvents().filter(e => e.id !== id);
   calSaveEvents(events);
@@ -12807,24 +12837,33 @@ function _origHouseholdRender(data, currentEmail) {
   }).join('');
 
   // Compatibility bars HTML
+  // S154: 6-trait redesign (locked S153) — Sleep, Social, Cleanliness, Study,
+  // Kitchen, Pets, in this order. Solo households (compat.solo === true) get
+  // an explicit message instead of blank bars.
   var barsHtml = '';
-  var dims = [
-    { icon: '🌙', label: 'Sleep',        key: 'sleep'    },
-    { icon: '🧹', label: 'Cleanliness',  key: 'clean'    },
-    { icon: '🎉', label: 'Guests',       key: 'guests'   },
-    { icon: '🍳', label: 'Kitchen',      key: 'kitchen'  }
-  ];
-  dims.forEach(function(d) {
-    var c = compat[d.key] || { score: 50, status: 'Mixed', cls: 'mixed' };
-    barsHtml += '<div class="household-compat-row">' +
-      '<span class="household-compat-icon">' + d.icon + '</span>' +
-      '<span class="household-compat-label">' + d.label + '</span>' +
-      '<div class="household-compat-bar-wrap">' +
-        '<div class="household-compat-bar ' + c.cls + '" style="width:' + c.score + '%"></div>' +
-      '</div>' +
-      '<span class="household-compat-status">' + c.status + '</span>' +
-    '</div>';
-  });
+  if (compat.solo) {
+    barsHtml = '<div class="household-compat-empty" style="font-size:13px;color:var(--text-muted);padding:10px 0;">🤝 Compatibility will show here once a flatmate joins your household — nothing to compare yet.</div>';
+  } else {
+    var dims = [
+      { icon: '🌙', label: 'Sleep',        key: 'sleep'   },
+      { icon: '🎉', label: 'Social',       key: 'social'  },
+      { icon: '🧹', label: 'Cleanliness',  key: 'clean'   },
+      { icon: '📖', label: 'Study',        key: 'study'   },
+      { icon: '🍳', label: 'Kitchen',      key: 'kitchen' },
+      { icon: '🐾', label: 'Pets',         key: 'pets'    }
+    ];
+    dims.forEach(function(d) {
+      var c = compat[d.key] || { score: 50, status: 'Mixed', cls: 'mixed' };
+      barsHtml += '<div class="household-compat-row">' +
+        '<span class="household-compat-icon">' + d.icon + '</span>' +
+        '<span class="household-compat-label">' + d.label + '</span>' +
+        '<div class="household-compat-bar-wrap">' +
+          '<div class="household-compat-bar ' + c.cls + '" style="width:' + c.score + '%"></div>' +
+        '</div>' +
+        '<span class="household-compat-status">' + c.status + '</span>' +
+      '</div>';
+    });
+  }
 
   // Actions HTML
   var actionsHtml = '<div class="household-actions">' +
@@ -13486,11 +13525,17 @@ function hhGoToPersonalTodo(feedId) {
 
 function householdCalcCompat(members) {
   if (members.length < 2) {
+    // S154: explicit `solo` flag so the renderer can show a "waiting on a
+    // flatmate" message instead of silently blank bars (previously read as
+    // broken rather than "nothing to compare yet" — found S153, fixed S154).
     return {
+      solo:    true,
       sleep:   { score: 0, status: '—', cls: 'mixed' },
+      social:  { score: 0, status: '—', cls: 'mixed' },
       clean:   { score: 0, status: '—', cls: 'mixed' },
-      guests:  { score: 0, status: '—', cls: 'mixed' },
-      kitchen: { score: 0, status: '—', cls: 'mixed' }
+      study:   { score: 0, status: '—', cls: 'mixed' },
+      kitchen: { score: 0, status: '—', cls: 'mixed' },
+      pets:    { score: 0, status: '—', cls: 'mixed' }
     };
   }
 
@@ -13504,16 +13549,28 @@ function householdCalcCompat(members) {
     return { score: 60, status: 'Mostly', cls: 'mixed' };
   }
 
-  var sleepVals  = members.map(function(m){ return m.sleep_schedule  || ''; });
-  var cleanVals  = members.map(function(m){ return m.cleanliness     || ''; });
-  var guestVals  = members.map(function(m){ return m.guests          || ''; });
-  var kitchenVals= members.map(function(m){ return m.household_type  || ''; });
+  // S154: 6-trait redesign (locked S153) — Sleep, Social, Cleanliness, Study,
+  // Kitchen, Pets. Kitchen previously read m.household_type (an accommodation
+  // preference field, completely unrelated to food/kitchen habits) — now
+  // combines the new kitchen_habits column with dietary, the two fields that
+  // actually describe kitchen/food compatibility. Social and Study reuse the
+  // same field/label convention api/matches.js already uses ('guests' ->
+  // 'social', 'study_location' -> 'study') for consistency across the app.
+  var sleepVals   = members.map(function(m){ return m.sleep_schedule || ''; });
+  var socialVals  = members.map(function(m){ return m.guests         || ''; });
+  var cleanVals   = members.map(function(m){ return m.cleanliness    || ''; });
+  var studyVals   = members.map(function(m){ return m.study_location || ''; });
+  var kitchenVals = members.map(function(m){ return [m.kitchen_habits||'', m.dietary||''].filter(Boolean).join(' + '); });
+  var petVals     = members.map(function(m){ return m.pets           || ''; });
 
   return {
+    solo:    false,
     sleep:   scoreField(sleepVals),
+    social:  scoreField(socialVals),
     clean:   scoreField(cleanVals),
-    guests:  scoreField(guestVals),
-    kitchen: scoreField(kitchenVals)
+    study:   scoreField(studyVals),
+    kitchen: scoreField(kitchenVals),
+    pets:    scoreField(petVals)
   };
 }
 
@@ -13586,7 +13643,7 @@ function householdCobTip(members, compat) {
   if (compat.clean && compat.clean.cls !== 'sync') {
     return '"One tidy, one relaxed — the most common friction point in any share house. A Sunday 20-minute reset works better than a running tally."';
   }
-  if (compat.guests && compat.guests.cls !== 'sync') {
+  if (compat.social && compat.social.cls !== 'sync') {
     return '"Worth agreeing on a heads-up window (24hrs?) so nobody\'s caught off guard by guests."';
   }
   // All in sync — celebrate
@@ -14095,8 +14152,10 @@ function hhAgShowLoading() {
 
 function hhAgShowError(msg) {
   document.getElementById('hh-ag-modal-body').innerHTML =
-    '<div style="text-align:center;padding:40px 20px;color:var(--brand-coral);font-size:13px);">' + msg + '</div>';
+    '<div style="text-align:center;padding:40px 20px;color:var(--brand-coral);font-size:13px;">' + msg + '</div>';
   document.getElementById('hh-ag-action-bar').style.display = 'none';
+  // S154: propagate Report a Problem to the tenancy agreement / house rules flow.
+  if (typeof rpShowAutoPrompt === 'function') rpShowAutoPrompt('tenancy_agreement', msg);
 }
 
 function hhAgRenderTierSelect() {
@@ -14212,6 +14271,7 @@ function hhAgRenderClauses() {
   });
 
   html += '<div class="hh-ag-disclaimer">This is not a legally binding document. It works because you\'ve all agreed to it \u2014 not because of anything written here. If something\'s not working, talk to each other first.</div>';
+  html += '<div class="rp-quiet-link" style="margin-top:6px;text-align:center;"><a href="#" onclick="rpOpen(\'tenancy_agreement\');return false;">⚠️ Something not working? Report a problem</a></div>';
 
   document.getElementById('hh-ag-modal-body').innerHTML = html;
   hhAgUpdateLockBtn();
@@ -14483,6 +14543,7 @@ function hhAgSave() {
     if (!d.ok) {
       saveBtn.textContent = 'Save agreement';
       showToast('❌ Save failed', d.error || 'Could not save agreement. Try again.');
+      if (typeof rpShowAutoPrompt === 'function') rpShowAutoPrompt('tenancy_agreement', d.error || 'agreement-save returned ok:false');
       return;
     }
     saveBtn.textContent = 'Saved ✓';
@@ -14505,6 +14566,7 @@ function hhAgSave() {
     saveBtn.disabled = false;
     saveBtn.textContent = 'Save agreement';
     showToast('❌ Save failed', 'Check your connection and try again.');
+    if (typeof rpShowAutoPrompt === 'function') rpShowAutoPrompt('tenancy_agreement', 'Network/API error during agreement-save');
   });
 }
 
@@ -14751,7 +14813,11 @@ function cobReviewMicInit() {
     if (ta) ta.value = ta.value ? ta.value + ' ' + transcript : transcript;
     cobReviewMicOff();
   };
-  _cobReviewRecognition.onerror = function() { cobReviewMicOff(); };
+  _cobReviewRecognition.onerror = function(e) {
+    cobReviewMicOff();
+    // S154: propagate Report a Problem to the review mic input flow.
+    if (typeof rpShowAutoPrompt === 'function') rpShowAutoPrompt('review_mic_input', 'Speech recognition error: ' + ((e && e.error) || 'unknown'));
+  };
   _cobReviewRecognition.onend = function() { cobReviewMicOff(); };
 }
 function cobReviewMicToggle() {
