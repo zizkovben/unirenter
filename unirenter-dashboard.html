@@ -1156,6 +1156,17 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 }
 .match-vibe-eq-nudge:hover { color: var(--brand-yellow); }
 .match-card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+
+/* S156: subtle optional-badge row — generation / star sign / Chinese zodiac.
+   Deliberately understated: no colour, no border emphasis, just enough to
+   notice and hover. Used on match cards and household member cards. */
+.mini-badges { display: flex; gap: 6px; margin: 0 0 10px; }
+.mini-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; line-height: 1; padding: 3px 8px; border-radius: 20px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-muted); cursor: default;
+}
 .match-avatar-wrap { position: relative; flex-shrink: 0; }
 .match-avatar {
   width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
@@ -2684,6 +2695,23 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
   font-family: var(--font-body); font-size: 11px; padding: 5px 10px; border-radius: 6px; cursor: pointer;
 }
 .msg-blocked-bar button:hover { border-color: rgba(75,191,224,0.3); color: var(--brand-blue); }
+
+/* S155c: account-status banner — warning/suspension/ban states */
+.account-status-banner {
+  border-radius: 12px; padding: 14px 18px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 14px; font-size: 13px;
+}
+.account-status-banner.warned { background: rgba(245,184,0,0.10); border: 1px solid rgba(245,184,0,0.3); color: #ffcc60; }
+.account-status-banner.severe { background: rgba(232,98,58,0.10); border: 1px solid rgba(232,98,58,0.3); color: #ff9b7a; }
+.account-status-banner-icon { font-size: 20px; flex-shrink: 0; }
+.account-status-banner-body { flex: 1; line-height: 1.5; }
+.account-status-banner-title { font-weight: 700; margin-bottom: 2px; }
+.account-status-banner button {
+  background: none; border: 1px solid currentColor; color: inherit;
+  font-family: var(--font-body); font-size: 12px; padding: 6px 12px;
+  border-radius: 7px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+}
+.account-status-banner button:hover { opacity: 0.8; }
 /* ── Household Agreement (S52) ── */
 .hh-agreement-entry-card {
   background: linear-gradient(135deg, rgba(245,184,0,0.08), rgba(75,191,224,0.06));
@@ -2948,6 +2976,10 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 .household-member-emoji {
   font-size: 16px;
 }
+/* S156: badges sit inline inside the chip row, not stacked below like on
+   match cards — chip is a single-line flex pill. */
+.household-member-chip .mini-badges { margin: 0; gap: 4px; }
+.household-member-chip .mini-badge { padding: 2px 6px; font-size: 11px; }
 /* Compatibility bars */
 .household-compat-grid {
   display: flex;
@@ -4395,6 +4427,11 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
     </button>
   </div>
 
+  <!-- S155c: account-status banner — visible on every tab, not just one
+       panel, since a warning/suspension/ban is account-wide. Hidden by
+       default; shown by accountStatusRenderBanner() once profile loads. -->
+  <div class="account-status-banner" id="account-status-banner" style="display:none;"></div>
+
   <!-- ══════════════════════════════════════════════════════ -->
   <!-- TAB: MATCHES -->
   <!-- ══════════════════════════════════════════════════════ -->
@@ -5428,6 +5465,21 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
     <div class="modal-actions">
       <button class="btn-modal-cancel" onclick="closeModal('report-modal')">Cancel</button>
       <button class="btn-modal-submit" onclick="submitReport()">Submit report</button>
+    </div>
+  </div>
+</div>
+
+<!-- S155c: appeal modal — shown from the account-status banner when the
+     signed-in user's own account is warned/suspended/banned. -->
+<div class="modal-overlay" id="appeal-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('appeal-modal')">✕</button>
+    <div class="modal-title">Submit an appeal</div>
+    <div class="modal-sub">Explain what happened. Our team reviews appeals manually — this doesn't guarantee a specific outcome, but every appeal is read.</div>
+    <textarea id="appeal-text" rows="5" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-family:var(--font-body);font-size:13px;padding:10px 12px;resize:vertical;" placeholder="Tell us why you think this should be reviewed…"></textarea>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal('appeal-modal')">Cancel</button>
+      <button class="btn-modal-submit" id="appeal-submit-btn" onclick="submitAppeal()">Submit appeal</button>
     </div>
   </div>
 </div>
@@ -6819,6 +6871,7 @@ function loadProfile() {
         const cobRefined = profile.cob_refined_fields || [];
         applyProfileData(profile, cobRefined);
         extrasLoadFromProfile(profile);
+        accountStatusRenderBanner(profile);
       }
     });
   }
@@ -7223,22 +7276,26 @@ const DUMMY_MATCHES = [
     sub:'UniMelb · Commerce/Law · 2nd year', tags:['🌙 Early bird','🧹 Very tidy','Carlton','$320/wk'],
     tagClass:['','green','yellow','yellow'], reason:'Sleep, cleanliness & location match',
     vibe_emoji_primary:'📚', vibe_emoji_secondary:'☕',
-    cob_summary:'Early riser who batch-cooks on Sundays and keeps the kitchen spotless — commerce student with a very structured week.' },
+    cob_summary:'Early riser who batch-cooks on Sundays and keeps the kitchen spotless — commerce student with a very structured week.',
+    generation:'genz', star_sign:'virgo', chinese_zodiac:'rabbit' },
   { name:'Jake S.', initials:'J', bg:'linear-gradient(135deg,#4BBFE0,#2a7a9e)', score:88,
     sub:'RMIT · Engineering · 3rd year', tags:['🌃 Night owl','⚖️ Average clean','Footscray','$280/wk'],
     tagClass:['','','yellow','yellow'], reason:'Budget & suburb match',
     vibe_emoji_primary:'🎮', vibe_emoji_secondary:'💻',
-    cob_summary:'Night-owl gamer who works from home most days — relaxed about mess but respectful of quiet study time.' },
+    cob_summary:'Night-owl gamer who works from home most days — relaxed about mess but respectful of quiet study time.',
+    generation:'genz', star_sign:'sagittarius' },
   { name:'Anika M.', initials:'A', bg:'linear-gradient(135deg,#F5B800,#c4900a)', score:84,
     sub:'Monash · Psychology · 1st year', tags:['🔄 Flexible','🧹 Tidy','St Kilda','$320/wk'],
     tagClass:['','green','yellow','yellow'], reason:'Lifestyle & budget match',
     vibe_emoji_primary:'🌿', vibe_emoji_secondary:'🪴',
-    cob_summary:'Chill first-year who loves plants and keeps shared spaces tidy — flexible schedule, very easy to live with.' },
+    cob_summary:'Chill first-year who loves plants and keeps shared spaces tidy — flexible schedule, very easy to live with.',
+    chinese_zodiac:'dragon' },
   { name:'Tom O.', initials:'T', bg:'linear-gradient(135deg,#3DAA5C,#1d6b38)', score:79,
     sub:'Melbourne Uni · Arts · 3rd year', tags:['🌙 Early bird','🧹 Very tidy','Brunswick'],
     tagClass:['','green','yellow'], reason:'Sleep schedule match',
     vibe_emoji_primary:'🏋️', vibe_emoji_secondary:'💪',
-    cob_summary:'Gym-going arts student who is up early and in bed by 10 — very tidy, prefers a quiet house during the week.' },
+    cob_summary:'Gym-going arts student who is up early and in bed by 10 — very tidy, prefers a quiet house during the week.',
+    generation:'millennial', star_sign:'leo', chinese_zodiac:'ox' },
 ];
 
 // ── Emoji equation pairing logic ─────────────────────────────────────────────
@@ -7434,6 +7491,7 @@ function renderMatchCard(p) {
       <div class="match-score-badge">${p.score}%</div>
     </div>
     ${cobPreviewHtml}
+    ${badgeMiniHtml(p)}
     <div class="match-tags">${tags}</div>
     <div class="match-compat"><div class="match-compat-bar" style="width:${p.score}%"></div></div>
     <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">✓ ${p.reason}</div>
@@ -7722,6 +7780,10 @@ function adaptApiMatchForCard(p) {
     field_of_study: p.field_of_study || null,
     email: p.email || null,
     in_household: !!p.in_household,
+    // S156: optional profile badges — display-only, never a match factor.
+    generation: p.generation || null,
+    star_sign: p.star_sign || null,
+    chinese_zodiac: p.chinese_zodiac || null,
   };
 }
 
@@ -8869,6 +8931,88 @@ function submitReport() {
     showToast('⚠️ Not submitted', 'Check your connection and try again.');
   });
   selectedReport = null;
+}
+
+// ── S155c: account-status banner + appeals ────────────────────────────────────
+// Reads the account_status Supabase already returns from /api/profile/get
+// (select=* — no API change needed) and shows a persistent, tab-independent
+// banner for anything other than 'active'. 'warned' is advisory only —
+// sending still works. The other three states also block sends server-side
+// (send.js), so the banner is the only place the person learns why.
+function accountStatusRenderBanner(profile) {
+  var el = document.getElementById('account-status-banner');
+  if (!el) return;
+  var status = profile.account_status || 'active';
+  if (status === 'active') { el.style.display = 'none'; el.innerHTML = ''; return; }
+
+  var COPY = {
+    warned: {
+      cls: 'warned', icon: '⚠️',
+      title: "You've received a warning",
+      body: 'One or more of your messages was flagged for a policy violation. Repeated violations can lead to a suspension.',
+      showAppeal: true,
+    },
+    suspended_pending_review: {
+      cls: 'severe', icon: '🚫',
+      title: 'Your account is suspended pending review',
+      body: "You can't send messages right now. This is automatically reviewed within 7 days.",
+      showAppeal: true,
+    },
+    banned_2wk: {
+      cls: 'severe', icon: '🚫',
+      title: 'Your account is temporarily banned',
+      body: "You can't send messages right now. This lifts automatically after the ban period.",
+      showAppeal: true,
+    },
+    banned_permanent: {
+      cls: 'severe', icon: '🚫',
+      title: 'Your account has been permanently banned',
+      body: "You can't send messages. If you believe this is a mistake, you can submit an appeal.",
+      showAppeal: true,
+    },
+  };
+  var c = COPY[status];
+  if (!c) { el.style.display = 'none'; el.innerHTML = ''; return; }
+
+  el.className = 'account-status-banner ' + c.cls;
+  el.style.display = '';
+  el.innerHTML =
+    '<div class="account-status-banner-icon">' + c.icon + '</div>' +
+    '<div class="account-status-banner-body">' +
+      '<div class="account-status-banner-title">' + c.title + '</div>' +
+      '<div>' + c.body + '</div>' +
+    '</div>' +
+    (c.showAppeal ? '<button onclick="openAppealModal(\'' + status + '\')">Submit an appeal</button>' : '');
+}
+
+window._appealStatusAtSubmit = null;
+function openAppealModal(status) {
+  window._appealStatusAtSubmit = status;
+  var t = document.getElementById('appeal-text');
+  if (t) t.value = '';
+  openModal('appeal-modal');
+}
+
+function submitAppeal() {
+  var text = (document.getElementById('appeal-text').value || '').trim();
+  if (!text) { showToast('⚠️ Add some detail', 'Please describe your appeal before submitting.'); return; }
+  var email = localStorage.getItem('unirenter_email');
+  if (!email) { showToast('⚠️ Not signed in', 'Please sign in first.'); return; }
+  var btn = document.getElementById('appeal-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+  fetch('/api/account/appeal', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, message: text, account_status_at_appeal: window._appealStatusAtSubmit })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (!data.ok) { showToast('⚠️ Not submitted', data.error || 'Could not submit your appeal.'); return; }
+    closeModal('appeal-modal');
+    showToast('✅ Appeal submitted', "Our team will review and follow up if action is taken.");
+  }).catch(function() {
+    showToast('⚠️ Not submitted', 'Check your connection and try again.');
+  }).finally(function() {
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit appeal'; }
+  });
 }
 
 // ── Calendar tab ─────────────────────────────────────────────────────────────
@@ -12187,6 +12331,31 @@ var BADGE_GEN_LABELS = {
   genz:'Gen Z', millennial:'Millennial', genx:'Gen X'
 };
 
+// S156: subtle optional-badge display for match cards and household member
+// cards. `fields` is any object carrying generation/star_sign/chinese_zodiac
+// (both real profiles and DUMMY_MATCHES use these same keys). Deliberately
+// icon/short-label only with the full explanation in the title tooltip —
+// Ben's ask was "subtle little badge with a hover over that explains what
+// it is", explicitly NOT a matching factor (matches api/matches.js, which
+// carries these fields for display only and never scores on them).
+function badgeMiniHtml(fields) {
+  if (!fields) return '';
+  var out = '';
+  if (fields.generation && BADGE_GEN_LABELS[fields.generation]) {
+    var genLabel = BADGE_GEN_LABELS[fields.generation];
+    out += '<span class="mini-badge" title="Generation: ' + genLabel + '">' + genLabel + '</span>';
+  }
+  if (fields.star_sign && BADGE_STAR_LABELS[fields.star_sign]) {
+    var starParts = BADGE_STAR_LABELS[fields.star_sign].split(' ');
+    out += '<span class="mini-badge" title="Star sign: ' + starParts.slice(1).join(' ') + '">' + starParts[0] + '</span>';
+  }
+  if (fields.chinese_zodiac && BADGE_ZODIAC_LABELS[fields.chinese_zodiac]) {
+    var zodiacParts = BADGE_ZODIAC_LABELS[fields.chinese_zodiac].split(' ');
+    out += '<span class="mini-badge" title="Chinese zodiac: ' + zodiacParts.slice(1).join(' ') + '">' + zodiacParts[0] + '</span>';
+  }
+  return out ? '<div class="mini-badges">' + out + '</div>' : '';
+}
+
 // Render badge pill or show select based on saved value
 function badgeRenderField(group) {
   var val = localStorage.getItem('ur_extras_' + group) || '';
@@ -12984,6 +13153,7 @@ function _origHouseholdRender(data, currentEmail) {
     return '<div class="household-member-chip' + (isYou ? ' is-you' : '') + '">' +
       '<span class="household-member-emoji">' + emoji + '</span>' +
       '<span>' + name + (isYou ? ' (you)' : '') + '</span>' +
+      badgeMiniHtml(m) +
     '</div>';
   }).join('');
 
@@ -15058,6 +15228,9 @@ function openCardPreview() {
   var cobSummary = localStorage.getItem('ur_vibe_summary') || window._loadedProfile && window._loadedProfile.cob_summary || null;
   var status = localStorage.getItem('ur_student_status') || window._loadedProfile && window._loadedProfile.student_status || '';
   var lastSeen = window._loadedProfile && window._loadedProfile.last_seen || new Date().toISOString();
+  var generation = window._loadedProfile && window._loadedProfile.generation || null;
+  var starSign = window._loadedProfile && window._loadedProfile.star_sign || null;
+  var chineseZodiac = window._loadedProfile && window._loadedProfile.chinese_zodiac || null;
 
   // Build the adapted card object (mirrors adaptApiMatchForCard)
   var initials = name.split(' ').map(function(w){ return w[0]; }).filter(Boolean).join('').slice(0,2).toUpperCase() || '??';
@@ -15087,6 +15260,9 @@ function openCardPreview() {
     vibe_emoji_primary: vibeP,
     vibe_emoji_secondary: vibeS,
     cob_summary: cobSummary,
+    generation: generation,
+    star_sign: starSign,
+    chinese_zodiac: chineseZodiac,
   };
 
   wrap.innerHTML = '';
