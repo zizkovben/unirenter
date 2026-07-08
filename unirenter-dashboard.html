@@ -13771,11 +13771,16 @@ function householdCalendarSkeletonHtml() {
       '<div class="cal-view-toggles" id="hh-cal-view-toggles" style="margin:8px 0;">' +
         '<button class="cal-view-btn active" id="hh-cal-vbtn-list" onclick="hhCalSetView(\'list\')">List</button>' +
         '<button class="cal-view-btn" id="hh-cal-vbtn-weekly" onclick="hhCalSetView(\'weekly\')">Weekly</button>' +
+        '<button class="cal-view-btn" id="hh-cal-vbtn-monthly" onclick="hhCalSetView(\'monthly\')">Monthly</button>' +
       '</div>' +
       '<div id="household-calendar-body" class="household-calendar-body">' +
         '<div class="household-calendar-empty">Loading…</div>' +
       '</div>' +
       '<div id="household-calendar-weekly-grid" class="cal-weekly-grid" style="display:none;"></div>' +
+      '<div id="household-calendar-monthly-wrap" style="display:none;">' +
+        '<div id="household-calendar-monthly-label" style="font-size:12px;font-weight:700;color:var(--text);margin:4px 0 6px;text-align:center;"></div>' +
+        '<div id="household-calendar-monthly-grid" class="cal-grid"></div>' +
+      '</div>' +
     '</div>' +
   '</div>';
 }
@@ -13797,21 +13802,27 @@ function toggleHouseholdCalendar() {
 window._hhCalActiveView = 'list';
 function hhCalSetView(view) {
   window._hhCalActiveView = view;
-  var listBody   = document.getElementById('household-calendar-body');
-  var weeklyBody = document.getElementById('household-calendar-weekly-grid');
+  var listBody    = document.getElementById('household-calendar-body');
+  var weeklyBody  = document.getElementById('household-calendar-weekly-grid');
+  var monthlyWrap = document.getElementById('household-calendar-monthly-wrap');
   var lbtn = document.getElementById('hh-cal-vbtn-list');
   var wbtn = document.getElementById('hh-cal-vbtn-weekly');
+  var mbtn = document.getElementById('hh-cal-vbtn-monthly');
   if (lbtn) lbtn.classList.toggle('active', view === 'list');
   if (wbtn) wbtn.classList.toggle('active', view === 'weekly');
-  if (listBody)   listBody.style.display   = (view === 'list')   ? 'flex' : 'none';
-  if (weeklyBody) weeklyBody.style.display = (view === 'weekly') ? ''     : 'none';
-  if (view === 'weekly') householdCalendarRenderWeekly();
+  if (mbtn) mbtn.classList.toggle('active', view === 'monthly');
+  if (listBody)    listBody.style.display    = (view === 'list')    ? 'flex' : 'none';
+  if (weeklyBody)  weeklyBody.style.display  = (view === 'weekly')  ? ''     : 'none';
+  if (monthlyWrap) monthlyWrap.style.display = (view === 'monthly') ? ''     : 'none';
+  if (view === 'weekly')  householdCalendarRenderWeekly();
+  if (view === 'monthly') householdCalendarRenderMonthly();
 }
 
 function householdCalendarUpdateFromFeed(feedItems) {
   window._hhCalFeedItems = feedItems || [];
   householdCalendarRenderBody();
-  if (window._hhCalActiveView === 'weekly') householdCalendarRenderWeekly();
+  if (window._hhCalActiveView === 'weekly')  householdCalendarRenderWeekly();
+  if (window._hhCalActiveView === 'monthly') householdCalendarRenderMonthly();
 }
 
 function householdCalendarRenderBody() {
@@ -13917,6 +13928,93 @@ function householdCalendarRenderWeekly() {
     }).join('');
     html += '<div class="' + colClass + '"><div class="cal-weekly-col-head"><div class="wcol-dow">' + DOWS[i] + '</div><div class="' + numClass + '">' + d.getDate() + '</div></div><div class="cal-weekly-events">' + evsHtml + '</div></div>';
   }
+// S158: household Monthly grid — third view alongside List/Weekly. Same
+// source data (householdCalendarBuildEvents), same reuse-existing-CSS
+// approach as the Weekly grid: borrows .cal-grid/.cal-dow/.cal-day/
+// .cal-day-chip/cc-* straight from the personal calendar's Monthly view,
+// so no new CSS was needed here either. Always shows the current month,
+// no prev/next navigation — consistent with the Weekly grid's own lack
+// of navigation (flag it if you want month-to-month browsing later).
+// Click behavior: same direct hhGoToPersonalTodo() jump as List/Weekly,
+// not the popover pattern the personal calendar's Monthly view uses —
+// staying consistent with the "extend the existing pattern" call made
+// for the Weekly grid rather than introducing a second interaction style.
+function householdCalendarRenderMonthly() {
+  var gridEl = document.getElementById('household-calendar-monthly-grid');
+  var labelEl = document.getElementById('household-calendar-monthly-label');
+  if (!gridEl) return;
+  var members = window._hhCalMembers || [];
+  var feedItems = window._hhCalFeedItems || [];
+  var events = householdCalendarBuildEvents(members, feedItems);
+
+  var now = new Date();
+  var viewYear = now.getFullYear();
+  var viewMonth = now.getMonth();
+  if (labelEl) labelEl.textContent = new Date(viewYear, viewMonth, 1).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+
+  var COLOR_MAP = { lease: 'cc-yellow', note: 'cc-blue', todo: 'cc-green', reminder: 'cc-coral' };
+
+  var evsByDay = {};
+  events.forEach(function(ev) {
+    var d;
+    try { d = new Date(ev.date + 'T00:00:00'); } catch (err) { return; }
+    if (d.getFullYear() === viewYear && d.getMonth() === viewMonth) {
+      var key = d.getDate();
+      if (!evsByDay[key]) evsByDay[key] = [];
+      evsByDay[key].push(ev);
+    }
+  });
+
+  var dows = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var first = new Date(viewYear, viewMonth, 1);
+  var startDow = (first.getDay() + 6) % 7;
+  var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  var daysInPrev  = new Date(viewYear, viewMonth, 0).getDate();
+
+  var html = dows.map(function(dw) { return '<div class="cal-dow">' + dw + '</div>'; }).join('');
+  for (var i = startDow - 1; i >= 0; i--) {
+    html += '<div class="cal-day other-month"><span class="cal-day-num">' + (daysInPrev - i) + '</span></div>';
+  }
+  for (var d = 1; d <= daysInMonth; d++) {
+    var isToday = (d === now.getDate() && viewMonth === now.getMonth() && viewYear === now.getFullYear());
+    var dayEvs = evsByDay[d] || [];
+    var cls = 'cal-day';
+    if (isToday) cls += ' today';
+    if (dayEvs.length) cls += ' has-event';
+    var chipsHtml = '';
+    if (dayEvs.length) {
+      var MAX_CHIPS = 2;
+      var shown = dayEvs.slice(0, MAX_CHIPS);
+      chipsHtml = '<div class="cal-day-chips">';
+      shown.forEach(function(ev) {
+        var cc = COLOR_MAP[ev.type] || 'cc-blue';
+        var rawLabel = ev.label || '';
+        var truncRaw = rawLabel.length > 12 ? rawLabel.substring(0, 12) + '…' : rawLabel;
+        var truncEsc = escHtml(truncRaw);
+        var titleEsc = escHtml(rawLabel);
+        var clickable = !!ev.feedId;
+        var attrs = clickable ? (' onclick="event.stopPropagation();hhGoToPersonalTodo(\'' + ev.feedId + '\')"') : '';
+        var chipCls = 'cal-day-chip ' + cc + (clickable ? ' cal-chip-clickable' : '');
+        chipsHtml += '<div class="' + chipCls + '"' + attrs + ' title="' + titleEsc + '">' +
+          '<span class="cal-day-chip-icon">' + ev.icon + '</span>' +
+          '<span class="cal-day-chip-label">' + truncEsc + '</span>' +
+        '</div>';
+      });
+      if (dayEvs.length > MAX_CHIPS) {
+        chipsHtml += '<div class="cal-day-chip cc-muted">+' + (dayEvs.length - MAX_CHIPS) + '</div>';
+      }
+      chipsHtml += '</div>';
+    }
+    html += '<div class="' + cls + '"><span class="cal-day-num">' + d + '</span>' + chipsHtml + '</div>';
+  }
+  var totalCells = startDow + daysInMonth;
+  var remainder = (7 - (totalCells % 7)) % 7;
+  for (var d2 = 1; d2 <= remainder; d2++) {
+    html += '<div class="cal-day other-month"><span class="cal-day-num">' + d2 + '</span></div>';
+  }
+  gridEl.innerHTML = html;
+}
+
   grid.innerHTML = html;
 }
 
