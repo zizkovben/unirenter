@@ -1123,7 +1123,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         <div class="legal-card-icon">📸</div>
         <div class="legal-card-body">
           <div class="legal-card-title">Document the property condition NOW — before anyone else moves in</div>
-          <div class="legal-card-desc">Your bond is at risk if the incoming tenant causes damage and the landlord can't distinguish it from yours. Photograph and video every room thoroughly before the handover. UniRenter's condition walkthrough (Session 27+) will guide both of you through this.</div>
+          <div class="legal-card-desc">Your bond is at risk if the incoming tenant causes damage and the landlord can't distinguish it from yours. Photograph and video every room thoroughly before the handover. UniRenter's Lease Companion tools will guide both of you through this.</div>
         </div>
         <div class="legal-card-check"></div>
       </div>
@@ -1194,11 +1194,20 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         <div class="legal-card-check"></div>
       </div>
       <div class="legal-card" onclick="ackCardIn(this)">
+        <div class="legal-card-icon">📋</div>
+        <div class="legal-card-body">
+          <div class="legal-card-title">Request the entry condition report before you commit</div>
+          <div class="legal-card-desc">The entry condition report documents the property from the <em>start of the original tenancy</em> — not from when you move in. Ask to see it, alongside a copy of the lease, the landlord consent letter, and the bond lodgement receipt, before you inspect or pay anything. Once you're in touch with a lister on UniRenter, you can request these documents directly — you don't need to wait until you're standing in the property to ask.</div>
+          <a class="legal-card-link" href="https://www.commerce.wa.gov.au/consumer-protection/condition-reports" target="_blank" onclick="event.stopPropagation()">Entry condition reports →</a>
+        </div>
+        <div class="legal-card-check"></div>
+      </div>
+      <div class="legal-card" onclick="ackCardIn(this)">
         <div class="legal-card-icon">⚠️</div>
         <div class="legal-card-body">
-          <div class="legal-card-title">Critical: you may be inheriting someone else's wear and tear</div>
+          <div class="legal-card-title">You may be inheriting someone else's wear and tear</div>
           <div class="legal-card-desc">
-            <strong style="color:#ffcc60;">This is how students lose their entire bond.</strong> When you take over a lease, the entry condition report was completed at the <em>start of the original tenancy</em> — not when you move in. When you eventually leave, you'll be judged against that original report.
+            Taking over a lease without checking the condition report carefully can affect your bond — this is why the card above matters. When you eventually leave, you'll be judged against the <em>original</em> condition report, not against how the place looked when you moved in.
             <br><br><strong>Before you sign anything:</strong>
             <ul style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:4px;">
               <li style="font-size:12px;color:var(--text-muted);">→ Walk through every room with the outgoing tenant</li>
@@ -1207,7 +1216,6 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
               <li style="font-size:12px;color:var(--text-muted);">→ Never transfer bond money until the condition is documented and agreed</li>
             </ul>
           </div>
-          <a class="legal-card-link" href="https://www.commerce.wa.gov.au/consumer-protection/condition-reports" target="_blank" onclick="event.stopPropagation()">Entry condition reports →</a>
         </div>
         <div class="legal-card-check"></div>
       </div>
@@ -1489,7 +1497,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
     <div class="redflag-item danger"><div class="redflag-icon">📱</div><div class="redflag-text"><h5>Refuses a video call or in-person meeting</h5><p>If someone won't do a video call or meet in person, assume the listing is fake.</p></div></div>
     <div class="redflag-item danger"><div class="redflag-icon">💰</div><div class="redflag-text"><h5>Rent seems significantly below market rate</h5><p>If it seems too good to be true, it is. Research comparable rooms before engaging.</p></div></div>
     <div class="redflag-item danger"><div class="redflag-icon">⏰</div><div class="redflag-text"><h5>Creating urgency — "3 other people want it"</h5><p>Scammers manufacture pressure. A legitimate person will give you time to inspect and decide.</p></div></div>
-    <div class="redflag-item"><div class="redflag-icon">🏦</div><div class="redflag-text"><h5>Bond not going through RTBA</h5><p>All WA bonds must be lodged with the Bond Administrator — never paid directly to anyone.</p></div></div>
+    <div class="redflag-item"><div class="redflag-icon">🏦</div><div class="redflag-text"><h5>Bond not going through the Bond Administrator</h5><p>All WA bonds must be lodged with the Bond Administrator — never paid directly to anyone.</p></div></div>
     <button class="redflag-close" onclick="closeRedflag()">I've reviewed these — continue safely</button>
   </div>
 </div>
@@ -1749,7 +1757,7 @@ let currentDocTarget = null;
 let ackCountOut = 0;
 let ackCountIn = 0;
 const totalAcksOut = 6;
-const totalAcksIn = 6;
+const totalAcksIn = 7;
 
 function heroTab(tab) {
   const board = document.getElementById('lease-board');
