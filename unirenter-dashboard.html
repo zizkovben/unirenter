@@ -5031,9 +5031,12 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
       <div class="hh-agreement-entry-head">
         <span class="hh-agreement-entry-icon">📋</span>
         <span class="hh-agreement-entry-title">Housemate Agreement</span>
-        <span class="hh-agreement-entry-badge" style="background:rgba(75,191,224,0.15);color:var(--brand-blue);">Optional</span>
+        <span class="hh-agreement-entry-badge" id="hh-ag-entry-badge">Optional</span>
       </div>
-      <div class="hh-agreement-entry-sub">Sort cleaning, guests, quiet hours and bills upfront — before the passive-aggressive notes start. Not legally binding. Between you as equals.</div>
+      <div class="hh-agreement-entry-sub" id="hh-ag-entry-sub">Sort cleaning, guests, quiet hours and bills upfront — before the passive-aggressive notes start. Not legally binding. Between you as equals.</div>
+      <div class="hh-agreement-entry-progress" id="hh-ag-entry-progress-wrap" style="display:none;">
+        <div class="hh-agreement-entry-progress-bar" id="hh-ag-entry-progress-bar" style="width:0%"></div>
+      </div>
     </div>
 
     <!-- Review modal -->
@@ -9250,7 +9253,11 @@ function calLoadEvents() {
       const catMap = { housing: 'housing', uni: 'uni', work: 'work', social: 'social', other: 'other' };
       events.push({
         id: t.id,
-        title: t.title,
+        // S157 fix: was `title: t.title` — every calendar renderer except
+        // Weekly/Monthly (which happened to have a `title || name`
+        // fallback) reads `ev.name`, so todo-sourced items showed as
+        // "undefined" in the This week strip and the flat Planner list.
+        name: t.title,
         cat: catMap[t.category] || 'other',
         date: t.date,
         source: 'todo',
@@ -13142,7 +13149,16 @@ function _origHouseholdRender(data, currentEmail) {
   var cobTip = householdCobTip(members, compat);
 
   // Invite token for "invite another" button
-  var inviteToken = localStorage.getItem('ur_household_invite_token');
+  // S157 fix: this used to be localStorage-only, which is set exactly once
+  // at the moment a household is first created. Any later visit — a new
+  // session, cleared storage, a different device, or being a member who
+  // joined via someone else's invite rather than the creator — had no
+  // token anywhere, so the invite panel div never rendered into the page
+  // at all and "Find a new flatmate" silently did nothing. The server now
+  // returns invite_token from api/household/get.js, so that's the source
+  // of truth; localStorage is just a fallback + gets refreshed from it.
+  var inviteToken = data.invite_token || localStorage.getItem('ur_household_invite_token');
+  if (inviteToken) localStorage.setItem('ur_household_invite_token', inviteToken);
   var inviteLink = inviteToken ? 'https://unirenter.com.au/dashboard?join=' + inviteToken : null;
 
   // Member chips HTML
@@ -13738,6 +13754,7 @@ function householdTimelineHtml(members) {
 // opted in. See project bible §4 for the full rationale.
 function householdCalendarInit(members) {
   window._hhCalMembers = members || [];
+  window._hhCalActiveView = 'list';
   var wrap = document.getElementById('household-calendar-wrap');
   if (!wrap) return;
   wrap.innerHTML = householdCalendarSkeletonHtml();
@@ -13750,24 +13767,51 @@ function householdCalendarSkeletonHtml() {
       '<span class="household-calendar-chevron" id="hh-cal-chevron">▴</span>' +
     '</button>' +
     '<div class="household-calendar-caption">Lease dates and the notes, todos and reminders you\'ve accepted — never a raw merge of anyone\'s personal calendar.</div>' +
-    '<div id="household-calendar-body" class="household-calendar-body">' +
-      '<div class="household-calendar-empty">Loading…</div>' +
+    '<div id="household-calendar-content">' +
+      '<div class="cal-view-toggles" id="hh-cal-view-toggles" style="margin:8px 0;">' +
+        '<button class="cal-view-btn active" id="hh-cal-vbtn-list" onclick="hhCalSetView(\'list\')">List</button>' +
+        '<button class="cal-view-btn" id="hh-cal-vbtn-weekly" onclick="hhCalSetView(\'weekly\')">Weekly</button>' +
+      '</div>' +
+      '<div id="household-calendar-body" class="household-calendar-body">' +
+        '<div class="household-calendar-empty">Loading…</div>' +
+      '</div>' +
+      '<div id="household-calendar-weekly-grid" class="cal-weekly-grid" style="display:none;"></div>' +
     '</div>' +
   '</div>';
 }
 
 function toggleHouseholdCalendar() {
-  var body = document.getElementById('household-calendar-body');
+  var content = document.getElementById('household-calendar-content');
   var chev = document.getElementById('hh-cal-chevron');
-  if (!body) return;
-  var open = body.style.display !== 'none';
-  body.style.display = open ? 'none' : 'flex';
+  if (!content) return;
+  var open = content.style.display !== 'none';
+  content.style.display = open ? 'none' : 'block';
   if (chev) chev.textContent = open ? '▾' : '▴';
+}
+
+// S157: household calendar view toggle (List / Weekly). Not persisted —
+// resets to List on every full household render, same as the collapse
+// chevron always starting open. Reuses the exact same .cal-weekly-* CSS
+// classes the personal calendar's Weekly grid already uses (generic,
+// not scoped to that view) so no new CSS was needed.
+window._hhCalActiveView = 'list';
+function hhCalSetView(view) {
+  window._hhCalActiveView = view;
+  var listBody   = document.getElementById('household-calendar-body');
+  var weeklyBody = document.getElementById('household-calendar-weekly-grid');
+  var lbtn = document.getElementById('hh-cal-vbtn-list');
+  var wbtn = document.getElementById('hh-cal-vbtn-weekly');
+  if (lbtn) lbtn.classList.toggle('active', view === 'list');
+  if (wbtn) wbtn.classList.toggle('active', view === 'weekly');
+  if (listBody)   listBody.style.display   = (view === 'list')   ? 'flex' : 'none';
+  if (weeklyBody) weeklyBody.style.display = (view === 'weekly') ? ''     : 'none';
+  if (view === 'weekly') householdCalendarRenderWeekly();
 }
 
 function householdCalendarUpdateFromFeed(feedItems) {
   window._hhCalFeedItems = feedItems || [];
   householdCalendarRenderBody();
+  if (window._hhCalActiveView === 'weekly') householdCalendarRenderWeekly();
 }
 
 function householdCalendarRenderBody() {
@@ -13790,10 +13834,10 @@ function householdCalendarBuildEvents(members, feedItems) {
   members.forEach(function(m) {
     var name = m.display_name ? m.display_name.split(' ')[0] : 'Flatmate';
     if (m.lease_start) {
-      events.push({ date: m.lease_start, icon: '🔑', label: name + '\'s lease starts', sub: m.lease_property || '' });
+      events.push({ date: m.lease_start, icon: '🔑', label: name + '\'s lease starts', sub: m.lease_property || '', type: 'lease' });
     }
     if (m.lease_end) {
-      events.push({ date: m.lease_end, icon: '🔚', label: name + '\'s lease ends', sub: m.lease_property || '' });
+      events.push({ date: m.lease_end, icon: '🔚', label: name + '\'s lease ends', sub: m.lease_property || '', type: 'lease' });
     }
   });
 
@@ -13803,7 +13847,7 @@ function householdCalendarBuildEvents(members, feedItems) {
     if (item.type === 'chat') return;
     if (!item.accepted_by_me) return; // only items the viewing member has accepted
     var authorName = item.author_name ? item.author_name.split(' ')[0] : (item.author_email ? item.author_email.split('@')[0] : 'Housemate');
-    events.push({ date: item.event_date, icon: typeIcon[item.type] || '📌', label: item.text, sub: 'from ' + authorName, feedId: item.id });
+    events.push({ date: item.event_date, icon: typeIcon[item.type] || '📌', label: item.text, sub: 'from ' + authorName, feedId: item.id, type: item.type });
   });
 
   events = events.filter(function(e) { return !!e.date; });
@@ -13829,6 +13873,51 @@ function householdCalendarEventHtml(e) {
     '</div>' +
     '<span class="household-calendar-event-date">' + hhTimelineFmtDate(e.date) + '</span>' +
   '</div>';
+}
+
+// S157: household Weekly grid — a 7-column view of the current week
+// (Mon–Sun), same source data as the List view (householdCalendarBuildEvents:
+// lease dates + accepted feed items). Reuses the personal calendar's
+// .cal-weekly-* CSS classes as-is (they're generic, not scoped to that
+// view) so this needed zero new CSS. No prev/next navigation yet — always
+// shows the current week, matching the List view's own lack of date
+// navigation. Click behavior mirrors the List view exactly: feed-sourced
+// items (the ones with a feedId) jump to the matching personal To Do via
+// hhGoToPersonalTodo — same function, same destination, no new pattern.
+// Lease-date chips stay non-clickable, same reasoning as the List view.
+function householdCalendarRenderWeekly() {
+  var grid = document.getElementById('household-calendar-weekly-grid');
+  if (!grid) return;
+  var members = window._hhCalMembers || [];
+  var feedItems = window._hhCalFeedItems || [];
+  var events = householdCalendarBuildEvents(members, feedItems);
+
+  var now = new Date(); now.setHours(0, 0, 0, 0);
+  var dow = (now.getDay() + 6) % 7; // Mon=0
+  var weekStart = new Date(now); weekStart.setDate(now.getDate() - dow);
+
+  var DOWS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var COLOR_MAP = { lease: 'yellow', note: 'blue', todo: 'green', reminder: 'coral' };
+
+  var html = '';
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(weekStart); d.setDate(weekStart.getDate() + i);
+    var dateStr = d.toISOString().split('T')[0];
+    var isToday = d.getTime() === now.getTime();
+    var dayEvs = events.filter(function(ev) { return ev.date === dateStr; });
+    var colClass = 'cal-weekly-col' + (isToday ? ' wcol-today' : '');
+    var numClass = 'wcol-num' + (isToday ? ' today' : '');
+    var evsHtml = dayEvs.map(function(ev) {
+      var color = COLOR_MAP[ev.type] || 'blue';
+      var clickable = !!ev.feedId;
+      var labelEsc = escHtml(ev.label);
+      var attrs = clickable ? (' onclick="hhGoToPersonalTodo(\'' + ev.feedId + '\')"') : '';
+      var cls = 'cal-weekly-ev cat-' + color + (clickable ? ' cal-chip-clickable' : '');
+      return '<div class="' + cls + '"' + attrs + ' title="' + labelEsc + '">' + ev.icon + ' ' + labelEsc + '</div>';
+    }).join('');
+    html += '<div class="' + colClass + '"><div class="cal-weekly-col-head"><div class="wcol-dow">' + DOWS[i] + '</div><div class="' + numClass + '">' + d.getDate() + '</div></div><div class="cal-weekly-events">' + evsHtml + '</div></div>';
+  }
+  grid.innerHTML = html;
 }
 
 // S152: jump from an accepted household item straight to the matching entry
@@ -14193,8 +14282,12 @@ function householdRender(data, currentEmail) {
     }
     var hhId2=localStorage.getItem('ur_household_id');
     if(hhId2&&currentEmail) hhReviewSummaryLoad(hhId2,currentEmail,inner);
-    // Inject agreement entry card
-    if(hhId2&&currentEmail) hhAgreementInjectCard(inner, hhId2, currentEmail);
+    // S157: duplicate "House rules" card injection removed here — it was
+    // rendering a second entry point for the same Housemate Agreement
+    // feature that _origHouseholdRender already shows. The kept card
+    // (#hh-ag-empty-card, "Housemate Agreement") now carries the live-state
+    // element IDs below so it gets the same real-time badge/progress
+    // updates the removed duplicate used to get.
   },50);
 }
 function hhReviewSummaryLoad(householdId, email, containerEl) {
@@ -14278,32 +14371,14 @@ function msgAgreementCardInit() {
   .catch(function() {});
 }
 
-// ── Agreement entry card injected after household renders ──
-function hhAgreementInjectCard(inner, householdId, currentEmail) {
-  if (!inner || !householdId) return;
-  if (inner.querySelector('.hh-agreement-entry-card')) return; // already injected
-
-  var card = document.createElement('div');
-  card.className = 'hh-agreement-entry-card';
-  card.id = 'hh-agreement-entry-card';
-  card.innerHTML =
-    '<div class="hh-agreement-entry-head">' +
-      '<span class="hh-agreement-entry-icon">📋</span>' +
-      '<span class="hh-agreement-entry-title">House rules</span>' +
-      '<span class="hh-agreement-entry-badge" id="hh-ag-entry-badge">New</span>' +
-    '</div>' +
-    '<div class="hh-agreement-entry-sub" id="hh-ag-entry-sub">Sort the house rules before someone leaves a passive-aggressive note about the dishes.</div>' +
-    '<div class="hh-agreement-entry-progress" id="hh-ag-entry-progress-wrap" style="display:none;">' +
-      '<div class="hh-agreement-entry-progress-bar" id="hh-ag-entry-progress-bar" style="width:0%"></div>' +
-    '</div>';
-
-  card.addEventListener('click', function() { hhAgOpen(householdId, currentEmail); });
-  inner.appendChild(card);
-
-  // Load existing agreement state to update the entry card
-  hhAgLoadEntryState(householdId, currentEmail);
-}
-
+// S157: hhAgreementInjectCard() removed — it built a second "House rules"
+// entry card with the same hh-ag-entry-badge/hh-ag-entry-sub IDs that now
+// live on the kept "Housemate Agreement" card (#hh-ag-empty-card). It had
+// no remaining callers after the duplicate-injection fix, and leaving it
+// in place would have been a duplicate-ID landmine if anything ever called
+// it again. hhAgLoadEntryState() below is unchanged and still does the
+// real work of pulling live state onto whichever card actually has those
+// IDs — it just now only ever finds the one, kept card.
 function hhAgLoadEntryState(householdId, currentEmail) {
   if (!householdId || !currentEmail) return;
   fetch('/api/household/agreement-get?email=' + encodeURIComponent(currentEmail) + '&household_id=' + encodeURIComponent(householdId))
