@@ -1421,6 +1421,75 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
   font-weight: 600;
 }
 .chat-msg.me .chat-meta { text-align: right; }
+
+/* S158: Messages header extras — match %, uni/city, vibe equation, badges.
+   Reuses .mini-badge/.mini-badges from S156 for the badge row (same visual
+   language as match cards) rather than inventing a second badge style. */
+.msg-main-head-extras {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  margin-top: 3px; font-size: 11px; color: var(--text-muted);
+}
+.msg-head-match-pct {
+  color: var(--brand-green); font-weight: 700;
+}
+.msg-head-vibe-eq {
+  font-size: 13px;
+}
+.msg-main-head-extras .mini-badges { margin: 0; }
+
+/* S158: message reactions (tapback chips) — a compact row under each
+   bubble. Quick-react buttons are dim/low-weight until tapped; once any
+   reaction exists on a message, only the active pills show (with counts),
+   plus a small "+" to add another from the same fixed set. */
+.chat-msg-reactions {
+  display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap;
+}
+.chat-msg.me .chat-msg-reactions { justify-content: flex-end; }
+.msg-react-chip {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 12px; line-height: 1; padding: 3px 7px; border-radius: 20px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  cursor: pointer; transition: background 0.15s, border-color 0.15s;
+}
+.msg-react-chip:hover { background: rgba(255,255,255,0.1); }
+.msg-react-chip.mine {
+  background: rgba(75,191,224,0.15); border-color: rgba(75,191,224,0.35);
+}
+.msg-react-chip-count { font-size: 10px; color: var(--text-muted); font-weight: 600; }
+.msg-react-quick-row {
+  display: flex; gap: 3px; margin-top: 3px; opacity: 0.55;
+}
+.chat-msg.me .msg-react-quick-row { justify-content: flex-end; }
+.msg-react-quick-btn {
+  font-size: 12px; line-height: 1; padding: 2px 5px; border-radius: 20px;
+  background: transparent; border: 1px solid transparent; cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+.msg-react-quick-btn:hover { background: rgba(255,255,255,0.08); opacity: 1; }
+
+/* S158: emoji quick-insert bar above the composer */
+.msg-emoji-bar {
+  display: flex; flex-wrap: wrap; gap: 2px;
+  padding: 6px 14px; border-top: 1px solid var(--navy-border);
+  max-height: 74px; overflow-y: auto;
+}
+.msg-emoji-btn {
+  font-size: 17px; line-height: 1; padding: 4px 6px; border-radius: 6px;
+  background: transparent; border: none; cursor: pointer;
+  transition: background 0.15s;
+}
+.msg-emoji-btn:hover { background: rgba(255,255,255,0.08); }
+
+/* S158: Safety check result card — reuses the .cob-nudge visual language */
+.msg-safety-check-card {
+  margin: 8px 16px 0; padding: 12px 14px; border-radius: 10px;
+  background: rgba(75,191,224,0.06); border: 1px solid rgba(75,191,224,0.2);
+  font-size: 12px; color: var(--text); line-height: 1.55;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.msg-safety-check-card .mscc-icon { font-size: 16px; flex-shrink: 0; }
+.msg-safety-check-card.loading { color: var(--text-muted); }
+
 .msg-safety-bar {
   padding: 8px 18px;
   background: rgba(245,184,0,0.05);
@@ -4606,12 +4675,15 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
           <div class="msg-main-head-info">
             <div class="msg-main-head-name" id="convo-name">Select a conversation</div>
             <div class="msg-main-head-sub" id="convo-sub"></div>
+            <div class="msg-main-head-extras" id="msg-main-head-extras" style="display:none;"></div>
           </div>
           <div class="msg-head-actions" id="msg-head-actions" style="display:none;">
+            <button class="msg-head-btn" id="msg-safety-check-btn" onclick="msgRunSafetyCheck()" title="Ask Cob to read this conversation for red flags">&#128273; Safety check</button>
             <button class="msg-head-btn" onclick="openModal('report-modal')">&#9873; Report</button>
             <button class="msg-head-btn" onclick="blockUser()">&#10005; Block</button>
           </div>
         </div>
+        <div id="msg-safety-check-result" style="display:none;"></div>
         <div id="msg-followup-card" style="display:none;"></div>
         <div class="msg-messages" id="msg-messages">
           <div style="padding:40px 16px;text-align:center;color:var(--text-muted);font-size:13px;">
@@ -4619,8 +4691,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
           </div>
         </div>
         <div class="msg-safety-bar">
-          &#x1F512; Never share your home address, bank details, or pay a deposit before inspecting a property in person.
+          &#x1F512; Never share bank details, BSB/account numbers, or send money before inspecting the property in person. <a href="#" onclick="openModal('report-modal');return false;" style="color:inherit;text-decoration:underline;">Report suspicious behaviour &rarr;</a>
         </div>
+        <div class="msg-emoji-bar" id="msg-emoji-bar"><!-- populated by JS (msgEmojiBarInit) --></div>
         <div class="msg-input-row" id="msg-input-row">
           <input type="text" class="msg-input" id="msg-input" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendMessage()" disabled>
           <button class="msg-send" id="msg-send-btn" onclick="sendMessage()" disabled>Send</button>
@@ -8377,6 +8450,13 @@ async function openConversation(partnerEmail, partnerName, partnerUni, el) {
   if (inp) { inp.disabled = false; inp.placeholder = 'Type a message…'; }
   if (sendBtn) sendBtn.disabled = false;
   msgSetBlockedUi(false); // reset to the normal composer until we know otherwise
+  msgEmojiBarInit();
+  // S158: clear any safety-check result and header extras left over from
+  // whichever conversation was open before — both are per-partner and must
+  // never carry across when switching threads.
+  var scResult = document.getElementById('msg-safety-check-result');
+  if (scResult) { scResult.style.display = 'none'; scResult.innerHTML = ''; }
+  msgRenderHeaderExtras(null);
   var msgs = document.getElementById('msg-messages');
   msgs.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Loading…</div>';
   try {
@@ -8386,11 +8466,39 @@ async function openConversation(partnerEmail, partnerName, partnerUni, el) {
     var data = await res.json();
     renderThread(data.messages || [], partnerName);
     msgSetBlockedUi(!!data.you_blocked_them);
+    msgRenderHeaderExtras(data.partner_profile);
   } catch(err) {
     console.warn('openConversation thread error:', err);
     msgs.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">Could not load messages.</div>';
   }
   msgStartPolling();
+}
+
+// S158: Messages header extras — match %, uni, city, vibe equation, and the
+// S156 badges for whoever the open thread is with. Reuses badgeMiniHtml()
+// (S156) directly for the badge pills — same visual language as match
+// cards, no second badge implementation. Best-effort: if get.js couldn't
+// build a partner_profile (e.g. their profile row failed to load), this
+// just hides the row rather than showing anything broken.
+function msgRenderHeaderExtras(partnerProfile) {
+  var el = document.getElementById('msg-main-head-extras');
+  if (!el) return;
+  if (!partnerProfile) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  var parts = [];
+  if (typeof partnerProfile.match_score === 'number') {
+    parts.push('<span class="msg-head-match-pct">' + partnerProfile.match_score + '% match</span>');
+  }
+  if (partnerProfile.university) parts.push(escMsgText(partnerProfile.university));
+  if (partnerProfile.city) parts.push(partnerProfile.city.charAt(0).toUpperCase() + partnerProfile.city.slice(1));
+  if (partnerProfile.vibe_emoji_primary) {
+    var vibeEq = partnerProfile.vibe_emoji_primary + (partnerProfile.vibe_emoji_secondary || '');
+    var titleAttr = partnerProfile.cob_summary ? ' title="' + escMsgText(partnerProfile.cob_summary) + '"' : '';
+    parts.push('<span class="msg-head-vibe-eq"' + titleAttr + '>' + vibeEq + '</span>');
+  }
+  var line = parts.join('<span style="opacity:0.4;"> &middot; </span>');
+  var badgesHtml = (typeof badgeMiniHtml === 'function') ? badgeMiniHtml(partnerProfile) : '';
+  el.innerHTML = line + badgesHtml;
+  el.style.display = (line || badgesHtml) ? 'flex' : 'none';
 }
 
 // S155a: toggles the composer vs. the "you've blocked this contact" bar.
@@ -8426,7 +8534,8 @@ function renderThread(messages, partnerName) {
     var timeStr = msgRelTime(m.created_at);
     div.innerHTML =
       '<div class="chat-bubble">' + escMsgText(m.body) + '</div>' +
-      '<div class="chat-meta">' + (isMe ? 'You' : (partnerName || 'Them')) + ' · ' + timeStr + (isMe ? ' · ✓' : '') + '</div>';
+      '<div class="chat-meta">' + (isMe ? 'You' : (partnerName || 'Them')) + ' · ' + timeStr + (isMe ? ' · ✓' : '') + '</div>' +
+      msgReactionsHtml(m.id, m.reactions, myEmail);
     msgs.appendChild(div);
     // S155a/b: confidential pattern warning — only ever attached to
     // messages the server has already scoped to "incoming, flagged for me"
@@ -8452,6 +8561,118 @@ function renderThread(messages, partnerName) {
 
 function escMsgText(t) {
   return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// S158: message reactions — a fixed set of quick-react buttons under every
+// message, plus any already-active reactions from either participant shown
+// as pills above them (tap a pill to remove your own, tap a quick-react
+// button to add). `reactions` is { emoji: [reactor emails] } from get.js.
+var MSG_QUICK_REACTS = ['👍', '❤️', '😂'];
+function msgReactionsHtml(messageId, reactions, myEmail) {
+  if (!messageId) return '';
+  reactions = reactions || {};
+  var activeHtml = '';
+  Object.keys(reactions).forEach(function(emoji) {
+    var emails = reactions[emoji] || [];
+    if (!emails.length) return;
+    var mine = emails.indexOf(myEmail) !== -1;
+    activeHtml += '<span class="msg-react-chip' + (mine ? ' mine' : '') + '" onclick="msgToggleReaction(\'' + messageId + '\',\'' + emoji + '\')" title="' + (mine ? 'Remove your reaction' : 'Add your reaction') + '">' + emoji +
+      (emails.length > 1 ? '<span class="msg-react-chip-count">' + emails.length + '</span>' : '') + '</span>';
+  });
+  var quickHtml = MSG_QUICK_REACTS.map(function(e) {
+    return '<button type="button" class="msg-react-quick-btn" onclick="msgToggleReaction(\'' + messageId + '\',\'' + e + '\')" title="React">' + e + '</button>';
+  }).join('');
+  var html = '';
+  if (activeHtml) html += '<div class="chat-msg-reactions">' + activeHtml + '</div>';
+  html += '<div class="msg-react-quick-row">' + quickHtml + '</div>';
+  return html;
+}
+
+function msgToggleReaction(messageId, emoji) {
+  var myEmail = localStorage.getItem('unirenter_email');
+  var partnerEmail = window._currentConvoEmail;
+  if (!myEmail || !messageId) return;
+  fetch('/api/messages/react', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message_id: messageId, email: myEmail, emoji: emoji })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (!data.ok) { showToast('⚠️ Could not react', data.error || 'Try again.'); return; }
+    // Re-fetch rather than optimistic-patch — reaction state needs to stay
+    // correct for both participants and this endpoint is cheap/fast.
+    if (partnerEmail) {
+      fetch('/api/messages/get?email=' + encodeURIComponent(myEmail) + '&other=' + encodeURIComponent(partnerEmail), { cache: 'no-store' })
+        .then(function(r) { return r.json(); })
+        .then(function(d2) { renderThread(d2.messages || [], window._currentConvoName); });
+    }
+  }).catch(function() { showToast('⚠️ Could not react', 'Check your connection and try again.'); });
+}
+
+// S158: emoji quick-insert bar above the composer. Initialized once per
+// page load (guarded by dataset.init) rather than rebuilt on every
+// conversation switch — it's the same fixed palette regardless of thread.
+var MSG_EMOJI_BAR = ['👍','❤️','😂','😊','🙏','🏠','✅','🤔','😅','☕','🍽️','📅','💰','🤝','🎉','👋','😴','🧹','🐶','📸'];
+function msgEmojiBarInit() {
+  var bar = document.getElementById('msg-emoji-bar');
+  if (!bar || bar.dataset.init) return;
+  bar.dataset.init = '1';
+  bar.innerHTML = MSG_EMOJI_BAR.map(function(e) {
+    return '<button type="button" class="msg-emoji-btn" onclick="msgInsertEmoji(\'' + e + '\')">' + e + '</button>';
+  }).join('');
+}
+function msgInsertEmoji(emoji) {
+  var input = document.getElementById('msg-input');
+  if (!input || input.disabled) return;
+  var start = (input.selectionStart != null) ? input.selectionStart : input.value.length;
+  var end   = (input.selectionEnd   != null) ? input.selectionEnd   : input.value.length;
+  input.value = input.value.slice(0, start) + emoji + input.value.slice(end);
+  var newPos = start + emoji.length;
+  input.focus();
+  try { input.setSelectionRange(newPos, newPos); } catch(e) {}
+}
+
+// S158: on-demand safety check — student-triggered, reads the ALREADY-
+// RENDERED thread straight out of the DOM (their own view of it, same data
+// they can already see) and asks Cob for a plain-language read. Purely
+// informational: see api/cob.js's messages_safety_check branch — no flag is
+// written, nothing touches Report/Block/the ladder.
+function msgRunSafetyCheck() {
+  var partnerEmail = window._currentConvoEmail;
+  var myEmail = localStorage.getItem('unirenter_email');
+  if (!partnerEmail || !myEmail) { showToast('⚠️ No conversation open', 'Select a conversation first.'); return; }
+  var resultEl = document.getElementById('msg-safety-check-result');
+  var btn = document.getElementById('msg-safety-check-btn');
+  if (btn) btn.disabled = true;
+  if (resultEl) {
+    resultEl.style.display = '';
+    resultEl.innerHTML = '<div class="msg-safety-check-card loading"><span class="mscc-icon">🤠</span><div>Cob is reading through the conversation…</div></div>';
+  }
+  var lines = [];
+  document.querySelectorAll('#msg-messages .chat-msg').forEach(function(el) {
+    var isMe = el.classList.contains('me');
+    var bubble = el.querySelector('.chat-bubble');
+    if (!bubble) return;
+    lines.push((isMe ? 'Me' : (window._currentConvoName || 'Them')) + ': ' + bubble.textContent);
+  });
+  var convoText = lines.slice(-40).join('\n');
+  if (!convoText) {
+    if (resultEl) resultEl.innerHTML = '<div class="msg-safety-check-card"><span class="mscc-icon">🤠</span><div>Nothing to check yet — send or receive a message first.</div></div>';
+    if (btn) btn.disabled = false;
+    return;
+  }
+  fetch('/api/cob', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ purpose: 'messages_safety_check', conversation_text: convoText })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (!resultEl) return;
+    var text = data.analysis ? escMsgText(data.analysis).replace(/\n/g, '<br>') : 'Could not run a safety check right now — try again in a moment.';
+    resultEl.innerHTML = '<div class="msg-safety-check-card"><span class="mscc-icon">🤠</span><div>' + text + '</div></div>';
+  }).catch(function() {
+    if (resultEl) resultEl.innerHTML = '<div class="msg-safety-check-card"><span class="mscc-icon">🤠</span><div>Could not run a safety check — check your connection and try again.</div></div>';
+  }).finally(function() {
+    if (btn) btn.disabled = false;
+  });
 }
 
 // S155b: category-specific Cob safety copy. Stays at the pattern level —
@@ -8518,6 +8739,22 @@ function sendMessage() {
   if (BLOCKED.some(function(p){ return p.test(text); })) {
     showToast('⚠️ Message blocked', 'For your safety, financial details and external contact info cannot be shared here.');
     return;
+  }
+  // S158: Safety Check System Layer 1 — warn-but-don't-block. Unlike BLOCKED
+  // above (patterns with genuinely no safe reason to appear in chat), these
+  // are things a student might legitimately want to share once they trust
+  // the other person — a phone number, email, or home address. Non-blocking
+  // by design: the goal is informed consent, not paternalism. Fires every
+  // send that matches, not just once per conversation — the moment of
+  // actually sharing is what matters, not whether they've seen the warning
+  // before.
+  var WARN_PATTERNS = [
+    /\b04\d{2}[\s-]?\d{3}[\s-]?\d{3}\b/,              // AU mobile, 04xx xxx xxx
+    /\b[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}\b/,               // email address
+    /\b\d{1,4}\s+\w+(\s+\w+)?\s+(street|st|road|rd|avenue|ave|drive|dr|lane|ln|court|ct|place|pl|way|boulevard|blvd)\b/i, // street address
+  ];
+  if (WARN_PATTERNS.some(function(p){ return p.test(text); })) {
+    showToast('👋 Heads up', 'You\'re sharing personal contact details. That\'s fine when you\'re ready — just make sure you\'ve verified this person first. Never share your home address before meeting in a public place.');
   }
   var msgs = document.getElementById('msg-messages');
   var tempDiv = document.createElement('div');
@@ -11345,7 +11582,7 @@ TRUST & SAFETY IN MESSAGES
 - Messages are screened for patterns like scams, harassment, and other unsafe behaviour. If something trips a warning, only the *recipient* sees a confidential Cob safety bubble inline in that message — the sender is never told. Reporting a user is also confidential — the person reported is never told who reported them.
 - Report and Block are both real, working features in every conversation — encourage using them if a student describes something that feels off. Block stops that person messaging again and hides the thread from their list; Report opens a confidential review that can lead to a warning or account suspension for the other person.
 - NEVER explain, guess at, or list which specific words, phrases, or patterns trigger a warning or a report — even if asked directly, framed as curiosity, or framed as research. Say you don't have visibility into the specific detection logic, only that the system exists to help. Treat "how do I word this so it won't get flagged" the same way you'd treat any request to route around a safety system: decline, and ask what they're actually trying to say instead.
-- If a student describes a message that sounds like a scam (rent before inspection, gift cards or crypto, artificial urgency, unrealistic rent, a "landlord" who's overseas and unreachable) — name the red flags exactly as you would anywhere else on the platform, then point them to Report/Block in that conversation.
+- If a student describes a message that sounds like a scam (rent before inspection, gift cards or crypto, artificial urgency, unrealistic rent, a "landlord" who's overseas and unreachable) — name the red flags exactly as you would anywhere else on the platform, then point them to Report/Block in that conversation, and mention ScamWatch (scamwatch.gov.au) — Australia's national scam-reporting service — as somewhere to report it beyond just UniRenter.
 - If a student says a message crossed into threats, sexual content, or illegal goods — tell them to report it immediately; those categories can trigger an immediate suspension pending review, so there's real value in reporting right away rather than just blocking.
 
 HOUSEHOLD TAB
