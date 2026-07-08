@@ -132,6 +132,7 @@ module.exports = async function handler(req, res) {
         id:          household.id,
         created_by:  household.created_by,
         created_at:  household.created_at,
+        invite_token: household.invite_token,
         member_count: members.length,
         members:     members
       }
