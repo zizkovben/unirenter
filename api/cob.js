@@ -57,7 +57,7 @@ ENDING A TENANCY EARLY:
 
 SCAM RED FLAGS: rent before inspection · suspiciously low rent · landlord overseas · gift cards/crypto payment · artificial urgency · no written lease
 
-ALWAYS: be state-specific · end scam answers with reporting advice · refer to Tenants Victoria (03 9416 2577), Tenants Union NSW (02 8117 3700), Tenants Queensland (1300 744 263)
+ALWAYS: be state-specific · end scam answers with reporting advice · refer to Tenants Victoria (03 9416 2577), Tenants Union NSW (02 8117 3700), Tenants Queensland (1300 744 263) · for scams specifically, also point to ScamWatch (scamwatch.gov.au) — Australia's national scam-reporting service, alongside reporting the person on UniRenter itself
 
 NEVER: recommend WhatsApp · discuss religious identity · use "legal advice/options/legally required" · tell Community members they cannot use UniRenter
 
@@ -394,6 +394,55 @@ module.exports = async function handler(req, res) {
     } catch (err) {
       console.error('Household vibe error:', err);
       return res.status(500).json({ error: 'Household vibe failed', detail: err.message });
+    }
+  }
+
+  // ── MESSAGES SAFETY CHECK BRANCH (S158) ───────────────────────────────────
+  // On-demand, student-triggered analysis of their own conversation — genuinely
+  // separate from the automatic S155a/b scam/harassment/etc detection that
+  // already runs on every send. That system is passive, confidential, and
+  // ties into Report/Block/the 3-strike ladder. This does none of that: no
+  // flag is written, no ladder stage moves, nothing is sent anywhere except
+  // back to the person who tapped the button. Purely "tell me what you see."
+  if (req.body && req.body.purpose === 'messages_safety_check') {
+    const convoText = req.body.conversation_text;
+    if (!convoText || typeof convoText !== 'string') {
+      return res.status(400).json({ error: 'conversation_text required for messages_safety_check' });
+    }
+    const safetyCheckSystem =
+      'You are Cob, UniRenter\'s Australian student housing assistant, doing an on-demand safety read of a ' +
+      'conversation a student is having with a housemate match. You are shown only the student\'s own copy of ' +
+      'the conversation, most recent messages last.\n\n' +
+      'Read it for the same rental-scam and unsafe-behaviour red flags you already watch for elsewhere: rent or ' +
+      'a deposit requested before an inspection, gift cards or crypto as payment, artificial urgency, a ' +
+      '"landlord" who is overseas or unreachable, requests for money before meeting in person, harassment, or ' +
+      'anything that pressures secrecy or isolation.\n\n' +
+      'Respond in Cob\'s voice — warm, direct, brief. If you see genuine red flags, name them specifically and ' +
+      'plainly, and recommend using Report or Block. If nothing stands out, say so in one or two sentences — do ' +
+      'not invent concern where there is none. Never claim certainty about someone\'s intent; describe patterns, ' +
+      'not verdicts. 2-4 sentences total. Do not give legal advice.';
+
+    try {
+      const scRes = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: anthropicHeaders,
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 300,
+          system: safetyCheckSystem,
+          messages: [{ role: 'user', content: 'Here is the conversation:\n\n' + convoText }]
+        })
+      });
+      if (!scRes.ok) {
+        const errData = await scRes.json().catch(() => ({}));
+        return res.status(scRes.status).json({ error: 'AI service error', detail: errData.error?.message || 'Unknown' });
+      }
+      const scData = await scRes.json();
+      const analysis = scData.content?.[0]?.text || '';
+      return res.status(200).json({ analysis: analysis.trim() });
+    } catch (err) {
+      console.error('Messages safety check error:', err);
+      return res.status(500).json({ error: 'Safety check failed', detail: err.message });
     }
   }
 
