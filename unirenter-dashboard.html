@@ -2942,6 +2942,41 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
   resize: none; min-height: 36px;
 }
 .hh-ag-clause-value:focus { outline: none; border-color: rgba(75,191,224,0.4); }
+/* S161: agreement clause → household calendar mini-form */
+.hh-ag-cal-btn {
+  background: none; border: none; color: var(--brand-blue); font-size: 11px;
+  font-weight: 600; cursor: pointer; padding: 2px 0; margin-top: 4px;
+  font-family: 'Inter', sans-serif;
+}
+.hh-ag-cal-btn:hover { text-decoration: underline; }
+.hh-ag-cal-form {
+  margin-top: 8px; padding: 10px 12px; background: rgba(75,191,224,0.05);
+  border: 1px solid rgba(75,191,224,0.15); border-radius: 8px;
+}
+.hh-ag-cal-mode-row { display: flex; gap: 6px; margin-bottom: 8px; }
+.hh-ag-cal-mode-btn {
+  background: rgba(255,255,255,0.04); border: 1px solid var(--navy-border);
+  border-radius: 20px; padding: 4px 12px; font-size: 11px; color: var(--text-muted);
+  cursor: pointer; font-family: 'Inter', sans-serif;
+}
+.hh-ag-cal-mode-btn.active { background: rgba(75,191,224,0.15); border-color: rgba(75,191,224,0.4); color: var(--brand-blue); }
+.hh-ag-cal-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.hh-ag-cal-row label { font-size: 11px; color: var(--text-muted); }
+.hh-ag-cal-date-input {
+  background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
+  padding: 5px 8px; font-size: 12px; color: var(--text-primary); font-family: 'Inter', sans-serif;
+}
+.hh-ag-cal-count-input {
+  width: 48px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px; padding: 5px 6px; font-size: 12px; color: var(--text-primary);
+  font-family: 'Inter', sans-serif; text-align: center;
+}
+.hh-ag-cal-submit-btn {
+  background: var(--brand-blue); color: #06222c; border: none; border-radius: 7px;
+  padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.hh-ag-cal-submit-btn:disabled { opacity: 0.6; cursor: default; }
 /* Tick row */
 .hh-ag-tick-row {
   display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;
@@ -15233,6 +15268,7 @@ function hhAgRenderClauses() {
             '<textarea class="hh-ag-clause-value" id="hh-ag-val-' + clause.id + '" placeholder="' + clause.placeholder + '" rows="2">' + hhEscape(val) + '</textarea>' +
           '</div>' +
           (memberCount > 1 ? '<div class="hh-ag-tick-row">' + tickChips + '</div>' : singleTickRow) +
+          hhAgCalWidgetHtml(clause.id, clause.title) +
         '</div>';
     });
   });
@@ -15242,6 +15278,151 @@ function hhAgRenderClauses() {
 
   document.getElementById('hh-ag-modal-body').innerHTML = html;
   hhAgUpdateLockBtn();
+}
+
+// S161: schedule any agreed clause straight onto the household calendar —
+// no parsing of the clause text involved (it's free-text, e.g. "bins out
+// Thursdays, whoever's turn it is"), the person nominates the actual day/
+// date and frequency themselves via this form. Available on every clause
+// that has content, not restricted to chore-shaped categories, per Ben's
+// call — a "quiet hours" or "rent due" clause is just as legitimately
+// schedulable as "bins". Posts straight through the existing household
+// feed (api/household/feed-add, unchanged) as Reminder-type items tagged
+// with the clause title — the feed's own accept-before-it-counts flow
+// applies exactly as it would to any other reminder, including for
+// whoever added it. Recurring dates reuse generateRecurringDates() (S152)
+// unchanged rather than a second implementation.
+window._hhAgCalState = {};
+var HH_AG_CAL_WEEKDAYS = [
+  { label: 'Mon', idx: 1 }, { label: 'Tue', idx: 2 }, { label: 'Wed', idx: 3 },
+  { label: 'Thu', idx: 4 }, { label: 'Fri', idx: 5 }, { label: 'Sat', idx: 6 }, { label: 'Sun', idx: 0 }
+];
+var HH_AG_CAL_MAX_OCCURRENCES = 26; // half a year of weekly — a per-clause chore doesn't need the personal calendar's 52-cap
+
+function hhAgCalWidgetHtml(clauseId, clauseTitle) {
+  // Only meaningful inside a real household (not the standalone/preview
+  // path, where there's no household_id to post a feed reminder against).
+  if (!_hhAgHouseholdId) return '';
+  var titleAttr = hhEscape(clauseTitle);
+  var weekdayChips = HH_AG_CAL_WEEKDAYS.map(function(d) {
+    return '<button type="button" class="qa-weekday-chip" onclick="hhAgCalToggleWeekday(\'' + clauseId + '\',' + d.idx + ',this)">' + d.label + '</button>';
+  }).join('');
+  return (
+    '<button type="button" class="hh-ag-cal-btn" onclick="hhAgCalToggle(\'' + clauseId + '\',\'' + titleAttr + '\')">📅 Add to household calendar</button>' +
+    '<div class="hh-ag-cal-form" id="hh-ag-cal-form-' + clauseId + '" style="display:none;">' +
+      '<div class="hh-ag-cal-mode-row">' +
+        '<button type="button" class="hh-ag-cal-mode-btn active" data-mode="once" onclick="hhAgCalSetMode(\'' + clauseId + '\',\'once\')">One-off</button>' +
+        '<button type="button" class="hh-ag-cal-mode-btn" data-mode="recurring" onclick="hhAgCalSetMode(\'' + clauseId + '\',\'recurring\')">Recurring</button>' +
+      '</div>' +
+      '<div id="hh-ag-cal-once-' + clauseId + '">' +
+        '<div class="hh-ag-cal-row"><label>Date</label><input type="date" class="hh-ag-cal-date-input" id="hh-ag-cal-date-' + clauseId + '"></div>' +
+      '</div>' +
+      '<div id="hh-ag-cal-recur-' + clauseId + '" style="display:none;">' +
+        '<div class="hh-ag-cal-row">' + weekdayChips + '</div>' +
+        '<div class="hh-ag-cal-row">' +
+          '<label>Starting</label><input type="date" class="hh-ag-cal-date-input" id="hh-ag-cal-start-' + clauseId + '">' +
+          '<label>For</label><input type="number" class="hh-ag-cal-count-input" id="hh-ag-cal-count-' + clauseId + '" value="8" min="1" max="' + HH_AG_CAL_MAX_OCCURRENCES + '"><label>times</label>' +
+        '</div>' +
+      '</div>' +
+      '<button type="button" class="hh-ag-cal-submit-btn" id="hh-ag-cal-submit-' + clauseId + '" onclick="hhAgCalSubmit(\'' + clauseId + '\',\'' + titleAttr + '\')">Add to calendar</button>' +
+    '</div>'
+  );
+}
+
+function hhAgCalToggle(clauseId, clauseTitle) {
+  var form = document.getElementById('hh-ag-cal-form-' + clauseId);
+  if (!form) return;
+  // Editing view has a live textarea to validate against; the locked view
+  // has no textarea at all (the button is only rendered there when the
+  // saved clause already has a value, so nothing to check).
+  var valEl = document.getElementById('hh-ag-val-' + clauseId);
+  if (valEl && !valEl.value.trim()) {
+    showToast('✏️ Add some detail first', 'Fill in this clause before scheduling it.');
+    return;
+  }
+  var open = form.style.display !== 'none';
+  form.style.display = open ? 'none' : 'block';
+  if (!open && !window._hhAgCalState[clauseId]) {
+    window._hhAgCalState[clauseId] = { mode: 'once', weekdays: [] };
+  }
+}
+
+function hhAgCalSetMode(clauseId, mode) {
+  if (!window._hhAgCalState[clauseId]) window._hhAgCalState[clauseId] = { mode: mode, weekdays: [] };
+  window._hhAgCalState[clauseId].mode = mode;
+  var form = document.getElementById('hh-ag-cal-form-' + clauseId);
+  if (!form) return;
+  form.querySelectorAll('.hh-ag-cal-mode-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+  var onceEl  = document.getElementById('hh-ag-cal-once-' + clauseId);
+  var recurEl = document.getElementById('hh-ag-cal-recur-' + clauseId);
+  if (onceEl)  onceEl.style.display  = (mode === 'once') ? '' : 'none';
+  if (recurEl) recurEl.style.display = (mode === 'recurring') ? '' : 'none';
+}
+
+function hhAgCalToggleWeekday(clauseId, dayIdx, chipEl) {
+  if (!window._hhAgCalState[clauseId]) window._hhAgCalState[clauseId] = { mode: 'recurring', weekdays: [] };
+  var st = window._hhAgCalState[clauseId];
+  var idx = st.weekdays.indexOf(dayIdx);
+  if (idx === -1) { st.weekdays.push(dayIdx); chipEl.classList.add('selected'); }
+  else { st.weekdays.splice(idx, 1); chipEl.classList.remove('selected'); }
+}
+
+function hhAgCalSubmit(clauseId, clauseTitle) {
+  var householdId = _hhAgHouseholdId;
+  var email = _hhAgEmail;
+  if (!householdId || !email) { showToast('⚠️ Could not schedule', 'No household found for this agreement.'); return; }
+
+  var st = window._hhAgCalState[clauseId] || { mode: 'once', weekdays: [] };
+  var btn = document.getElementById('hh-ag-cal-submit-' + clauseId);
+  var dates = [];
+
+  if (st.mode === 'once') {
+    var dateEl = document.getElementById('hh-ag-cal-date-' + clauseId);
+    var d = dateEl ? dateEl.value : '';
+    if (!d) { showToast('📅 Pick a date', 'Choose a date to add this to the calendar.'); return; }
+    dates = [d];
+  } else {
+    var startEl  = document.getElementById('hh-ag-cal-start-' + clauseId);
+    var countEl  = document.getElementById('hh-ag-cal-count-' + clauseId);
+    var startVal = startEl ? startEl.value : '';
+    var count = countEl ? Math.max(1, Math.min(HH_AG_CAL_MAX_OCCURRENCES, parseInt(countEl.value, 10) || 8)) : 8;
+    if (!startVal) { showToast('📅 Pick a start date', 'Choose when the first one should land.'); return; }
+    if (!st.weekdays.length) { showToast('📅 Pick a day', 'Choose at least one day of the week.'); return; }
+    dates = generateRecurringDates(startVal, st.weekdays, 'count', count);
+  }
+  if (!dates.length) { showToast('⚠️ Nothing to add', 'Check the date/day settings and try again.'); return; }
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Adding…'; }
+  var okCount = 0, failCount = 0;
+  var requests = dates.map(function(d) {
+    return fetch('/api/household/feed-add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ household_id: householdId, email: email, type: 'reminder', text: clauseTitle, event_date: d })
+    }).then(function(r) { return r.json(); }).then(function(res) {
+      if (res && res.ok) okCount++; else failCount++;
+    }).catch(function() { failCount++; });
+  });
+
+  Promise.all(requests).then(function() {
+    if (btn) { btn.disabled = false; btn.textContent = 'Add to calendar'; }
+    if (okCount > 0) {
+      var noun = okCount === 1 ? 'reminder' : 'reminders';
+      showToast('📅 Posted to household feed',
+        okCount + ' ' + noun + ' added' + (failCount ? ' (' + failCount + ' failed)' : '') +
+        ' — everyone, including you, needs to tap accept before it shows on the household calendar.');
+      var form = document.getElementById('hh-ag-cal-form-' + clauseId);
+      if (form) form.style.display = 'none';
+      // Refresh the feed/calendar if the household tab happens to already be open behind this modal
+      if (typeof householdFeedLoad === 'function' && window._hhFeedHouseholdId) {
+        householdFeedLoad(window._hhFeedHouseholdId, window._hhFeedEmail);
+      }
+    } else {
+      showToast('❌ Could not schedule', 'Check your connection and try again.');
+    }
+  });
 }
 
 function hhAgRenderLocked() {
@@ -15279,6 +15460,7 @@ function hhAgRenderLocked() {
             '<span class="hh-ag-clause-title">' + hhEscape(c.title) + '</span>' +
           '</div>' +
           (c.value ? '<div style="font-size:12px;color:var(--text-muted);margin-top:4px;padding-left:26px;">' + hhEscape(c.value) + '</div>' : '') +
+          (c.value ? hhAgCalWidgetHtml(c.id, c.title) : '') +
         '</div>';
     });
   });
