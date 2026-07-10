@@ -4,6 +4,7 @@
 // CommonJS
 
 const { createClient } = require('@supabase/supabase-js');
+const crypto = require('crypto');
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -48,12 +49,26 @@ module.exports = async function handler(req, res) {
     // Fetch household row
     const { data: household, error: hhErr } = await supabase
       .from('households')
-      .select('id, created_by, invite_token, created_at')
+      .select('id, created_by, invite_token, share_token, created_at')
       .eq('id', household_id)
       .single();
 
     if (hhErr || !household) {
       return res.status(404).json({ ok: false, error: 'Household not found.' });
+    }
+
+    // S160: lazily generate a household-level share token if this household
+    // predates the feature — same "get or create" pattern already used for
+    // invite_token in api/household/create.js. Sharing must never require a
+    // housemate agreement to exist first.
+    let shareToken = household.share_token;
+    if (!shareToken) {
+      shareToken = crypto.randomBytes(12).toString('base64url');
+      try {
+        await supabase.from('households').update({ share_token: shareToken }).eq('id', household_id);
+      } catch (tokenErr) {
+        console.warn('share_token backfill error (non-fatal):', tokenErr.message);
+      }
     }
 
     // Fetch members
@@ -74,7 +89,7 @@ module.exports = async function handler(req, res) {
     // Only pull the fields needed for compatibility display — no sensitive data
     const { data: profiles, error: profileErr } = await supabase
       .from('profiles')
-      .select('email, display_name, university, vibe_emoji_primary, vibe_emoji_secondary, cob_summary, sleep_schedule, cleanliness, guests, household_type, city')
+      .select('email, display_name, university, vibe_emoji_primary, vibe_emoji_secondary, cob_summary, sleep_schedule, cleanliness, guests, household_type, city, star_sign, generation, chinese_zodiac')
       .in('email', memberEmails);
 
     if (profileErr) {
@@ -118,6 +133,12 @@ module.exports = async function handler(req, res) {
         cleanliness:        p.cleanliness   || null,
         guests:             p.guests        || null,
         household_type:     p.household_type || null,
+        // S156 badges — restored here (were selected nowhere in this file
+        // despite being part of the shipped feature); display-only, never a
+        // compatibility factor, same as api/matches.js.
+        star_sign:          p.star_sign      || null,
+        generation:         p.generation     || null,
+        chinese_zodiac:     p.chinese_zodiac || null,
         lease_start:        l.lease_start   || null,
         lease_end:          l.lease_end     || null,
         lease_property:     l.property_description || null,
@@ -133,6 +154,7 @@ module.exports = async function handler(req, res) {
         created_by:  household.created_by,
         created_at:  household.created_at,
         invite_token: household.invite_token,
+        share_token: shareToken,
         member_count: members.length,
         members:     members
       }
