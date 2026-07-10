@@ -10877,13 +10877,13 @@ function calcRunIncrease(silent) {
 // covers the common misread-a-date/name case without the storage/privacy
 // cost of holding onto lease documents or other uploads.
 // Pilot: Lease Companion only, this session. To propagate to another feature
-// (Entry Condition Report, tenancy agreement/house rules, review mic input —
+// (Entry Condition Report, Housemate Agreement, review mic input —
 // all already keyed below), just call rpOpen()/rpShowAutoPrompt() from that
 // feature's own manual-link and error-handling code. No other changes needed.
 var RP_FEATURE_LABELS = {
   lease_companion_photo:  { label: 'Lease Companion — photo upload',  prompt: 'What date, name, or detail did Cob get wrong?' },
   entry_condition_report: { label: 'Entry Condition Report',          prompt: 'What did Cob get wrong in the report?' },
-  tenancy_agreement:      { label: 'Tenancy agreement / house rules', prompt: "What's incorrect in what Cob generated?" },
+  tenancy_agreement:      { label: 'Housemate Agreement',             prompt: "What's incorrect in what Cob generated?" },
   review_mic_input:       { label: 'Review — voice input',           prompt: 'What did you say vs. what got transcribed?' }
 };
 
@@ -11692,7 +11692,7 @@ MEDICARE & HEALTH
 UNIRENTER FEATURES — PROMOTE NATURALLY
 - Vibe matching: emoji-based personality system — helps find housemates you'll actually get along with, not just tolerate. If they haven't done their vibe quiz, nudge them
 - Lease transfer board: best way to find a room mid-semester or exit a lease without paying full break costs
-- Household Hub: once in a share house, use it to set up house rules, a shared agreement, and manage the housemate group
+- Household Hub: once in a share house, use it to set up a Housemate Agreement together and manage the group
 - Renter's Guide (/{city}/guide): full state-specific tenancy breakdown — point students here for rights questions
 - Getting Settled (/{city}/settled): life in their city as a student — banking, transport, community
 - Sleep modes: smart way to pause without losing matches — inspecting a place, exam crunch, sorted
@@ -13685,7 +13685,7 @@ function _origHouseholdRender(data, currentEmail) {
     agCard.style.display = 'block';
     // Update sub-text and load real state if household exists
     var agSub = agCard.querySelector('.hh-agreement-entry-sub');
-    if (agSub) agSub.textContent = 'Sort the house rules before someone needs to guess. Tap to start or review your agreement.';
+    if (agSub) agSub.textContent = 'Sort the details before someone needs to guess. Tap to start or review your agreement.';
     hhAgLoadEntryState(localStorage.getItem('ur_household_id'), currentEmail);
   }
 
@@ -14949,7 +14949,7 @@ function msgAgreementCardInit() {
   var badge = document.getElementById('msg-ag-badge');
   if (!householdId || !email) {
     if (badge) { badge.textContent = 'New'; badge.className = 'hh-agreement-entry-badge'; }
-    if (sub) sub.textContent = 'Sort out house rules, chores and bills upfront with a simple shared agreement — once you join a household.';
+    if (sub) sub.textContent = 'Sort out chores and bills upfront with a simple shared agreement — once you join a household.';
     return;
   }
   fetch('/api/household/agreement-get?email=' + encodeURIComponent(email) + '&household_id=' + encodeURIComponent(householdId))
@@ -14966,10 +14966,10 @@ function msgAgreementCardInit() {
 
     if (agreement.locked_at) {
       if (badge) { badge.textContent = '🔒 Locked'; badge.className = 'hh-agreement-entry-badge locked'; }
-      if (sub)   sub.textContent = 'Your house rules are locked and agreed by everyone — tap to review.';
+      if (sub)   sub.textContent = 'Your agreement is locked and agreed by everyone — tap to review.';
     } else {
       var tierNames = { 1: 'Quick Agreement', 2: 'Full Agreement', 3: 'Household Manual' };
-      var tierName = tierNames[agreement.tier] || 'House Rules';
+      var tierName = tierNames[agreement.tier] || 'Housemate Agreement';
       if (badge) { badge.textContent = tierName; badge.className = 'hh-agreement-entry-badge'; }
       if (sub)   sub.textContent = pct + '% of clauses ticked — tap to review.';
     }
@@ -15006,11 +15006,11 @@ function hhAgLoadEntryState(householdId, currentEmail) {
 
     if (agreement.locked_at) {
       if (badge) { badge.textContent = '🔒 Locked'; badge.className = 'hh-agreement-entry-badge locked'; }
-      if (sub)   sub.textContent = 'Your house rules are locked and agreed by everyone.';
+      if (sub)   sub.textContent = 'Your agreement is locked and agreed by everyone.';
       if (pwrap) pwrap.style.display = 'none';
     } else {
       var tierNames = { 1: 'Quick Agreement', 2: 'Full Agreement', 3: 'Household Manual' };
-      var tierName = tierNames[agreement.tier] || 'House Rules';
+      var tierName = tierNames[agreement.tier] || 'Housemate Agreement';
       if (badge) { badge.textContent = tierName; badge.className = 'hh-agreement-entry-badge'; }
       if (sub)   sub.textContent = pct + '% of clauses ticked — tap to review.';
       if (pwrap) pwrap.style.display = 'block';
@@ -15156,7 +15156,7 @@ function hhAgShowError(msg) {
   document.getElementById('hh-ag-modal-body').innerHTML =
     '<div style="text-align:center;padding:40px 20px;color:var(--brand-coral);font-size:13px;">' + msg + '</div>';
   document.getElementById('hh-ag-action-bar').style.display = 'none';
-  // S154: propagate Report a Problem to the tenancy agreement / house rules flow.
+  // S154: propagate Report a Problem to the Housemate Agreement flow.
   if (typeof rpShowAutoPrompt === 'function') rpShowAutoPrompt('tenancy_agreement', msg);
 }
 
@@ -15721,7 +15721,7 @@ function hhAgSave() {
 
 function hhAgLock() {
   if (!_hhAgAgreement) return;
-  if (!confirm('Lock the house rules? Everyone will receive a copy by email. You can still edit later if needed.')) return;
+  if (!confirm('Lock the agreement? Everyone will receive a copy by email. You can still edit later if needed.')) return;
 
   var lockBtn = document.getElementById('hh-ag-lock-btn');
   lockBtn.disabled = true;
@@ -16354,7 +16354,7 @@ function closeCardPreview() {
 <input type="file" id="lc-file-input" accept="image/*,application/pdf" style="display:none" onchange="lcHandleFile(this)">
 
 <!-- ── Household Agreement Modal (S52) ── -->
-<div id="hh-agreement-modal" role="dialog" aria-modal="true" aria-label="House rules agreement">
+<div id="hh-agreement-modal" role="dialog" aria-modal="true" aria-label="Housemate Agreement">
   <div class="hh-ag-modal-box" id="hh-ag-modal-box">
     <div class="hh-ag-modal-header">
       <button class="hh-ag-modal-back" id="hh-ag-back-btn" onclick="hhAgBack()" style="display:none;">← Back</button>
