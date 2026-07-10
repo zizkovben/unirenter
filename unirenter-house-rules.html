@@ -395,27 +395,41 @@
 
 <script>
 (function() {
-  // Extract token from URL: /house-rules/TOKEN
-  var token = window.location.pathname.split('/house-rules/')[1];
+  // S160: this page now serves two routes. /house-rules/:token is the
+  // original, agreement-keyed route (unchanged). /household-card/:token is
+  // new — keyed to the household itself via households.share_token, so a
+  // household can be shared whether or not an agreement exists yet.
+  // renderAgreement() below now accepts agreement === null and renders a
+  // members/vibe-only card in that case.
+  var isCardRoute = window.location.pathname.indexOf('/household-card/') === 0;
+  var token = isCardRoute
+    ? window.location.pathname.split('/household-card/')[1]
+    : window.location.pathname.split('/house-rules/')[1];
   if (!token) {
-    showError('No agreement found at this URL.');
+    showError(isCardRoute ? 'No household card found at this URL.' : 'No agreement found at this URL.');
     return;
   }
 
-  fetch('/api/household/agreement-view?token=' + encodeURIComponent(token))
+  var endpoint = isCardRoute
+    ? '/api/household/card-view?token=' + encodeURIComponent(token)
+    : '/api/household/agreement-view?token=' + encodeURIComponent(token);
+
+  fetch(endpoint)
   .then(function(r) {
     if (r.status === 404) return null;
     return r.json();
   })
   .then(function(d) {
     if (!d || !d.ok) {
-      showError('This housemate agreement link has expired or doesn\'t exist.');
+      showError(isCardRoute
+        ? 'This household card link has expired or doesn\'t exist.'
+        : 'This housemate agreement link has expired or doesn\'t exist.');
       return;
     }
-    renderAgreement(d.agreement, d.members || []);
+    renderAgreement(d.agreement || null, d.members || []);
   })
   .catch(function() {
-    showError('Could not load housemate agreement. Check your connection and try again.');
+    showError('Could not load this page. Check your connection and try again.');
   });
 
   var CAT_LABELS = {
@@ -534,7 +548,9 @@
       });
     });
 
-    document.title = 'Housemate Agreement — ' + tierName + ' — UniRenter';
+    document.title = agreement
+      ? ('Housemate Agreement — ' + tierName + ' — UniRenter')
+      : 'Household Card — UniRenter';
 
     document.getElementById('page-content').innerHTML =
       // Header
@@ -542,22 +558,24 @@
         '<div class="ag-header-top">' +
           '<span class="ag-header-icon">🏠</span>' +
           '<div>' +
-            '<div class="ag-header-title">' + escHtml(tierName) + '</div>' +
-            '<div class="ag-header-sub">Housemate agreement — agreed between tenants via UniRenter</div>' +
+            '<div class="ag-header-title">' + (agreement ? escHtml(tierName) : 'Household Card') + '</div>' +
+            '<div class="ag-header-sub">' + (agreement
+              ? 'Housemate agreement — agreed between tenants via UniRenter'
+              : 'Who lives here and how the house vibes — via UniRenter') + '</div>' +
           '</div>' +
         '</div>' +
-        (agreement.locked_at
+        (agreement && agreement.locked_at
           ? '<div class="ag-locked-badge">🔒 Locked · ' + escHtml(lockedDate) + '</div><br>'
           : '') +
         (membersHtml ? '<div class="ag-members-row">' + membersHtml + '</div>' : '') +
       '</div>' +
       // House vibe (if members have vibe data)
       (houseVibeHtml || '') +
-      // Disclaimer
-      '<div class="ag-disclaimer">' +
-        '<strong>Not legally binding.</strong> This works because everyone agreed to it — not because of anything written here. It\'s agreed between tenants as equals, not set by a landlord. If something\'s not working, talk to each other first.' +
-      '</div>' +
-      // Clauses
+      // Disclaimer — only meaningful when there's an actual agreement to disclaim
+      (agreement
+        ? '<div class="ag-disclaimer"><strong>Not legally binding.</strong> This works because everyone agreed to it — not because of anything written here. It\'s agreed between tenants as equals, not set by a landlord. If something\'s not working, talk to each other first.</div>'
+        : '') +
+      // Clauses (empty string if no agreement — clauseHtml is built from clauses = [])
       clauseHtml +
       // Share strip
       '<div class="ag-family-showcase">' +
@@ -565,7 +583,9 @@
           '<span class="ag-family-icon">👨\u200d👩\u200d👧</span>' +
           '<div>' +
             '<div class="ag-family-title">Share with family back home</div>' +
-            '<div class="ag-family-sub">Show parents and family who you\'re living with, what everyone agreed to, and how your household vibes compare — all in one link.</div>' +
+            '<div class="ag-family-sub">' + (agreement
+              ? 'Show parents and family who you\'re living with, what everyone agreed to, and how your household vibes compare — all in one link.'
+              : 'Show parents and family who you\'re living with and how your household vibes compare — all in one link.') + '</div>' +
           '</div>' +
         '</div>' +
         '<div class="ag-family-link-row">' +
@@ -575,7 +595,7 @@
         '</div>' +
         '<div class="ag-family-features">' +
           '<span class="ag-family-feat">🤠 Household vibe</span>' +
-          '<span class="ag-family-feat">📋 Agreed rules</span>' +
+          (agreement ? '<span class="ag-family-feat">📋 Agreed rules</span>' : '') +
           '<span class="ag-family-feat">👥 Who you live with</span>' +
         '</div>' +
       '</div>' +

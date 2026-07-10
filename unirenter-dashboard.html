@@ -13543,6 +13543,14 @@ function _origHouseholdRender(data, currentEmail) {
   if (inviteToken) localStorage.setItem('ur_household_invite_token', inviteToken);
   var inviteLink = inviteToken ? 'https://unirenter.com.au/dashboard?join=' + inviteToken : null;
 
+  // S160: household share token — same "server is the source of truth,
+  // localStorage is just a fallback" pattern as invite_token above. Used by
+  // householdShareCard() below, which no longer requires a locked agreement
+  // to exist before sharing is possible.
+  var shareToken = data.share_token || localStorage.getItem('ur_household_share_token');
+  if (shareToken) localStorage.setItem('ur_household_share_token', shareToken);
+  window._hhShareToken = shareToken;
+
   // Member chips HTML
   var chipsHtml = members.map(function(m) {
     var isYou = m.email === currentEmail;
@@ -13650,21 +13658,32 @@ function _origHouseholdRender(data, currentEmail) {
   householdFeedInit(data.id, currentEmail);
 }
 
+// S160: no longer gated on a locked housemate agreement — not every
+// household will have one, and sharing shouldn't be compulsory-agreement-
+// first. Always uses the household-level share token (window._hhShareToken,
+// set in _origHouseholdRender from api/household/get.js's response) via the
+// new /household-card/:token route. If a locked agreement exists for this
+// household, api/household/card-view.js includes it automatically and the
+// shared page shows both — same link either way, richer content once an
+// agreement exists, never a hard requirement to get a link at all.
 function householdShareCard() {
-  if (_hhAgAgreement && _hhAgAgreement.locked_at && _hhAgAgreement.share_token) {
-    var url = 'https://unirenter.com.au/house-rules/' + _hhAgAgreement.share_token;
-    navigator.clipboard.writeText(url).then(function() {
-      showToast('📋 Link copied!', 'Share with family or housemates — shows your vibe and agreed rules.');
-    }).catch(function() {
-      var ta = document.createElement('textarea');
-      ta.value = url; document.body.appendChild(ta); ta.select();
-      document.execCommand('copy'); document.body.removeChild(ta);
-      showToast('📋 Link copied!', 'Share with family or housemates.');
-    });
+  if (!window._hhShareToken) {
+    showToast('⚠️ Could not create share link', 'Try reloading the Household tab.');
     return;
   }
-  showToast('📋 Finish your agreement first', 'Lock a housemate agreement and your shareable household card generates automatically.');
-  hhAgOpenStandalone();
+  var url = 'https://unirenter.com.au/household-card/' + window._hhShareToken;
+  var hasLockedAgreement = !!(_hhAgAgreement && _hhAgAgreement.locked_at);
+  var msg = hasLockedAgreement
+    ? 'Share with family or housemates — shows your vibe and agreed rules.'
+    : 'Share with family or housemates — shows who lives here and your household vibe.';
+  navigator.clipboard.writeText(url).then(function() {
+    showToast('📋 Link copied!', msg);
+  }).catch(function() {
+    var ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('📋 Link copied!', msg);
+  });
 }
 
 function householdShowInvite() {
