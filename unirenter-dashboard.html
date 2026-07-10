@@ -8555,8 +8555,47 @@ function renderThread(messages, partnerName) {
       msgs.appendChild(warn);
     }
   });
+  msgMaybeShowMeetupTip(messages.length, msgs);
   msgs.scrollTop = msgs.scrollHeight;
   _msgLastCount = messages.length;
+}
+
+// S158: lightweight meetup safety tip — a much smaller alternative to the
+// "arrange to meet" mutual-unlock idea from the original Safety Check
+// brainstorm, which we deliberately decided not to build (a UI gate can't
+// stop free-text sharing, and it fights the platform's own "informed
+// consent, not paternalism" principle). Instead: once a real back-and-forth
+// conversation reaches a decent length, Cob surfaces one well-timed,
+// dismissible tip. Not a one-time-ever thing gated in localStorage before
+// insertion — renderThread() rebuilds the whole message list from scratch
+// on every poll, so this re-adds itself on every render for as long as the
+// threshold is met, right up until the student dismisses it (localStorage
+// flag from that point on suppresses it permanently for this conversation).
+var MEETUP_TIP_THRESHOLD = 15;
+function msgMaybeShowMeetupTip(messageCount, msgsEl) {
+  if (messageCount < MEETUP_TIP_THRESHOLD) return;
+  var partnerEmail = window._currentConvoEmail;
+  if (!partnerEmail) return;
+  var key = 'ur_meetup_tip_dismissed_' + partnerEmail;
+  if (localStorage.getItem(key) === '1') return;
+  var tip = document.createElement('div');
+  tip.className = 'chat-msg cob-nudge';
+  tip.id = 'msg-meetup-tip';
+  tip.innerHTML =
+    '<div class="cob-nudge-inner">' +
+      '<span class="cob-nudge-avatar">🤠</span>' +
+      '<div class="cob-nudge-body">' +
+        '<div class="cob-nudge-text">Looking good — if you\'re planning to swap numbers or meet up, just remember: never pay anything before you\'ve inspected the place in person.</div>' +
+        '<button class="cob-nudge-btn" onclick="msgDismissMeetupTip()">Got it 👍</button>' +
+      '</div>' +
+    '</div>';
+  msgsEl.appendChild(tip);
+}
+function msgDismissMeetupTip() {
+  var partnerEmail = window._currentConvoEmail;
+  if (partnerEmail) localStorage.setItem('ur_meetup_tip_dismissed_' + partnerEmail, '1');
+  var tip = document.getElementById('msg-meetup-tip');
+  if (tip) tip.remove();
 }
 
 function escMsgText(t) {
@@ -9288,6 +9327,31 @@ const CAT_META = {
 // Filter groups — stored in ur_cal_filters
 const ALL_FILTERS = ['housing','uni','public_holidays','work','other'];
 
+// ── S159: canonical local date-string helper ────────────────────────────────
+// Bug found this session: `someLocalDate.toISOString().split('T')[0]` was
+// used in 11 places across the calendar system to turn a Date object into a
+// "YYYY-MM-DD" string. toISOString() always converts to UTC first — and in
+// any timezone ahead of UTC (all of Australia, always, no exceptions for DST
+// direction), a local Date representing local midnight (or any local time
+// before roughly 10–11am, depending on the state's UTC offset) lands on the
+// *previous* UTC calendar day once converted. The date-of-month getters
+// (getDate/getDay/etc.) all correctly report the LOCAL day, so the two
+// numbers silently disagree — a Thursday-local Date object stringifies to
+// Wednesday's date. This is genuinely intermittent (it depends on what time
+// of day the code runs), which is exactly why it went unnoticed: past
+// 10–11am local it "worked", so most manual testing during the day wouldn't
+// have caught it. localDateStr() below reads the same local getters the rest
+// of the calendar code already uses for display (getFullYear/getMonth/
+// getDate), so the string always matches what's on screen. Every call site
+// that was building a calendar-day key from a local Date now goes through
+// this — see the S159 comments at each fixed call site.
+function localDateStr(d) {
+  var y = d.getFullYear();
+  var m = String(d.getMonth() + 1).padStart(2, '0');
+  var day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+}
+
 // ── Recurring entries (S152) ──────────────────────────────────────────────────
 // Deliberately NOT a recurrence-rule engine: generates N individual dated rows
 // up front (weekday-based, ending after a count or an end date). Each row is
@@ -9308,7 +9372,7 @@ function generateRecurringDates(startStr, weekdays, endMode, endValue) {
   let safety = 0;
   while (dates.length < targetCount && safety < 3660) { // ~10yr day-by-day cap, belt-and-braces
     if (endDate && cursor > endDate) break;
-    if (weekdays.includes(cursor.getDay())) dates.push(cursor.toISOString().split('T')[0]);
+    if (weekdays.includes(cursor.getDay())) dates.push(localDateStr(cursor)); // S159 fix
     cursor.setDate(cursor.getDate() + 1);
     safety++;
   }
@@ -9748,14 +9812,14 @@ function qaResolveDate() {
     // Next Sunday
     const d = new Date(now);
     d.setDate(d.getDate() + (7 - d.getDay()));
-    return d.toISOString().split('T')[0];
+    return localDateStr(d); // S159 fix
   }
   if (qaDateMode === 'next_week') {
     const d = new Date(now);
     d.setDate(d.getDate() + (14 - d.getDay()));
-    return d.toISOString().split('T')[0];
+    return localDateStr(d); // S159 fix
   }
-  return qaPickedDate || now.toISOString().split('T')[0];
+  return qaPickedDate || localDateStr(now); // S159 fix
 }
 
 async function qaSave() {
@@ -9883,7 +9947,7 @@ function qaSetReminder(yes) {
     if (idx > -1) {
       const d = new Date(items[idx].date);
       d.setDate(d.getDate() - 2);
-      items[idx].reminder_date = d.toISOString().split('T')[0];
+      items[idx].reminder_date = localDateStr(d); // S159 — standardized (wasn't actually broken here, see localDateStr's comment, but one convention throughout is safer)
       todoSave(items);
     }
     if (nudge) nudge.innerHTML = '<span style="font-size:20px;">🤠</span><span style="color:var(--text-muted);">Reminder set — I\'ll nudge you 2 days before.</span>';
@@ -9918,10 +9982,10 @@ function qaRefreshUpcomingPills() {
 
 function todoGroupItems(items) {
   const now = new Date();
-  const todayStr = now.toISOString().split('T')[0];
+  const todayStr = localDateStr(now); // S159 fix — was toISOString(), see comment on localDateStr()
   const endOfWeekDate = new Date(now);
   endOfWeekDate.setDate(endOfWeekDate.getDate() + (7 - endOfWeekDate.getDay()));
-  const endOfWeekStr = endOfWeekDate.toISOString().split('T')[0];
+  const endOfWeekStr = localDateStr(endOfWeekDate); // S159 fix
 
   const overdue   = items.filter(i => i.status === 'pending' && i.date < todayStr);
   const thisWeek  = items.filter(i => i.status === 'pending' && i.date >= todayStr && i.date <= endOfWeekStr);
@@ -10174,7 +10238,7 @@ function calRenderWeekStrip() {
   // Build day cells
   const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   stripEl.innerHTML = days.map(d => {
-    const dateStr = d.toISOString().split('T')[0];
+    const dateStr = localDateStr(d); // S159 fix
     const dayEvs = events.filter(ev => ev.date === dateStr);
     const isToday = (d.getTime() === now.getTime());
     let cls = 'cal-week-day';
@@ -10189,7 +10253,7 @@ function calRenderWeekStrip() {
   }).join('');
 
   // Events for the next 7 days
-  const weekDateStrs = new Set(days.map(d => d.toISOString().split('T')[0]));
+  const weekDateStrs = new Set(days.map(d => localDateStr(d))); // S159 fix
   const weekEvs = events.filter(ev => weekDateStrs.has(ev.date))
     .sort((a,b) => a.date.localeCompare(b.date));
 
@@ -10226,7 +10290,7 @@ function calRenderWeekly() {
   for (let i = 0; i < 7; i++) {
     const d = new Date(ws);
     d.setDate(ws.getDate() + i);
-    const dateStr = d.toISOString().split('T')[0];
+    const dateStr = localDateStr(d); // S159 fix — root cause of the Thu/Fri mismatch (see localDateStr comment)
     const isToday = d.getTime() === now.getTime();
     const dayEvs = events.filter(ev => ev.date === dateStr);
     const colClass = 'cal-weekly-col' + (isToday ? ' wcol-today' : '');
@@ -11099,8 +11163,8 @@ function tier1CheckDates() {
     const events = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]');
     const now = new Date();
     const in7 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const nowStr = now.toISOString().slice(0,10);
-    const in7Str = in7.toISOString().slice(0,10);
+    const nowStr = localDateStr(now); // S159 fix — was toISOString().slice(0,10)
+    const in7Str = localDateStr(in7); // S159 fix
 
     const upcoming = events.filter(e => {
       if (!e.date) return false;
@@ -11136,8 +11200,8 @@ function tier2CheckDates() {
     const events = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]');
     const now = new Date();
     const in14 = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
-    const nowStr = now.toISOString().slice(0,10);
-    const in14Str = in14.toISOString().slice(0,10);
+    const nowStr = localDateStr(now); // S159 fix — was toISOString().slice(0,10)
+    const in14Str = localDateStr(in14); // S159 fix
 
     const upcoming = events
       .filter(e => e.date && e.date >= nowStr && e.date <= in14Str)
@@ -12954,9 +13018,9 @@ async function sendEmailReminders() {
 
   const events = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]');
   const now    = new Date();
-  const nowStr = now.toISOString().slice(0,10);
+  const nowStr = localDateStr(now); // S159 fix — was toISOString().slice(0,10)
   const in3    = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-  const in3Str = in3.toISOString().slice(0,10);
+  const in3Str = localDateStr(in3); // S159 fix
 
   const remindable = events.filter(function(e) {
     if (!e.date || e.date < nowStr || e.date > in3Str) return false;
@@ -13006,8 +13070,8 @@ function checkWelfare() {
   const events   = JSON.parse(localStorage.getItem('ur_calendar_events') || '[]');
   const now      = new Date();
   const in14     = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
-  const nowStr   = now.toISOString().slice(0,10);
-  const in14Str  = in14.toISOString().slice(0,10);
+  const nowStr   = localDateStr(now); // S159 fix — was toISOString().slice(0,10)
+  const in14Str  = localDateStr(in14); // S159 fix
 
   const upcoming = events.filter(function(e) {
     return e.date && e.date >= nowStr && e.date <= in14Str;
@@ -14034,9 +14098,45 @@ function householdTimelineHtml(members) {
 function householdCalendarInit(members) {
   window._hhCalMembers = members || [];
   window._hhCalActiveView = 'list';
+  hhCalResetToToday();
   var wrap = document.getElementById('household-calendar-wrap');
   if (!wrap) return;
   wrap.innerHTML = householdCalendarSkeletonHtml();
+}
+
+// S159: household Weekly/Monthly nav state — deliberately mirrors the
+// personal calendar's own calWeekStart/calViewYear/calViewMonth pattern
+// (see calChangeWeek/calChangeMonth/calToday) rather than inventing a
+// second convention. Reset to "today" every time the household section
+// re-initializes (same moment the active view itself resets to List),
+// so re-opening Household always starts from the current week/month.
+window._hhCalWeekStart = null;
+window._hhCalViewYear = null;
+window._hhCalViewMonth = null;
+function hhCalResetToToday() {
+  var now = new Date(); now.setHours(0, 0, 0, 0);
+  var dow = (now.getDay() + 6) % 7; // Mon=0
+  var ws = new Date(now); ws.setDate(now.getDate() - dow);
+  window._hhCalWeekStart = ws;
+  window._hhCalViewYear = now.getFullYear();
+  window._hhCalViewMonth = now.getMonth();
+}
+function hhCalToday() {
+  hhCalResetToToday();
+  if (window._hhCalActiveView === 'weekly') householdCalendarRenderWeekly();
+  if (window._hhCalActiveView === 'monthly') householdCalendarRenderMonthly();
+}
+function hhCalChangeWeek(delta) {
+  if (!window._hhCalWeekStart) hhCalResetToToday();
+  window._hhCalWeekStart.setDate(window._hhCalWeekStart.getDate() + delta * 7);
+  householdCalendarRenderWeekly();
+}
+function hhCalChangeMonth(delta) {
+  if (window._hhCalViewYear == null) hhCalResetToToday();
+  window._hhCalViewMonth += delta;
+  if (window._hhCalViewMonth > 11) { window._hhCalViewMonth = 0; window._hhCalViewYear++; }
+  if (window._hhCalViewMonth < 0)  { window._hhCalViewMonth = 11; window._hhCalViewYear--; }
+  householdCalendarRenderMonthly();
 }
 
 function householdCalendarSkeletonHtml() {
@@ -14047,17 +14147,31 @@ function householdCalendarSkeletonHtml() {
     '</button>' +
     '<div class="household-calendar-caption">Lease dates and the notes, todos and reminders you\'ve accepted — never a raw merge of anyone\'s personal calendar.</div>' +
     '<div id="household-calendar-content">' +
-      '<div class="cal-view-toggles" id="hh-cal-view-toggles" style="margin:8px 0;">' +
-        '<button class="cal-view-btn active" id="hh-cal-vbtn-list" onclick="hhCalSetView(\'list\')">List</button>' +
-        '<button class="cal-view-btn" id="hh-cal-vbtn-weekly" onclick="hhCalSetView(\'weekly\')">Weekly</button>' +
-        '<button class="cal-view-btn" id="hh-cal-vbtn-monthly" onclick="hhCalSetView(\'monthly\')">Monthly</button>' +
+      '<div class="cal-view-toggles" id="hh-cal-view-toggles" style="margin:8px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">' +
+        '<div style="display:flex;gap:6px;">' +
+          '<button class="cal-view-btn active" id="hh-cal-vbtn-list" onclick="hhCalSetView(\'list\')">List</button>' +
+          '<button class="cal-view-btn" id="hh-cal-vbtn-weekly" onclick="hhCalSetView(\'weekly\')">Weekly</button>' +
+          '<button class="cal-view-btn" id="hh-cal-vbtn-monthly" onclick="hhCalSetView(\'monthly\')">Monthly</button>' +
+        '</div>' +
+        '<button class="section-action" id="hh-cal-today-btn" onclick="hhCalToday()">Today</button>' +
       '</div>' +
       '<div id="household-calendar-body" class="household-calendar-body">' +
         '<div class="household-calendar-empty">Loading…</div>' +
       '</div>' +
-      '<div id="household-calendar-weekly-grid" class="cal-weekly-grid" style="display:none;"></div>' +
+      '<div id="household-calendar-weekly-grid-wrap" style="display:none;">' +
+        '<div class="cal-nav-row" style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 6px;">' +
+          '<button class="cal-nav-btn" onclick="hhCalChangeWeek(-1)">&#8249;</button>' +
+          '<div class="cal-month-label" id="hh-cal-week-label"></div>' +
+          '<button class="cal-nav-btn" onclick="hhCalChangeWeek(1)">&#8250;</button>' +
+        '</div>' +
+        '<div id="household-calendar-weekly-grid" class="cal-weekly-grid"></div>' +
+      '</div>' +
       '<div id="household-calendar-monthly-wrap" style="display:none;">' +
-        '<div id="household-calendar-monthly-label" style="font-size:12px;font-weight:700;color:var(--text);margin:4px 0 6px;text-align:center;"></div>' +
+        '<div class="cal-nav-row" style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 6px;">' +
+          '<button class="cal-nav-btn" onclick="hhCalChangeMonth(-1)">&#8249;</button>' +
+          '<div class="cal-month-label" id="household-calendar-monthly-label"></div>' +
+          '<button class="cal-nav-btn" onclick="hhCalChangeMonth(1)">&#8250;</button>' +
+        '</div>' +
         '<div id="household-calendar-monthly-grid" class="cal-grid"></div>' +
       '</div>' +
     '</div>' +
@@ -14082,7 +14196,7 @@ window._hhCalActiveView = 'list';
 function hhCalSetView(view) {
   window._hhCalActiveView = view;
   var listBody    = document.getElementById('household-calendar-body');
-  var weeklyBody  = document.getElementById('household-calendar-weekly-grid');
+  var weeklyWrap  = document.getElementById('household-calendar-weekly-grid-wrap');
   var monthlyWrap = document.getElementById('household-calendar-monthly-wrap');
   var lbtn = document.getElementById('hh-cal-vbtn-list');
   var wbtn = document.getElementById('hh-cal-vbtn-weekly');
@@ -14091,7 +14205,7 @@ function hhCalSetView(view) {
   if (wbtn) wbtn.classList.toggle('active', view === 'weekly');
   if (mbtn) mbtn.classList.toggle('active', view === 'monthly');
   if (listBody)    listBody.style.display    = (view === 'list')    ? 'flex' : 'none';
-  if (weeklyBody)  weeklyBody.style.display  = (view === 'weekly')  ? ''     : 'none';
+  if (weeklyWrap)  weeklyWrap.style.display  = (view === 'weekly')  ? ''     : 'none';
   if (monthlyWrap) monthlyWrap.style.display = (view === 'monthly') ? ''     : 'none';
   if (view === 'weekly')  householdCalendarRenderWeekly();
   if (view === 'monthly') householdCalendarRenderMonthly();
@@ -14165,26 +14279,47 @@ function householdCalendarEventHtml(e) {
   '</div>';
 }
 
-// S157: household Weekly grid — a 7-column view of the current week
-// (Mon–Sun), same source data as the List view (householdCalendarBuildEvents:
-// lease dates + accepted feed items). Reuses the personal calendar's
-// .cal-weekly-* CSS classes as-is (they're generic, not scoped to that
-// view) so this needed zero new CSS. No prev/next navigation yet — always
-// shows the current week, matching the List view's own lack of date
-// navigation. Click behavior mirrors the List view exactly: feed-sourced
-// items (the ones with a feedId) jump to the matching personal To Do via
+// S157/S159: household Weekly grid — a 7-column view, now navigable via
+// hhCalChangeWeek()/hhCalToday() (window._hhCalWeekStart) instead of
+// always showing the current week. Same source data as the List view
+// (householdCalendarBuildEvents: lease dates + accepted feed items).
+// Reuses the personal calendar's .cal-weekly-* CSS classes as-is (they're
+// generic, not scoped to that view) so this needed zero new CSS. Click
+// behavior mirrors the List view exactly: feed-sourced items (the ones
+// with a feedId) jump to the matching personal To Do via
 // hhGoToPersonalTodo — same function, same destination, no new pattern.
 // Lease-date chips stay non-clickable, same reasoning as the List view.
+//
+// BUGFIX S159: this function previously never reached its own closing
+// brace — the `grid.innerHTML = html;` + `}` that belonged here had been
+// accidentally left off, so householdCalendarRenderMonthly() (originally
+// written directly underneath) ended up nested *inside* this function
+// instead of standing as its own top-level function. That made
+// householdCalendarRenderMonthly undefined in the global scope hhCalSetView
+// calls it from — clicking "Monthly" threw a silent ReferenceError (visible
+// only in the browser console) right after the button's own active-state
+// styling had already applied, which is why it looked like the button
+// "worked" but nothing ever rendered underneath it. node --check could not
+// have caught this: a function nested inside another function is
+// syntactically valid JS, just wrong at the scope level — a reminder that
+// syntax validation alone doesn't prove a set of sibling functions are
+// actually siblings.
 function householdCalendarRenderWeekly() {
   var grid = document.getElementById('household-calendar-weekly-grid');
   if (!grid) return;
+  if (!window._hhCalWeekStart) hhCalResetToToday();
   var members = window._hhCalMembers || [];
   var feedItems = window._hhCalFeedItems || [];
   var events = householdCalendarBuildEvents(members, feedItems);
 
   var now = new Date(); now.setHours(0, 0, 0, 0);
-  var dow = (now.getDay() + 6) % 7; // Mon=0
-  var weekStart = new Date(now); weekStart.setDate(now.getDate() - dow);
+  var weekStart = new Date(window._hhCalWeekStart);
+  var weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6);
+  var labelEl = document.getElementById('hh-cal-week-label');
+  if (labelEl) {
+    labelEl.textContent = weekStart.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }) +
+      ' – ' + weekEnd.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
 
   var DOWS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   var COLOR_MAP = { lease: 'yellow', note: 'blue', todo: 'green', reminder: 'coral' };
@@ -14192,7 +14327,7 @@ function householdCalendarRenderWeekly() {
   var html = '';
   for (var i = 0; i < 7; i++) {
     var d = new Date(weekStart); d.setDate(weekStart.getDate() + i);
-    var dateStr = d.toISOString().split('T')[0];
+    var dateStr = localDateStr(d); // S159 fix — same bug as personal calendar, copied in when this was built
     var isToday = d.getTime() === now.getTime();
     var dayEvs = events.filter(function(ev) { return ev.date === dateStr; });
     var colClass = 'cal-weekly-col' + (isToday ? ' wcol-today' : '');
@@ -14207,28 +14342,32 @@ function householdCalendarRenderWeekly() {
     }).join('');
     html += '<div class="' + colClass + '"><div class="cal-weekly-col-head"><div class="wcol-dow">' + DOWS[i] + '</div><div class="' + numClass + '">' + d.getDate() + '</div></div><div class="cal-weekly-events">' + evsHtml + '</div></div>';
   }
-// S158: household Monthly grid — third view alongside List/Weekly. Same
-// source data (householdCalendarBuildEvents), same reuse-existing-CSS
+  grid.innerHTML = html;
+}
+
+// S157/S159: household Monthly grid — third view alongside List/Weekly.
+// Now navigable via hhCalChangeMonth()/hhCalToday() (window._hhCalViewYear/
+// window._hhCalViewMonth) instead of always showing the current month.
+// Same source data (householdCalendarBuildEvents), same reuse-existing-CSS
 // approach as the Weekly grid: borrows .cal-grid/.cal-dow/.cal-day/
 // .cal-day-chip/cc-* straight from the personal calendar's Monthly view,
-// so no new CSS was needed here either. Always shows the current month,
-// no prev/next navigation — consistent with the Weekly grid's own lack
-// of navigation (flag it if you want month-to-month browsing later).
-// Click behavior: same direct hhGoToPersonalTodo() jump as List/Weekly,
-// not the popover pattern the personal calendar's Monthly view uses —
-// staying consistent with the "extend the existing pattern" call made
-// for the Weekly grid rather than introducing a second interaction style.
+// so no new CSS was needed here either. Click behavior: same direct
+// hhGoToPersonalTodo() jump as List/Weekly, not the popover pattern the
+// personal calendar's Monthly view uses — staying consistent with the
+// "extend the existing pattern" call made for the Weekly grid rather than
+// introducing a second interaction style.
 function householdCalendarRenderMonthly() {
   var gridEl = document.getElementById('household-calendar-monthly-grid');
   var labelEl = document.getElementById('household-calendar-monthly-label');
   if (!gridEl) return;
+  if (window._hhCalViewYear == null) hhCalResetToToday();
   var members = window._hhCalMembers || [];
   var feedItems = window._hhCalFeedItems || [];
   var events = householdCalendarBuildEvents(members, feedItems);
 
   var now = new Date();
-  var viewYear = now.getFullYear();
-  var viewMonth = now.getMonth();
+  var viewYear = window._hhCalViewYear;
+  var viewMonth = window._hhCalViewMonth;
   if (labelEl) labelEl.textContent = new Date(viewYear, viewMonth, 1).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
 
   var COLOR_MAP = { lease: 'cc-yellow', note: 'cc-blue', todo: 'cc-green', reminder: 'cc-coral' };
@@ -14292,9 +14431,6 @@ function householdCalendarRenderMonthly() {
     html += '<div class="cal-day other-month"><span class="cal-day-num">' + d2 + '</span></div>';
   }
   gridEl.innerHTML = html;
-}
-
-  grid.innerHTML = html;
 }
 
 // S152: jump from an accepted household item straight to the matching entry
