@@ -252,6 +252,10 @@
       "destination": "/unirenter-house-rules.html"
     },
     {
+      "source": "/household-card/:token",
+      "destination": "/unirenter-house-rules.html"
+    },
+    {
       "source": "/listing/:token",
       "destination": "/unirenter-listing.html"
     }
