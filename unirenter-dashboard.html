@@ -15433,7 +15433,7 @@ function hhAgRenderLocked() {
   document.getElementById('hh-ag-action-bar').style.display = 'none';
   document.getElementById('hh-ag-progress-note').textContent = '';
 
-  var shareUrl = 'https://unirenter.com.au/house-rules/' + agreement.share_token;
+  var shareUrl = 'https://unirenter.com.au/agreement/' + agreement.share_token;
   var lockedDate = agreement.locked_at ? new Date(agreement.locked_at).toLocaleDateString('en-AU', { day:'numeric', month:'long', year:'numeric' }) : '';
 
   var catLabels = {

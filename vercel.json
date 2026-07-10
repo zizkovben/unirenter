@@ -248,12 +248,12 @@
       "destination": "/unirenter-vibe.html"
     },
     {
-      "source": "/house-rules/:token",
-      "destination": "/unirenter-house-rules.html"
+      "source": "/agreement/:token",
+      "destination": "/unirenter-housemate-agreement.html"
     },
     {
       "source": "/household-card/:token",
-      "destination": "/unirenter-house-rules.html"
+      "destination": "/unirenter-housemate-agreement.html"
     },
     {
       "source": "/listing/:token",
