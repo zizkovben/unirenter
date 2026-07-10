@@ -697,6 +697,12 @@ body.light-mode {
 }
 .cal-day.has-event { cursor: pointer; }
 .cal-day.has-event:hover { background: rgba(75,191,224,0.1); }
+/* S160: click-any-day-to-add affordance — applies to every real day cell
+   (Monthly) and every day column (Weekly), not just ones with existing
+   events. Event chips inside stop propagation (calChipClick), so this
+   only fires when the click lands on the cell background itself. */
+.cal-day-addable { cursor: pointer; }
+.cal-day-addable:hover { background: rgba(75,191,224,0.08); }
 .cal-day-dot {
   position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
   width: 5px; height: 5px; border-radius: 50%;
@@ -9756,6 +9762,31 @@ function qaDatePicked() {
   qaCheckCanSave();
 }
 
+// S160: click any day cell (Weekly or Monthly grid) to add a new event dated
+// to that day — regardless of whether the day already has events on it, per
+// Ben's explicit ask. Reuses the existing Quick Add panel rather than a
+// second add-event UI: opens it, then overrides the date selection straight
+// to "Pick date…" pre-filled with the clicked day, so the person lands on
+// an already-correctly-dated form instead of having to re-select the date
+// themselves. Adding always appends a new item — todoGetAll()/todoSave()
+// are already a plain array with no per-day cap, so a day can carry as many
+// events as needed; the Monthly view's existing MAX_CHIPS/"+N" overflow
+// chip is what keeps a busy day from breaking the layout, not a limit on
+// how many events a day can actually hold.
+function calDayClick(dateStr) {
+  qaOpen();
+  qaDateMode = 'pick';
+  qaPickedDate = dateStr;
+  document.querySelectorAll('#qa-date-row .qa-date-chip').forEach(c => c.classList.toggle('selected', c.dataset.date === 'pick'));
+  const dp = document.getElementById('qa-date-picker');
+  if (dp) { dp.classList.add('visible'); dp.value = dateStr; }
+  qaCheckCanSave();
+  const panel = document.getElementById('qa-expanded');
+  if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const ti = document.getElementById('qa-title-input');
+  if (ti) ti.focus();
+}
+
 // ── Recurring entries (S152) ──────────────────────────────────────────────────
 function qaToggleRecurring(checked) {
   qaIsRecurring = checked;
@@ -10241,7 +10272,7 @@ function calRenderWeekStrip() {
     const dateStr = localDateStr(d); // S159 fix
     const dayEvs = events.filter(ev => ev.date === dateStr);
     const isToday = (d.getTime() === now.getTime());
-    let cls = 'cal-week-day';
+    let cls = 'cal-week-day cal-day-addable';
     if (isToday) cls += ' wday-today';
     if (dayEvs.length) cls += ' wday-has-event';
     const dotsHtml = dayEvs.slice(0,3).map(ev => {
@@ -10249,7 +10280,7 @@ function calRenderWeekStrip() {
       const dotColor = { yellow:'#F5B800', coral:'#E8623A', blue:'#4BBFE0', green:'#3DAA5C' }[meta.color] || '#7a96aa';
       return '<span class="wday-dot" style="background:' + dotColor + ';border-radius:3px;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;">' + meta.icon + '</span>';
     }).join('');
-    return '<div class="' + cls + '"><span class="wday-name">' + DAYS[d.getDay()] + '</span><span class="wday-num">' + d.getDate() + '</span><div class="wday-dots">' + dotsHtml + '</div></div>';
+    return '<div class="' + cls + '" onclick="calDayClick(\'' + dateStr + '\')" title="Add an event on this day"><span class="wday-name">' + DAYS[d.getDay()] + '</span><span class="wday-num">' + d.getDate() + '</span><div class="wday-dots">' + dotsHtml + '</div></div>';
   }).join('');
 
   // Events for the next 7 days
@@ -10293,14 +10324,14 @@ function calRenderWeekly() {
     const dateStr = localDateStr(d); // S159 fix — root cause of the Thu/Fri mismatch (see localDateStr comment)
     const isToday = d.getTime() === now.getTime();
     const dayEvs = events.filter(ev => ev.date === dateStr);
-    const colClass = 'cal-weekly-col' + (isToday ? ' wcol-today' : '');
+    const colClass = 'cal-weekly-col cal-day-addable' + (isToday ? ' wcol-today' : '');
     const numClass = 'wcol-num' + (isToday ? ' today' : '');
     const evsHtml = dayEvs.map(ev => {
       const meta = CAT_META[ev.cat] || CAT_META.other;
       var wEvData = JSON.stringify({ title: ev.title || ev.name || '', icon: meta.icon, color: meta.color, cat: ev.cat, date: ev.date, source: ev.source || '', id: ev.id || '' }).replace(/"/g, '&quot;');
       return '<div class="cal-weekly-ev cat-' + meta.color + ' cal-chip-clickable" data-ev="' + wEvData + '" onclick="calChipClick(this,event)" role="button" tabindex="0" title="' + (ev.title || ev.name || '').replace(/"/g,'') + '">' + meta.icon + ' ' + (ev.title || ev.name || '') + '</div>';
     }).join('');
-    html += '<div class="' + colClass + '"><div class="cal-weekly-col-head"><div class="wcol-dow">' + DOWS[i] + '</div><div class="' + numClass + '">' + d.getDate() + '</div></div><div class="cal-weekly-events">' + evsHtml + '</div></div>';
+    html += '<div class="' + colClass + '" onclick="calDayClick(\'' + dateStr + '\')" title="Add an event on this day"><div class="cal-weekly-col-head"><div class="wcol-dow">' + DOWS[i] + '</div><div class="' + numClass + '">' + d.getDate() + '</div></div><div class="cal-weekly-events">' + evsHtml + '</div></div>';
   }
   grid.innerHTML = html;
 }
@@ -10332,13 +10363,18 @@ function calRenderMonthly() {
   const daysInPrev  = new Date(calViewYear, calViewMonth, 0).getDate();
 
   let html = dows.map(d => '<div class="cal-dow">' + d + '</div>').join('');
+  const prevMonthDate = new Date(calViewYear, calViewMonth, 0); // last day of prev month, for correct year/month on padding cells
+  const prevY = prevMonthDate.getFullYear(), prevM = prevMonthDate.getMonth();
   for (let i = startDow - 1; i >= 0; i--) {
-    html += '<div class="cal-day other-month"><span class="cal-day-num">' + (daysInPrev - i) + '</span></div>';
+    const dNum = daysInPrev - i;
+    const padDateStr = prevY + '-' + String(prevM + 1).padStart(2,'0') + '-' + String(dNum).padStart(2,'0');
+    html += '<div class="cal-day other-month" onclick="calDayClick(\'' + padDateStr + '\')"><span class="cal-day-num">' + dNum + '</span></div>';
   }
   for (let d = 1; d <= daysInMonth; d++) {
     const isToday = (d === now.getDate() && calViewMonth === now.getMonth() && calViewYear === now.getFullYear());
     const dayEvs  = evsByDay[d] || [];
-    let cls = 'cal-day';
+    const cellDateStr = calViewYear + '-' + String(calViewMonth + 1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    let cls = 'cal-day cal-day-addable';
     if (isToday)         cls += ' today';
     if (dayEvs.length)   cls += ' has-event';
     // Build chip strip — max 2 chips, +N overflow chip
@@ -10361,12 +10397,15 @@ function calRenderMonthly() {
       }
       chipsHtml += '</div>';
     }
-    html += '<div class="' + cls + '"><span class="cal-day-num">' + d + '</span>' + chipsHtml + '</div>';
+    html += '<div class="' + cls + '" onclick="calDayClick(\'' + cellDateStr + '\')" title="Add an event on this day"><span class="cal-day-num">' + d + '</span>' + chipsHtml + '</div>';
   }
   const totalCells = startDow + daysInMonth;
   const remainder  = (7 - (totalCells % 7)) % 7;
+  const nextMonthDate = new Date(calViewYear, calViewMonth + 1, 1); // first day of next month
+  const nextY = nextMonthDate.getFullYear(), nextM = nextMonthDate.getMonth();
   for (let d = 1; d <= remainder; d++) {
-    html += '<div class="cal-day other-month"><span class="cal-day-num">' + d + '</span></div>';
+    const padDateStr = nextY + '-' + String(nextM + 1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    html += '<div class="cal-day other-month" onclick="calDayClick(\'' + padDateStr + '\')"><span class="cal-day-num">' + d + '</span></div>';
   }
   const gridEl = document.getElementById('cal-grid');
   if (gridEl) gridEl.innerHTML = html;
