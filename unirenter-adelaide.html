@@ -1519,6 +1519,8 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
             <div class="chip" onclick="toggle(this)">🍳 Cook most nights — clean as I go</div>
             <div class="chip" onclick="toggle(this)">🥗 Cook occasionally</div>
             <div class="chip" onclick="toggle(this)">🥡 Mostly takeaway / meal prep</div>
+            <div class="chip" onclick="toggle(this)">🔥 Outdoor BBQ / cook-ups</div>
+            <div class="chip" onclick="toggle(this)">🍱 Happy with leftovers</div>
           </div>
         </div>
 
@@ -3006,6 +3008,7 @@ async function saveProfileToSupabase() {
   const substances    = getChip('chips-smoking');
   const dietary       = null; // no dietary chips in current flow
   const pets          = getChip('chips-pets');
+  const kitchenHabits  = getChips('chips-kitchen').join(', ') || null;
   const suburbPrefs = [...document.querySelectorAll('.suburb-chip.selected')]
     .map(c => c.dataset?.suburb || c.textContent.trim()).filter(Boolean);
   const budgetSlider = document.querySelector('input[type="range"]');
@@ -3034,7 +3037,7 @@ async function saveProfileToSupabase() {
     suburb_preferences: suburbPrefs.length > 0 ? suburbPrefs : null,
     budget_min: budgetMin, budget_max: budgetMax,
     sleep_schedule: sleepSchedule, cleanliness, study_location: studyLocation,
-    guests, substances, dietary, pets, age_bracket: ageBracket, city: 'adelaide', profile_complete: profileComplete,
+    guests, substances, dietary, pets, kitchen_habits: kitchenHabits, age_bracket: ageBracket, city: 'adelaide', profile_complete: profileComplete,
     language_home: languageHome, languages_spoken: languagesSpoken.length > 0 ? languagesSpoken : null,
     stay_duration: stayDuration, cob_summary: cobSummary,
     vibe_emoji_primary: (localStorage.getItem('ur_avatar_emoji') || vibeEmojiPrimary), vibe_emoji_secondary: vibeEmojiSecondary,

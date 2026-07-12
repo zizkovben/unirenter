@@ -6504,10 +6504,13 @@ async function vibeSave() {
         generation:           gen,
         vibe_lifestyle:       _vibePending.lifestyle    || null,
         vibe_quiz_answers:    _vibePending.quiz_answers || null,
-        // S154: persist the food/kitchen vibe-quiz answer as its own column —
-        // previously only ever sent inside vibe_quiz_answers JSON, never saved
-        // as a real field, so it couldn't be used for household compat scoring.
-        kitchen_habits:       (_vibePending.quiz_answers && _vibePending.quiz_answers.food_kitchen) || null
+        // S165: kitchen_habits is no longer written from here. The onboarding
+        // kitchen chips (index.html + city clones) are now the source of
+        // truth for this column and feed real chip-based match scoring —
+        // this free-text vibe-quiz answer was overwriting that with
+        // unstructured text. The Q3 vibe-quiz question itself still runs and
+        // is still saved inside vibe_quiz_answers above (used for Cob's
+        // narrative flavour), it just no longer clobbers the real column.
       })
     });
   } catch(err) {
