@@ -6482,6 +6482,15 @@ async function vibeSave() {
   // Persist locally first
   _vibeSaveLocal(primary, secondary, summary);
 
+  // S164 fix: also patch the in-memory profile snapshot so anything reading
+  // window._loadedProfile (e.g. openCardPreview) reflects this save
+  // immediately, not just after the next full page load.
+  if (window._loadedProfile) {
+    window._loadedProfile.vibe_emoji_primary   = primary;
+    window._loadedProfile.vibe_emoji_secondary = secondary;
+    window._loadedProfile.cob_summary          = summary;
+  }
+
   // Save extras too
   var star = (document.getElementById('select-star-sign')   || {}).value || '';
   var gen  = (document.getElementById('select-generation')  || {}).value || '';
@@ -16058,9 +16067,20 @@ function openCardPreview() {
   var sleep = localStorage.getItem('ur_sleep') || window._loadedProfile && window._loadedProfile.sleep_schedule || '';
   var clean = localStorage.getItem('ur_cleanliness') || window._loadedProfile && window._loadedProfile.cleanliness || '';
   var suburbs = window._loadedProfile && window._loadedProfile.suburb_preferences || [];
-  var vibeP = localStorage.getItem('ur_vibe_primary') || window._loadedProfile && window._loadedProfile.vibe_emoji_primary || null;
-  var vibeS = localStorage.getItem('ur_vibe_secondary') || window._loadedProfile && window._loadedProfile.vibe_emoji_secondary || null;
-  var cobSummary = localStorage.getItem('ur_vibe_summary') || window._loadedProfile && window._loadedProfile.cob_summary || null;
+  // S164 fix: previously read localStorage keys ('ur_vibe_primary' etc.)
+  // that were never written anywhere — _vibeSaveLocal() has always written
+  // a single consolidated 'ur_vibe' JSON blob instead (same source
+  // getMyVibeEmoji()/getMyVibeSecondary() use for the real match-card vibe
+  // equations). This card preview was the one place still reading the dead
+  // keys, so it silently fell back to window._loadedProfile — a snapshot
+  // taken once at page load and never refreshed after a vibe-quiz save —
+  // showing stale/missing vibe data until a full page reload.
+  var savedVibeRaw = localStorage.getItem('ur_vibe');
+  var savedVibe = null;
+  if (savedVibeRaw) { try { savedVibe = JSON.parse(savedVibeRaw); } catch(e) {} }
+  var vibeP = (savedVibe && savedVibe.primary) || window._loadedProfile && window._loadedProfile.vibe_emoji_primary || null;
+  var vibeS = (savedVibe && savedVibe.secondary) || window._loadedProfile && window._loadedProfile.vibe_emoji_secondary || null;
+  var cobSummary = (savedVibe && savedVibe.summary) || window._loadedProfile && window._loadedProfile.cob_summary || null;
   var status = localStorage.getItem('ur_student_status') || window._loadedProfile && window._loadedProfile.student_status || '';
   var lastSeen = window._loadedProfile && window._loadedProfile.last_seen || new Date().toISOString();
   var generation = window._loadedProfile && window._loadedProfile.generation || null;
