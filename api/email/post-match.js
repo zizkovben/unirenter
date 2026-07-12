@@ -568,6 +568,10 @@ module.exports = async function handler(req, res) {
 
       await supabase.from('profiles').update({
         match_email_2_sent_at: new Date().toISOString(),
+        // S180-ish fix: this was previously never set, so Email 3 had a
+        // gate (email_2_not_sent_yet) but nothing that ever satisfied it on
+        // a timeline — added here so the day-14 lazy-check has a due date.
+        match_email_3_due_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       }).eq('email', email);
 
       return res.status(200).json({ sent: true, email_number: 2 });
@@ -579,6 +583,9 @@ module.exports = async function handler(req, res) {
 
   // ── Email 3 (14 days, conditional) ────────────────────────────────────────
   if (emailNum === 3) {
+    if (profileRow.match_email_3_sent_at) {
+      return res.status(200).json({ suppressed: true, reason: 'email_3_already_sent' });
+    }
     if (profileRow.match_email_2_sent_at === null) {
       return res.status(200).json({ suppressed: true, reason: 'email_2_not_sent_yet' });
     }
@@ -609,6 +616,13 @@ module.exports = async function handler(req, res) {
         subject: `Ay ${firstName}! Two weeks in — Cob checking in 🤠`,
         html,
       });
+
+      await supabase.from('profiles').update({
+        // Missing before this fix — with nothing marking Email 3 sent, the
+        // day-14 lazy-check trigger would have fired it on every dashboard
+        // load forever. Mirrors the match_email_2_sent_at pattern above.
+        match_email_3_sent_at: new Date().toISOString(),
+      }).eq('email', email);
 
       return res.status(200).json({ sent: true, email_number: 3 });
     } catch (err) {
