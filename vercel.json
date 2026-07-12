@@ -208,6 +208,10 @@
       "destination": "/unirenter-canberra.html"
     },
     {
+      "source": "/goldcoast",
+      "destination": "/unirenter-goldcoast.html"
+    },
+    {
       "source": "/agent",
       "destination": "/unirenter-agent.html"
     },
