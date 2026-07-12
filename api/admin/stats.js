@@ -26,7 +26,8 @@ module.exports = async function handler(req, res) {
       handoversRes,
       leaseCompanionRes,
       householdsRes,
-      agentLeadsRes
+      agentLeadsRes,
+      matchedThreadsRes
     ] = await Promise.all([
       supabase.from('profiles').select(
         'city, student_status, generation, sleep_mode, email_unsubscribed, uni_email_verified, vibe_emoji_primary, cob_summary, match_email_1_sent_at, created_at'
@@ -35,7 +36,9 @@ module.exports = async function handler(req, res) {
       supabase.from('lease_handover').select('status, created_at'),
       supabase.from('lease_companion_data').select('id, created_at'),
       supabase.from('households').select('city, created_at'),
-      supabase.from('agent_leads').select('city, status, created_at')
+      supabase.from('agent_leads').select('city, status, created_at'),
+      // S180-ish: "Mark as matched" — self-reported confirmation count.
+      supabase.from('message_threads').select('matched_confirmed_at').not('matched_confirmed_at', 'is', null)
     ]);
 
     const profiles  = profilesRes.data  || [];
@@ -44,6 +47,7 @@ module.exports = async function handler(req, res) {
     const companions = leaseCompanionRes.data || [];
     const households = householdsRes.data || [];
     const leads = agentLeadsRes.data || [];
+    const successfulMatches = (matchedThreadsRes.data || []).length;
 
     // ── Demographics ──────────────────────────────────
     const studentStatusMap = {};
@@ -137,6 +141,7 @@ module.exports = async function handler(req, res) {
         households: householdCount,
         vibe_quizzes: vibeCount,
         match_emails_sent: matchEmailCount,
+        successful_matches: successfulMatches,
         agent_leads_total: agentLeadsTotal,
         agent_leads_open: agentLeadsOpen,
         agent_leads_by_city: agentLeadsByCity
