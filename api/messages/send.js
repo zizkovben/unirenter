@@ -1,6 +1,6 @@
 // api/messages/send.js — POST /api/messages/send
 const { createClient } = require('@supabase/supabase-js');
-const notifyRecipient = require('./notify');
+const { notifyRecipient, notifyConnectionRequest } = require('./notify');
 const { applyFastTrackSuspension, checkStandardLadder, checkAccountEnforcement } = require('./trust-safety');
 
 const supabase = createClient(
@@ -200,35 +200,70 @@ module.exports = async function handler(req, res) {
       return res.status(403).json({ error: 'Message could not be sent' });
     }
 
-    // S131: Check if a thread ALREADY EXISTS between these two people in EITHER direction.
-    // If a thread exists → allow send (it's a reply, not a duplicate opener).
-    // If NO thread exists AND sender has already sent to recipient → block (duplicate opener).
-    //
-    // A "thread exists" means at least one message exists where:
-    //   (sender=A, recipient=B) OR (sender=B, recipient=A)
-    const { count: threadCount } = await supabase
+    // S181: Request → Accept gate. connection_requests is a SEPARATE table
+    // from message_threads (see migration_connection_requests_181.sql for
+    // why) — it's the source of truth for whether these two people have an
+    // open, accepted conversation, are still pending, or were declined.
+    const [participant_a, participant_b] = [sender_email, resolvedRecipientEmail].sort();
+
+    // Legacy safety net: a thread that already has real messages from
+    // before this feature shipped should never get gated — back-fill it as
+    // 'accepted' rather than treating it as a fresh request.
+    const { count: legacyThreadCount } = await supabase
       .from('messages')
       .select('id', { count: 'exact', head: true })
       .or(
         `and(sender_email.eq.${sender_email},recipient_email.eq.${resolvedRecipientEmail}),` +
         `and(sender_email.eq.${resolvedRecipientEmail},recipient_email.eq.${sender_email})`
       );
+    const legacyThreadExists = (legacyThreadCount || 0) > 0;
 
-    const threadExists = (threadCount || 0) > 0;
+    const { data: crRow } = await supabase
+      .from('connection_requests')
+      .select('*')
+      .eq('participant_a', participant_a)
+      .eq('participant_b', participant_b)
+      .maybeSingle();
 
-    if (!threadExists) {
-      // No thread yet — check if THIS sender has already tried to open (duplicate opener guard)
-      const { count: senderCount } = await supabase
-        .from('messages')
-        .select('id', { count: 'exact', head: true })
-        .eq('sender_email', sender_email)
-        .eq('recipient_email', resolvedRecipientEmail);
+    let isNewRequest = false;   // this send creates/reopens a pending request → "wants to connect" email
+    let justAccepted = false;   // this send is the recipient replying to an inbound pending request
 
-      if ((senderCount || 0) > 0) {
-        return res.status(409).json({ error: 'Already messaged this person' });
+    if (crRow) {
+      if (crRow.status === 'pending') {
+        if (crRow.requested_by === sender_email) {
+          return res.status(409).json({ error: 'Already messaged this person', reason: 'pending' });
+        }
+        // The OTHER person's request is pending on sender_email — sender_email
+        // replying counts as accepting it.
+        justAccepted = true;
+        await supabase.from('connection_requests')
+          .update({ status: 'accepted', responded_at: new Date().toISOString() })
+          .eq('participant_a', participant_a).eq('participant_b', participant_b);
+      } else if (crRow.status === 'declined') {
+        const now = new Date();
+        const retryAt = crRow.retry_allowed_at ? new Date(crRow.retry_allowed_at) : null;
+        if (retryAt && now < retryAt) {
+          return res.status(409).json({
+            error: 'You can try connecting again later',
+            reason: 'cooldown',
+            retry_allowed_at: crRow.retry_allowed_at,
+          });
+        }
+        isNewRequest = true;
+        await supabase.from('connection_requests')
+          .update({ status: 'pending', requested_by: sender_email, responded_at: null })
+          .eq('participant_a', participant_a).eq('participant_b', participant_b);
       }
+      // status === 'accepted' → normal reply, fall through with no changes
+    } else if (legacyThreadExists) {
+      await supabase.from('connection_requests').insert({
+        participant_a, participant_b, requested_by: sender_email,
+        status: 'accepted', responded_at: new Date().toISOString(),
+      });
+    } else {
+      // Brand new pair, no prior contact at all.
+      isNewRequest = true;
     }
-    // If threadExists → fall through and allow the reply
 
     // Insert message
     const { data, error: insertErr } = await supabase
@@ -240,6 +275,24 @@ module.exports = async function handler(req, res) {
     if (insertErr) {
       console.error('Message insert error:', JSON.stringify(insertErr));
       return res.status(500).json({ error: 'Failed to send message', detail: insertErr.message });
+    }
+
+    // S181: record this as the request's opening message. Brand-new pairs
+    // need the row created; reopened-after-cooldown pairs already had it
+    // flipped to pending above and just need message_id attached.
+    try {
+      if (isNewRequest && !crRow) {
+        await supabase.from('connection_requests').insert({
+          participant_a, participant_b, requested_by: sender_email,
+          status: 'pending', message_id: data.id,
+        });
+      } else if (isNewRequest) {
+        await supabase.from('connection_requests')
+          .update({ message_id: data.id })
+          .eq('participant_a', participant_a).eq('participant_b', participant_b);
+      }
+    } catch (crWriteErr) {
+      console.warn('connection_requests write error (non-fatal):', crWriteErr.message);
     }
 
     // S155a/b: confidential pattern flags — never block the send, never
@@ -279,8 +332,23 @@ module.exports = async function handler(req, res) {
       console.warn('message_flags insert error (non-fatal):', flagErr.message);
     }
 
-    // Fire notify only on first message in thread (i.e. threadCount was 0 before this insert)
-    if (!threadExists) {
+    // S181: notify copy now depends on where this message sits in the
+    // request lifecycle. Still only ever one notify email per thread
+    // (matches pre-S181 behaviour — ongoing replies rely on in-app
+    // polling, not email, once a conversation is genuinely live).
+    if (isNewRequest) {
+      // Brand new (or reopened-after-cooldown) request — recipient doesn't
+      // have an open thread with this sender yet, so this is a distinct
+      // "wants to connect" ask, not a message notification.
+      notifyConnectionRequest({
+        recipientEmail: resolvedRecipientEmail,
+        senderName: senderProfile.display_name || sender_email.split('@')[0],
+        messagePreview: trimmed,
+        city,
+      });
+    } else if (justAccepted) {
+      // sender_email just accepted an inbound request by replying — this is
+      // the ORIGINAL requester's first real signal that someone responded.
       notifyRecipient({
         recipientEmail: resolvedRecipientEmail,
         senderName: senderProfile.display_name || sender_email.split('@')[0],
@@ -288,14 +356,18 @@ module.exports = async function handler(req, res) {
         city,
       });
     }
+    // else: ongoing accepted conversation — no email, matches prior behaviour.
 
     // S144: keep message_threads (lifecycle status tracker) in sync.
     // Never let a failure here block the send — it's a secondary write.
+    // S181: "first message ever" is now !legacyThreadExists && !crRow — a
+    // reopened-after-cooldown request already has both a messages history
+    // and a message_threads row, so it falls into the update branch below.
     try {
-      const [participant_a, participant_b] = [sender_email, resolvedRecipientEmail].sort();
       const nowIso = new Date().toISOString();
+      const isFirstMessageEver = !legacyThreadExists && !crRow;
 
-      if (!threadExists) {
+      if (isFirstMessageEver) {
         // First message ever in this thread — create the tracker row.
         await supabase.from('message_threads').insert({
           participant_a, participant_b,

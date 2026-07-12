@@ -209,6 +209,27 @@ module.exports = async function handler(req, res) {
       console.warn('followup_dismissed lookup error (non-fatal):', followupErr.message);
     }
 
+    // S181: connection_requests lookup — determines whether each partner is
+    // a pending inbound request (hide from the normal list, surface in
+    // `requests` instead), a pending outbound request I'm still waiting on,
+    // or a declined request I sent (show the soft "not taking new
+    // connections" copy + when I can retry). Accepted/legacy pairs are
+    // simply absent from this or have status 'accepted' and behave exactly
+    // like today.
+    let connectionReqByPartner = {};
+    try {
+      const { data: crRows } = await supabase
+        .from('connection_requests')
+        .select('participant_a, participant_b, requested_by, status, retry_allowed_at')
+        .or(`participant_a.eq.${email},participant_b.eq.${email}`);
+      (crRows || []).forEach(r => {
+        const partner = r.participant_a === email ? r.participant_b : r.participant_a;
+        connectionReqByPartner[partner] = r;
+      });
+    } catch (crErr) {
+      console.warn('connection_requests lookup error (non-fatal):', crErr.message);
+    }
+
     // S144: write-through sync to message_threads so a future scheduled job
     // (e.g. the 7-day nudge email) can read authoritative status without
     // re-scanning the full messages table. Non-blocking — never fails the request.
@@ -301,6 +322,16 @@ module.exports = async function handler(req, res) {
         && c.has_reply
         && !c.is_household
         && !followupDismissedSet.has(pairKey);
+
+      // S181: connection request state for this partner, if any. Absent
+      // (null) covers both legacy pre-S181 threads and accepted ones where
+      // the frontend doesn't need to treat them any differently.
+      const cr = connectionReqByPartner[c.partner_email] || null;
+      const isPendingInbound  = !!cr && cr.status === 'pending'  && cr.requested_by !== email;
+      const isPendingOutbound = !!cr && cr.status === 'pending'  && cr.requested_by === email;
+      const isDeclinedByMe    = !!cr && cr.status === 'declined' && cr.requested_by !== email; // I declined them
+      const isDeclinedOfMine  = !!cr && cr.status === 'declined' && cr.requested_by === email; // they declined me
+
       return {
         partner_email: c.partner_email,
         last_message: c.last_message,
@@ -317,15 +348,37 @@ module.exports = async function handler(req, res) {
         display_name: profile.display_name || nameFromEmail(c.partner_email),
         university: profile.university || null,
         suburb_preferences: profile.suburb_preferences || [],
+        // S181 fields
+        request_status: cr ? cr.status : null,
+        is_pending_inbound: isPendingInbound,
+        is_pending_outbound: isPendingOutbound,
+        is_declined_of_mine: isDeclinedOfMine, // my outbound request was declined
+        retry_allowed_at: (isDeclinedOfMine && cr) ? cr.retry_allowed_at : null,
       };
     });
 
+    // S181: pending inbound requests are surfaced separately, not in the
+    // normal conversation list — that's the whole point of the gate. Every
+    // other case (accepted, pending-outbound, declined, legacy/no-row)
+    // behaves exactly as before and stays in `conversations`.
+    const requests = conversations.filter(c => c.is_pending_inbound);
+    const regularConversations = conversations.filter(c => !c.is_pending_inbound);
+
     // Sort by last_time desc
-    conversations.sort((a, b) => new Date(b.last_time) - new Date(a.last_time));
+    regularConversations.sort((a, b) => new Date(b.last_time) - new Date(a.last_time));
+    requests.sort((a, b) => new Date(b.last_time) - new Date(a.last_time));
 
-    const totalUnread = conversations.reduce((sum, c) => sum + c.unread, 0);
+    // Unread/badge count deliberately excludes pending-inbound requests —
+    // they get their own "N requests" affordance client-side, not folded
+    // into the messages bell.
+    const totalUnread = regularConversations.reduce((sum, c) => sum + c.unread, 0);
 
-    return res.status(200).json({ conversations, totalUnread });
+    return res.status(200).json({
+      conversations: regularConversations,
+      requests,
+      totalRequests: requests.length,
+      totalUnread,
+    });
   }
 
   // ── Mode 2: return thread between email and other ─────────────────────────
