@@ -7620,7 +7620,7 @@ function renderMatchCard(p) {
     <div class="match-card-header">
       <div class="match-avatar-wrap">
         <div class="match-avatar" style="background:${p.bg};">${p.initials}</div>
-        <div class="avatar-emoji-badge">${p.vibe_emoji_primary || ''}</div>
+        <div class="avatar-emoji-badge" title="${p.vibe_emoji_primary ? (VIBE_LABELS[p.vibe_emoji_primary] || 'Vibe type') : ''}">${p.vibe_emoji_primary || ''}</div>
       </div>
       <div class="match-info">
         <div class="match-name">${p.name}</div>
@@ -7650,7 +7650,10 @@ function pdmOpen(key) {
   const photoEl = document.getElementById('pdm-photo');
   if (photoEl) { photoEl.style.background = p.bg; photoEl.textContent = p.initials; }
   const badgeEl = document.getElementById('pdm-emoji-badge');
-  if (badgeEl) badgeEl.textContent = p.vibe_emoji_primary || '';
+  if (badgeEl) {
+    badgeEl.textContent = p.vibe_emoji_primary || '';
+    badgeEl.title       = p.vibe_emoji_primary ? (VIBE_LABELS[p.vibe_emoji_primary] || 'Vibe type') : '';
+  }
 
   document.getElementById('pdm-name').textContent = p.name || 'Student';
   document.getElementById('pdm-sub').textContent  = p.sub  || 'Student';
