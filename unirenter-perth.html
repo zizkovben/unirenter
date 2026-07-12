@@ -1306,7 +1306,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
             </div>
             <div class="form-group">
               <label>Household preferences that matter to you</label>
-              <div class="chips">
+              <div class="chips" id="chips-dietary">
                 <div class="chip" onclick="toggle(this)">🥩 Halal kitchen</div>
                 <div class="chip" onclick="toggle(this)">🌿 Vegetarian household</div>
                 <div class="chip" onclick="toggle(this)">🍺 No alcohol in house</div>
@@ -1314,6 +1314,11 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
                 <div class="chip" onclick="toggle(this)">🤝 Same gender household</div>
                 <div class="chip" onclick="toggle(this)">🐷 No pork products</div>
                 <div class="chip" onclick="toggle(this)">🕯️ Observe religious holidays</div>
+                <div class="chip" onclick="toggle(this)">🚫🍷 Non-drinker</div>
+                <div class="chip" onclick="toggle(this)">🍷 Enjoy a drink</div>
+                <div class="chip" onclick="toggle(this)">🙅 Prefer not to live with a drinker</div>
+                <div class="chip" onclick="toggle(this)">🌿 Cannabis-friendly household</div>
+                <div class="chip" onclick="toggle(this)">🚫🌿 Cannabis-free household</div>
               </div>
             </div>
             <div class="privacy-note">🔒 Religious preferences are <span>private by default</span> — used only for matching, never shown publicly unless you choose.</div>
@@ -2996,7 +3001,7 @@ async function saveProfileToSupabase() {
   const studyLocation = getChip('chips-study');
   const guests        = getChips('chips-guests').join(', ') || null;
   const substances    = getChip('chips-smoking');
-  const dietary       = null; // no dietary chips in current flow
+  const dietary       = getChips('chips-dietary').join(', ') || null;
   const pets          = getChip('chips-pets');
   const kitchenHabits  = getChips('chips-kitchen').join(', ') || null;
   const suburbPrefs = [...document.querySelectorAll('.suburb-chip.selected')]
