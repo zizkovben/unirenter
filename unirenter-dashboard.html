@@ -6395,6 +6395,12 @@ async function _vibeGenerate() {
     _vibePending = { primary:primary, secondary:secondary, summary:summary, narrative:narrative,
                       lifestyle: _vibePending.lifestyle, quiz_answers: _vibePending.quiz_answers };
     _vibeShowDone(primary, secondary, summary);
+    // Auto-save on completion — previously required a manual "Save vibe ✓"
+    // click, which was an easy step to miss (Cob already generated a
+    // real, finished result at this point; there's nothing left to decide
+    // unless the student wants to override the primary emoji, which the
+    // Save button still handles for that case).
+    vibeSave();
 
   } catch(err) {
     clearInterval(dotInterval);
@@ -6463,6 +6469,7 @@ function vibePickEmoji(emoji) {
   // Update pending summary leading emoji
   _vibePending.summary = emoji + ' ' + _vibePending.summary.replace(/^[^\s"]+\s*/, '');
   vibeClosePicker();
+  vibeSave();
 }
 
 function vibeClosePicker() {
