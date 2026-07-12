@@ -186,16 +186,23 @@ module.exports = async function handler(req, res) {
     // should never reappear once the user has acted on or dismissed it for
     // a given partner. Keyed by the same sorted participant_a/b pair used
     // by the write-through sync below, so lookups line up exactly.
+    //
+    // S180-ish: same query also carries matched_confirmed_at, so the
+    // dashboard can render the "Mark as matched" button correctly per
+    // conversation (confirmed vs not) without a separate round trip.
     let followupDismissedSet = new Set();
+    let matchedConfirmedMap = {};
     try {
       const pairKeys = Object.keys(convMap).map(partner => [email, partner].sort().join('|'));
       if (pairKeys.length > 0) {
         const { data: threadRows } = await supabase
           .from('message_threads')
-          .select('participant_a, participant_b, followup_dismissed')
+          .select('participant_a, participant_b, followup_dismissed, matched_confirmed_at')
           .or(`participant_a.eq.${email},participant_b.eq.${email}`);
         (threadRows || []).forEach(r => {
-          if (r.followup_dismissed) followupDismissedSet.add([r.participant_a, r.participant_b].sort().join('|'));
+          const pairKey = [r.participant_a, r.participant_b].sort().join('|');
+          if (r.followup_dismissed) followupDismissedSet.add(pairKey);
+          if (r.matched_confirmed_at) matchedConfirmedMap[pairKey] = r.matched_confirmed_at;
         });
       }
     } catch (followupErr) {
@@ -306,6 +313,7 @@ module.exports = async function handler(req, res) {
         has_reply: c.has_reply,
         is_household: c.is_household,
         show_followup: showFollowup,
+        matched_confirmed_at: matchedConfirmedMap[pairKey] || null,
         display_name: profile.display_name || nameFromEmail(c.partner_email),
         university: profile.university || null,
         suburb_preferences: profile.suburb_preferences || [],
