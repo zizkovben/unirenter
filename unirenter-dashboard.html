@@ -7590,7 +7590,7 @@ function renderMatchCard(p) {
   } else if (!myEmoji && matchEmoji) {
     eqHtml = '<div class="match-vibe-equation">' +
       '<span class="match-vibe-eq-math">' + matchEmoji + ' + ❓ = 🤔</span>' +
-      '<span class="match-vibe-eq-nudge" onclick="switchTab(\'profile\');setTimeout(function(){var v=document.getElementById(\'vibe-card\');if(v)v.scrollIntoView({behavior:\'smooth\'});},300);">' +
+      '<span class="match-vibe-eq-nudge" onclick="event.stopPropagation();switchTab(\'profile\');setTimeout(function(){var v=document.getElementById(\'vibe-card\');if(v)v.scrollIntoView({behavior:\'smooth\'});},300);">' +
         'Complete your vibe quiz — Cob will work out your equation 🤠' +
       '</span>' +
     '</div>';
