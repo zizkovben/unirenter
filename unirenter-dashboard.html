@@ -5219,7 +5219,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
       <div id="vibe-card-quiz" style="display:none;">
         <div class="vibe-quiz-progress">
           <div class="vibe-quiz-bar"><div class="vibe-quiz-fill" id="vibe-quiz-fill" style="width:20%"></div></div>
-          <span class="vibe-quiz-step" id="vibe-quiz-step">1 of 6</span>
+          <span class="vibe-quiz-step" id="vibe-quiz-step">1 of 5</span>
         </div>
         <div class="vibe-quiz-questions" id="vibe-quiz-questions">
           <!-- injected by JS -->
@@ -6046,28 +6046,21 @@ function buildVibeQuestions() {
       max: 200,
       shortcuts: ['Cook most nights 🍳', 'Mostly takeaway 🥡', 'Plant-based 🌱', 'Meat-eater 🍖', 'Allergies / dietary needs ⚠️', 'No fridge sharing 🛒']
     },
-    {
-      type: 'multi-emoji',
-      q: 'Any pets — or pet dealbreakers?',
-      hint: 'Select all that apply. Pick what describes you.',
-      emojis: [
-        { e: '🐱', label: 'I have a cat' },
-        { e: '🐶', label: 'I have a dog' },
-        { e: '🐦', label: 'I have a bird' },
-        { e: '🐠', label: 'I have fish' },
-        { e: '🐾', label: 'Love all pets' },
-        { e: '🚫🐱', label: 'Allergic to cats' },
-        { e: '🚫🐶', label: 'No dogs please' },
-        { e: '🙅', label: 'No pets at all' },
-        { e: '✅', label: 'Happy with any pet' }
-      ]
-    },
+    // S166: pets question removed from here — consolidated onto the richer
+    // onboarding chip set (index.html + city clones), which now carries the
+    // same 9-option emoji set this question used to offer. The onboarding
+    // chips write directly to the real `pets` column that match-score.js
+    // reads; this question only ever fed vibe_quiz_answers JSON (Cob
+    // flavour text), never the real column, so nothing scoring-relevant is
+    // lost by removing it. The multi-emoji rendering/nav code below (search
+    // "multi-emoji") is now dormant — safe to leave, no remaining question
+    // uses that type, but flagging so a future session isn't confused by it.
     {
       type: 'text-shortcuts',
       q: q5Text,
       hint: q5Hint,
       max: 200,
-      shortcuts: ['Clean as I go 🧹', 'Weekly roster 🗓️', 'Pretty relaxed 🤷', 'Strict about kitchen ✨', 'Need my own shelf 🛒', 'Bathroom schedule ⏰']
+      shortcuts: ['Clean as I go 🧹', 'Cleaning roster 🗓️', 'Weekly clean 🧼', 'Pretty relaxed 🤷', 'Strict about kitchen ✨', 'Need my own shelf 🛒', 'Bathroom schedule ⏰']
     },
     {
       type: 'text-shortcuts',
@@ -6082,7 +6075,7 @@ function buildVibeQuestions() {
 var VIBE_QUESTIONS = [];
 
 var _vibeStep      = 0;
-var _vibeAnswers   = ['','','','','',''];
+var _vibeAnswers   = ['','','','',''];
 var _vibePetEmojis = [];
 var _vibePending   = { primary:'', secondary:'', summary:'', lifestyle:{}, quiz_answers:{} };
 
@@ -6122,7 +6115,7 @@ function vibeStartQuiz() {
   if (!verified) { showToast('🔒 Verify your email first', 'Complete your profile to unlock this.'); return; }
   VIBE_QUESTIONS   = buildVibeQuestions();
   _vibeStep      = 0;
-  _vibeAnswers   = ['','','','','',''];
+  _vibeAnswers   = ['','','','',''];
   _vibePetEmojis = [];
   document.getElementById('vibe-card-empty').style.display    = 'none';
   document.getElementById('vibe-card-done').style.display     = 'none';
@@ -6338,35 +6331,34 @@ async function _vibeGenerate() {
     exam_study: _vibeAnswers[0] || '',
     home_life: _vibeAnswers[1] || '',
     food_kitchen: _vibeAnswers[2] || '',
-    pets: _vibeAnswers[3] || 'No preference',
-    shared_spaces: _vibeAnswers[4] || '',
-    social_style: _vibeAnswers[5] || ''
+    // S166: pets removed — see removal note above buildVibeQuestions' old Q4.
+    shared_spaces: _vibeAnswers[3] || '',
+    social_style: _vibeAnswers[4] || ''
   };
   _vibePending.lifestyle    = _vibeQuizData;
   _vibePending.quiz_answers = _vibeQuizData;
 
   var promptBody =
     'You are Cob — a warm AI assistant for UniRenter, an Australian student accommodation platform.\n\n' +
-    'A student has answered 6 questions about themselves as a housemate. Your job is to work out their vibe equation and write two things: a short one-line portrait, and a fuller narrative paragraph, both for their profile.\n\n' +
+    'A student has answered 5 questions about themselves as a housemate. Your job is to work out their vibe equation and write two things: a short one-line portrait, and a fuller narrative paragraph, both for their profile.\n\n' +
     'LOCKED PRIMARY EMOJI PALETTE (pick exactly one, based on ALL the answers together — no single answer is a forced pick):\n' +
     '🌙 Night owl | 🐦 Early riser | 📚 Study-focused | 🎓 Postgrad | 💼 Young professional | 🗣️ Social & outgoing | 🚪 Keeps to themselves | 🧹 Neat freak | 🤷 Relaxed about mess | 🍳 Home cook | 🎮 Gamer | 🎵 Musician | 🏋️ Gym regular | 🌈 LGBTQ+ friendly | 🌍 International | 👥 Loves having guests | 🏠 Homebody | 🌿 Chill vibes\n\n' +
     'SECONDARY EMOJI — pick one that adds personality flavour from this curated set (not restricted to):\n' +
     '💻 🌙 💪 🧘 🎨 📖 🎬 📺 🌳 🪴 🔥 🛀 🚫 📦 🌱 🍖 ☕ 🍺 🥡 🛍 🐱 🐶 🐦 🐠 💑 👨‍👩‍👧 🤝 🗺 🍽 🌍 ✈ 🎊 👶 ♿\n\n' +
     'RULES:\n' +
-    '- Weigh all 6 answers together — no single answer overrides the rest\n' +
+    '- Weigh all 5 answers together — no single answer overrides the rest\n' +
     '- Secondary emoji adds personality flavour — be specific, not generic\n' +
     '- "summary" is 1-2 sentences, warm and specific — not generic. Lead with their strongest coexistence trait.\n' +
     '- Summary format: starts with primary emoji, then a quoted sentence or two. Example: 🧹 "Neat freak who cooks every night and is strict about kitchen cleanliness — total homebody, quiet after 10pm."\n' +
-    '- "narrative" is a fuller, 3-5 sentence third-person paragraph weaving together ALL 6 answers into a rounded picture of them as a housemate — sleep habits, social style, cleanliness, food/kitchen, pets if relevant. Warmer and more descriptive than the summary, but still honest and specific rather than generic filler. No quotes, no emoji, plain prose. This is shown on their full profile (not the match card), so it can go into more depth than the summary.\n' +
+    '- "narrative" is a fuller, 3-5 sentence third-person paragraph weaving together ALL 5 answers into a rounded picture of them as a housemate — sleep habits, social style, cleanliness, food/kitchen. Warmer and more descriptive than the summary, but still honest and specific rather than generic filler. No quotes, no emoji, plain prose. This is shown on their full profile (not the match card), so it can go into more depth than the summary.\n' +
     '- Do NOT give legal advice or housing recommendations. Just write the portrait.\n' +
     '- NEVER use the word "legal"\n\n' +
     'STUDENT ANSWERS:\n' +
     'Q1 (Exam/deadline behaviour at home): ' + (_vibeQuizData.exam_study || '(skipped)') + '\n' +
     'Q2 (Home life): ' + (_vibeQuizData.home_life || '(skipped)') + '\n' +
     'Q3 (Food & kitchen): ' + (_vibeQuizData.food_kitchen || '(skipped)') + '\n' +
-    'Q4 (Pets): ' + _vibeQuizData.pets + '\n' +
-    'Q5 (Shared spaces): ' + (_vibeQuizData.shared_spaces || '(skipped)') + '\n' +
-    'Q6 (Social style — most important): ' + (_vibeQuizData.social_style || '(skipped)') + '\n\n' +
+    'Q4 (Shared spaces): ' + (_vibeQuizData.shared_spaces || '(skipped)') + '\n' +
+    'Q5 (Social style — most important): ' + (_vibeQuizData.social_style || '(skipped)') + '\n\n' +
     'Respond ONLY with a JSON object, no preamble, no markdown fences:\n' +
     '{"primary":"<emoji>","secondary":"<emoji>","summary":"<primary_emoji> \\"<1-2 sentences>\\"","narrative":"<3-5 sentence paragraph, plain prose>"}';
 
@@ -6539,7 +6531,7 @@ function vibeConfirmRetake() {
   document.getElementById('vibe-retake-confirm').style.display = 'none';
   VIBE_QUESTIONS = buildVibeQuestions();
   _vibeStep      = 0;
-  _vibeAnswers   = ['','','','','',''];
+  _vibeAnswers   = ['','','','',''];
   _vibePetEmojis = [];
   document.getElementById('vibe-card-quiz').style.display     = 'block';
   _vibeRenderStep();

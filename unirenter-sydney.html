@@ -1483,9 +1483,15 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         <div class="form-group">
           <label>🐾 Pets</label>
           <div class="chips" id="chips-pets">
-            <div class="chip" onclick="toggle(this)">🐾 Have / want a pet</div>
-            <div class="chip" onclick="toggle(this)">🚫 No pets please</div>
-            <div class="chip" onclick="toggle(this)">🤧 Allergic to cats or dogs</div>
+            <div class="chip" onclick="toggle(this)">🐱 I have a cat</div>
+            <div class="chip" onclick="toggle(this)">🐶 I have a dog</div>
+            <div class="chip" onclick="toggle(this)">🐦 I have a bird</div>
+            <div class="chip" onclick="toggle(this)">🐠 I have fish</div>
+            <div class="chip" onclick="toggle(this)">🐾 Love all pets</div>
+            <div class="chip" onclick="toggle(this)">🚫🐱 Allergic to cats</div>
+            <div class="chip" onclick="toggle(this)">🚫🐶 No dogs please</div>
+            <div class="chip" onclick="toggle(this)">🙅 No pets at all</div>
+            <div class="chip" onclick="toggle(this)">✅ Happy with any pet</div>
           </div>
           <div class="info-note" style="margin-top:10px;">🐾 <strong>NSW pet law:</strong> Since 2021 landlords cannot unreasonably refuse a pet. Strata buildings may have by-laws restricting certain animals. <a href="/sydney/guide#pets" target="_blank" style="color:var(--brand-blue);">See our Pets &amp; Rentals guide →</a></div>
         </div>
@@ -2941,7 +2947,7 @@ async function saveProfileToSupabase() {
   const guests        = getChips('chips-guests').join(', ') || null;
   const substances    = getChip('chips-smoking');
   const dietary       = getChips('chips-dietary').join(', ') || null;
-  const pets          = getChip('chips-pets');
+  const pets          = getChips('chips-pets').join(', ') || null;
   const kitchenHabits  = getChips('chips-kitchen').join(', ') || null;
   const suburbPrefs = [...document.querySelectorAll('.suburb-chip.selected')]
     .map(c => c.dataset?.suburb || c.textContent.trim()).filter(Boolean);
