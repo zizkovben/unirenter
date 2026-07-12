@@ -69,8 +69,8 @@ function scoreCandidate(c, myProfile, city) {
       }
     }
 
-    // Pets (S163) — parsed from the vibe-quiz emoji tokens (e.g. "🐱 🐾" or
-    // "🚫🐶"). See scorePets() below for the conflict-detection logic.
+    // Pets (S166) — parsed from the onboarding pets chips (e.g. "🐱 I have
+    // a cat, 🐾 Love all pets"). See scorePets() below for the conflict-
     const petsScore = scorePets(myProfile.pets, c.pets, WEIGHTS.pets);
     if (petsScore >= WEIGHTS.pets * 0.9) reasons.push('pets');
     score += petsScore;
@@ -329,39 +329,68 @@ function isAdjacentClean(a, b) {
   return ai !== -1 && bi !== -1 && Math.abs(ai - bi) === 1;
 }
 
-// ── Pets (S163) ───────────────────────────────────────────────────────────
+// ── Pets (S166) ───────────────────────────────────────────────────────────
 // pets is stored as a space-joined string of fixed emoji tokens from the
 // vibe quiz multi-emoji question — e.g. "🐱 🐾" or "🚫🐶" or "No preference".
 // This is a closed vocabulary (unlike kitchen_habits), so real conflict
-// detection is possible: a dealbreaker token ("🚫🐱") against a candidate who
-// has that pet, or who loves all pets ("🐾"), is scored as a hard conflict.
-const PET_POSITIVE   = ['🐱', '🐶', '🐦', '🐠', '🐾'];
-const PET_DEALBREAKERS = { '🚫🐱': '🐱', '🚫🐶': '🐶' };
+// detection is possible: a dealbreaker against a pet (or general aversion)
+// the other person actually has is scored as a hard conflict.
+//
+// S166: rewritten for the consolidated 9-option chip set (moved from the
+// vibe quiz to onboarding — see index.html "Pets" step). Matching is done
+// on exact full chip-label strings (after splitting on ', '), not emoji
+// substrings — several labels share an emoji as a prefix (e.g. "🚫🐱
+// Allergic to cats" contains the bare 🐱 glyph as a substring), so a plain
+// .includes() check on emoji alone would misfire. Exact array membership
+// on the full label avoids that entirely.
+const PET_CAT          = '🐱 I have a cat';
+const PET_DOG          = '🐶 I have a dog';
+const PET_BIRD         = '🐦 I have a bird';
+const PET_FISH         = '🐠 I have fish';
+const PET_LOVE_ALL     = '🐾 Love all pets';
+const PET_ALLERGIC_CAT = '🚫🐱 Allergic to cats';
+const PET_NO_DOG       = '🚫🐶 No dogs please';
+const PET_NONE         = '🙅 No pets at all';
+const PET_HAPPY_ANY    = '✅ Happy with any pet';
+
+const PET_HAS_TOKENS = [PET_CAT, PET_DOG, PET_BIRD, PET_FISH, PET_LOVE_ALL];
 
 function scorePets(myPets, candPets, weight) {
   if (!myPets || !candPets) return weight * 0.6;
 
-  const myTokens = myPets.split(/\s+/).filter(Boolean);
-  const cTokens  = candPets.split(/\s+/).filter(Boolean);
+  const myTokens = myPets.split(', ').filter(Boolean);
+  const cTokens  = candPets.split(', ').filter(Boolean);
 
-  // Hard conflict: a stated dealbreaker against a pet (or "loves all pets")
-  // the other person actually has.
-  for (const neg of Object.keys(PET_DEALBREAKERS)) {
-    const pos = PET_DEALBREAKERS[neg];
-    if ((myTokens.includes(neg) && (cTokens.includes(pos) || cTokens.includes('🐾'))) ||
-        (cTokens.includes(neg) && (myTokens.includes(pos) || myTokens.includes('🐾')))) {
-      return 0;
-    }
+  const myHasAnyPet = myTokens.some(t => PET_HAS_TOKENS.includes(t));
+  const cHasAnyPet  = cTokens.some(t => PET_HAS_TOKENS.includes(t));
+
+  // Hard conflicts — general aversion or a specific-animal dealbreaker
+  // against a pet (or "loves all pets") the other person actually has.
+  if ((myTokens.includes(PET_NONE) && cHasAnyPet) ||
+      (cTokens.includes(PET_NONE) && myHasAnyPet)) {
+    return 0;
+  }
+  if ((myTokens.includes(PET_ALLERGIC_CAT) && (cTokens.includes(PET_CAT) || cTokens.includes(PET_LOVE_ALL))) ||
+      (cTokens.includes(PET_ALLERGIC_CAT) && (myTokens.includes(PET_CAT) || myTokens.includes(PET_LOVE_ALL)))) {
+    return 0;
+  }
+  if ((myTokens.includes(PET_NO_DOG) && (cTokens.includes(PET_DOG) || cTokens.includes(PET_LOVE_ALL))) ||
+      (cTokens.includes(PET_NO_DOG) && (myTokens.includes(PET_DOG) || myTokens.includes(PET_LOVE_ALL)))) {
+    return 0;
   }
 
   // Shared specific pet or shared "loves all pets" — strong match.
-  const sharedPositive = myTokens.some(t => PET_POSITIVE.includes(t) && cTokens.includes(t));
+  const sharedPositive = myTokens.some(t => PET_HAS_TOKENS.includes(t) && cTokens.includes(t));
   if (sharedPositive) return weight;
 
-  const myHasPet = myTokens.some(t => PET_POSITIVE.includes(t));
-  const cHasPet  = cTokens.some(t => PET_POSITIVE.includes(t));
-  if (!myHasPet && !cHasPet) return weight * 0.8; // both pet-free / no preference — low friction
-  return weight * 0.5; // one has pets, other has no stated objection — moderate credit
+  // Either side is genuinely flexible about it, and no conflict was found
+  // above — high compatibility even without an exact shared pet type.
+  if (myTokens.includes(PET_HAPPY_ANY) || cTokens.includes(PET_HAPPY_ANY)) {
+    return weight * 0.9;
+  }
+
+  if (!myHasAnyPet && !cHasAnyPet) return weight * 0.8; // both pet-free — low friction
+  return weight * 0.6; // one has pets, other has no stated objection — moderate, neutral credit
 }
 
 // ── Kitchen habits (S165) ──────────────────────────────────────────────────
