@@ -36,7 +36,8 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to create listing token' });
   }
  
-  const url = `https://unirenter.vercel.app/listing/${token}`;
+  const url = `https://www.unirenter.com.au/listing/${token}`;
   return res.status(200).json({ token, url, expires_at: expiresAt });
 };
+ 
  
