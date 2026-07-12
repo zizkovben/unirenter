@@ -84,7 +84,7 @@ module.exports = async function handler(req, res) {
       'seeking', 'move_in_date', 'lease_duration', 'household_type',
       'suburb_preferences', 'budget_min', 'budget_max',
       'sleep_schedule', 'cleanliness', 'study_location',
-      'guests', 'substances', 'dietary', 'pets', 'kitchen_habits',
+      'guests', 'substances', 'dietary', 'pets', 'kitchen_habits', 'age_bracket',
       'vibe_emoji_primary', 'vibe_emoji_secondary', 'cob_summary', 'cob_narrative',
       'star_sign', 'generation', 'vibe_lifestyle', 'vibe_quiz_answers',
       'language_home', 'languages_spoken', 'english_practice',
