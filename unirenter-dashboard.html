@@ -1377,6 +1377,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
   transition: all 0.2s;
 }
 .msg-head-btn:hover { border-color: rgba(255,80,80,0.3); color: #ff8080; }
+#msg-mark-matched-btn:hover { border-color: rgba(61,170,92,0.4); color: var(--brand-green); }
+#msg-mark-matched-btn.confirmed { border-color: rgba(61,170,92,0.35); color: var(--brand-green); background: rgba(61,170,92,0.08); cursor: default; }
+#msg-mark-matched-btn.confirmed:hover { border-color: rgba(61,170,92,0.35); color: var(--brand-green); }
 .msg-messages {
   flex: 1; padding: 18px; display: flex; flex-direction: column;
   gap: 10px; overflow-y: auto; max-height: 380px; min-height: 200px;
@@ -4719,6 +4722,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
             <div class="msg-main-head-extras" id="msg-main-head-extras" style="display:none;"></div>
           </div>
           <div class="msg-head-actions" id="msg-head-actions" style="display:none;">
+            <button class="msg-head-btn" id="msg-mark-matched-btn" onclick="markAsMatched()" title="Confirm you found your housemate through this conversation">&#9989; Mark as matched</button>
             <button class="msg-head-btn" id="msg-safety-check-btn" onclick="msgRunSafetyCheck()" title="Ask Cob to read this conversation for red flags">&#128273; Safety check</button>
             <button class="msg-head-btn" onclick="openModal('report-modal')">&#9873; Report</button>
             <button class="msg-head-btn" onclick="blockUser()">&#10005; Block</button>
@@ -7010,6 +7014,7 @@ function loadProfile() {
         applyProfileData(profile, cobRefined);
         extrasLoadFromProfile(profile);
         accountStatusRenderBanner(profile);
+        checkPostMatchEmailsDue(profile);
       }
     });
   }
@@ -8418,6 +8423,123 @@ function followupCreateHousehold(partnerEmail) {
   switchTab('household');
 }
 
+// ── S180-ish: "Mark as matched" ──────────────────────────────────────────────
+// Self-reported confirmation that a conversation turned into a real match.
+// Either person can confirm — first click wins, both sides then see it as
+// confirmed. Triggers the immediate follow-up card (create household / leave
+// a review) rather than waiting for the conversation to go quiet, and fires
+// the previously-dormant post-match Email 1 for both participants.
+function updateMarkMatchedButton(partnerEmail) {
+  var btn = document.getElementById('msg-mark-matched-btn');
+  if (!btn) return;
+  var convo = (window._followupMap || {})[partnerEmail];
+  var confirmed = !!(convo && convo.matched_confirmed_at);
+  btn.disabled = confirmed;
+  btn.innerHTML = confirmed ? '✅ Matched' : '✅ Mark as matched';
+  btn.title = confirmed
+    ? 'Confirmed — nice one 🤠'
+    : 'Confirm you found your housemate through this conversation';
+  btn.classList.toggle('confirmed', confirmed);
+}
+
+async function markAsMatched() {
+  var partnerEmail = window._currentConvoEmail;
+  var partnerName  = window._currentConvoName;
+  var email = localStorage.getItem('unirenter_email');
+  if (!partnerEmail || !email) return;
+  var btn = document.getElementById('msg-mark-matched-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+  try {
+    var res = await fetch('/api/messages/mark-matched', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, partner_email: partnerEmail })
+    });
+    var data = await res.json();
+    if (!res.ok || !data.ok) {
+      showToast('😬 Something went wrong', 'Try again in a moment.');
+      updateMarkMatchedButton(partnerEmail);
+      return;
+    }
+
+    if (window._followupMap && window._followupMap[partnerEmail]) {
+      window._followupMap[partnerEmail].matched_confirmed_at = data.matched_confirmed_at;
+    }
+    updateMarkMatchedButton(partnerEmail);
+
+    if (data.already_matched) {
+      showToast('✅ Already confirmed', 'You two already marked this as matched.');
+      return;
+    }
+
+    showToast('🎉 Matched!', 'Nice one — Cob just emailed you both.');
+    playSound('cob_summary_generated');
+
+    // Show the same follow-up card the cooling-conversation nudge uses —
+    // right now, while it's actually relevant, instead of waiting a week.
+    if (window._followupMap && window._followupMap[partnerEmail]) {
+      window._followupMap[partnerEmail].show_followup = true;
+    }
+    renderFollowupCard(partnerEmail, partnerName);
+
+  } catch (err) {
+    console.warn('markAsMatched error:', err);
+    showToast('😬 Something went wrong', 'Try again in a moment.');
+    updateMarkMatchedButton(partnerEmail);
+  }
+}
+
+// ── S180-ish: lazy-check for the 7-day / 14-day post-match emails ───────────
+// Same no-cron, check-on-load pattern as tier2CheckDates() — runs once after
+// the authoritative profile loads. Fire-and-forget: api/email/post-match.js
+// itself is idempotent (checks *_sent_at before sending), so calling this on
+// every load is safe even if it's already been sent or isn't due yet.
+async function checkPostMatchEmailsDue(profile) {
+  try {
+    if (!profile || !profile.matched_partner_email) return;
+    var email = localStorage.getItem('unirenter_email');
+    if (!email) return;
+    var now = Date.now();
+    var matchName = profile.matched_partner_name || 'your match';
+    var matchUni  = profile.matched_partner_uni  || '';
+    var score     = (profile.matched_score != null) ? profile.matched_score : '—';
+
+    if (profile.match_email_2_due_at && !profile.match_email_2_sent_at &&
+        new Date(profile.match_email_2_due_at).getTime() <= now) {
+      fetch('/api/email/post-match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, match_name: matchName, match_uni: matchUni, score: score, email_number: 2 })
+      }).catch(function(){});
+    }
+
+    if (profile.match_email_3_due_at && !profile.match_email_3_sent_at &&
+        new Date(profile.match_email_3_due_at).getTime() <= now) {
+      // Best-effort completed_features — a quick household/agreement check;
+      // vibe and tenancy are already visible on the profile object itself.
+      var completed = [];
+      if (profile.vibe_emoji_primary) completed.push('vibe');
+      try {
+        var hhRes = await fetch('/api/household/mine?email=' + encodeURIComponent(email));
+        var hh = await hhRes.json();
+        if (hh && hh.ok && hh.has_household) {
+          completed.push('household');
+          if (hh.agreement_locked) completed.push('agreement');
+        }
+      } catch (hhErr) { /* non-fatal — Email 3 just falls back to the household hook */ }
+
+      fetch('/api/email/post-match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, match_name: matchName, completed_features: completed, email_number: 3 })
+      }).catch(function(){});
+    }
+  } catch (err) {
+    console.warn('checkPostMatchEmailsDue error (non-fatal):', err.message);
+  }
+}
+
 window._followupReviewPartner = null;
 
 function followupOpenReview(partnerEmail) {
@@ -8505,6 +8627,7 @@ async function openConversation(partnerEmail, partnerName, partnerUni, el) {
   var headActions = document.getElementById('msg-head-actions');
   if (headActions) headActions.style.display = '';
   renderFollowupCard(partnerEmail, partnerName);
+  updateMarkMatchedButton(partnerEmail);
   var inp = document.getElementById('msg-input');
   var sendBtn = document.getElementById('msg-send-btn');
   if (inp) { inp.disabled = false; inp.placeholder = 'Type a message…'; }

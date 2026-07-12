@@ -655,6 +655,7 @@ function renderFeaturesTab(features) {
   var cards = [
     {icon:'🔀', name:'Lease transfer listings', value:features.break_lease_total||0,   sub:(features.break_lease_active||0)+' active · '+(features.break_lease_filled||0)+' filled'},
     {icon:'🤝', name:'Handovers',             value:features.handover_total||0,       sub:(features.handover_complete||0)+' complete'},
+    {icon:'✅', name:'Successful matches',    value:features.successful_matches||0,   sub:'self-confirmed by students'},
     {icon:'📋', name:'Lease companion',       value:features.lease_companion||0,      sub:'tenancies tracked'},
     {icon:'🏠', name:'Household hubs',        value:features.households||0,           sub:'households created'},
     {icon:'🎭', name:'Vibe quizzes',          value:features.vibe_quizzes||0,         sub:'personality summaries'},
