@@ -6519,6 +6519,11 @@ async function vibeSave() {
   playSound('cob_summary_generated');
   showToast('🤠 Vibe saved!', 'Your personality portrait is live on your profile.');
   vibeShareBlockShow();
+  // S164: vibeSave() previously left already-drawn match cards showing the
+  // pre-save emoji equation/compatibility data until the next full page
+  // load or manual refresh. refreshMatches() is the same wrapper the
+  // existing "refresh" control uses elsewhere on this page.
+  if (typeof refreshMatches === 'function') refreshMatches();
 }
 
 // ── Retake flow ──
