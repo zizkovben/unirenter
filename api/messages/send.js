@@ -1,7 +1,7 @@
 // api/messages/send.js — POST /api/messages/send
 const { createClient } = require('@supabase/supabase-js');
 const { notifyRecipient, notifyConnectionRequest } = require('./notify');
-const { applyFastTrackSuspension, checkStandardLadder, checkAccountEnforcement } = require('./trust-safety');
+const { applyFastTrackSuspension, checkStandardLadder, checkAccountEnforcement } = require('./_trust-safety');
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
