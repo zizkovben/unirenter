@@ -20,7 +20,7 @@
 // S163: scoring logic (scoreCandidate/computeNearMisses/etc.) extracted to api/_lib/match-score.js.
 // This file is now handler-only — it fetches profiles from Supabase and delegates scoring.
 
-const { scoreCandidate, computeNearMisses } = require('./_lib/match-score');
+const { scoreCandidate, computeNearMisses, isGenderCompatible } = require('./_lib/match-score');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -85,9 +85,17 @@ module.exports = async function handler(req, res) {
     // matching against a real myProfile — leaves the (legacy, effectively
     // unreachable since the S80 fix) anonymous fallback path untouched.
     const COMPLETENESS_FLOOR = 35;
-    const eligibleCandidates = myProfile
+    const completenessFiltered = myProfile
       ? candidates.filter(c => (typeof c.profile_complete === 'number' ? c.profile_complete : 50) >= COMPLETENESS_FLOOR)
       : candidates;
+
+    // ── Gender preference hard filter (S167) ─────────────────────────────────
+    // A stated Women-only/Men-only household preference (either side) excludes
+    // the candidate entirely — never just scored lower. See isGenderCompatible
+    // in match-score.js for the exact rule (unspecified gender never excludes).
+    const eligibleCandidates = myProfile
+      ? completenessFiltered.filter(c => isGenderCompatible(myProfile, c))
+      : completenessFiltered;
 
     // ── Score each candidate ─────────────────────────────────────────────────
     const scored = eligibleCandidates.map(c => scoreCandidate(c, myProfile, city));
@@ -99,7 +107,12 @@ module.exports = async function handler(req, res) {
     // ── Near misses — only compute when < 4 real matches ─────────────────────
     let near_misses = [];
     if (myProfile && top.length < 4) {
-      near_misses = computeNearMisses(myProfile, eligibleCandidates, city);
+      // S167: pass completenessFiltered (pre-gender-filter), not
+      // eligibleCandidates — computeNearMisses needs the gender-excluded
+      // candidates present in the pool to measure the gender-relaxation
+      // unlock. It applies its own gender-compatible subset internally for
+      // every other near-miss type, so this doesn't change their behaviour.
+      near_misses = computeNearMisses(myProfile, completenessFiltered, city);
     }
 
     // S128: safety filter — never return requester's own profile
