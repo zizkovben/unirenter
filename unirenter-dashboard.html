@@ -10963,7 +10963,7 @@ function calcRenderHistory() {
     list.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:8px 0;">No recent calculations yet.</div>';
     return;
   }
-  const modeIcon = { budget: '💰', break: '📋', increase: '📈' };
+  const modeIcon = { budget: '💰', break: '🔄', increase: '📈' };
   const modeLabel = { budget: 'Budget', break: 'Lease transfer', increase: 'Rent increase' };
   list.innerHTML = arr.map(e => {
     const ago = calcRelTime(e.calculated_at);
@@ -11008,9 +11008,19 @@ function calcRestoreFromHistory(id) {
 }
 
 function calcSetMode(mode) {
+  // S187: was targeting 'calc-panel-*' elements that don't exist (the real
+  // section IDs are 'calc-section-*') and toggling a '.active' class with no
+  // matching CSS rule — visibility here is controlled by inline
+  // style.display, same as the sections' own initial markup. Every call to
+  // this function threw on getElementById(null).classList, so switching to
+  // Lease transfer or Rent increase silently did nothing (only the mode
+  // button's own highlight changed, since that part's IDs happened to be
+  // correct) — this was the reported "calculator tabs" bug.
   ['budget','break','increase'].forEach(m => {
-    document.getElementById('calc-panel-' + m).classList.toggle('active', m === mode);
-    document.getElementById('calc-mode-btn-' + m).classList.toggle('active', m === mode);
+    const section = document.getElementById('calc-section-' + m);
+    if (section) section.style.display = (m === mode) ? 'block' : 'none';
+    const btn = document.getElementById('calc-mode-btn-' + m);
+    if (btn) btn.classList.toggle('active', m === mode);
   });
 }
 
@@ -11110,8 +11120,15 @@ function calcRunBreak(silent) {
 }
 
 function calcRunIncrease(silent) {
-  const curr = parseFloat(document.getElementById('calc-current-rent').value);
-  const prop = parseFloat(document.getElementById('calc-proposed-rent').value);
+  // S187: was reading from 'calc-current-rent'/'calc-proposed-rent' (don't
+  // exist — real input IDs are 'calc-inc-current'/'calc-inc-proposed') and
+  // writing to 'calc-out-inc-wk'/'calc-out-inc-yr' (don't exist — real
+  // output IDs are 'calc-out-inc-week'/'calc-out-inc-annual'). The very
+  // first line threw on .value of null, so clicking "Assess increase" did
+  // nothing and failed silently — no alert, no console-visible feedback
+  // to the user, part of the same "calculator tabs" bug report.
+  const curr = parseFloat(document.getElementById('calc-inc-current').value);
+  const prop = parseFloat(document.getElementById('calc-inc-proposed').value);
   if (!curr || curr <= 0) { alert('Please enter current rent.'); return; }
   if (!prop || prop <= 0) { alert('Please enter proposed rent.'); return; }
 
@@ -11119,9 +11136,9 @@ function calcRunIncrease(silent) {
   const pct = ((wkDiff / curr) * 100).toFixed(1);
   const yrDiff = Math.round(wkDiff * 52);
 
-  document.getElementById('calc-out-inc-wk').textContent = (wkDiff >= 0 ? '+' : '') + '$' + wkDiff.toFixed(0);
+  document.getElementById('calc-out-inc-week').textContent = (wkDiff >= 0 ? '+' : '') + '$' + wkDiff.toFixed(0);
   document.getElementById('calc-out-inc-pct').textContent = (wkDiff >= 0 ? '+' : '') + pct + '%';
-  document.getElementById('calc-out-inc-yr').textContent = (wkDiff >= 0 ? '+' : '') + '$' + Math.abs(yrDiff).toLocaleString() + '/yr';
+  document.getElementById('calc-out-inc-annual').textContent = (wkDiff >= 0 ? '+' : '') + '$' + Math.abs(yrDiff).toLocaleString() + '/yr';
 
   const noticeEl = document.getElementById('calc-increase-notice');
   let noticeHtml = '<strong>Notice period requirements:</strong> Landlords must give at least 60 days written notice of a rent increase in VIC, NSW, and QLD. In SA, WA, and ACT it\'s 60 days. In TAS it\'s 60 days. Rent can only be increased once every 12 months in most states.';
@@ -11135,7 +11152,7 @@ function calcRunIncrease(silent) {
   if (!silent) {
     calcSaveHistory({
       id: calcGenId(), mode: 'increase', calculated_at: Date.now(), expires_at: Date.now() + CALC_HISTORY_TTL,
-      inputs: { 'calc-current-rent': curr, 'calc-proposed-rent': prop },
+      inputs: { 'calc-inc-current': curr, 'calc-inc-proposed': prop },
       result_summary: summary
     });
     calcRenderHistory();
