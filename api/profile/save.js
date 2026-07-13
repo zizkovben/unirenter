@@ -82,6 +82,7 @@ module.exports = async function handler(req, res) {
       'university', 'student_status', 'field_of_study', 'year_of_study',
       'uni_email', 'uni_email_verified', 'email_verified',
       'seeking', 'move_in_date', 'lease_duration', 'household_type',
+      'gender', 'household_gender_pref',
       'suburb_preferences', 'budget_min', 'budget_max',
       'sleep_schedule', 'cleanliness', 'study_location',
       'guests', 'substances', 'dietary', 'pets', 'kitchen_habits', 'age_bracket',
