@@ -2271,12 +2271,54 @@ function renderMatchCard(p) {
 // (cob_summary) which stays on the card as-is. Scaled back after first review:
 // no full lifestyle-detail dump — just avatar, name, vibe emojis (with
 // tooltips), a few key highlight tags, and the narrative.
+// S186: rebuilt to match api/cob.js's actual VIBE_SYSTEM emoji taxonomy —
+// see the matching comment in unirenter-dashboard.html for why. Kept
+// identical across both files intentionally (index.html only displays
+// tooltips, it doesn't run the quiz, but match cards here show the same
+// emoji the dashboard assigns).
 const VIBE_LABELS = {
-  '🌙':'Night owl', '🐦':'Early riser', '📚':'Study-focused', '🎓':'Postgrad',
-  '💼':'Young professional', '🗣️':'Social & outgoing', '🚪':'Keeps to themselves',
-  '🧹':'Neat freak', '🤷':'Relaxed about mess', '🍳':'Home cook', '🎮':'Gamer',
-  '🎵':'Musician', '🏋️':'Gym regular', '🌈':'LGBTQ+ friendly', '🌍':'International',
-  '👥':'Loves having guests', '🏠':'Homebody', '🌿':'Chill vibes'
+  // Primary archetypes — must match api/cob.js VIBE_SYSTEM's PRIMARY EMOJI list
+  '📚':'Study-focused', '🎨':'Creative', '🔬':'Analytical researcher', '🎮':'Gamer / tech-lover',
+  '🍳':'Home cook', '🏃':'Active / fitness-focused', '🧘':'Calm & mindful', '🌿':'Chill vibes',
+  '🎉':'Social & outgoing', '🛋️':'Homebody', '✈️':'Adventurer', '🌙':'Night owl',
+  '☀️':'Early riser', '💬':'Community connector', '🎵':'Music lover', '🌍':'Global citizen',
+  '🏳️‍🌈':'LGBTQ+ friendly', '🐾':'Pet person',
+  // Secondary — ACADEMIC & INTELLECTUAL
+  '☕':'Runs on coffee', '📖':'Always has a book on the go', '📐':'Very analytical', '🗂️':'Hyper-organised',
+  '📝':'Always studying', '🔭':'Curious about everything', '💡':'Big ideas person', '🎓':'Career-focused',
+  // Secondary — SOCIAL & WARMTH
+  '🍺':'Loves a night out', '🥂':'Celebrations person', '🎊':'Party starter', '🤝':'Natural networker',
+  '👐':'Warm & open', '❤️':'Big heart', '🫂':'Affectionate', '🗣️':'Loves deep conversations',
+  '👯':'Always with friends', '💌':'Pen pal energy', '🌟':'Natural leader',
+  // Secondary — FOOD & KITCHEN
+  '🍜':'Noodle obsessed', '🧁':'Stress baker', '🥗':'Plant-based / vegan', '🍱':'Meal prepper',
+  '🫕':'Experimental cook', '🍕':'Takeaway regular', '🧃':'Teetotal', '🫖':'Tea person',
+  '🌶️':'Spicy food obsessed', '🥘':'Big batch cooker',
+  // Secondary — FITNESS & BODY
+  '🏊':'Swimmer', '⚽':'Team sport', '🧗':'Climber', '🚴':'Cyclist',
+  '🏋️':'Gym regular', '🤸':'Dancer / very flexible', '🥊':'Martial arts', '🎾':'Racquet sports',
+  // Secondary — CREATIVE & ARTISTIC
+  '✏️':'Always sketching', '🖌️':'Painter', '📸':'Photographer', '🎬':'Film lover',
+  '🎸':'Guitarist', '🎹':'Pianist', '🎤':'Singer', '🎧':'Music always playing',
+  '📻':'Podcast addict', '✍️':'Writer', '🎭':'Theatre kid',
+  // Secondary — NATURE & ENVIRONMENT
+  '🌱':'Environmentalist', '🪴':'Plant parent', '🌊':'Ocean person', '🏔️':'Mountain person',
+  '🌸':'Seasonal soul', '♻️':'Zero-waste', '🌻':'Sunshine seeker',
+  // Secondary — CULTURAL & IDENTITY
+  '🕌':'Faith-observant', '🙏':'Spiritual / mindful practice', '🪬':'Superstitious', '🎎':'Connected to heritage',
+  '🌏':'Homesick but happy', '🗺️':'Wants to see everywhere',
+  // Secondary — LANGUAGE & COMMUNICATION
+  '🌐':'Multilingual', '📱':'Always connected', '🤫':'Very private', '📢':'Expressive & open',
+  // Secondary — HOME STYLE & HABITS
+  '🧹':'Tidiness matters a lot', '🕯️':'Ambience matters', '🪑':'Makes a space their own', '⏰':'Punctual & routine-driven',
+  '🔇':'Needs quiet to function', '😴':'Champion sleeper', '🛁':'Slow mornings',
+  // Secondary — RELATIONSHIPS & GUESTS
+  '💑':'Partner visits regularly', '👨‍👩‍👧':'Family stays sometimes', '🏠':'Open house, welcomes people', '🚪':'Needs personal space respected',
+  '💞':'Romantic soul', '🤐':'Private about personal life',
+  // Secondary — RARE & UNEXPECTED
+  '🎲':'Spontaneous', '🃏':'Dry sense of humour', '🦉':'Old soul', '🌈':'Genuinely optimistic',
+  '🧊':'Cool under pressure', '🎯':'Goal-oriented', '🪄':'Creative problem solver', '🦋':'In personal transformation',
+  '🎪':'Life of the party', '🧩':'Puzzle solver', '📡':'Loner who loves company', '🎒':'Always ready to go'
 };
 const PDM_SLEEP_LABELS = { early_bird: '🌅 Early bird', night_owl: '🌃 Night owl', flexible: '🔄 Flexible' };
 const PDM_CLEAN_LABELS = { very_tidy: '🧹 Very tidy', tidy: '🧹 Tidy', average: '⚖️ Average clean', relaxed: '😌 Relaxed' };

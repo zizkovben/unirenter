@@ -5958,15 +5958,58 @@ function openSettingsCollapse() {
 // VIBE SYSTEM — Session 42
 // ══════════════════════════════════════════════════════════════
 
-const VIBE_PRIMARY_PALETTE = ['🌙','🐦','📚','🎓','💼','🗣️','🚪','🧹','🤷','🍳','🎮','🎵','🏋️','🌈','🌍','👥','🏠','🌿'];
+const VIBE_PRIMARY_PALETTE = ['📚','🎨','🔬','🎮','🍳','🏃','🧘','🌿','🎉','🛋️','✈️','🌙','☀️','💬','🎵','🌍','🏳️‍🌈','🐾'];
 // S152: hoisted to global scope (was local to renderVibeFilterChips only) so
 // pdmOpen()'s emoji tooltips can share the same explanation text.
+// S186: rebuilt to match api/cob.js's actual VIBE_SYSTEM emoji taxonomy (S96
+// rewrite) — this was still the original S42 18-emoji palette, which the
+// live quiz stopped using once it started calling the real vibe_assign
+// branch, leaving every current primary/secondary emoji unrecognised here
+// (fell back to the generic "Vibe type" tooltip). Keep this in sync with
+// api/cob.js's PRIMARY EMOJI / SECONDARY EMOJI lists if that prompt changes.
 const VIBE_LABELS = {
-  '🌙':'Night owl', '🐦':'Early riser', '📚':'Study-focused', '🎓':'Postgrad',
-  '💼':'Young professional', '🗣️':'Social & outgoing', '🚪':'Keeps to themselves',
-  '🧹':'Neat freak', '🤷':'Relaxed about mess', '🍳':'Home cook', '🎮':'Gamer',
-  '🎵':'Musician', '🏋️':'Gym regular', '🌈':'LGBTQ+ friendly', '🌍':'International',
-  '👥':'Loves having guests', '🏠':'Homebody', '🌿':'Chill vibes'
+  // Primary archetypes — must match api/cob.js VIBE_SYSTEM's PRIMARY EMOJI list
+  '📚':'Study-focused', '🎨':'Creative', '🔬':'Analytical researcher', '🎮':'Gamer / tech-lover',
+  '🍳':'Home cook', '🏃':'Active / fitness-focused', '🧘':'Calm & mindful', '🌿':'Chill vibes',
+  '🎉':'Social & outgoing', '🛋️':'Homebody', '✈️':'Adventurer', '🌙':'Night owl',
+  '☀️':'Early riser', '💬':'Community connector', '🎵':'Music lover', '🌍':'Global citizen',
+  '🏳️‍🌈':'LGBTQ+ friendly', '🐾':'Pet person',
+  // Secondary — ACADEMIC & INTELLECTUAL
+  '☕':'Runs on coffee', '📖':'Always has a book on the go', '📐':'Very analytical', '🗂️':'Hyper-organised',
+  '📝':'Always studying', '🔭':'Curious about everything', '💡':'Big ideas person', '🎓':'Career-focused',
+  // Secondary — SOCIAL & WARMTH
+  '🍺':'Loves a night out', '🥂':'Celebrations person', '🎊':'Party starter', '🤝':'Natural networker',
+  '👐':'Warm & open', '❤️':'Big heart', '🫂':'Affectionate', '🗣️':'Loves deep conversations',
+  '👯':'Always with friends', '💌':'Pen pal energy', '🌟':'Natural leader',
+  // Secondary — FOOD & KITCHEN
+  '🍜':'Noodle obsessed', '🧁':'Stress baker', '🥗':'Plant-based / vegan', '🍱':'Meal prepper',
+  '🫕':'Experimental cook', '🍕':'Takeaway regular', '🧃':'Teetotal', '🫖':'Tea person',
+  '🌶️':'Spicy food obsessed', '🥘':'Big batch cooker',
+  // Secondary — FITNESS & BODY
+  '🏊':'Swimmer', '⚽':'Team sport', '🧗':'Climber', '🚴':'Cyclist',
+  '🏋️':'Gym regular', '🤸':'Dancer / very flexible', '🥊':'Martial arts', '🎾':'Racquet sports',
+  // Secondary — CREATIVE & ARTISTIC
+  '✏️':'Always sketching', '🖌️':'Painter', '📸':'Photographer', '🎬':'Film lover',
+  '🎸':'Guitarist', '🎹':'Pianist', '🎤':'Singer', '🎧':'Music always playing',
+  '📻':'Podcast addict', '✍️':'Writer', '🎭':'Theatre kid',
+  // Secondary — NATURE & ENVIRONMENT
+  '🌱':'Environmentalist', '🪴':'Plant parent', '🌊':'Ocean person', '🏔️':'Mountain person',
+  '🌸':'Seasonal soul', '♻️':'Zero-waste', '🌻':'Sunshine seeker',
+  // Secondary — CULTURAL & IDENTITY
+  '🕌':'Faith-observant', '🙏':'Spiritual / mindful practice', '🪬':'Superstitious', '🎎':'Connected to heritage',
+  '🌏':'Homesick but happy', '🗺️':'Wants to see everywhere',
+  // Secondary — LANGUAGE & COMMUNICATION
+  '🌐':'Multilingual', '📱':'Always connected', '🤫':'Very private', '📢':'Expressive & open',
+  // Secondary — HOME STYLE & HABITS
+  '🧹':'Tidiness matters a lot', '🕯️':'Ambience matters', '🪑':'Makes a space their own', '⏰':'Punctual & routine-driven',
+  '🔇':'Needs quiet to function', '😴':'Champion sleeper', '🛁':'Slow mornings',
+  // Secondary — RELATIONSHIPS & GUESTS
+  '💑':'Partner visits regularly', '👨‍👩‍👧':'Family stays sometimes', '🏠':'Open house, welcomes people', '🚪':'Needs personal space respected',
+  '💞':'Romantic soul', '🤐':'Private about personal life',
+  // Secondary — RARE & UNEXPECTED
+  '🎲':'Spontaneous', '🃏':'Dry sense of humour', '🦉':'Old soul', '🌈':'Genuinely optimistic',
+  '🧊':'Cool under pressure', '🎯':'Goal-oriented', '🪄':'Creative problem solver', '🦋':'In personal transformation',
+  '🎪':'Life of the party', '🧩':'Puzzle solver', '📡':'Loner who loves company', '🎒':'Always ready to go'
 };
 
 // S150 rebuild — restores the Session 96 personalisation design that was
@@ -6366,51 +6409,38 @@ async function _vibeGenerate() {
   _vibePending.lifestyle    = _vibeQuizData;
   _vibePending.quiz_answers = _vibeQuizData;
 
-  var promptBody =
-    'You are Cob — a warm AI assistant for UniRenter, an Australian student accommodation platform.\n\n' +
-    'A student has answered 5 questions about themselves as a housemate. Your job is to work out their vibe equation and write two things: a short one-line portrait, and a fuller narrative paragraph, both for their profile.\n\n' +
-    'LOCKED PRIMARY EMOJI PALETTE (pick exactly one, based on ALL the answers together — no single answer is a forced pick):\n' +
-    '🌙 Night owl | 🐦 Early riser | 📚 Study-focused | 🎓 Postgrad | 💼 Young professional | 🗣️ Social & outgoing | 🚪 Keeps to themselves | 🧹 Neat freak | 🤷 Relaxed about mess | 🍳 Home cook | 🎮 Gamer | 🎵 Musician | 🏋️ Gym regular | 🌈 LGBTQ+ friendly | 🌍 International | 👥 Loves having guests | 🏠 Homebody | 🌿 Chill vibes\n\n' +
-    'SECONDARY EMOJI — pick one that adds personality flavour from this curated set (not restricted to):\n' +
-    '💻 🌙 💪 🧘 🎨 📖 🎬 📺 🌳 🪴 🔥 🛀 🚫 📦 🌱 🍖 ☕ 🍺 🥡 🛍 🐱 🐶 🐦 🐠 💑 👨‍👩‍👧 🤝 🗺 🍽 🌍 ✈ 🎊 👶 ♿\n\n' +
-    'RULES:\n' +
-    '- Weigh all 5 answers together — no single answer overrides the rest\n' +
-    '- Secondary emoji adds personality flavour — be specific, not generic\n' +
-    '- "summary" is 1-2 sentences, warm and specific — not generic. Lead with their strongest coexistence trait.\n' +
-    '- Summary format: starts with primary emoji, then a quoted sentence or two. Example: 🧹 "Neat freak who cooks every night and is strict about kitchen cleanliness — total homebody, quiet after 10pm."\n' +
-    '- "narrative" is a fuller, 3-5 sentence third-person paragraph weaving together ALL 5 answers into a rounded picture of them as a housemate — sleep habits, social style, cleanliness, food/kitchen. Warmer and more descriptive than the summary, but still honest and specific rather than generic filler. No quotes, no emoji, plain prose. This is shown on their full profile (not the match card), so it can go into more depth than the summary.\n' +
-    '- Do NOT give legal advice or housing recommendations. Just write the portrait.\n' +
-    '- NEVER use the word "legal"\n\n' +
-    'STUDENT ANSWERS:\n' +
-    'Q1 (Exam/deadline behaviour at home): ' + (_vibeQuizData.exam_study || '(skipped)') + '\n' +
-    'Q2 (Home life): ' + (_vibeQuizData.home_life || '(skipped)') + '\n' +
-    'Q3 (Food & kitchen): ' + (_vibeQuizData.food_kitchen || '(skipped)') + '\n' +
-    'Q4 (Shared spaces): ' + (_vibeQuizData.shared_spaces || '(skipped)') + '\n' +
-    'Q5 (Social style — most important): ' + (_vibeQuizData.social_style || '(skipped)') + '\n\n' +
-    'Respond ONLY with a JSON object, no preamble, no markdown fences:\n' +
-    '{"primary":"<emoji>","secondary":"<emoji>","summary":"<primary_emoji> \\"<1-2 sentences>\\"","narrative":"<3-5 sentence paragraph, plain prose>"}';
+  // S186: was previously its own ad-hoc prompt + generic /api/cob chat call,
+  // built against a small, stale 18-primary/34-secondary palette that never
+  // matched api/cob.js's actual VIBE_SYSTEM (S96 rewrite: 18 different
+  // primary archetypes + ~90 categorised secondary emoji). That richer
+  // branch already existed server-side (purpose: 'vibe_assign') but nothing
+  // in the client ever called it. This now calls it directly instead of
+  // re-implementing the prompt here — one emoji taxonomy, defined once, in
+  // api/cob.js.
+  var questionTexts = (VIBE_QUESTIONS || []).map(function(q) { return q.q; });
 
   try {
     var res = await fetch('/api/cob', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: [{ role:'user', content: promptBody }],
-        systemPrompt: 'You are Cob. Respond only with the JSON object requested. No extra text.'
+        purpose: 'vibe_assign',
+        answers: _vibeAnswers,
+        questions: questionTexts
       })
     });
     var data = await res.json();
-    var raw  = (data.reply || data.message || '').trim();
-    // Strip markdown fences if present
-    raw = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
-    var parsed = JSON.parse(raw);
+    if (!res.ok || !data.vibe_result) {
+      throw new Error(data.error || 'Vibe assignment failed');
+    }
+    var parsed = data.vibe_result;
 
     clearInterval(dotInterval);
     document.getElementById('vibe-card-generating').style.display = 'none';
 
-    var primary   = parsed.primary   || '🌿';
-    var secondary = parsed.secondary || '☕';
-    var summary   = parsed.summary   || primary + ' "' + 'A thoughtful housemate with their own rhythm."';
+    var primary   = parsed.vibe_emoji_primary   || '🌿';
+    var secondary = parsed.vibe_emoji_secondary || '☕';
+    var summary   = parsed.cob_summary   || primary + ' "' + 'A thoughtful housemate with their own rhythm."';
     var narrative = (parsed.narrative || '').trim() || null;
 
     // Validate primary is in palette
