@@ -2146,9 +2146,19 @@ async function vmCheckOTP() {
       // ever written on Step 6, the final step, so its presence means this
       // person genuinely completed the flow at least once. No guessing needed.
       const hasExistingProfile = !!(p.student_status && p.budget_max);
+      // S185: if this visitor was bounced here from the dashboard (or another
+      // page) while signed out, the auth guard stashed the intended
+      // destination (path + query + hash) before redirecting. Now that
+      // they're verified, send them straight back there instead of always
+      // landing on the default matches view.
+      let _redirectAfterLogin = null;
+      try { _redirectAfterLogin = localStorage.getItem('unirenter_redirect_after_login'); } catch (e) {}
       setTimeout(() => {
         closeModal('verify-modal');
-        if (hasExistingProfile) {
+        if (_redirectAfterLogin) {
+          try { localStorage.removeItem('unirenter_redirect_after_login'); } catch (e) {}
+          window.location.href = _redirectAfterLogin;
+        } else if (hasExistingProfile) {
           welcomeBackFlow();
         } else if (_verifyDestination === 'signin') {
           showToast('👋 No profile found yet', "We couldn't find an existing profile for that email — pick a status below to get started.");

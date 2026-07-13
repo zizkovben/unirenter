@@ -4317,14 +4317,25 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 // S135: Auth guard — runs synchronously before any dashboard content paints.
 // Prevents an unsigned-in visitor from ever seeing a rendered dashboard
 // (which previously showed dummy/cached match cards that looked real).
+// S185: before bouncing, stash the intended destination (path + query + hash)
+// so the homepage can send the user back here after they verify, instead of
+// always dropping them on the default matches view.
 (function() {
+  function stashRedirectDestination() {
+    try {
+      var dest = window.location.pathname + window.location.search + window.location.hash;
+      if (dest && dest !== '/') localStorage.setItem('unirenter_redirect_after_login', dest);
+    } catch (e2) {}
+  }
   try {
     var email = localStorage.getItem('unirenter_email');
     var verified = localStorage.getItem('unirenter_email_verified') === '1';
     if (!email || !verified) {
+      stashRedirectDestination();
       window.location.replace('/');
     }
   } catch (e) {
+    stashRedirectDestination();
     window.location.replace('/');
   }
 })();
@@ -5689,8 +5700,14 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 
 <script>
 // ── Auth guard — redirect unauthenticated users before DOM paint ──────────────
+// S185: same redirect-destination stash as the S135 guard above, kept here too
+// since this second guard fires independently later in the body.
 (function() {
   if (localStorage.getItem('unirenter_email_verified') !== '1') {
+    try {
+      var dest = window.location.pathname + window.location.search + window.location.hash;
+      if (dest && dest !== '/') localStorage.setItem('unirenter_redirect_after_login', dest);
+    } catch (e2) {}
     window.location.replace('/');
   }
 })();
