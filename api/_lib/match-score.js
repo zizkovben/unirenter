@@ -23,6 +23,43 @@ const WEIGHTS = {
 };
 // 22+18+18+13+10+8+6+3+2 = 100
  
+// ── Gender preference (S167) ─────────────────────────────────────────────
+// Hard filter, not a scoring factor — checked by the caller (api/matches.js)
+// before scoreCandidate ever runs, so a mismatch means the candidate never
+// appears at all rather than just scoring lower.
+//
+// `gender` = own identity, single value ('Woman' | 'Man' | 'Non-binary' |
+// 'Prefer not to say' | null). `household_gender_pref` = comma-joined
+// multi-select, e.g. "👩 Women only, 🏳️‍🌈 LGBTQ+ friendly important".
+//
+// Only the mutually-exclusive Women-only / Men-only signal is used here.
+// "🤝 Mixed gender — no preference", "🏳️‍🌈 LGBTQ+ friendly important" and
+// "📵 No couples" are separate dimensions and don't affect this filter.
+//
+// Unspecified/missing gender on either side is NEVER used to exclude —
+// a mismatch is only ever a hard filter when both the stated household
+// preference and the other person's stated identity are known and conflict.
+// This mirrors the "never used to exclude you" treatment already applied
+// to age_bracket elsewhere in this file.
+const HH_WOMEN_ONLY = '👩 Women only';
+const HH_MEN_ONLY   = '👨 Men only';
+
+function isGenderCompatible(myProfile, candidate) {
+  if (!myProfile) return true;
+
+  const myPrefTokens = (myProfile.household_gender_pref || '').split(', ').filter(Boolean);
+  const cPrefTokens  = (candidate.household_gender_pref || '').split(', ').filter(Boolean);
+  const myGender = myProfile.gender || null;
+  const cGender  = candidate.gender || null;
+
+  if (myPrefTokens.includes(HH_WOMEN_ONLY) && cGender && cGender !== 'Woman') return false;
+  if (myPrefTokens.includes(HH_MEN_ONLY)   && cGender && cGender !== 'Man')   return false;
+  if (cPrefTokens.includes(HH_WOMEN_ONLY)  && myGender && myGender !== 'Woman') return false;
+  if (cPrefTokens.includes(HH_MEN_ONLY)    && myGender && myGender !== 'Man')   return false;
+
+  return true;
+}
+
 // ── Score a single candidate against the user's profile ─────────────────────
 function scoreCandidate(c, myProfile, city) {
   let score = 0;
@@ -192,22 +229,31 @@ function activityBoost(lastSeen) {
 function computeNearMisses(myProfile, candidates, city) {
   const MIN_UNLOCK = 5;
   const results = [];
+
+  // ── 0. Gender-compatible subset (S167) ─────────────────────────────────
+  // `candidates` here is the completeness-filtered pool BEFORE the gender
+  // hard-filter (api/matches.js passes it in that way deliberately, so the
+  // gender-relaxation block below can measure the unlock). Every other
+  // near-miss type (suburb/budget/accommodation) should only ever count
+  // gender-compatible candidates as "current" or "relaxed" — those
+  // relaxations aren't meant to also relax gender.
+  const genderCandidates = candidates.filter(c => isGenderCompatible(myProfile, c));
  
   // ── 1. Suburb relaxation ──────────────────────────────────────────────────
   if (myProfile.suburb_preferences && myProfile.suburb_preferences.length > 0) {
     const relaxedProfile = { ...myProfile, suburb_preferences: [] };
-    const relaxedMatches = candidates
+    const relaxedMatches = genderCandidates
       .map(c => scoreCandidate(c, relaxedProfile, city))
       .filter(c => c.match_score >= 50);
  
-    const currentMatches = candidates
+    const currentMatches = genderCandidates
       .map(c => scoreCandidate(c, myProfile, city))
       .filter(c => c.match_score >= 50);
  
     const unlock = relaxedMatches.length - currentMatches.length;
  
     if (unlock >= MIN_UNLOCK) {
-      const nearMissCandidates = candidates.filter(c => {
+      const nearMissCandidates = genderCandidates.filter(c => {
         const relaxedScore = scoreCandidate(c, relaxedProfile, city).match_score;
         const currentScore = scoreCandidate(c, myProfile, city).match_score;
         return relaxedScore >= 50 && currentScore < 50;
@@ -239,11 +285,11 @@ function computeNearMisses(myProfile, candidates, city) {
   // ── 2. Budget relaxation ──────────────────────────────────────────────────
   if (myProfile.budget_max) {
     const relaxedProfile = { ...myProfile, budget_max: myProfile.budget_max + 30 };
-    const relaxedMatches = candidates
+    const relaxedMatches = genderCandidates
       .map(c => scoreCandidate(c, relaxedProfile, city))
       .filter(c => c.match_score >= 50);
  
-    const currentMatches = candidates
+    const currentMatches = genderCandidates
       .map(c => scoreCandidate(c, myProfile, city))
       .filter(c => c.match_score >= 50);
  
@@ -271,11 +317,11 @@ function computeNearMisses(myProfile, candidates, city) {
     const expanded = seekingExpansion[myProfile.seeking] || [];
     if (expanded.length > 1) {
       const relaxedProfile = { ...myProfile, seeking: null }; // null = any
-      const relaxedMatches = candidates
+      const relaxedMatches = genderCandidates
         .map(c => scoreCandidate(c, relaxedProfile, city))
         .filter(c => c.match_score >= 50);
  
-      const currentMatches = candidates
+      const currentMatches = genderCandidates
         .map(c => scoreCandidate(c, myProfile, city))
         .filter(c => c.match_score >= 50);
  
@@ -294,12 +340,41 @@ function computeNearMisses(myProfile, candidates, city) {
     }
   }
  
-  // ── 4. Break lease listings ───────────────────────────────────────────────
+  // ── 4. Gender preference relaxation (S167) ────────────────────────────────
+  // Uses the full pre-gender-filter `candidates` pool (not genderCandidates)
+  // for the relaxed side, since this is specifically measuring what the
+  // gender filter itself is excluding.
+  const myHhPrefTokens = (myProfile.household_gender_pref || '').split(', ').filter(Boolean);
+  const hasGenderRestriction = myHhPrefTokens.includes(HH_WOMEN_ONLY) || myHhPrefTokens.includes(HH_MEN_ONLY);
+  if (hasGenderRestriction) {
+    const currentMatches = genderCandidates
+      .map(c => scoreCandidate(c, myProfile, city))
+      .filter(c => c.match_score >= 50);
+
+    const relaxedMatches = candidates
+      .map(c => scoreCandidate(c, myProfile, city))
+      .filter(c => c.match_score >= 50);
+
+    const unlock = relaxedMatches.length - currentMatches.length;
+
+    if (unlock >= MIN_UNLOCK) {
+      const genderLabel = myHhPrefTokens.includes(HH_WOMEN_ONLY) ? 'women-only' : 'men-only';
+      results.push({
+        constraint: 'gender',
+        unlock,
+        label:      'gender preference',
+        suggestion: `Found ${currentMatches.length} ${genderLabel} matches — but ${unlock} more if you'd consider mixed households`,
+        current_count: currentMatches.length,
+      });
+    }
+  }
+
+  // ── 5. Break lease listings ───────────────────────────────────────────────
   // Placeholder — will be meaningful once lease_listings table is populated
  
   results.sort((a, b) => b.unlock - a.unlock);
  
-  // ── 5. Profile completeness (S81) ─────────────────────────────────────────
+  // ── 6. Profile completeness (S81) ─────────────────────────────────────────
   const COMPLETENESS_NUDGE_THRESHOLD = 70;
   if (typeof myProfile.profile_complete === 'number' && myProfile.profile_complete < COMPLETENESS_NUDGE_THRESHOLD) {
     results.unshift({
@@ -433,6 +508,7 @@ module.exports = {
   activityBoost,
   scorePets,
   scoreKitchen,
+  isGenderCompatible,
   WEIGHTS,
 };
  
