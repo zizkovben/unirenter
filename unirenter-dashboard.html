@@ -4699,6 +4699,13 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
     <div class="msg-layout">
       <!-- Sidebar -->
       <div class="msg-sidebar" id="msg-sidebar">
+        <div id="msg-requests-section" style="display:none;">
+          <div class="msg-sidebar-head" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>Requests</span>
+            <span id="msg-requests-count" style="background:var(--brand-coral,#E8623A);color:#fff;border-radius:10px;padding:1px 8px;font-size:12px;"></span>
+          </div>
+          <div id="msg-requests-list"></div>
+        </div>
         <div class="msg-sidebar-head">Conversations</div>
         <div id="msg-contacts-list">
           <div id="msg-contacts-loading" style="padding:24px 16px;text-align:center;color:var(--text-muted);font-size:13px;">Loading…</div>
@@ -8302,6 +8309,10 @@ async function loadConversations() {
 
     function stageBadge(c) {
       if (c.is_household) return '<span class="msg-stage-badge household">🏠 Housemates</span>';
+      // S181: connection-request states take priority over the normal decay
+      // badges — they describe whether a conversation is even open yet.
+      if (c.is_pending_outbound) return '<span class="msg-stage-badge cooling">Request sent</span>';
+      if (c.is_declined_of_mine) return '<span class="msg-stage-badge cooling">Not taking new connections right now</span>';
       if (c.status === 'cooling') {
         return c.has_reply
           ? '<span class="msg-stage-badge cooling">Quiet · ' + c.days_inactive + 'd</span>'
@@ -8353,6 +8364,8 @@ async function loadConversations() {
       }
     }
 
+    renderRequestsSection(data.requests || []);
+
     var totalUnread = data.totalUnread || 0;
     var badge = document.getElementById('msg-badge');
     if (badge) {
@@ -8371,6 +8384,68 @@ async function loadConversations() {
     console.warn('loadConversations error:', err);
     list.innerHTML = '<div style="padding:24px 16px;text-align:center;color:var(--text-muted);font-size:13px;">Could not load conversations.</div>';
   }
+}
+
+// ── S181: Request → Accept gate — Requests card ──────────────────────────────
+// Pending-inbound requests come back from get.js already split out of
+// `conversations` (see requests[] in the response). Each has the opening
+// message as last_message so the recipient can see what was said before
+// deciding, without it counting toward the messages unread badge.
+function renderRequestsSection(requests) {
+  var section = document.getElementById('msg-requests-section');
+  var list = document.getElementById('msg-requests-list');
+  var count = document.getElementById('msg-requests-count');
+  if (!section || !list) return;
+  if (!requests.length) { section.style.display = 'none'; list.innerHTML = ''; return; }
+  section.style.display = '';
+  count.textContent = requests.length;
+  list.innerHTML = '';
+  requests.forEach(function(r) {
+    var el = document.createElement('div');
+    el.className = 'msg-contact';
+    el.dataset.email = r.partner_email;
+    var initials = msgInitials(r.display_name);
+    var bg = msgBg(r.partner_email);
+    var preview = (r.last_message || '').slice(0,40) + ((r.last_message || '').length > 40 ? '…' : '');
+    el.innerHTML =
+      '<div class="msg-contact-avatar" style="background:' + bg + ';">' + initials + '</div>' +
+      '<div class="msg-contact-info">' +
+        '<div class="msg-contact-name">' + (r.display_name || 'Student') + '</div>' +
+        '<div class="msg-contact-preview">' + preview + '</div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">' +
+        '<button class="msg-followup-btn primary" style="padding:4px 10px;font-size:12px;" onclick="event.stopPropagation();respondToConnectionRequest(\'' + escMsgAttr(r.partner_email) + '\',\'accept\',this)">Accept</button>' +
+        '<button class="msg-followup-btn" style="padding:4px 10px;font-size:12px;" onclick="event.stopPropagation();respondToConnectionRequest(\'' + escMsgAttr(r.partner_email) + '\',\'decline\',this)">Decline</button>' +
+      '</div>';
+    list.appendChild(el);
+  });
+}
+
+async function respondToConnectionRequest(senderEmail, action, btnEl) {
+  var email = localStorage.getItem('unirenter_email');
+  if (!email || !senderEmail) return;
+  var row = btnEl ? btnEl.closest('.msg-contact') : null;
+  if (row) row.style.opacity = '0.5';
+  try {
+    var res = await fetch('/api/messages/respond-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, sender_email: senderEmail, action: action })
+    });
+    var out = await res.json();
+    if (!res.ok || out.error) throw new Error(out.error || 'Could not respond to request');
+    if (action === 'accept') {
+      showToast('🤝 Connected', 'You can now message each other freely.');
+    } else {
+      showToast('Request declined', 'They will not be notified.');
+    }
+  } catch (err) {
+    console.warn('respondToConnectionRequest error:', err);
+    showToast('Something went wrong', 'Could not save your response — try again.');
+    if (row) row.style.opacity = '';
+    return;
+  }
+  loadConversations();
 }
 
 function toggleArchivedRequests() {
@@ -8441,6 +8516,13 @@ function updateMarkMatchedButton(partnerEmail) {
   if (!btn) return;
   var convo = (window._followupMap || {})[partnerEmail];
   var confirmed = !!(convo && convo.matched_confirmed_at);
+  // S181: request_status is null for legacy/pre-gate threads (treat as
+  // accepted) and 'accepted' once a request has gone through — anything
+  // else (pending-outbound, declined) means there's no open connection yet.
+  var status = convo && convo.request_status;
+  var isAccepted = !status || status === 'accepted';
+  btn.style.display = isAccepted ? '' : 'none';
+  if (!isAccepted) return;
   btn.disabled = confirmed;
   btn.innerHTML = confirmed ? '✅ Matched' : '✅ Mark as matched';
   btn.title = confirmed
