@@ -448,9 +448,34 @@ module.exports = async function handler(req, res) {
     console.warn('user_blocks lookup error (non-fatal):', blockErr.message);
   }
 
+  // S158: message reactions — grouped by message_id into { emoji: [reactor
+  // emails] }, matching the shape msgReactionsHtml() expects client-side.
+  // This was the missing half of the S158 feature: react.js could record
+  // reactions but nothing ever read them back, so every message rendered
+  // with zero active reaction pills regardless of what had been tapped.
+  let reactionsByMessage = {};
+  try {
+    const messageIds = (data || []).map(m => m.id);
+    if (messageIds.length > 0) {
+      const { data: reactionRows, error: reactionsErr } = await supabase
+        .from('message_reactions')
+        .select('message_id, emoji, reactor_email')
+        .in('message_id', messageIds);
+      if (reactionsErr) throw reactionsErr;
+      (reactionRows || []).forEach(r => {
+        if (!reactionsByMessage[r.message_id]) reactionsByMessage[r.message_id] = {};
+        if (!reactionsByMessage[r.message_id][r.emoji]) reactionsByMessage[r.message_id][r.emoji] = [];
+        reactionsByMessage[r.message_id][r.emoji].push(r.reactor_email);
+      });
+    }
+  } catch (reactionsErr) {
+    console.warn('message_reactions lookup error (non-fatal):', reactionsErr.message);
+  }
+
   const messagesWithFlags = (data || []).map(m => ({
     ...m,
     flag_categories: flagCategoriesByMessage[m.id] || [],
+    reactions: reactionsByMessage[m.id] || {},
   }));
 
   return res.status(200).json({ messages: messagesWithFlags, you_blocked_them: youBlockedThem });
