@@ -3037,6 +3037,12 @@ async function saveProfileToSupabase() {
   function getChips(groupId) {
     return Array.from(document.querySelectorAll('#' + groupId + ' .chip.selected')).map(function(c){ return c.textContent.trim(); });
   }
+  // S167: chips-gender and chips-hh-gender existed in the UI and persisted to
+  // localStorage for step-recovery, but were never read into profileData below —
+  // confirmed by re-reading this function fresh from GitHub. Neither ever reached
+  // Supabase before this fix.
+  const gender             = getChip('chips-gender');
+  const householdGenderPref = getChips('chips-hh-gender').join(', ') || null;
   const ageBracket = getChip('chips-age');
   const sleepSchedule = getChip('chips-sleep');
   const cleanliness   = getChip('chips-clean');
@@ -3078,6 +3084,7 @@ async function saveProfileToSupabase() {
     budget_min: budgetMin, budget_max: budgetMax,
     sleep_schedule: sleepSchedule, cleanliness, study_location: studyLocation,
     guests, substances, dietary, pets, kitchen_habits: kitchenHabits, age_bracket: ageBracket, city: 'melbourne', profile_complete: profileComplete,
+    gender, household_gender_pref: householdGenderPref,
     language_home: languageHome, languages_spoken: languagesSpoken.length > 0 ? languagesSpoken : null,
     stay_duration: stayDuration, cob_summary: cobSummary,
     vibe_emoji_primary: (localStorage.getItem('ur_avatar_emoji') || vibeEmojiPrimary), vibe_emoji_secondary: vibeEmojiSecondary,
@@ -3321,6 +3328,9 @@ function fireCobPhase2Nudge() {
       break;
     case 'accommodation_type':
       nudgeText = `I found ${miss.unlock} more matches if you open up your accommodation type a little 🏠 — worth considering?`;
+      break;
+    case 'gender':
+      nudgeText = `Found ${miss.current_count} matches with your gender preference — but ${miss.unlock} more if you'd consider mixed households 🤝 — worth a look?`;
       break;
     case 'profile_completeness':
       var liveCompleteness = (typeof stepWeights !== 'undefined' && typeof currentStep !== 'undefined') ? (stepWeights[currentStep-1] || miss.completeness) : miss.completeness;
