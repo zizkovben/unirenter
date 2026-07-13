@@ -51,12 +51,16 @@ module.exports = async function handler(req, res) {
     if (!isParticipant) return res.status(403).json({ error: 'Not a participant in this conversation' });
 
     // Toggle: does this reactor already have this exact emoji on this message?
+    // S186: the message_reactions table's reactor column is named `email`
+    // (confirmed via information_schema — it already existed from an
+    // earlier, undocumented attempt at this feature), not `reactor_email`.
+    // Code aligned to the live schema rather than renaming a live column.
     const { data: existing, error: existingErr } = await supabase
       .from('message_reactions')
       .select('id')
       .eq('message_id', message_id)
       .eq('emoji', emoji)
-      .eq('reactor_email', reactor_email)
+      .eq('email', reactor_email)
       .maybeSingle();
 
     if (existingErr) {
@@ -78,7 +82,7 @@ module.exports = async function handler(req, res) {
 
     const { error: insErr } = await supabase
       .from('message_reactions')
-      .insert({ message_id, emoji, reactor_email });
+      .insert({ message_id, emoji, email: reactor_email });
     if (insErr) {
       console.error('react.js insert error:', insErr);
       return res.status(500).json({ error: 'Failed to add reaction', detail: insErr.message });

@@ -457,15 +457,19 @@ module.exports = async function handler(req, res) {
   try {
     const messageIds = (data || []).map(m => m.id);
     if (messageIds.length > 0) {
+      // S186: message_reactions' reactor column is `email`, not
+      // `reactor_email` — confirmed via information_schema against the live
+      // table (it already existed from an earlier, undocumented attempt at
+      // this feature). Aligned to the live schema rather than renaming it.
       const { data: reactionRows, error: reactionsErr } = await supabase
         .from('message_reactions')
-        .select('message_id, emoji, reactor_email')
+        .select('message_id, emoji, email')
         .in('message_id', messageIds);
       if (reactionsErr) throw reactionsErr;
       (reactionRows || []).forEach(r => {
         if (!reactionsByMessage[r.message_id]) reactionsByMessage[r.message_id] = {};
         if (!reactionsByMessage[r.message_id][r.emoji]) reactionsByMessage[r.message_id][r.emoji] = [];
-        reactionsByMessage[r.message_id][r.emoji].push(r.reactor_email);
+        reactionsByMessage[r.message_id][r.emoji].push(r.email);
       });
     }
   } catch (reactionsErr) {
