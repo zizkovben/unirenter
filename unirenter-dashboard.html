@@ -3968,14 +3968,33 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 }
 .sleep-pop-wake:hover { background: rgba(61,170,92,0.25); }
 @media (max-width: 480px) {
+  /* S187: previous fix (right:0, wider fixed width) still overflowed off-
+     screen when the status pill anchor wasn't near the right edge of the
+     nav. Condensed single-column grid instead — a narrower popover that
+     stays comfortably within the viewport regardless of anchor position,
+     without needing JS-computed positioning. */
   .sleep-popover {
-    width: calc(100vw - 24px);
-    max-width: 320px;
+    width: 220px;
+    max-width: calc(100vw - 24px);
     left: auto;
     right: 0;
     transform: none;
   }
   .sleep-popover::before { display: none; }
+  .sleep-pop-grid {
+    grid-template-columns: 1fr;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  .sleep-pop-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+  .sleep-pop-icon { margin-bottom: 0; }
+  .sleep-pop-name { line-height: 1.2; }
+  .sleep-pop-badge { margin-top: 0; margin-left: auto; text-align: right; }
 }
 
 
@@ -4199,6 +4218,17 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
   pointer-events: none; /* read-only */
 }
 #card-preview-card-wrap .match-actions { display: none; }
+/* S187: this is the only place someone can read their own vibe summary in
+   full — the grid version truncates to 2 lines and normally relies on a
+   click-through to the expanded profile modal, but clicks are disabled here
+   (pointer-events:none above). Show the whole thing instead of cutting it
+   off with "...". */
+#card-preview-card-wrap .match-cob-summary {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+  opacity: 0.9;
+}
 
 /* === Lease Handover Panel S114 === */
 #lease-handover-backdrop {
@@ -5172,6 +5202,42 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
       <div class="hh-agreement-entry-sub" id="hh-ag-entry-sub">Sort cleaning, guests, quiet hours and bills upfront — before the passive-aggressive notes start. Not legally binding. Between you as equals.</div>
       <div class="hh-agreement-entry-progress" id="hh-ag-entry-progress-wrap" style="display:none;">
         <div class="hh-agreement-entry-progress-bar" id="hh-ag-entry-progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- S187: household-level "Room available" post generator — sits alongside
+         the Housemate Agreement entry card, shown/hidden the same way (block
+         in active household, none in empty state / no household). Reuses the
+         individual fw-* CSS classes for a consistent look. -->
+    <div class="fw-card" id="hh-fw-card" style="display:none;margin-top:12px;">
+      <div class="fw-card-header">
+        <span class="fw-card-icon">📢</span>
+        <div class="fw-card-title">Room Available</div>
+      </div>
+      <div class="fw-card-sub">Got a spare room? Generate a ready-to-post listing for your household — pulls in your flatmates' vibes automatically.</div>
+      <div id="hh-fw-idle">
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <input type="number" id="hh-fw-rent" placeholder="Asking rent $/wk" min="0"
+            style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--text);font-size:13px;padding:9px 10px;box-sizing:border-box;">
+          <input type="text" id="hh-fw-suburb" placeholder="Suburb"
+            style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--text);font-size:13px;padding:9px 10px;box-sizing:border-box;">
+        </div>
+        <input type="text" id="hh-fw-movein" placeholder="Available from (e.g. ASAP, or a date)"
+          style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--text);font-size:13px;padding:9px 10px;box-sizing:border-box;margin-bottom:8px;">
+        <button class="fw-btn fw-btn-copy" style="width:100%;" onclick="hhFwGenerate()">✨ Generate room listing post</button>
+        <div id="hh-fw-error" style="display:none;margin-top:8px;font-size:12px;color:var(--brand-coral);"></div>
+      </div>
+      <div id="hh-fw-loading" style="display:none;">
+        <div class="fw-skeleton" style="width:80%;"></div>
+        <div class="fw-skeleton" style="width:60%;"></div>
+        <div class="fw-skeleton" style="width:72%;"></div>
+      </div>
+      <div id="hh-fw-result" style="display:none;">
+        <div class="fw-post-box" id="hh-fw-post-text"></div>
+        <div class="fw-actions">
+          <button class="fw-btn fw-btn-copy" onclick="hhFwCopyPost()">📋 Copy post</button>
+          <button class="fw-btn fw-btn-regen" onclick="hhFwEdit()" title="Edit details">✎ Edit</button>
+        </div>
       </div>
     </div>
 
@@ -13687,6 +13753,9 @@ function householdRenderEmpty() {
   // even though the click is fully re-clickable underneath.
   var setupBtn = document.querySelector('.household-setup-btn');
   if (setupBtn) { setupBtn.disabled = false; setupBtn.textContent = 'Set up my household →'; }
+  // S187: no household yet in any empty-state branch — nothing to list
+  var hhFwCardEmpty = document.getElementById('hh-fw-card');
+  if (hhFwCardEmpty) hhFwCardEmpty.style.display = 'none';
   // If invite token exists, show the invite panel
   var token = localStorage.getItem('ur_household_invite_token');
   if (token && emptyState) {
@@ -13699,6 +13768,9 @@ function householdRenderEmpty() {
   // Show agreement entry card
   var agCard = document.getElementById('hh-ag-empty-card');
   if (agCard) agCard.style.display = 'block';
+  // S187: no household yet — nothing to generate a room listing from
+  var hhFwCard = document.getElementById('hh-fw-card');
+  if (hhFwCard) hhFwCard.style.display = 'none';
 }
 
 function householdSetup() {
@@ -13984,6 +14056,11 @@ function _origHouseholdRender(data, currentEmail) {
     hhAgLoadEntryState(localStorage.getItem('ur_household_id'), currentEmail);
   }
 
+  // S187: room-listing generator only makes sense once there's a household
+  // to describe.
+  var hhFwCard = document.getElementById('hh-fw-card');
+  if (hhFwCard) hhFwCard.style.display = 'block';
+
   // S147: Household Feed (chat/notes/todos/reminders, tick-to-accept)
   householdFeedInit(data.id, currentEmail);
 }
@@ -14013,6 +14090,103 @@ function householdShareCard() {
     ta.value = url; document.body.appendChild(ta); ta.select();
     document.execCommand('copy'); document.body.removeChild(ta);
     showToast('📋 Link copied!', msg);
+  });
+}
+
+// ── S187: Household "Room Available" post generator ─────────────────────────
+// Mirrors the individual fwBuildPost() pattern, but aggregates lifestyle
+// traits across every current household member (from window._householdLastData,
+// set by householdRender()) instead of a single profile. Rent, suburb and
+// move-in date are asked for directly rather than inferred from members'
+// personal budget/suburb preferences — a household advertising a spare room
+// is describing the room's price, not any one flatmate's own budget, so
+// aggregating existing profile fields would have been misleading.
+function hhFwBuildPost(members, rent, suburb, moveIn) {
+  var data = window._householdLastData || {};
+  var city = (members.find(function(m) { return m.city; }) || {}).city || 'my city';
+  city = city.replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+
+  var n = members.length;
+  var sleepSet = {}, cleanSet = {}, uniSet = {};
+  members.forEach(function(m) {
+    if (m.sleep_schedule && typeof SLEEP_LABELS !== 'undefined' && SLEEP_LABELS[m.sleep_schedule]) {
+      sleepSet[SLEEP_LABELS[m.sleep_schedule]] = true;
+    }
+    if (m.cleanliness && typeof CLEAN_LABELS !== 'undefined' && CLEAN_LABELS[m.cleanliness]) {
+      cleanSet[CLEAN_LABELS[m.cleanliness]] = true;
+    }
+    if (m.university) uniSet[m.university] = true;
+  });
+  var sleepTraits = Object.keys(sleepSet);
+  var cleanTraits = Object.keys(cleanSet);
+  var unis = Object.keys(uniSet);
+
+  var rentStr = rent ? ('$' + rent + '/wk') : 'negotiable';
+  var link = window._hhShareToken ? ('https://unirenter.com.au/household-card/' + window._hhShareToken) : null;
+
+  var post = '🏠 ROOM AVAILABLE — ' + city.toUpperCase() + '\n\n';
+  post += "Hi! We're a household of " + n + (n === 1 ? ' person' : ' people') +
+    (suburb ? (' in ' + suburb) : (' in ' + city)) + ' looking for a new flatmate.\n\n';
+  post += '💰 Rent: ' + rentStr + '\n';
+  if (moveIn) post += '📅 Available: ' + moveIn + '\n';
+  if (suburb) post += '📍 Suburb: ' + suburb + '\n';
+  post += '\n';
+  if (sleepTraits.length || cleanTraits.length || unis.length) {
+    post += 'About the house:\n';
+    if (sleepTraits.length) post += '🌙 ' + sleepTraits.join(', ') + '\n';
+    if (cleanTraits.length) post += '🧹 ' + cleanTraits.join(', ') + '\n';
+    if (unis.length) post += '🎓 ' + unis.join(', ') + '\n';
+    post += '\n';
+  }
+  post += "We're verified on UniRenter — check out our household and connect with us there.\n";
+  if (link) post += '👉 ' + link + '\n';
+  post += '\nDM us if you\'re keen! 😊';
+  return post;
+}
+
+function hhFwGenerate() {
+  var data = window._householdLastData;
+  if (!data || !data.members || !data.members.length) {
+    var errEl = document.getElementById('hh-fw-error');
+    if (errEl) { errEl.textContent = 'Could not load household details — try reloading the Household tab.'; errEl.style.display = ''; }
+    return;
+  }
+  var rentEl = document.getElementById('hh-fw-rent');
+  var suburbEl = document.getElementById('hh-fw-suburb');
+  var moveInEl = document.getElementById('hh-fw-movein');
+  var rent = rentEl ? rentEl.value.trim() : '';
+  var suburb = suburbEl ? suburbEl.value.trim() : '';
+  var moveIn = moveInEl ? moveInEl.value.trim() : '';
+
+  var errEl = document.getElementById('hh-fw-error');
+  if (errEl) errEl.style.display = 'none';
+
+  document.getElementById('hh-fw-idle').style.display = 'none';
+  document.getElementById('hh-fw-loading').style.display = '';
+  document.getElementById('hh-fw-result').style.display = 'none';
+
+  setTimeout(function() {
+    var post = hhFwBuildPost(data.members, rent, suburb, moveIn);
+    document.getElementById('hh-fw-post-text').textContent = post;
+    document.getElementById('hh-fw-loading').style.display = 'none';
+    document.getElementById('hh-fw-result').style.display = '';
+  }, 300); // brief delay so the skeleton loader isn't an imperceptible flash
+}
+
+function hhFwEdit() {
+  document.getElementById('hh-fw-result').style.display = 'none';
+  document.getElementById('hh-fw-idle').style.display = '';
+}
+
+function hhFwCopyPost() {
+  var text = document.getElementById('hh-fw-post-text').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    showToast('📋 Post copied!', 'Paste it into your Facebook student group.');
+  }).catch(function() {
+    var ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('📋 Post copied!', 'Paste it into your Facebook student group.');
   });
 }
 
