@@ -3077,8 +3077,12 @@ async function saveProfileToSupabase() {
   const dietary       = getChips('chips-dietary').join(', ') || null;
   const pets          = getChips('chips-pets').join(', ') || null;
   const kitchenHabits  = getChips('chips-kitchen').join(', ') || null;
-  const suburbPrefs = [...document.querySelectorAll('.suburb-chip.selected')]
-    .map(c => c.dataset?.suburb || c.textContent.trim()).filter(Boolean);
+  // S190 fix: '.suburb-chip' was never an actual class on the suburb chip
+  // elements (they use the same '.chip' class as every other chip group) —
+  // this selector always matched zero elements, so suburb_preferences has
+  // been silently saved as null on every profile since this code was written.
+  const suburbPrefs = ['chips-suburb-inner', 'chips-suburb-east', 'chips-suburb-west']
+    .flatMap(gid => Array.from(document.querySelectorAll('#' + gid + ' .chip.selected')).map(c => c.textContent.trim()));
   const budgetSlider = document.querySelector('input[type="range"]');
   const budgetMax = budgetSlider ? parseInt(budgetSlider.value) : null;
   const budgetMin = budgetMax ? Math.round(budgetMax * 0.8) : null;
