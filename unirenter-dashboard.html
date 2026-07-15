@@ -14979,8 +14979,11 @@ function vibeShareBlockShow() {
   var b = document.getElementById('vibe-share-block'); if (b) b.style.display = 'block';
 }
 function vibeCardShare() {
+  // S187: this toast previously read "before ticking clauses" — copy-pasted
+  // from the housemate agreement feature (a different flow entirely) and
+  // never updated to describe what's actually being gated here.
   var email = localStorage.getItem('unirenter_email');
-  if (!email || localStorage.getItem('unirenter_email_verified') !== '1') { showToast('🔒 Email not verified', 'Please verify your email before ticking clauses.'); return; }
+  if (!email || localStorage.getItem('unirenter_email_verified') !== '1') { showToast('🔒 Email not verified', 'Please verify your email before sharing your vibe card.'); return; }
   var btn = document.getElementById('vibe-share-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Generating link...'; }
   var errEl = document.getElementById('vibe-share-error');

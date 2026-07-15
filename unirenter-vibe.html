@@ -329,12 +329,40 @@
     var key = primary + '+' + secondary;
     if (VIBE_SELF_PAIRS[key]) return VIBE_SELF_PAIRS[key];
     // Fallback: generate a generic line from both
+    // S187: rebuilt to match api/cob.js's actual VIBE_SYSTEM emoji taxonomy —
+    // was still the original S42 18-emoji palette, so almost every card
+    // generated since the S186 vibe-system rewire fell through to null here
+    // (unrecognised emoji), silently dropping the "vibe equation" blurb
+    // from newly-shared cards. Keep in sync with api/cob.js's PRIMARY EMOJI /
+    // SECONDARY EMOJI lists if that prompt changes.
     var VIBE_LABELS = {
-      '🌙':'night owl','🐦':'early riser','📚':'study-focused','🎓':'postgrad',
-      '💼':'young professional','🗣️':'social','🚪':'private','🧹':'neat freak',
-      '🤷':'relaxed about mess','🍳':'home cook','🎮':'gamer','🎵':'musician',
-      '🏋️':'gym regular','🌈':'inclusive','🌍':'international','👥':'loves guests',
-      '🏠':'homebody','🌿':'chill'
+      '📚':'study-focused', '🎨':'creative', '🔬':'analytical researcher', '🎮':'gamer / tech-lover',
+      '🍳':'home cook', '🏃':'active / fitness-focused', '🧘':'calm & mindful', '🌿':'chill vibes',
+      '🎉':'social & outgoing', '🛋️':'homebody', '✈️':'adventurer', '🌙':'night owl',
+      '☀️':'early riser', '💬':'community connector', '🎵':'music lover', '🌍':'global citizen',
+      '🏳️‍🌈':'lgbtq+ friendly', '🐾':'pet person', '☕':'runs on coffee', '📖':'always has a book on the go',
+      '📐':'very analytical', '🗂️':'hyper-organised', '📝':'always studying', '🔭':'curious about everything',
+      '💡':'big ideas person', '🎓':'very career-focused', '🍺':'loves a night out', '🥂':'celebrations person',
+      '🎊':'party starter', '🤝':'natural networker', '👐':'very warm and open', '❤️':'big heart',
+      '🫂':'affectionate, tactile', '🗣️':'loves deep conversations', '👯':'always with friends', '💌':'pen pal energy — stays in touch forever',
+      '🌟':'natural leader', '🍜':'noodle obsessed', '🧁':'stress baker', '🥗':'plant-based / vegan',
+      '🍱':'meal prepper', '🫕':'experimental cook', '🍕':'takeaway regular', '🧃':'teetotal',
+      '🫖':'tea person', '🌶️':'spicy food obsessed', '🥘':'big batch cooker — feeds the house', '🏊':'swimmer',
+      '⚽':'team sport', '🧗':'climber', '🚴':'cyclist', '🏋️':'gym regular',
+      '🤸':'dancer or very flexible', '🥊':'martial arts', '🎾':'racquet sports', '✏️':'always sketching',
+      '🖌️':'painter', '📸':'photographer', '🎬':'film lover', '🎸':'guitarist',
+      '🎹':'pianist', '🎤':'singer', '🎧':'music always playing', '📻':'podcast addict',
+      '✍️':'writer', '🎭':'theatre kid', '🌱':'environmentalist', '🪴':'plant parent',
+      '🌊':'ocean person', '🏔️':'mountain person', '🌸':'seasonal soul', '♻️':'zero-waste',
+      '🌻':'sunshine seeker', '🕌':'faith-observant', '🙏':'spiritual / mindful practice', '🪬':'superstitious',
+      '🎎':'deeply connected to heritage', '🌏':'homesick but happy', '🗺️':'wants to see everywhere', '🌐':'multilingual, loves languages',
+      '📱':'always connected', '🤫':'very private person', '📢':'very expressive and open', '🧹':'tidiness is non-negotiable',
+      '🕯️':'ambience and atmosphere matter', '🪑':'makes a space their own', '⏰':'very punctual and routine-driven', '🔇':'needs quiet to function well',
+      '😴':'champion sleeper', '🛁':'long bath, slow morning person', '💑':'partner visits regularly', '👨‍👩‍👧':'family stays sometimes',
+      '🏠':'open house — always welcoming people', '🚪':'needs personal space respected', '💞':'romantic soul', '🤐':'private about personal life',
+      '🎲':'spontaneous, goes with the flow', '🃏':'dry sense of humour', '🦉':'old soul, wise beyond years', '🌈':'genuinely very optimistic',
+      '🧊':'cool under pressure', '🎯':'very goal-oriented', '🪄':'creative problem solver', '🦋':'in a period of personal transformation',
+      '🎪':'life of the party', '🧩':'puzzle solver, analytical mind', '📡':'bit of a loner but loves company when it happens', '🎒':'always ready to go somewhere'
     };
     var pa = VIBE_LABELS[primary] || '', sa = VIBE_LABELS[secondary] || '';
     if (pa && sa) return { result: primary + secondary, line: capitalise(pa) + ' with ' + sa + ' energy on the side.' };
