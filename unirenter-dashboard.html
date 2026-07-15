@@ -1592,6 +1592,41 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
   border: 1px solid rgba(75,191,224,0.15);
 }
 
+/* ── S190: Dashboard-native inline profile editing ── */
+.pe-body { display:none; padding:14px 18px 18px; }
+.pe-body.active { display:block; }
+.pe-field { margin-bottom:14px; }
+.pe-field:last-child { margin-bottom:0; }
+.pe-field-label { font-size:11px; color:var(--text-muted); margin-bottom:6px; display:block; }
+.pe-select, .pe-input[type="range"] {
+  width:100%; padding:9px 10px; border-radius:8px;
+  background:rgba(255,255,255,0.05); border:1px solid var(--navy-border);
+  color:var(--text); font-family:var(--font-body); font-size:13px;
+}
+.pe-select { appearance:none; }
+.pe-chips { display:flex; flex-wrap:wrap; gap:6px; }
+.pe-chip {
+  font-size:11px; padding:7px 11px; border-radius:8px; cursor:pointer;
+  background:rgba(255,255,255,0.04); border:1px solid var(--navy-border); color:var(--text-muted);
+  transition: all 0.15s;
+}
+.pe-chip:hover { border-color: rgba(75,191,224,0.3); }
+.pe-chip.selected { background:rgba(75,191,224,0.12); border-color:var(--brand-blue); color:var(--brand-blue); }
+.pe-suburb-group-label { font-size:11px; color:var(--text-muted); margin:10px 0 5px; display:block; }
+.pe-suburb-group-label:first-child { margin-top:0; }
+.pe-actions { display:flex; gap:8px; margin-top:16px; }
+.pe-btn-save {
+  flex:1; padding:9px; border-radius:8px; border:none; background:var(--brand-yellow);
+  color:var(--navy); font-weight:600; font-size:13px; cursor:pointer; font-family:var(--font-body);
+}
+.pe-btn-save:hover { background:#e6ac00; }
+.pe-btn-cancel {
+  flex:1; padding:9px; border-radius:8px; border:1px solid var(--navy-border); background:transparent;
+  color:var(--text); font-size:13px; cursor:pointer; font-family:var(--font-body);
+}
+.pe-save-msg { font-size:11px; color:var(--brand-green); margin-top:10px; display:none; }
+.pe-verify-note { font-size:11px; color:var(--brand-yellow); margin-top:10px; display:none; line-height:1.5; }
+
 /* ── Settings tab ── */
 .settings-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 @media (max-width: 700px) { .settings-layout { grid-template-columns: 1fr; } }
@@ -5545,67 +5580,147 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
         <div class="profile-section-card">
           <div class="profile-section-head">
             🏠 Accommodation preferences
-            <button class="profile-section-edit" onclick="editProfile()">Edit</button>
+            <button class="profile-section-edit" id="pe-btn-accom" onclick="toggleSectionEdit('accom')">Edit</button>
           </div>
-          <div class="profile-rows">
-            <div class="profile-row">
-              <span class="profile-row-label">Looking for</span>
-              <span class="profile-row-val" id="prow-seeking">—</span>
+          <div id="pe-view-accom">
+            <div class="profile-rows">
+              <div class="profile-row">
+                <span class="profile-row-label">Looking for</span>
+                <span class="profile-row-val" id="prow-seeking">—</span>
+              </div>
+              <div class="profile-row">
+                <span class="profile-row-label">Budget</span>
+                <span class="profile-row-val" id="prow-budget">—</span>
+              </div>
+              <div class="profile-row">
+                <span class="profile-row-label">Household type</span>
+                <span class="profile-row-val" id="prow-household">—</span>
+              </div>
+              <div class="profile-row">
+                <span class="profile-row-label">Stay duration</span>
+                <span class="profile-row-val" id="prow-duration">—</span>
+              </div>
             </div>
-            <div class="profile-row">
-              <span class="profile-row-label">Budget</span>
-              <span class="profile-row-val" id="prow-budget">—</span>
-            </div>
-            <div class="profile-row">
-              <span class="profile-row-label">Household type</span>
-              <span class="profile-row-val" id="prow-household">—</span>
-            </div>
-            <div class="profile-row">
-              <span class="profile-row-label">Stay duration</span>
-              <span class="profile-row-val" id="prow-duration">—</span>
-            </div>
+            <div class="profile-chips" id="prow-suburbs"></div>
           </div>
-          <div class="profile-chips" id="prow-suburbs"></div>
+          <div class="pe-body" id="pe-edit-accom">
+            <div class="pe-field">
+              <span class="pe-field-label">Looking for</span>
+              <div class="pe-chips" id="pe-seeking"></div>
+            </div>
+            <div class="pe-field">
+              <span class="pe-field-label">Budget (max per week)</span>
+              <input type="range" class="pe-input" id="pe-budget" min="100" max="600" step="10" oninput="peBudgetOut()">
+              <div style="font-size:12px;color:var(--text-muted);margin-top:6px;" id="pe-budget-out">$—/wk</div>
+            </div>
+            <div class="pe-field">
+              <span class="pe-field-label">Household type</span>
+              <div class="pe-chips" id="pe-household"></div>
+            </div>
+            <div class="pe-field">
+              <span class="pe-field-label">Stay duration</span>
+              <div class="pe-chips" id="pe-duration"></div>
+            </div>
+            <div class="pe-field">
+              <span class="pe-field-label">Preferred suburbs</span>
+              <div id="pe-suburbs"></div>
+            </div>
+            <div class="pe-actions">
+              <button class="pe-btn-save" onclick="saveSection('accom')">Save</button>
+              <button class="pe-btn-cancel" onclick="cancelSectionEdit('accom')">Cancel</button>
+            </div>
+            <div class="pe-save-msg" id="pe-msg-accom">Saved.</div>
+          </div>
         </div>
         <div class="profile-section-card">
           <div class="profile-section-head">
             🌙 Lifestyle
-            <button class="profile-section-edit" onclick="editProfile()">Edit</button>
+            <button class="profile-section-edit" id="pe-btn-lifestyle" onclick="toggleSectionEdit('lifestyle')">Edit</button>
           </div>
-          <div class="profile-rows">
-            <div class="profile-row">
-              <span class="profile-row-label">Sleep schedule</span>
-              <span class="profile-row-val" id="prow-sleep">—</span>
+          <div id="pe-view-lifestyle">
+            <div class="profile-rows">
+              <div class="profile-row">
+                <span class="profile-row-label">Sleep schedule</span>
+                <span class="profile-row-val" id="prow-sleep">—</span>
+              </div>
+              <div class="profile-row">
+                <span class="profile-row-label">Cleanliness</span>
+                <span class="profile-row-val" id="prow-clean">—</span>
+              </div>
+              <div class="profile-row">
+                <span class="profile-row-label">Guests</span>
+                <span class="profile-row-val" id="prow-guests">—</span>
+              </div>
+              <div class="profile-row">
+                <span class="profile-row-label">Pets</span>
+                <span class="profile-row-val" id="prow-pets">—</span>
+              </div>
             </div>
-            <div class="profile-row">
-              <span class="profile-row-label">Cleanliness</span>
-              <span class="profile-row-val" id="prow-clean">—</span>
+          </div>
+          <div class="pe-body" id="pe-edit-lifestyle">
+            <div class="pe-field">
+              <span class="pe-field-label">Sleep schedule</span>
+              <div class="pe-chips" id="pe-sleep"></div>
             </div>
-            <div class="profile-row">
-              <span class="profile-row-label">Guests</span>
-              <span class="profile-row-val" id="prow-guests">—</span>
+            <div class="pe-field">
+              <span class="pe-field-label">Cleanliness</span>
+              <div class="pe-chips" id="pe-clean"></div>
             </div>
-            <div class="profile-row">
-              <span class="profile-row-label">Pets</span>
-              <span class="profile-row-val" id="prow-pets">—</span>
+            <div class="pe-field">
+              <span class="pe-field-label">Guests (select all that apply)</span>
+              <div class="pe-chips" id="pe-guests"></div>
             </div>
+            <div class="pe-field">
+              <span class="pe-field-label">Pets (select all that apply)</span>
+              <div class="pe-chips" id="pe-pets"></div>
+            </div>
+            <div class="pe-actions">
+              <button class="pe-btn-save" onclick="saveSection('lifestyle')">Save</button>
+              <button class="pe-btn-cancel" onclick="cancelSectionEdit('lifestyle')">Cancel</button>
+            </div>
+            <div class="pe-save-msg" id="pe-msg-lifestyle">Saved.</div>
           </div>
         </div>
         <div class="profile-section-card">
-          <div class="profile-section-head">🎓 About you</div>
-          <div class="profile-rows">
-            <div class="profile-row">
-              <span class="profile-row-label">University</span>
-              <span class="profile-row-val" id="prow-uni">—</span>
+          <div class="profile-section-head">
+            🎓 About you
+            <button class="profile-section-edit" id="pe-btn-about" onclick="toggleSectionEdit('about')">Edit</button>
+          </div>
+          <div id="pe-view-about">
+            <div class="profile-rows">
+              <div class="profile-row">
+                <span class="profile-row-label">University</span>
+                <span class="profile-row-val" id="prow-uni">—</span>
+              </div>
+              <div class="profile-row">
+                <span class="profile-row-label">Status</span>
+                <span class="profile-row-val" id="prow-status">—</span>
+              </div>
+              <div class="profile-row">
+                <span class="profile-row-label">Study mode</span>
+                <span class="profile-row-val" id="prow-studyloc">—</span>
+              </div>
             </div>
-            <div class="profile-row">
-              <span class="profile-row-label">Status</span>
-              <span class="profile-row-val" id="prow-status">—</span>
+          </div>
+          <div class="pe-body" id="pe-edit-about">
+            <div class="pe-field">
+              <span class="pe-field-label">University</span>
+              <select class="pe-select" id="pe-uni"></select>
             </div>
-            <div class="profile-row">
-              <span class="profile-row-label">Study mode</span>
-              <span class="profile-row-val" id="prow-studyloc">—</span>
+            <div class="pe-field">
+              <span class="pe-field-label">Status</span>
+              <div class="pe-chips" id="pe-status"></div>
             </div>
+            <div class="pe-field">
+              <span class="pe-field-label">Study mode</span>
+              <div class="pe-chips" id="pe-studyloc"></div>
+            </div>
+            <div class="pe-verify-note" id="pe-about-verify-note">Changing your university will mean re-verifying your uni email.</div>
+            <div class="pe-actions">
+              <button class="pe-btn-save" onclick="saveSection('about')">Save</button>
+              <button class="pe-btn-cancel" onclick="cancelSectionEdit('about')">Cancel</button>
+            </div>
+            <div class="pe-save-msg" id="pe-msg-about">Saved.</div>
           </div>
         </div>
       </div>
@@ -6959,6 +7074,7 @@ function lcDashboardRenderTimeline(startDate, endDate, noticePeriod, rent) {
 // Apply a profile data object (from Supabase or localStorage) to the UI.
 // cobRefinedFields: array of field keys Cob has updated (shows 🤠 badge).
 function applyProfileData(p, cobRefinedFields) {
+  window._urProfile = p || {}; // S190: cache for inline edit forms
   const refined = cobRefinedFields || JSON.parse(localStorage.getItem('ur_cob_refined') || '[]');
 
   function setRow(elId, val, fieldKey) {
@@ -6998,7 +7114,7 @@ function applyProfileData(p, cobRefinedFields) {
   setRow('prow-clean',     clean   ? clean.replace(/_/g, ' ')  : null, 'cleanliness');
   setRow('prow-guests',    guests,                 'guests');
   setRow('prow-pets',      pets,                   'pets');
-  setRow('prow-status',    status,                 'student_status');
+  setRow('prow-status',    STATUS_LABELS[status] || status, 'student_status');
   setRow('prow-studyloc',  studyloc,               'study_location');
   setRow('prow-duration',   stayDur,                'stay_duration');
 
@@ -7070,6 +7186,501 @@ function applyProfileData(p, cobRefinedFields) {
     if (pcbBtn)   pcbBtn.setAttribute('onclick', `window.location.href='${cityRoot}'`);
   } else if (banner) {
     banner.style.display = 'none';
+  }
+}
+
+
+// ── S190: Dashboard-native inline profile editing ─────────────────────────
+// Replaces the old blanket editProfile() redirect for the three profile
+// section cards (Accommodation preferences, Lifestyle, About you) with
+// inline expand/edit-in-place. api/profile/save.js already supports
+// partial updates keyed on email/id, so no API changes were needed here —
+// only the front-end edit UI + a save handler per section.
+
+const CITY_DATA = {
+  "melbourne": {
+    "unis": [
+      "University of Melbourne",
+      "RMIT University",
+      "Monash University",
+      "Deakin University",
+      "La Trobe University",
+      "Swinburne University",
+      "Victoria University",
+      "TAFE / College",
+      "Other"
+    ],
+    "groups": {
+      "chips-suburb-inner": {
+        "label": "Inner city and inner north",
+        "chips": [
+          "CBD",
+          "Carlton",
+          "Fitzroy",
+          "Collingwood",
+          "Brunswick",
+          "Northcote",
+          "Coburg"
+        ]
+      },
+      "chips-suburb-east": {
+        "label": "Inner east and south",
+        "chips": [
+          "Richmond",
+          "South Yarra",
+          "Prahran",
+          "St Kilda",
+          "Hawthorn",
+          "Camberwell"
+        ]
+      },
+      "chips-suburb-west": {
+        "label": "West and near campus",
+        "chips": [
+          "Footscray",
+          "Flemington",
+          "Parkville (UniMelb)",
+          "Clayton (Monash)",
+          "Bundoora (La Trobe)"
+        ]
+      }
+    }
+  },
+  "sydney": {
+    "unis": [
+      "UNSW Sydney",
+      "University of Sydney",
+      "UTS",
+      "Macquarie University",
+      "Western Sydney University",
+      "Australian Catholic University",
+      "Notre Dame Australia",
+      "TAFE / College",
+      "Other"
+    ],
+    "groups": {
+      "chips-suburb-inner": {
+        "label": "Inner city and east",
+        "chips": [
+          "CBD / Haymarket",
+          "Pyrmont",
+          "Glebe",
+          "Newtown",
+          "Surry Hills",
+          "Chippendale"
+        ]
+      },
+      "chips-suburb-east": {
+        "label": "Inner south and near campus",
+        "chips": [
+          "Redfern",
+          "Waterloo",
+          "Zetland",
+          "Kensington (UNSW)",
+          "Randwick",
+          "Kingsford"
+        ]
+      },
+      "chips-suburb-west": {
+        "label": "North and west",
+        "chips": [
+          "North Sydney",
+          "Crows Nest",
+          "St Leonards (UTS)",
+          "Parramatta (WSU)",
+          "Strathfield",
+          "Burwood"
+        ]
+      }
+    }
+  },
+  "brisbane": {
+    "unis": [
+      "QUT — Queensland University of Technology",
+      "University of Queensland",
+      "Griffith University",
+      "Bond University",
+      "Australian Catholic University",
+      "TAFE / College",
+      "Other"
+    ],
+    "groups": {
+      "chips-suburb-inner": {
+        "label": "Inner city and south",
+        "chips": [
+          "CBD / South Brisbane",
+          "West End",
+          "Woolloongabba",
+          "Kangaroo Point",
+          "Fortitude Valley",
+          "New Farm"
+        ]
+      },
+      "chips-suburb-east": {
+        "label": "Near campus",
+        "chips": [
+          "St Lucia (UQ)",
+          "Toowong",
+          "Kelvin Grove (QUT)",
+          "Herston",
+          "Dutton Park",
+          "Greenslopes"
+        ]
+      },
+      "chips-suburb-west": {
+        "label": "North and outer",
+        "chips": [
+          "Chermside",
+          "Nundah",
+          "Windsor",
+          "Paddington (Qld)",
+          "Nathan (Griffith)",
+          "Carindale",
+          "Ipswich",
+          "Springfield (USQ)"
+        ]
+      }
+    }
+  },
+  "adelaide": {
+    "unis": [
+      "University of Adelaide",
+      "UniSA — University of South Australia",
+      "Flinders University",
+      "Torrens University",
+      "TAFE SA",
+      "Other"
+    ],
+    "groups": {
+      "chips-suburb-inner": {
+        "label": "Inner city and north",
+        "chips": [
+          "CBD",
+          "North Adelaide",
+          "Prospect",
+          "Fitzroy (SA)",
+          "Bowden",
+          "Brompton"
+        ]
+      },
+      "chips-suburb-east": {
+        "label": "Near campus",
+        "chips": [
+          "Hackney (UniSA City)",
+          "College Park",
+          "Kensington (SA)",
+          "Wayville",
+          "Netherby",
+          "Unley"
+        ]
+      },
+      "chips-suburb-west": {
+        "label": "South and outer",
+        "chips": [
+          "Bedford Park (Flinders)",
+          "Glenelg",
+          "Mitcham",
+          "Norwood",
+          "Magill",
+          "Payneham"
+        ]
+      }
+    }
+  },
+  "perth": {
+    "unis": [
+      "UWA — University of Western Australia",
+      "Curtin University",
+      "Murdoch University",
+      "Edith Cowan University (ECU)",
+      "Notre Dame Australia",
+      "TAFE WA",
+      "Other"
+    ],
+    "groups": {
+      "chips-suburb-inner": {
+        "label": "Inner city and north",
+        "chips": [
+          "CBD / Perth City",
+          "Northbridge",
+          "Leederville",
+          "Mount Lawley",
+          "Highgate",
+          "Maylands"
+        ]
+      },
+      "chips-suburb-east": {
+        "label": "Near campus",
+        "chips": [
+          "Crawley (UWA)",
+          "Bentley (Curtin)",
+          "Murdoch (Murdoch Uni)",
+          "Fremantle",
+          "Subiaco",
+          "Nedlands"
+        ]
+      },
+      "chips-suburb-west": {
+        "label": "South and east",
+        "chips": [
+          "Victoria Park",
+          "Burswood",
+          "Joondalup (ECU)",
+          "Belmont",
+          "Rivervale",
+          "Cannington"
+        ]
+      }
+    }
+  },
+  "canberra": {
+    "unis": [
+      "ANU — Australian National University",
+      "University of Canberra (UC)",
+      "CIT — Canberra Institute of Technology",
+      "Other"
+    ],
+    "groups": {
+      "chips-suburb-inner": {
+        "label": "Inner / ANU",
+        "chips": [
+          "Acton (ANU)",
+          "Turner",
+          "Reid",
+          "Braddon",
+          "City (Civic)",
+          "Dickson"
+        ]
+      },
+      "chips-suburb-east": {
+        "label": "Inner / UC",
+        "chips": [
+          "Bruce (UC)",
+          "Belconnen",
+          "Kaleen",
+          "Page",
+          "Macquarie (ACT)",
+          "Florey"
+        ]
+      },
+      "chips-suburb-west": {
+        "label": "South and outer",
+        "chips": [
+          "Woden",
+          "Phillip",
+          "Tuggeranong",
+          "Gungahlin",
+          "Watson",
+          "Lyneham"
+        ]
+      }
+    }
+  }
+};
+
+const STATUS_LABELS = { future: 'Future student', current: 'Current student', ex: 'Graduate / Alumni', other: 'Community member' };
+const SEEKING_OPTIONS   = ["A room in a share house", "A housemate for my place", "Someone to find a place with"];
+const HOUSEHOLD_OPTIONS = ["Just 1 other person", "2–3 housemates", "4–5 housemates", "No strong preference"];
+const DURATION_OPTIONS  = ["📋 1–3 months (short stay / sublet)", "📅 3–6 months (semester / exchange)", "🏠 6–12 months (fixed-term lease)", "📆 12+ months (long-term)", "🔄 Open to a lease transfer / sublet", "💬 Flexible — open to options"];
+const SLEEP_OPTIONS     = ["🌅 Early bird — bed by 10pm, up early", "🌤️ Usually in by midnight", "🌙 Night owl — awake late, home quietly", "😴 Irregular — shifts / varies a lot", "🔄 Flexible — depends on the week"];
+const CLEAN_OPTIONS     = ["✨ Very tidy — clean as you go", "🙂 Pretty neat overall", "😐 Average — some mess is fine", "😌 Pretty relaxed about it"];
+const GUESTS_OPTIONS    = ["👨‍👩‍👧 Family stays over sometimes", "💑 Partner stays over regularly", "👋 Friends stay over occasionally", "🔔 Guests welcome — just give notice", "🚪 Prefer no overnight guests"];
+const PETS_OPTIONS      = ["🐱 I have a cat", "🐶 I have a dog", "🐦 I have a bird", "🐠 I have fish", "🐾 Love all pets", "🚫🐱 Allergic to cats", "🚫🐶 No dogs please", "🙅 No pets at all", "✅ Happy with any pet"];
+const STUDYLOC_OPTIONS  = ["📚 Study at home — need genuine quiet", "🏫 Go out to study (library / café)", "🎧 Background noise fine when studying", "💻 Work from home some days"];
+
+function peCurrentCity() {
+  return localStorage.getItem('ur_city') || 'melbourne';
+}
+
+// Renders a row of chips into `containerId`. `selected` is a string (single)
+// or array (multi). `multi` controls whether clicking toggles just one
+// selection or adds/removes from a set.
+function peRenderChips(containerId, options, selected, multi) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const selectedSet = multi ? new Set(Array.isArray(selected) ? selected : (selected ? String(selected).split(',').map(s => s.trim()) : []))
+                            : new Set(selected ? [selected] : []);
+  el.innerHTML = options.map(opt => {
+    const isSel = selectedSet.has(opt);
+    return `<div class="pe-chip${isSel ? ' selected' : ''}" data-val="${opt.replace(/"/g, '&quot;')}" onclick="peChipClick(this, ${multi})">${opt}</div>`;
+  }).join('');
+}
+
+function peChipClick(el, multi) {
+  if (multi) {
+    el.classList.toggle('selected');
+  } else {
+    el.parentElement.querySelectorAll('.pe-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+}
+
+function peGetChip(containerId) {
+  const el = document.querySelector(`#${containerId} .pe-chip.selected`);
+  return el ? el.dataset.val : null;
+}
+function peGetChips(containerId) {
+  return Array.from(document.querySelectorAll(`#${containerId} .pe-chip.selected`)).map(c => c.dataset.val);
+}
+
+function peBudgetOut() {
+  const slider = document.getElementById('pe-budget');
+  const out = document.getElementById('pe-budget-out');
+  if (slider && out) out.textContent = `$${slider.value}/wk`;
+}
+
+function peRenderSuburbs(city, selected) {
+  const wrap = document.getElementById('pe-suburbs');
+  if (!wrap) return;
+  const data = CITY_DATA[city] || CITY_DATA.melbourne;
+  const selSet = new Set(selected || []);
+  let html = '';
+  Object.keys(data.groups).forEach(gid => {
+    const g = data.groups[gid];
+    html += `<span class="pe-suburb-group-label">${g.label}</span><div class="pe-chips" id="pe-suburbs-${gid}">`;
+    html += g.chips.map(s => {
+      const isSel = selSet.has(s);
+      return `<div class="pe-chip${isSel ? ' selected' : ''}" data-val="${s.replace(/"/g, '&quot;')}" onclick="peChipClick(this, true)">${s}</div>`;
+    }).join('');
+    html += '</div>';
+  });
+  wrap.innerHTML = html;
+}
+function peGetAllSuburbs() {
+  return Array.from(document.querySelectorAll('#pe-suburbs .pe-chip.selected')).map(c => c.dataset.val);
+}
+
+function peRenderUniSelect(city, current) {
+  const sel = document.getElementById('pe-uni');
+  if (!sel) return;
+  const data = CITY_DATA[city] || CITY_DATA.melbourne;
+  let opts = data.unis.slice();
+  if (current && !opts.includes(current)) opts.unshift(current); // preserve legacy/free-text values
+  sel.innerHTML = opts.map(u => `<option${u === current ? ' selected' : ''}>${u}</option>`).join('');
+}
+
+// Toggle a section between its read-only view and its inline edit form.
+function toggleSectionEdit(section) {
+  const view = document.getElementById('pe-view-' + section);
+  const edit = document.getElementById('pe-edit-' + section);
+  const btn  = document.getElementById('pe-btn-' + section);
+  if (!view || !edit) return;
+  const opening = !edit.classList.contains('active');
+  if (opening) {
+    peFillEditForm(section);
+    view.style.display = 'none';
+    edit.classList.add('active');
+    if (btn) btn.textContent = 'Editing…';
+  } else {
+    cancelSectionEdit(section);
+  }
+}
+
+function cancelSectionEdit(section) {
+  const view = document.getElementById('pe-view-' + section);
+  const edit = document.getElementById('pe-edit-' + section);
+  const btn  = document.getElementById('pe-btn-' + section);
+  if (view) view.style.display = '';
+  if (edit) edit.classList.remove('active');
+  if (btn) btn.textContent = 'Edit';
+  const msg = document.getElementById('pe-msg-' + section);
+  if (msg) msg.style.display = 'none';
+  const note = document.getElementById('pe-about-verify-note');
+  if (note) note.style.display = 'none';
+}
+
+// Populate the edit form for a section from the cached profile (window._urProfile).
+function peFillEditForm(section) {
+  const p = window._urProfile || {};
+  const city = peCurrentCity();
+
+  if (section === 'accom') {
+    peRenderChips('pe-seeking', SEEKING_OPTIONS, p.seeking, false);
+    const slider = document.getElementById('pe-budget');
+    if (slider) { slider.value = p.budget_max || 300; peBudgetOut(); }
+    peRenderChips('pe-household', HOUSEHOLD_OPTIONS, p.household_type, false);
+    peRenderChips('pe-duration', DURATION_OPTIONS, p.stay_duration, true);
+    peRenderSuburbs(city, p.suburb_preferences || []);
+  } else if (section === 'lifestyle') {
+    peRenderChips('pe-sleep', SLEEP_OPTIONS, p.sleep_schedule, false);
+    peRenderChips('pe-clean', CLEAN_OPTIONS, p.cleanliness, false);
+    peRenderChips('pe-guests', GUESTS_OPTIONS, p.guests, true);
+    peRenderChips('pe-pets', PETS_OPTIONS, p.pets, true);
+  } else if (section === 'about') {
+    peRenderUniSelect(city, p.university);
+    peRenderChips('pe-status', Object.keys(STATUS_LABELS).map(k => STATUS_LABELS[k]), STATUS_LABELS[p.student_status], false);
+    peRenderChips('pe-studyloc', STUDYLOC_OPTIONS, p.study_location, false);
+  }
+}
+
+// Reverse-lookup a status label back to its enum key.
+function peStatusKeyFromLabel(label) {
+  return Object.keys(STATUS_LABELS).find(k => STATUS_LABELS[k] === label) || null;
+}
+
+async function saveSection(section) {
+  const p = window._urProfile || {};
+  const email = localStorage.getItem('unirenter_email') || p.email;
+  if (!email) return;
+
+  // api/profile/save.js always writes a `city` value into the Supabase
+  // payload — defaulting to 'melbourne' if the request omits it. Every
+  // partial save from this dashboard MUST include the user's real city,
+  // or a Sydney/Brisbane/etc. profile would silently get reset to Melbourne.
+  const payload = { email, city: peCurrentCity() };
+
+  if (section === 'accom') {
+    payload.seeking = peGetChip('pe-seeking');
+    const budgetMax = parseInt(document.getElementById('pe-budget').value, 10);
+    payload.budget_max = budgetMax;
+    payload.budget_min = Math.round(budgetMax * 0.8);
+    payload.household_type = peGetChip('pe-household');
+    payload.stay_duration = peGetChips('pe-duration').join(', ') || null;
+    payload.suburb_preferences = peGetAllSuburbs();
+  } else if (section === 'lifestyle') {
+    payload.sleep_schedule = peGetChip('pe-sleep');
+    payload.cleanliness = peGetChip('pe-clean');
+    payload.guests = peGetChips('pe-guests').join(', ') || null;
+    payload.pets = peGetChips('pe-pets').join(', ') || null;
+  } else if (section === 'about') {
+    const newUni = document.getElementById('pe-uni').value;
+    const newStatusKey = peStatusKeyFromLabel(peGetChip('pe-status'));
+    payload.university = newUni;
+    payload.student_status = newStatusKey;
+    payload.study_location = peGetChip('pe-studyloc');
+    // If the university changed while status is "current" and the uni email
+    // was previously verified, force re-verification rather than silently
+    // keeping a verified badge against a university that no longer matches.
+    const uniChanged = newUni !== p.university;
+    if (uniChanged && newStatusKey === 'current' && p.uni_email_verified) {
+      payload.uni_email_verified = false;
+      const note = document.getElementById('pe-about-verify-note');
+      if (note) note.style.display = 'block';
+    }
+  }
+
+  try {
+    const res = await fetch('/api/profile/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const result = await res.json();
+    if (result && result.profile) {
+      window._urProfile = Object.assign({}, window._urProfile, result.profile);
+      applyProfileData(window._urProfile);
+    }
+    const msg = document.getElementById('pe-msg-' + section);
+    if (msg) { msg.style.display = 'block'; setTimeout(() => { msg.style.display = 'none'; }, 2500); }
+    const view = document.getElementById('pe-view-' + section);
+    const edit = document.getElementById('pe-edit-' + section);
+    const btn  = document.getElementById('pe-btn-' + section);
+    if (view) view.style.display = '';
+    if (edit) edit.classList.remove('active');
+    if (btn) btn.textContent = 'Edit';
+    if (section === 'about' && typeof updateUniVerifyCard === 'function') updateUniVerifyCard(window._urProfile);
+  } catch (err) {
+    console.error('[UR] saveSection error:', err);
   }
 }
 
