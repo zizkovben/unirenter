@@ -2426,12 +2426,12 @@ function pdmOpen(key) {
 
 // ── Dummy fallback profiles ───────────────────────────────────────────────────
 const dummyProfiles = [
-  { display_name:'Priya R.', university:'ANU', field_of_study:'Commerce/Law', year_of_study:'2nd year', seeking:'Private room', household_type:'Women only', suburb_preferences:['Acton (ANU)'], sleep_schedule:'early_bird', cleanliness:'very_tidy', budget_max:280, email_verified:true, match_score:96, match_reasons:['sleep','cleanliness','budget','location'], vibe_emoji_primary:'📚', vibe_emoji_secondary:'☕', cob_summary:'Organised early riser who values a tidy, structured home.' },
-  { display_name:'Jake S.', university:'UC', field_of_study:'Engineering', year_of_study:'3rd year', seeking:'Share apartment', household_type:'Mixed', suburb_preferences:['Bruce (UC)'], sleep_schedule:'night_owl', cleanliness:'average', budget_max:260, email_verified:false, match_score:88, match_reasons:['sleep','budget','location'], vibe_emoji_primary:'🎮', vibe_emoji_secondary:'💻', cob_summary:'Night-owl coder who is respectful of quiet study hours.' },
-  { display_name:'Anika M.', university:'ANU', field_of_study:'Psychology', year_of_study:'1st year', seeking:'Private room', household_type:'Mixed', suburb_preferences:['O\u2019Connor'], sleep_schedule:'flexible', cleanliness:'tidy', budget_max:270, email_verified:true, match_score:84, match_reasons:['cleanliness','budget','social'], vibe_emoji_primary:'🌿', vibe_emoji_secondary:'🪴', cob_summary:'Chill first-year who loves plants and a calm living space.' },
-  { display_name:'Tom O.', university:'UC', field_of_study:'IT', year_of_study:'3rd year', seeking:'Shared house', household_type:'Mixed', suburb_preferences:['Braddon'], sleep_schedule:'flexible', cleanliness:'tidy', budget_max:240, email_verified:false, match_score:79, match_reasons:['budget','cleanliness','location'], vibe_emoji_primary:'🎵', vibe_emoji_secondary:'🎸', cob_summary:'Music-loving IT student — easy to live with on weekdays.' },
-  { display_name:'Sara C.', university:'ANU', field_of_study:'Design', year_of_study:'Graduate', seeking:'Share apartment', household_type:'Women only', suburb_preferences:['Kingston'], sleep_schedule:'night_owl', cleanliness:'relaxed', budget_max:265, email_verified:false, match_score:74, match_reasons:['sleep','budget'], vibe_emoji_primary:'🎨', vibe_emoji_secondary:'✏️', cob_summary:'Creative grad student — thrives late, loves good design and coffee.' },
-  { display_name:'Rahul K.', university:'ANU', field_of_study:'Science', year_of_study:'PhD', seeking:'Private room', household_type:'Mixed', suburb_preferences:['Acton (ANU)'], sleep_schedule:'early_bird', cleanliness:'very_tidy', budget_max:290, email_verified:true, match_score:71, match_reasons:['sleep','cleanliness','location'], vibe_emoji_primary:'🔬', vibe_emoji_secondary:'📖', cob_summary:'PhD researcher who values a quiet, clean home and structured days.' },
+  { display_name:'Priya R.', university:'ANU', field_of_study:'Commerce/Law', year_of_study:'2nd year', seeking:'Private room', household_type:'2–3 housemates', suburb_preferences:['Acton (ANU)'], sleep_schedule:'early_bird', cleanliness:'very_tidy', budget_max:280, email_verified:true, match_score:96, match_reasons:['sleep','cleanliness','budget','location'], vibe_emoji_primary:'📚', vibe_emoji_secondary:'☕', cob_summary:'Organised early riser who values a tidy, structured home.' },
+  { display_name:'Jake S.', university:'UC', field_of_study:'Engineering', year_of_study:'3rd year', seeking:'Share apartment', household_type:'Just 1 other person', suburb_preferences:['Bruce (UC)'], sleep_schedule:'night_owl', cleanliness:'average', budget_max:260, email_verified:false, match_score:88, match_reasons:['sleep','budget','location'], vibe_emoji_primary:'🎮', vibe_emoji_secondary:'💻', cob_summary:'Night-owl coder who is respectful of quiet study hours.' },
+  { display_name:'Anika M.', university:'ANU', field_of_study:'Psychology', year_of_study:'1st year', seeking:'Private room', household_type:'No strong preference', suburb_preferences:['O\u2019Connor'], sleep_schedule:'flexible', cleanliness:'tidy', budget_max:270, email_verified:true, match_score:84, match_reasons:['cleanliness','budget','social'], vibe_emoji_primary:'🌿', vibe_emoji_secondary:'🪴', cob_summary:'Chill first-year who loves plants and a calm living space.' },
+  { display_name:'Tom O.', university:'UC', field_of_study:'IT', year_of_study:'3rd year', seeking:'Shared house', household_type:'4–5 housemates', suburb_preferences:['Braddon'], sleep_schedule:'flexible', cleanliness:'tidy', budget_max:240, email_verified:false, match_score:79, match_reasons:['budget','cleanliness','location'], vibe_emoji_primary:'🎵', vibe_emoji_secondary:'🎸', cob_summary:'Music-loving IT student — easy to live with on weekdays.' },
+  { display_name:'Sara C.', university:'ANU', field_of_study:'Design', year_of_study:'Graduate', seeking:'Share apartment', household_type:'2–3 housemates', suburb_preferences:['Kingston'], sleep_schedule:'night_owl', cleanliness:'relaxed', budget_max:265, email_verified:false, match_score:74, match_reasons:['sleep','budget'], vibe_emoji_primary:'🎨', vibe_emoji_secondary:'✏️', cob_summary:'Creative grad student — thrives late, loves good design and coffee.' },
+  { display_name:'Rahul K.', university:'ANU', field_of_study:'Science', year_of_study:'PhD', seeking:'Private room', household_type:'Just 1 other person', suburb_preferences:['Acton (ANU)'], sleep_schedule:'early_bird', cleanliness:'very_tidy', budget_max:290, email_verified:true, match_score:71, match_reasons:['sleep','cleanliness','location'], vibe_emoji_primary:'🔬', vibe_emoji_secondary:'📖', cob_summary:'PhD researcher who values a quiet, clean home and structured days.' },
 ];
 // ── Example matches preview (S80 fix) ───────────────────────────────────────
 // Renders ONLY the static dummyProfiles set — used by the "See example matches"
@@ -3060,6 +3060,12 @@ async function saveProfileToSupabase() {
   function getChips(groupId) {
     return Array.from(document.querySelectorAll('#' + groupId + ' .chip.selected')).map(function(c){ return c.textContent.trim(); });
   }
+  // S189: propagated from Melbourne/Sydney/Brisbane (S167) — chips-gender and
+  // chips-hh-gender existed in the UI and persisted to localStorage for
+  // step-recovery, but were never read into profileData below, so neither
+  // ever reached Supabase.
+  const gender             = getChip('chips-gender');
+  const householdGenderPref = getChips('chips-hh-gender').join(', ') || null;
   const ageBracket = getChip('chips-age');
   const sleepSchedule = getChip('chips-sleep');
   const cleanliness   = getChip('chips-clean');
@@ -3098,6 +3104,7 @@ async function saveProfileToSupabase() {
     budget_min: budgetMin, budget_max: budgetMax,
     sleep_schedule: sleepSchedule, cleanliness, study_location: studyLocation,
     guests, substances, dietary, pets, kitchen_habits: kitchenHabits, age_bracket: ageBracket, city: 'canberra', profile_complete: profileComplete,
+    gender, household_gender_pref: householdGenderPref,
     language_home: languageHome, languages_spoken: languagesSpoken.length > 0 ? languagesSpoken : null,
     stay_duration: stayDuration, cob_summary: cobSummary,
     vibe_emoji_primary: (localStorage.getItem('ur_avatar_emoji') || vibeEmojiPrimary), vibe_emoji_secondary: vibeEmojiSecondary,
