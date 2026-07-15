@@ -2062,6 +2062,20 @@ function triggerStep1Verify() {
   triggerMatchesVerify();
 }
 
+function autoOpenSignInIfBounced() {
+  // S189: propagated from Melbourne (S187).
+  let redirect = null;
+  try { redirect = localStorage.getItem('unirenter_redirect_after_login'); } catch (e) {}
+  if (!redirect) return;
+  // Already signed in on this device (e.g. verified in another tab since the
+  // stash was written) — the stash is stale, don't interrupt with a prompt
+  // they don't need. The dashboard guard itself re-checks auth on load too.
+  if (localStorage.getItem('unirenter_email_verified') === '1' && localStorage.getItem('unirenter_email')) return;
+  openSignInModal();
+  const bounceNote = document.getElementById('verify-modal-bounce-note');
+  if (bounceNote) bounceNote.style.display = '';
+}
+
 // ── "Sign in" nav link → open verify modal for a returning user ──
 function openSignInModal() {
   _verifyDestination = 'signin';
@@ -2070,6 +2084,11 @@ function openSignInModal() {
   document.getElementById('verify-modal-badge').classList.remove('show');
   document.getElementById('verify-modal-status').textContent = '';
   document.getElementById('verify-modal-status').className = 'verify-status';
+  // S189: propagated from Melbourne (S187) — hide the bounce-context note by
+  // default; autoOpenSignInIfBounced() re-shows it explicitly right after
+  // calling this function, for the one case where it's relevant.
+  const bounceNote = document.getElementById('verify-modal-bounce-note');
+  if (bounceNote) bounceNote.style.display = 'none';
   ['vm-otp1','vm-otp2','vm-otp3','vm-otp4','vm-otp5','vm-otp6'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
@@ -2182,9 +2201,19 @@ async function vmCheckOTP() {
       // completed the flow at least once. No percentage-threshold guessing needed.
       const p = data.profile || {};
       const hasExistingProfile = !!(p.student_status && p.budget_max);
+      // S189: propagated from Melbourne (S185) — if this visitor was bounced
+      // here from the dashboard (or another page) while signed out, the auth
+      // guard stashed the intended destination (path + query + hash) before
+      // redirecting. Now that they're verified, send them straight back
+      // there instead of always landing on the default matches view.
+      let _redirectAfterLogin = null;
+      try { _redirectAfterLogin = localStorage.getItem('unirenter_redirect_after_login'); } catch (e) {}
       setTimeout(() => {
         closeModal('verify-modal');
-        if (hasExistingProfile) {
+        if (_redirectAfterLogin) {
+          try { localStorage.removeItem('unirenter_redirect_after_login'); } catch (e) {}
+          window.location.href = _redirectAfterLogin;
+        } else if (hasExistingProfile) {
           welcomeBackFlow();
         } else if (_verifyDestination === 'signin') {
           showToast('👋 No profile found yet', "We couldn't find an existing profile for that email — pick a status below to get started.");
@@ -3394,6 +3423,16 @@ function fireCobPhase2Nudge() {
   renderTabLocks();
   syncAuthNav();
   startNotificationPolling();
+  // S189: propagated from Melbourne (S187) — verify-modal's HTML is defined
+  // later in the document than this script block, so calling this
+  // immediately (before the parser reaches it) would hit null elements —
+  // defer to DOMContentLoaded, same pattern as wireAvatar()/attachNextButtons()
+  // elsewhere in this file.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', autoOpenSignInIfBounced);
+  } else {
+    autoOpenSignInIfBounced();
+  }
 
 // ── Seasonal academic-calendar banner (dynamic, S82 — replaces static hardcoded banner) ──
 const ACADEMIC_CAL_CANBERRA = [
@@ -3875,8 +3914,19 @@ function vibeMicToggle() {
 
 <!-- EMAIL VERIFY MODAL — triggered by "Show my matches" -->
 <div class="modal-overlay" id="verify-modal">
-  <div class="modal" style="max-width:440px;">
+  <div class="modal" style="max-width:440px;position:relative;">
+    <button class="modal-close-x" onclick="closeModal('verify-modal')" aria-label="Close"
+      style="position:absolute;top:14px;right:14px;background:none;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;line-height:1;padding:4px;">✕</button>
     <div class="modal-title">✉️ Verify your email</div>
+    <!-- S189: propagated from Melbourne (S187) — shown only when this modal
+         was auto-opened because the visitor was bounced here from a
+         signed-out page (dashboard, messages, etc.). Kept separate from
+         #verify-modal-sub below since that element's inner
+         <strong id="verify-modal-email"> is written into directly once a
+         code is sent — overwriting the whole sub text here would destroy it. -->
+    <div class="modal-sub" id="verify-modal-bounce-note" style="display:none;color:var(--brand-yellow);">
+      🤠 That link needs you to be signed in first — verify your email below and we'll take you straight back to where you were headed.
+    </div>
     <div class="modal-sub" id="verify-modal-sub">We've sent a 6-digit code to <strong id="verify-modal-email"></strong>. Enter it below to unlock your matches.</div>
     <div id="verify-modal-send-row" style="margin:18px 0 6px;">
       <div style="display:flex;gap:10px;align-items:center;">
