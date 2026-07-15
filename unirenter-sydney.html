@@ -2093,6 +2093,28 @@ async function verifyModalSendOTP() {
   btn.textContent = 'Resend'; btn.disabled = false;
 }
 
+function vmOtpPaste(e) {
+  // S189: lets someone paste a full 6-digit code into any one of the boxes
+  // instead of having to enter each digit separately. Splits the pasted
+  // text across all 6 fields (starting from the first box, regardless of
+  // which box the paste happened in, so a paste anywhere always fills the
+  // code correctly from the start) and auto-submits once all 6 are filled.
+  e.preventDefault();
+  const clipboard = (e.clipboardData || window.clipboardData);
+  const text = clipboard ? clipboard.getData('text') : '';
+  const digits = text.replace(/\D/g, '').slice(0, 6);
+  if (!digits) return;
+  const ids = ['vm-otp1','vm-otp2','vm-otp3','vm-otp4','vm-otp5','vm-otp6'];
+  ids.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.value = digits[i] || '';
+  });
+  const lastIndex = Math.min(digits.length, 6) - 1;
+  const lastEl = document.getElementById(ids[lastIndex]);
+  if (lastEl) lastEl.focus();
+  if (digits.length === 6) vmCheckOTP();
+}
+
 function vmOtpNext(input, nextId) {
   if (input.value.length === 1) {
     if (nextId) document.getElementById(nextId).focus();
@@ -3878,12 +3900,12 @@ function vibeMicToggle() {
       <div style="width:100%">
         <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Enter the 6-digit code sent to your email</div>
         <div class="otp-inputs">
-          <input class="otp-input" maxlength="1" id="vm-otp1" oninput="vmOtpNext(this,'vm-otp2')" />
-          <input class="otp-input" maxlength="1" id="vm-otp2" oninput="vmOtpNext(this,'vm-otp3')" />
-          <input class="otp-input" maxlength="1" id="vm-otp3" oninput="vmOtpNext(this,'vm-otp4')" />
-          <input class="otp-input" maxlength="1" id="vm-otp4" oninput="vmOtpNext(this,'vm-otp5')" />
-          <input class="otp-input" maxlength="1" id="vm-otp5" oninput="vmOtpNext(this,'vm-otp6')" />
-          <input class="otp-input" maxlength="1" id="vm-otp6" oninput="vmOtpNext(this,null)" />
+          <input class="otp-input" maxlength="1" id="vm-otp1" oninput="vmOtpNext(this,'vm-otp2')" onpaste="vmOtpPaste(event)" />
+          <input class="otp-input" maxlength="1" id="vm-otp2" oninput="vmOtpNext(this,'vm-otp3')" onpaste="vmOtpPaste(event)" />
+          <input class="otp-input" maxlength="1" id="vm-otp3" oninput="vmOtpNext(this,'vm-otp4')" onpaste="vmOtpPaste(event)" />
+          <input class="otp-input" maxlength="1" id="vm-otp4" oninput="vmOtpNext(this,'vm-otp5')" onpaste="vmOtpPaste(event)" />
+          <input class="otp-input" maxlength="1" id="vm-otp5" oninput="vmOtpNext(this,'vm-otp6')" onpaste="vmOtpPaste(event)" />
+          <input class="otp-input" maxlength="1" id="vm-otp6" oninput="vmOtpNext(this,null)" onpaste="vmOtpPaste(event)" />
         </div>
         <div class="verify-status" id="verify-modal-status"></div>
         <div style="margin-top:10px;font-size:12px;color:var(--text-muted);">Didn't get it? <a href="#" onclick="verifyModalSendOTP();return false;" style="color:var(--brand-blue);">Resend code</a></div>
