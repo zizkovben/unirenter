@@ -3618,6 +3618,16 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 .hh-review-summary-text { font-size:13px;color:var(--text);line-height:1.6; }
 .hh-review-count-note { font-size:11px;color:var(--text-muted);margin-top:6px; }
 
+/* ── S190: Share household card modal ── */
+.hh-share-preview { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px; margin-bottom:18px; }
+.hh-share-preview-members { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+.hh-share-field-label { font-size:11px; color:var(--text-muted); margin-bottom:8px; }
+.hh-share-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+.hh-share-chip { font-size:12px; padding:7px 12px; border-radius:20px; cursor:pointer; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); color:var(--text); transition:all 0.15s; }
+.hh-share-chip:hover { border-color:rgba(245,184,0,0.4); }
+.hh-share-chip.selected { background:rgba(245,184,0,0.12); border-color:var(--brand-yellow); color:var(--brand-yellow); }
+.hh-share-output { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px; font-size:13px; color:var(--text-muted); white-space:pre-wrap; line-height:1.5; max-height:160px; overflow-y:auto; margin-top:8px; }
+
 @media (max-width: 600px) {
   .household-invite-link-row { flex-direction: column; }
   .household-invite-link { width: 100%; }
@@ -5227,23 +5237,11 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
         <div id="household-setup-error" style="display:none;margin-top:10px;font-size:12px;color:var(--brand-coral);text-align:center;padding:0 16px;"></div>
       </div>
     </div>
-    <!-- Housemate agreement entry card — shown in empty state and active household -->
-    <div class="hh-agreement-entry-card" id="hh-ag-empty-card" onclick="hhAgOpenStandalone()" style="display:none;margin-top:12px;">
-      <div class="hh-agreement-entry-head">
-        <span class="hh-agreement-entry-icon">📋</span>
-        <span class="hh-agreement-entry-title">Housemate Agreement</span>
-        <span class="hh-agreement-entry-badge" id="hh-ag-entry-badge">Optional</span>
-      </div>
-      <div class="hh-agreement-entry-sub" id="hh-ag-entry-sub">Sort cleaning, guests, quiet hours and bills upfront — before the passive-aggressive notes start. Not legally binding. Between you as equals.</div>
-      <div class="hh-agreement-entry-progress" id="hh-ag-entry-progress-wrap" style="display:none;">
-        <div class="hh-agreement-entry-progress-bar" id="hh-ag-entry-progress-bar" style="width:0%"></div>
-      </div>
-    </div>
-
-    <!-- S187: household-level "Room available" post generator — sits alongside
-         the Housemate Agreement entry card, shown/hidden the same way (block
-         in active household, none in empty state / no household). Reuses the
-         individual fw-* CSS classes for a consistent look. -->
+    <!-- S190: reordered above the Housemate Agreement card, and no longer
+         auto-shown on every household render — it now only appears once
+         "Find a new flatmate" is clicked (see householdShowInvite()), sitting
+         directly under the action buttons instead of always-on clutter for
+         households not currently looking for anyone. -->
     <div class="fw-card" id="hh-fw-card" style="display:none;margin-top:12px;">
       <div class="fw-card-header">
         <span class="fw-card-icon">📢</span>
@@ -5272,6 +5270,43 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
         <div class="fw-actions">
           <button class="fw-btn fw-btn-copy" onclick="hhFwCopyPost()">📋 Copy post</button>
           <button class="fw-btn fw-btn-regen" onclick="hhFwEdit()" title="Edit details">✎ Edit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Housemate agreement entry card — shown in empty state and active household -->
+    <div class="hh-agreement-entry-card" id="hh-ag-empty-card" onclick="hhAgOpenStandalone()" style="display:none;margin-top:12px;">
+      <div class="hh-agreement-entry-head">
+        <span class="hh-agreement-entry-icon">📋</span>
+        <span class="hh-agreement-entry-title">Housemate Agreement</span>
+        <span class="hh-agreement-entry-badge" id="hh-ag-entry-badge">Optional</span>
+      </div>
+      <div class="hh-agreement-entry-sub" id="hh-ag-entry-sub">Sort cleaning, guests, quiet hours and bills upfront — before the passive-aggressive notes start. Not legally binding. Between you as equals.</div>
+      <div class="hh-agreement-entry-progress" id="hh-ag-entry-progress-wrap" style="display:none;">
+        <div class="hh-agreement-entry-progress-bar" id="hh-ag-entry-progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- S190: Share household card modal — shows a live preview of who's in
+         the household plus a caption picker (preset chips + free-text) so
+         sharing produces an actual message+link, not a bare copied URL that
+         previews misleadingly (see house-rules.html fix, same session). -->
+    <div id="hh-share-modal" class="hh-review-modal" style="display:none;">
+      <div class="hh-review-modal-inner">
+        <div class="hh-review-modal-header">
+          <button class="hh-review-close" onclick="hhShareClose()">×</button>
+          <div class="hh-review-title">Share household card 🏠</div>
+        </div>
+        <div class="hh-review-body">
+          <div class="hh-share-preview" id="hh-share-preview"></div>
+          <div class="hh-share-field-label">Add a caption</div>
+          <div class="hh-share-chips" id="hh-share-chips"></div>
+          <textarea class="hhr-textarea" id="hh-share-custom-msg" rows="3" placeholder="Or write your own caption..." oninput="hhShareUpdatePreviewText()"></textarea>
+          <div class="hh-share-field-label" style="margin-top:14px;">This is what gets copied</div>
+          <div class="hh-share-output" id="hh-share-output"></div>
+        </div>
+        <div class="hh-review-footer" style="justify-content:flex-end;">
+          <button class="hh-review-nav-btn" onclick="hhShareCopy()">📋 Copy message + link</button>
         </div>
       </div>
     </div>
@@ -14667,10 +14702,9 @@ function _origHouseholdRender(data, currentEmail) {
     hhAgLoadEntryState(localStorage.getItem('ur_household_id'), currentEmail);
   }
 
-  // S187: room-listing generator only makes sense once there's a household
-  // to describe.
-  var hhFwCard = document.getElementById('hh-fw-card');
-  if (hhFwCard) hhFwCard.style.display = 'block';
+  // S190: no longer auto-shown here — Room Available now only appears once
+  // "Find a new flatmate" is clicked (see householdShowInvite()), so it
+  // doesn't sit permanently visible for households not currently looking.
 
   // S147: Household Feed (chat/notes/todos/reminders, tick-to-accept)
   householdFeedInit(data.id, currentEmail);
@@ -14684,23 +14718,96 @@ function _origHouseholdRender(data, currentEmail) {
 // household, api/household/card-view.js includes it automatically and the
 // shared page shows both — same link either way, richer content once an
 // agreement exists, never a hard requirement to get a link at all.
+// S190: previously copied a bare link straight to clipboard with no
+// preview and no way to add context — replaced with a modal showing who's
+// actually in the household plus a caption picker, so what gets shared is
+// an actual ready-to-post message, not just a URL (mirrors the existing
+// Room Available generator's "compose, then copy" pattern).
+const HH_SHARE_CAPTIONS = [
+  'Oi, this is us! 🏠',
+  'Our home away from home 💛',
+  'Mi casa es su casa 🔑',
+  'Look Mum, I made it! 🎉',
+  'Meet the housemates 👋',
+  'Home sweet (share) home',
+  'The crew, in one place ✨',
+  'This is where we live now'
+];
+
 function householdShareCard() {
   if (!window._hhShareToken) {
     showToast('⚠️ Could not create share link', 'Try reloading the Household tab.');
     return;
   }
-  var url = 'https://unirenter.com.au/household-card/' + window._hhShareToken;
+  hhShareRenderPreview();
+  var chipsWrap = document.getElementById('hh-share-chips');
+  if (chipsWrap) {
+    chipsWrap.innerHTML = HH_SHARE_CAPTIONS.map(function(c) {
+      return '<div class="hh-share-chip" onclick="hhShareChipClick(this)">' + c.replace(/"/g, '&quot;') + '</div>';
+    }).join('');
+  }
+  var msgEl = document.getElementById('hh-share-custom-msg');
+  if (msgEl) msgEl.value = HH_SHARE_CAPTIONS[0];
+  hhShareUpdatePreviewText();
+  var modal = document.getElementById('hh-share-modal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function hhShareRenderPreview() {
+  var wrap = document.getElementById('hh-share-preview');
+  if (!wrap) return;
+  var data = window._householdLastData || {};
+  var members = data.members || [];
+  var chipsHtml = members.map(function(m) {
+    var name = m.display_name ? m.display_name.split(' ')[0] : 'Flatmate';
+    var emoji = m.vibe_emoji_primary || '🏠';
+    return '<div class="household-member-chip"><span class="household-member-emoji">' + emoji + '</span><span>' + name + '</span></div>';
+  }).join('');
   var hasLockedAgreement = !!(_hhAgAgreement && _hhAgAgreement.locked_at);
-  var msg = hasLockedAgreement
-    ? 'Share with family or housemates — shows your vibe and agreed rules.'
-    : 'Share with family or housemates — shows who lives here and your household vibe.';
-  navigator.clipboard.writeText(url).then(function() {
-    showToast('📋 Link copied!', msg);
+  wrap.innerHTML =
+    '<div class="hh-share-preview-members">' + chipsHtml + '</div>' +
+    '<div style="font-size:12px;color:var(--text-muted);">' +
+    (hasLockedAgreement
+      ? "This is what your flatmates and family will see — who's here, your vibe, and your agreed rules."
+      : "This is what your flatmates and family will see — who's here and your household vibe.") +
+    '</div>';
+}
+
+function hhShareChipClick(el) {
+  document.querySelectorAll('#hh-share-chips .hh-share-chip').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+  var msgEl = document.getElementById('hh-share-custom-msg');
+  if (msgEl) msgEl.value = el.textContent;
+  hhShareUpdatePreviewText();
+}
+
+function hhShareUpdatePreviewText() {
+  var msgEl = document.getElementById('hh-share-custom-msg');
+  var outEl = document.getElementById('hh-share-output');
+  if (!msgEl || !outEl || !window._hhShareToken) return;
+  var url = 'https://unirenter.com.au/household-card/' + window._hhShareToken;
+  var msg = msgEl.value.trim();
+  outEl.textContent = (msg ? (msg + '\n\n') : '') + url;
+}
+
+function hhShareClose() {
+  var modal = document.getElementById('hh-share-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function hhShareCopy() {
+  var outEl = document.getElementById('hh-share-output');
+  var text = outEl ? outEl.textContent : '';
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(function() {
+    showToast('📋 Copied!', 'Paste it anywhere — group chat, caption, wherever.');
+    hhShareClose();
   }).catch(function() {
     var ta = document.createElement('textarea');
-    ta.value = url; document.body.appendChild(ta); ta.select();
+    ta.value = text; document.body.appendChild(ta); ta.select();
     document.execCommand('copy'); document.body.removeChild(ta);
-    showToast('📋 Link copied!', msg);
+    showToast('📋 Copied!', 'Paste it anywhere — group chat, caption, wherever.');
+    hhShareClose();
   });
 }
 
@@ -14803,7 +14910,13 @@ function hhFwCopyPost() {
 
 function householdShowInvite() {
   var wrap = document.getElementById('hh-invite-panel-wrap');
-  if (wrap) wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+  var isOpening = wrap && wrap.style.display === 'none';
+  if (wrap) wrap.style.display = isOpening ? 'block' : 'none';
+  // S190: Room Available now travels with "Find a new flatmate" — showing
+  // the invite link and the room-listing generator together makes sense
+  // since both are about the same moment (actively looking for someone new).
+  var fwCard = document.getElementById('hh-fw-card');
+  if (fwCard) fwCard.style.display = isOpening ? 'block' : 'none';
 }
 
 // ── S148: Leave household — Household Ecosystem Expansion step 6 ───────────
