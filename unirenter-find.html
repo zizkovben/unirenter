@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Room Available — UniRenter</title>
+  <meta name="description" content="A household on UniRenter is looking for a new flatmate — see who's there and what the vibe is like." />
+  <meta property="og:title" content="Room Available — UniRenter" />
+  <meta property="og:description" content="A household on UniRenter is looking for a new flatmate — see who's there and what the vibe is like." />
+  <meta property="og:image" content="https://unirenter.com.au/og-image.png" />
+  <meta property="og:type" content="website" />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy:       #0d1f2d;
+      --navy-mid:   #162535;
+      --card-bg:    #182f42;
+      --text:       #e8f0f5;
+      --text-muted: #7a96aa;
+      --yellow:     #F5B800;
+      --blue:       #4BBFE0;
+      --green:      #3DAA5C;
+      --coral:      #E8623A;
+      --border:     rgba(255,255,255,0.08);
+      --radius:     14px;
+    }
+    html, body {
+      background: var(--navy);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+    nav {
+      background: #0a1a26;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 0 20px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    a.nav-logo {
+      font-family: 'Epilogue', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--yellow);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+    .nav-right { margin-left: auto; }
+    .nav-cta {
+      background: var(--yellow);
+      color: var(--navy);
+      font-family: 'Epilogue', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    main { max-width: 560px; margin: 0 auto; padding: 28px 16px 60px; }
+
+    .listing-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+    .listing-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+    .listing-icon { font-size: 28px; }
+    .listing-title { font-family: 'Epilogue', sans-serif; font-weight: 800; font-size: 20px; }
+    .listing-sub { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+
+    .listing-facts { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+    .listing-fact {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      flex: 1;
+      min-width: 110px;
+    }
+    .listing-fact-label { color: var(--text-muted); font-size: 11px; margin-bottom: 3px; }
+    .listing-fact-val { font-weight: 700; font-family: 'Epilogue', sans-serif; }
+
+    .listing-note {
+      font-size: 14px;
+      line-height: 1.6;
+      background: rgba(255,255,255,0.03);
+      border-left: 3px solid var(--blue);
+      padding: 12px 14px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 4px;
+    }
+
+    .household-block {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+    .household-block-title { font-family: 'Epilogue', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 12px; }
+    .members-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .member-chip {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+    .trait-row { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--text-muted); }
+    .trait-chip { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 5px 9px; }
+
+    .cob-message {
+      background: rgba(245,184,0,0.06);
+      border: 1px solid rgba(245,184,0,0.2);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    .vibe-links { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+    .vibe-link {
+      display: block;
+      background: rgba(75,191,224,0.06);
+      border: 1px solid rgba(75,191,224,0.2);
+      color: var(--blue);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .vibe-link:hover { opacity: 0.85; }
+
+    .cta-block {
+      text-align: center;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px 20px;
+    }
+    .cta-block h3 { font-family: 'Epilogue', sans-serif; font-size: 18px; margin-bottom: 8px; }
+    .cta-block p { font-size: 14px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
+    .cta-btn {
+      display: inline-block;
+      background: var(--yellow);
+      color: var(--navy);
+      font-family: 'Epilogue', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 13px 26px;
+      border-radius: 10px;
+      text-decoration: none;
+    }
+    .cta-btn:hover { opacity: 0.88; }
+
+    .state-msg { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 14px; }
+    .expired-icon { font-size: 40px; margin-bottom: 14px; }
+
+    .page-footer { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 30px; }
+    .page-footer a { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="nav-logo" href="/">UniRenter</a>
+    <div class="nav-right"><a class="nav-cta" href="/">🏠 Find housing</a></div>
+  </nav>
+
+  <main id="page-content">
+    <div class="state-msg" id="state-loading">Loading listing…</div>
+  </main>
+
+  <script>
+    function getToken() {
+      var m = window.location.pathname.match(/\/find\/([^\/]+)/);
+      if (m) return m[1];
+      var sp = new URLSearchParams(window.location.search);
+      return sp.get('token') || null;
+    }
+
+    function escHtml(s) {
+      if (s === null || s === undefined) return '';
+      return String(s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    var SLEEP_LABELS = {
+      '🌅 Early bird — bed by 10pm, up early': '🌅 Early bird',
+      '🌤️ Usually in by midnight': '🌤️ Usually in by midnight',
+      '🌙 Night owl — awake late, home quietly': '🌙 Night owl',
+      '😴 Irregular — shifts / varies a lot': '😴 Irregular hours',
+      '🔄 Flexible — depends on the week': '🔄 Flexible'
+    };
+    var CLEAN_LABELS = {
+      '✨ Very tidy — clean as you go': '✨ Very tidy',
+      '🙂 Pretty neat overall': '🙂 Pretty neat',
+      '😐 Average — some mess is fine': '😐 Average',
+      '😌 Pretty relaxed about it': '😌 Relaxed'
+    };
+
+    function renderExpired() {
+      document.getElementById('page-content').innerHTML =
+        '<div class="state-msg"><div class="expired-icon">⏳</div>This listing has expired or is no longer available.<br><br>' +
+        '<a class="cta-btn" href="/">Find housing on UniRenter →</a></div>';
+      document.title = 'Listing expired — UniRenter';
+    }
+
+    function renderNotFound() {
+      document.getElementById('page-content').innerHTML =
+        '<div class="state-msg"><div class="expired-icon">🔍</div>We couldn\'t find that listing.<br><br>' +
+        '<a class="cta-btn" href="/">Find housing on UniRenter →</a></div>';
+      document.title = 'Listing not found — UniRenter';
+    }
+
+    function render(listing) {
+      var city = listing.city ? (listing.city.charAt(0).toUpperCase() + listing.city.slice(1)) : 'my city';
+      document.title = '🏠 Room Available in ' + city + ' — UniRenter';
+
+      var membersHtml = (listing.members || []).map(function (m) {
+        return '<div class="member-chip"><span>' + escHtml(m.vibe_emoji || '🏠') + '</span><span>' + escHtml(m.display_name) + '</span></div>';
+      }).join('');
+
+      var sleepHtml = (listing.sleep_traits || []).map(function (t) {
+        return '<span class="trait-chip">' + escHtml(SLEEP_LABELS[t] || t) + '</span>';
+      }).join('');
+      var cleanHtml = (listing.clean_traits || []).map(function (t) {
+        return '<span class="trait-chip">' + escHtml(CLEAN_LABELS[t] || t) + '</span>';
+      }).join('');
+      var uniHtml = (listing.unis || []).map(function (u) {
+        return '<span class="trait-chip">🎓 ' + escHtml(u) + '</span>';
+      }).join('');
+
+      var factsHtml =
+        (listing.rent ? '<div class="listing-fact"><div class="listing-fact-label">Rent</div><div class="listing-fact-val">$' + escHtml(listing.rent) + '/wk</div></div>' : '') +
+        (listing.bedrooms ? '<div class="listing-fact"><div class="listing-fact-label">Bedrooms</div><div class="listing-fact-val">' + escHtml(listing.bedrooms) + '</div></div>' : '') +
+        (listing.available_from ? '<div class="listing-fact"><div class="listing-fact-label">Available from</div><div class="listing-fact-val">' + escHtml(listing.available_from) + '</div></div>' : '');
+
+      var householdHtml = '';
+      if (membersHtml || sleepHtml || cleanHtml || uniHtml) {
+        householdHtml =
+          '<div class="household-block">' +
+            '<div class="household-block-title">Who\'s there</div>' +
+            (membersHtml ? '<div class="members-row">' + membersHtml + '</div>' : '') +
+            ((sleepHtml || cleanHtml || uniHtml) ? '<div class="trait-row">' + sleepHtml + cleanHtml + uniHtml + '</div>' : '') +
+          '</div>';
+      }
+
+      var cobHtml = listing.cob_message
+        ? '<div class="cob-message">' + escHtml(listing.cob_message) + '</div>'
+        : '';
+
+      var vibeLinksHtml = '';
+      if (listing.household_card_token) {
+        vibeLinksHtml += '<a class="vibe-link" href="/household-card/' + encodeURIComponent(listing.household_card_token) + '">🏠 See the full household card →</a>';
+      }
+      if (listing.creator_vibe_token) {
+        vibeLinksHtml += '<a class="vibe-link" href="/vibe/' + encodeURIComponent(listing.creator_vibe_token) + '">🤠 See their individual vibe card →</a>';
+      }
+      if (vibeLinksHtml) vibeLinksHtml = '<div class="vibe-links">' + vibeLinksHtml + '</div>';
+
+      document.getElementById('page-content').innerHTML =
+        '<div class="listing-card">' +
+          '<div class="listing-header">' +
+            '<span class="listing-icon">📢</span>' +
+            '<div><div class="listing-title">Room Available in ' + escHtml(city) + '</div>' +
+            '<div class="listing-sub">Shared via UniRenter</div></div>' +
+          '</div>' +
+          (factsHtml ? '<div class="listing-facts">' + factsHtml + '</div>' : '') +
+          (listing.note ? '<div class="listing-note">' + escHtml(listing.note) + '</div>' : '') +
+        '</div>' +
+        householdHtml +
+        cobHtml +
+        vibeLinksHtml +
+        '<div class="cta-block">' +
+          '<h3>Does this household match your vibe?</h3>' +
+          '<p>Build your profile for free on UniRenter and see how compatible you really are — plus find other options in ' + escHtml(city) + '.</p>' +
+          '<a class="cta-btn" href="/">Build your profile →</a>' +
+        '</div>' +
+        '<div class="page-footer">© UniRenter · <a href="/legal">Legal</a> · <a href="/">unirenter.com.au</a></div>';
+    }
+
+    var token = getToken();
+    if (!token) {
+      renderNotFound();
+    } else {
+      fetch('/api/household/find-get?token=' + encodeURIComponent(token))
+        .then(function (r) {
+          if (r.status === 410) { renderExpired(); throw new Error('expired'); }
+          if (r.status === 404) { renderNotFound(); throw new Error('not found'); }
+          return r.json();
+        })
+        .then(function (d) {
+          if (d && d.ok && d.listing) render(d.listing);
+          else renderNotFound();
+        })
+        .catch(function (err) {
+          if (err.message !== 'expired' && err.message !== 'not found') renderNotFound();
+        });
+    }
+  </script>
+</body>
+</html>

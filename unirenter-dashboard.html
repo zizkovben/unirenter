@@ -3628,6 +3628,15 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 .hh-share-chip.selected { background:rgba(245,184,0,0.12); border-color:var(--brand-yellow); color:var(--brand-yellow); }
 .hh-share-output { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px; font-size:13px; color:var(--text-muted); white-space:pre-wrap; line-height:1.5; max-height:160px; overflow-y:auto; margin-top:8px; }
 
+/* ── S190: Find a new flatmate — expanded quick form (Feature E, full spec) ── */
+.hh-fw-checkbox-row { display:flex; flex-direction:column; gap:7px; margin-bottom:12px; }
+.hh-fw-checkbox-row label { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-muted); cursor:pointer; }
+.hh-fw-checkbox-row input[type="checkbox"] { accent-color: var(--brand-yellow); width:15px; height:15px; }
+.hh-fw-secondary-link { text-align:center; font-size:12px; color:var(--brand-blue); margin-top:12px; cursor:pointer; text-decoration:underline; text-decoration-color:rgba(75,191,224,0.3); }
+.hh-fw-secondary-link:hover { text-decoration-color:var(--brand-blue); }
+.hh-fw-result-url-row { display:flex; gap:8px; align-items:center; background:rgba(255,255,255,0.04); border:1px solid var(--navy-border); border-radius:8px; padding:9px 10px; margin-bottom:10px; }
+.hh-fw-result-url { flex:1; font-size:12px; color:var(--brand-blue); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
 @media (max-width: 600px) {
   .household-invite-link-row { flex-direction: column; }
   .household-invite-link { width: 100%; }
@@ -5245,20 +5254,32 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
     <div class="fw-card" id="hh-fw-card" style="display:none;margin-top:12px;">
       <div class="fw-card-header">
         <span class="fw-card-icon">📢</span>
-        <div class="fw-card-title">Room Available</div>
+        <div class="fw-card-title">Find a new flatmate</div>
       </div>
-      <div class="fw-card-sub">Got a spare room? Generate a ready-to-post listing for your household — pulls in your flatmates' vibes automatically.</div>
+      <div class="fw-card-sub">Generate a shareable listing for your household — pulls in your flatmates' vibes automatically, plus a Facebook-ready post.</div>
       <div id="hh-fw-idle">
         <div style="display:flex;gap:8px;margin-bottom:8px;">
           <input type="number" id="hh-fw-rent" placeholder="Asking rent $/wk" min="0"
             style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--text);font-size:13px;padding:9px 10px;box-sizing:border-box;">
-          <input type="text" id="hh-fw-suburb" placeholder="Suburb"
+          <input type="number" id="hh-fw-bedrooms" placeholder="Bedrooms" min="0"
             style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--text);font-size:13px;padding:9px 10px;box-sizing:border-box;">
         </div>
-        <input type="text" id="hh-fw-movein" placeholder="Available from (e.g. ASAP, or a date)"
-          style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--text);font-size:13px;padding:9px 10px;box-sizing:border-box;margin-bottom:8px;">
-        <button class="fw-btn fw-btn-copy" style="width:100%;" onclick="hhFwGenerate()">✨ Generate room listing post</button>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <input type="text" id="hh-fw-suburb" placeholder="Suburb"
+            style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--text);font-size:13px;padding:9px 10px;box-sizing:border-box;">
+          <input type="text" id="hh-fw-movein" placeholder="Available from (e.g. ASAP, or a date)"
+            style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--text);font-size:13px;padding:9px 10px;box-sizing:border-box;">
+        </div>
+        <textarea id="hh-fw-note" maxlength="140" placeholder="A note about the room or household (optional, 140 chars)"
+          style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--text);font-size:13px;padding:9px 10px;box-sizing:border-box;margin-bottom:10px;resize:vertical;min-height:56px;font-family:var(--font-body);"></textarea>
+        <div class="hh-fw-checkbox-row">
+          <label><input type="checkbox" id="hh-fw-include-vibe" checked> Include my vibe card</label>
+          <label><input type="checkbox" id="hh-fw-include-household" checked> Include household vibe card</label>
+          <label><input type="checkbox" id="hh-fw-include-cob" checked> Include a Cob message</label>
+        </div>
+        <button class="fw-btn fw-btn-copy" style="width:100%;" onclick="hhFwGenerate()">✨ Generate listing</button>
         <div id="hh-fw-error" style="display:none;margin-top:8px;font-size:12px;color:var(--brand-coral);"></div>
+        <div class="hh-fw-secondary-link" onclick="householdToggleInvitePanel()">Already know someone? Invite them directly →</div>
       </div>
       <div id="hh-fw-loading" style="display:none;">
         <div class="fw-skeleton" style="width:80%;"></div>
@@ -5266,9 +5287,13 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
         <div class="fw-skeleton" style="width:72%;"></div>
       </div>
       <div id="hh-fw-result" style="display:none;">
+        <div class="hh-fw-result-url-row">
+          <span class="hh-fw-result-url" id="hh-fw-result-url"></span>
+          <button class="fw-link-copy-btn" onclick="hhFwCopyLink()">Copy link</button>
+        </div>
         <div class="fw-post-box" id="hh-fw-post-text"></div>
         <div class="fw-actions">
-          <button class="fw-btn fw-btn-copy" onclick="hhFwCopyPost()">📋 Copy post</button>
+          <button class="fw-btn fw-btn-copy" onclick="hhFwCopyPost()">📋 Copy Facebook post</button>
           <button class="fw-btn fw-btn-regen" onclick="hhFwEdit()" title="Edit details">✎ Edit</button>
         </div>
       </div>
@@ -14819,76 +14844,86 @@ function hhShareCopy() {
 // personal budget/suburb preferences — a household advertising a spare room
 // is describing the room's price, not any one flatmate's own budget, so
 // aggregating existing profile fields would have been misleading.
-function hhFwBuildPost(members, rent, suburb, moveIn) {
-  var data = window._householdLastData || {};
-  var city = (members.find(function(m) { return m.city; }) || {}).city || 'my city';
-  city = city.replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+// S190: rebuilt against the original Feature E spec (Flatmate Wanted Listing
+// Card, household version) — a real shareable /find/:token listing rather
+// than a plain-text-only local generator. Calls api/household/find-create.js,
+// which persists the listing to the `listing_cards` table (card_type
+// 'find_flatmate') and returns a public URL; the Facebook copy below is
+// still built client-side since that text never needs to be stored.
+window._hhFwLastUrl = null;
 
-  var n = members.length;
-  var sleepSet = {}, cleanSet = {}, uniSet = {};
-  members.forEach(function(m) {
-    if (m.sleep_schedule && typeof SLEEP_LABELS !== 'undefined' && SLEEP_LABELS[m.sleep_schedule]) {
-      sleepSet[SLEEP_LABELS[m.sleep_schedule]] = true;
-    }
-    if (m.cleanliness && typeof CLEAN_LABELS !== 'undefined' && CLEAN_LABELS[m.cleanliness]) {
-      cleanSet[CLEAN_LABELS[m.cleanliness]] = true;
-    }
-    if (m.university) uniSet[m.university] = true;
-  });
-  var sleepTraits = Object.keys(sleepSet);
-  var cleanTraits = Object.keys(cleanSet);
-  var unis = Object.keys(uniSet);
-
-  var rentStr = rent ? ('$' + rent + '/wk') : 'negotiable';
-  var link = window._hhShareToken ? ('https://unirenter.com.au/household-card/' + window._hhShareToken) : null;
-
-  var post = '🏠 ROOM AVAILABLE — ' + city.toUpperCase() + '\n\n';
-  post += "Hi! We're a household of " + n + (n === 1 ? ' person' : ' people') +
-    (suburb ? (' in ' + suburb) : (' in ' + city)) + ' looking for a new flatmate.\n\n';
-  post += '💰 Rent: ' + rentStr + '\n';
-  if (moveIn) post += '📅 Available: ' + moveIn + '\n';
-  if (suburb) post += '📍 Suburb: ' + suburb + '\n';
-  post += '\n';
-  if (sleepTraits.length || cleanTraits.length || unis.length) {
-    post += 'About the house:\n';
-    if (sleepTraits.length) post += '🌙 ' + sleepTraits.join(', ') + '\n';
-    if (cleanTraits.length) post += '🧹 ' + cleanTraits.join(', ') + '\n';
-    if (unis.length) post += '🎓 ' + unis.join(', ') + '\n';
-    post += '\n';
-  }
-  post += "We're verified on UniRenter — check out our household and connect with us there.\n";
-  if (link) post += '👉 ' + link + '\n';
-  post += '\nDM us if you\'re keen! 😊';
+function hhFwBuildFacebookPost(url, city, rent, bedrooms, suburb, moveIn) {
+  var cityCap = city.replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+  var post = 'Hey ' + cityCap + ' students 👋\n\n';
+  post += "We're looking for a flatmate" + (suburb ? (' in ' + suburb) : '') +
+    (moveIn ? (' from ' + moveIn) : '') + '.\n';
+  var factsLine = [];
+  if (rent) factsLine.push('$' + rent + '/wk');
+  if (bedrooms) factsLine.push(bedrooms + (bedrooms == 1 ? ' bedroom' : ' bedrooms'));
+  if (factsLine.length) post += factsLine.join(' · ') + '\n';
+  post += '\nHere\'s our vibe → ' + url + '\n\n';
+  post += 'Powered by Cob 🤠';
   return post;
 }
 
-function hhFwGenerate() {
+async function hhFwGenerate() {
   var data = window._householdLastData;
-  if (!data || !data.members || !data.members.length) {
-    var errEl = document.getElementById('hh-fw-error');
+  var householdId = localStorage.getItem('ur_household_id');
+  var email = localStorage.getItem('unirenter_email');
+  var errEl = document.getElementById('hh-fw-error');
+
+  if (!data || !data.members || !data.members.length || !householdId || !email) {
     if (errEl) { errEl.textContent = 'Could not load household details — try reloading the Household tab.'; errEl.style.display = ''; }
     return;
   }
-  var rentEl = document.getElementById('hh-fw-rent');
-  var suburbEl = document.getElementById('hh-fw-suburb');
-  var moveInEl = document.getElementById('hh-fw-movein');
-  var rent = rentEl ? rentEl.value.trim() : '';
-  var suburb = suburbEl ? suburbEl.value.trim() : '';
-  var moveIn = moveInEl ? moveInEl.value.trim() : '';
 
-  var errEl = document.getElementById('hh-fw-error');
+  var rent = (document.getElementById('hh-fw-rent') || {}).value || '';
+  var bedrooms = (document.getElementById('hh-fw-bedrooms') || {}).value || '';
+  var suburb = (document.getElementById('hh-fw-suburb') || {}).value.trim() || '';
+  var moveIn = (document.getElementById('hh-fw-movein') || {}).value.trim() || '';
+  var note = (document.getElementById('hh-fw-note') || {}).value.trim() || '';
+  var includeVibe = !!(document.getElementById('hh-fw-include-vibe') || {}).checked;
+  var includeHousehold = !!(document.getElementById('hh-fw-include-household') || {}).checked;
+  var includeCob = !!(document.getElementById('hh-fw-include-cob') || {}).checked;
+
   if (errEl) errEl.style.display = 'none';
-
   document.getElementById('hh-fw-idle').style.display = 'none';
   document.getElementById('hh-fw-loading').style.display = '';
   document.getElementById('hh-fw-result').style.display = 'none';
 
-  setTimeout(function() {
-    var post = hhFwBuildPost(data.members, rent, suburb, moveIn);
-    document.getElementById('hh-fw-post-text').textContent = post;
+  try {
+    const res = await fetch('/api/household/find-create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        household_id: householdId,
+        rent: rent || null,
+        bedrooms: bedrooms || null,
+        available_from: moveIn || null,
+        note: note || null,
+        include_vibe_card: includeVibe,
+        include_household_card: includeHousehold,
+        include_cob_message: includeCob
+      })
+    });
+    const result = await res.json();
+    if (!result || !result.ok) throw new Error((result && result.error) || 'Could not generate listing');
+
+    var city = (data.members.find(function(m) { return m.city; }) || {}).city || 'my city';
+    window._hhFwLastUrl = result.url;
+
+    document.getElementById('hh-fw-result-url').textContent = result.url;
+    document.getElementById('hh-fw-post-text').textContent =
+      hhFwBuildFacebookPost(result.url, city, rent, bedrooms, suburb, moveIn);
     document.getElementById('hh-fw-loading').style.display = 'none';
     document.getElementById('hh-fw-result').style.display = '';
-  }, 300); // brief delay so the skeleton loader isn't an imperceptible flash
+  } catch (err) {
+    console.error('[UR] hhFwGenerate error:', err);
+    document.getElementById('hh-fw-loading').style.display = 'none';
+    document.getElementById('hh-fw-idle').style.display = '';
+    if (errEl) { errEl.textContent = 'Something went wrong generating the listing — try again.'; errEl.style.display = ''; }
+  }
 }
 
 function hhFwEdit() {
@@ -14908,15 +14943,33 @@ function hhFwCopyPost() {
   });
 }
 
+function hhFwCopyLink() {
+  var url = window._hhFwLastUrl;
+  if (!url) return;
+  navigator.clipboard.writeText(url).then(function() {
+    showToast('📋 Link copied!', 'Share it anywhere — group chat, Insta bio, wherever.');
+  }).catch(function() {
+    var ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('📋 Link copied!', 'Share it anywhere — group chat, Insta bio, wherever.');
+  });
+}
+
+// S190: "Find a new flatmate" now leads with the full listing generator
+// (hh-fw-card) — the original bare invite-link panel is a genuinely
+// different action (inviting someone you already know to join your
+// household account) and is demoted to a secondary toggle inside the
+// generator card itself (see householdToggleInvitePanel below), rather
+// than appearing automatically alongside it.
 function householdShowInvite() {
-  var wrap = document.getElementById('hh-invite-panel-wrap');
-  var isOpening = wrap && wrap.style.display === 'none';
-  if (wrap) wrap.style.display = isOpening ? 'block' : 'none';
-  // S190: Room Available now travels with "Find a new flatmate" — showing
-  // the invite link and the room-listing generator together makes sense
-  // since both are about the same moment (actively looking for someone new).
   var fwCard = document.getElementById('hh-fw-card');
-  if (fwCard) fwCard.style.display = isOpening ? 'block' : 'none';
+  if (fwCard) fwCard.style.display = fwCard.style.display === 'none' ? 'block' : 'none';
+}
+
+function householdToggleInvitePanel() {
+  var wrap = document.getElementById('hh-invite-panel-wrap');
+  if (wrap) wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
 }
 
 // ── S148: Leave household — Household Ecosystem Expansion step 6 ───────────
