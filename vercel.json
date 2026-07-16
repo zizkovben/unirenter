@@ -262,6 +262,10 @@
     {
       "source": "/listing/:token",
       "destination": "/unirenter-listing.html"
+    },
+    {
+      "source": "/find/:token",
+      "destination": "/unirenter-find.html"
     }
   ],
   "redirects": [
