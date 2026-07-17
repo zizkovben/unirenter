@@ -1140,7 +1140,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-row">
           <div class="form-group">
-            <label>First name</label>
+            <label>First name <span style="color:var(--brand-coral);font-weight:700;">*</span></label>
             <input type="text" id="fname" placeholder="e.g. Priya" />
           </div>
           <div class="form-group">
@@ -4150,6 +4150,19 @@ function validateStepData(step) {
   return true;
 }
 
+// S191: Step-specific validation failure messaging — name is the one
+// required field on Step 2 (marked with a red asterisk in the UI); other
+// steps keep the generic message.
+function stepFailMessage(step) {
+  if (step === 2) {
+    const fname = document.getElementById('fname');
+    if (!fname || !fname.value.trim()) {
+      return "Please enter your first name to continue — it's the one required field on this step.";
+    }
+  }
+  return 'Please fill in at least one field on this step before continuing.';
+}
+
 // ── Mobile-safe Next button handler (S126b) ──────────────────────────────────
 // Replaces inline onclick attributes which can silently fail on mobile Safari
 // inside scrollable containers. addEventListener is reliable across all devices.
@@ -4162,7 +4175,7 @@ function validateStepData(step) {
         var step   = parseInt(btn.getAttribute('data-step') || '0', 10);
         if (action === 'unlock' && step) {
           if (!validateStepData(currentStep)) {
-            showToast('⚠️ Add a bit more first', 'Please fill in at least one field on this step before continuing.');
+            showToast('⚠️ Add a bit more first', stepFailMessage(currentStep));
             return;
           }
           unlockAndGo(step);

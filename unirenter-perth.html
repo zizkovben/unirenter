@@ -1187,7 +1187,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-row">
           <div class="form-group">
-            <label>First name</label>
+            <label>First name <span style="color:var(--brand-coral);font-weight:700;">*</span></label>
             <input type="text" id="fname" placeholder="e.g. Priya" />
           </div>
           <div class="form-group">
@@ -1363,7 +1363,7 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="step-nav">
           <button class="btn-back" onclick="goStep(1)">← Back</button>
-          <button class="btn-next" onclick="if(validateStepData(currentStep)){unlockAndGo(3)}else{showToast('⚠️ Add a bit more first','Please fill in at least one field on this step before continuing.')}">Next: Housing →</button>
+          <button class="btn-next" onclick="if(validateStepData(currentStep)){unlockAndGo(3)}else{showToast('⚠️ Add a bit more first', stepFailMessage(2))}">Next: Housing →</button>
         </div>
       </div>
 
@@ -2938,6 +2938,19 @@ function validateStepData(step) {
     return container.querySelectorAll('.chip.selected').length > 0;
   }
   return true;
+}
+
+// S191: Step-specific validation failure messaging — name is the one
+// required field on Step 2 (marked with a red asterisk in the UI); other
+// steps keep the generic message.
+function stepFailMessage(step) {
+  if (step === 2) {
+    const fname = document.getElementById('fname');
+    if (!fname || !fname.value.trim()) {
+      return "Please enter your first name to continue — it's the one required field on this step.";
+    }
+  }
+  return 'Please fill in at least one field on this step before continuing.';
 }
 
 // ── Save progress ──
