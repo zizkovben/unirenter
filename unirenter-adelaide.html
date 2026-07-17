@@ -1606,13 +1606,13 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
         <div class="form-group">
                     <label>How long are you looking to stay?</label>
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;line-height:1.5;">Helps match you with housemates on a similar timeline — also tells us what lease types suit you.</div>
-          <div class="chips" id="chips-duration">
-            <div class="chip" onclick="toggleSingle(this,'chips-duration')">📋 1–3 months (short stay / sublet)</div>
-            <div class="chip" onclick="toggleSingle(this,'chips-duration')">📅 3–6 months (semester / exchange)</div>
-            <div class="chip" onclick="toggleSingle(this,'chips-duration')">🏠 6–12 months (fixed-term lease)</div>
-            <div class="chip" onclick="toggleSingle(this,'chips-duration')">📆 12+ months (long-term)</div>
-            <div class="chip" onclick="toggleSingle(this,'chips-duration')">🔄 Open to a lease transfer / sublet</div>
-            <div class="chip" onclick="toggleSingle(this,'chips-duration')">💬 Flexible — open to options</div>
+          <div class="chips" id="chips-dur">
+            <div class="chip" onclick="toggle(this)">📋 1–3 months (short stay / sublet)</div>
+            <div class="chip" onclick="toggle(this)">📅 3–6 months (semester / exchange)</div>
+            <div class="chip" onclick="toggle(this)">🏠 6–12 months (fixed-term lease)</div>
+            <div class="chip" onclick="toggle(this)">📆 12+ months (long-term)</div>
+            <div class="chip" onclick="toggle(this)">🔄 Open to a lease transfer / sublet</div>
+            <div class="chip" onclick="toggle(this)">💬 Flexible — open to options</div>
           </div>
         </div>
 
@@ -3110,7 +3110,7 @@ async function saveProfileToSupabase() {
   const budgetSlider = document.querySelector('input[type="range"]');
   const budgetMax = budgetSlider ? parseInt(budgetSlider.value) : null;
   const budgetMin = budgetMax ? Math.round(budgetMax * 0.8) : null;
-  const stayDuration = document.querySelector('#chips-duration .chip.selected')?.textContent.trim() || null;
+  const stayDuration = Array.from(document.querySelectorAll('#chips-dur .chip.selected')).map(c => c.textContent.trim()).join(', ') || null;
   const cobSummary = document.getElementById('vibe-summary-val')?.value.trim() || localStorage.getItem('ur_vibe_summary') || null;
   const avatarEmoji = localStorage.getItem('ur_avatar_emoji') || null;
   const vibeEmojiPrimary = document.getElementById('vibe-primary-val')?.value.trim() || localStorage.getItem('ur_vibe_primary') || null;
