@@ -1140,8 +1140,8 @@ body.light-mode .translate-bar{background:rgba(0,31,45,0.06);border-color:rgba(0
 
         <div class="form-row">
           <div class="form-group">
-            <label>First name <span style="color:var(--brand-coral);font-weight:700;">*</span></label>
-            <input type="text" id="fname" placeholder="e.g. Priya" />
+            <label>First name <span id="fname-star" style="color:var(--brand-coral);font-weight:700;">*</span></label>
+            <input type="text" id="fname" placeholder="e.g. Priya" oninput="updateFnameStar()" />
           </div>
           <div class="form-group">
             <label>Current country of residence</label>
@@ -1848,6 +1848,7 @@ function restoreProfileSteps() {
   });
 
   if (data['fname']) { var f = document.getElementById('fname'); if (f) f.value = data['fname']; }
+  updateFnameStar();
   // Restore status card selection
   if (data['status-type']) {
     var card = document.querySelector('.status-card[data-type="' + data['status-type'] + '"]');
@@ -4161,6 +4162,20 @@ function stepFailMessage(step) {
     }
   }
   return 'Please fill in at least one field on this step before continuing.';
+}
+
+// S192: Live-hide the required-field asterisk on Step 2's name field once filled.
+function updateFnameStar() {
+  var fname = document.getElementById('fname');
+  var star = document.getElementById('fname-star');
+  if (fname && star) {
+    star.style.display = fname.value.trim() ? 'none' : 'inline';
+  }
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', updateFnameStar);
+} else {
+  updateFnameStar();
 }
 
 // ── Mobile-safe Next button handler (S126b) ──────────────────────────────────
