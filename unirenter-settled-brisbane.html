@@ -255,7 +255,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 
 .cob-quick{padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid rgba(255,255,255,0.06)}
 .cobqr{background:rgba(245,184,0,0.08);border:1px solid rgba(245,184,0,0.2);color:var(--yellow);font-family:var(--fb);font-size:11px;font-weight:500;padding:6px 11px;border-radius:14px;cursor:pointer;transition:all 0.15s;white-space:nowrap}
-.cobqr:hover{background:rgba(245,184,0,0.16)}
+.cobqr:hover{background:rgba(245,184,0,0.16)}.cobqr.used{opacity:0;pointer-events:none;transition:opacity 0.25s}#cob-chips-close{background:none;border:none;color:var(--muted,#5a8fa8);font-size:14px;cursor:pointer;padding:2px 4px;border-radius:4px;line-height:1;flex-shrink:0;opacity:0.5}#cob-chips-close:hover{opacity:1}
 
 .cob-input-row{padding:10px 12px;border-top:1px solid rgba(255,255,255,0.07);display:flex;gap:8px}
 .cob-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text);font-family:var(--fb);font-size:13px;padding:9px 12px;border-radius:10px;outline:none;transition:border-color 0.2s}
@@ -983,15 +983,16 @@ footer{position:relative;z-index:1;text-align:center;padding:32px;border-top:1px
     </div>
   </div>
   <div class="cob-typing" id="cob-typing"><span></span><span></span><span></span></div>
-  <div class="cob-quick" id="cob-quick">
-    <button class="cobqr" onclick="cobSend('Do I have Medicare as an international student?')">🏥 Do I have Medicare?</button>
-    <button class="cobqr" onclick="cobSend('How do I set up a bank account in Australia?')">🏦 Bank account</button>
-    <button class="cobqr" onclick="cobSend('How many hours can I work on a student visa?')">💼 Work hours</button>
-    <button class="cobqr" onclick="cobSend('What is the go card and how do I use it?')">🚌 go card</button>
-    <button class="cobqr" onclick="cobSend('What should I do if I see a snake?')">🐍 I saw a snake!</button>
-    <button class="cobqr" onclick="cobSend('What are some uniquely Australian cultural things I should know?')">🇦🇺 Aussie culture</button>
-    <button class="cobqr" onclick="cobSend('What is the drinking age in Australia?')">🍺 Drinking age?</button>
-    <button class="cobqr" onclick="cobSend('I am feeling homesick and lonely, what can I do?')">💙 Feeling homesick</button>
+  <div class="cob-quick" id="cob-quick" style="align-items:flex-start;">
+    <button id="cob-chips-close" onclick="document.getElementById('cob-quick').style.display='none'" title="Dismiss suggestions">✕</button>
+    <button class="cobqr" onclick="cobSend('Do I have Medicare as an international student?', this)">🏥 Do I have Medicare?</button>
+    <button class="cobqr" onclick="cobSend('How do I set up a bank account in Australia?', this)">🏦 Bank account</button>
+    <button class="cobqr" onclick="cobSend('How many hours can I work on a student visa?', this)">💼 Work hours</button>
+    <button class="cobqr" onclick="cobSend('What is the go card and how do I use it?', this)">🚌 go card</button>
+    <button class="cobqr" onclick="cobSend('What should I do if I see a snake?', this)">🐍 I saw a snake!</button>
+    <button class="cobqr" onclick="cobSend('What are some uniquely Australian cultural things I should know?', this)">🇦🇺 Aussie culture</button>
+    <button class="cobqr" onclick="cobSend('What is the drinking age in Australia?', this)">🍺 Drinking age?</button>
+    <button class="cobqr" onclick="cobSend('I am feeling homesick and lonely, what can I do?', this)">💙 Feeling homesick</button>
   </div>
   <div class="cob-input-row">
     <input class="cob-input" id="cob-input" placeholder="Ask Cob anything about settling in…" onkeydown="if(event.key==='Enter')cobSend()" />
@@ -1085,12 +1086,12 @@ function cobResponse(msg) {
   return COB_BRAIN.default;
 }
 
-async function cobSend(preset) {
+async function cobSend(preset, btn) {
+  if (btn) btn.classList.add('used');
   const input = document.getElementById('cob-input');
   const msg = preset || input.value.trim();
   if (!msg) return;
   input.value = '';
-  document.getElementById('cob-quick').style.display = 'none';
   addCobMsg(msg, 'me');
   const typing = document.getElementById('cob-typing');
   typing.classList.add('vis');
