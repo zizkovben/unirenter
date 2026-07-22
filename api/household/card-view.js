@@ -6,7 +6,7 @@
 // it exists, with or without ever starting an agreement. If a locked
 // agreement is found for the household, it's included in the response in
 // the exact same shape agreement-view.js already returns, so the shared
-// page (unirenter-house-rules.html) can render it with the same code path
+// page (unirenter-housemate-agreement.html) can render it with the same code path
 // regardless of which route the visitor arrived from.
 // Query: token
 // Returns: { ok, agreement: {...} | null, members }
