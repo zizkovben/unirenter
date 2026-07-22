@@ -14668,6 +14668,7 @@ function _origHouseholdRender(data, currentEmail) {
   // Actions HTML
   var actionsHtml = '<div class="household-actions">' +
     '<button class="household-action-btn primary" onclick="householdShareCard()">Share household card</button>' +
+    '<button class="household-action-btn" onclick="householdPreviewCard()">Preview card</button>' +
     '<button class="household-action-btn" onclick="householdShowInvite()">Find a new flatmate</button>';
   // 'Invite another' merged into 'Find a new flatmate' button
   actionsHtml += '</div>';
@@ -14758,6 +14759,17 @@ const HH_SHARE_CAPTIONS = [
   'The crew, in one place ✨',
   'This is where we live now'
 ];
+
+// S193: lets a household member actually see the real public card page
+// before sharing it, instead of only the in-app preview built from local
+// data in hhShareRenderPreview(). Same token, opened in a new tab.
+function householdPreviewCard() {
+  if (!window._hhShareToken) {
+    showToast('⚠️ Could not create share link', 'Try reloading the Household tab.');
+    return;
+  }
+  window.open('https://unirenter.com.au/household-card/' + window._hhShareToken, '_blank');
+}
 
 function householdShareCard() {
   if (!window._hhShareToken) {

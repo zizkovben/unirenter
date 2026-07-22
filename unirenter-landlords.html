@@ -500,37 +500,40 @@ a.nav-logo {
   /* ── COB FAB + CHAT PANEL (Landlords) ── */
   #cob-fab {
     position: fixed; bottom: 1.5rem; right: 1.5rem;
-    width: 58px; height: 58px; border-radius: 50%;
+    width: 52px; height: 52px; border-radius: 50%;
     background: var(--brand-yellow); color: #0d1f2d;
-    font-size: 1.6rem; border: none; cursor: pointer;
-    box-shadow: 0 6px 24px rgba(0,0,0,.35);
+    font-size: 1.4rem; border: none; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(245,184,0,0.4);
     display: none; align-items: center; justify-content: center;
     z-index: 2000; transition: transform .2s, box-shadow .2s;
   }
-  #cob-fab:hover { transform: scale(1.08); box-shadow: 0 8px 30px rgba(0,0,0,.45); }
+  #cob-fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(245,184,0,0.5); }
   #cob-fab.visible { display: flex; }
 
   #cob-panel {
     position: fixed; bottom: 5.5rem; right: 1.5rem;
-    width: 340px; max-width: calc(100vw - 2rem);
+    width: 320px; max-width: calc(100vw - 2rem);
     background: var(--card-bg); border-radius: 18px;
-    border: 1px solid rgba(255,255,255,.1);
-    box-shadow: 0 12px 40px rgba(0,0,0,.45);
+    border: 1px solid rgba(75,191,224,0.2);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
     display: none; flex-direction: column;
     overflow: hidden; z-index: 1999;
     max-height: 480px;
   }
   #cob-panel.open { display: flex; }
   #cob-panel-header {
-    background: var(--brand-yellow); color: #0d1f2d;
+    background: rgba(245,184,0,0.08); color: var(--brand-yellow);
     padding: .75rem 1rem; font-family: var(--font-display);
     font-weight: 700; font-size: .95rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
     display: flex; align-items: center; justify-content: space-between;
   }
   #cob-panel-header button {
     background: none; border: none; cursor: pointer;
-    font-size: 1.1rem; color: #0d1f2d; padding: 0 .25rem;
+    font-size: 1.1rem; color: var(--text-muted); padding: 0 .25rem;
+    transition: color .15s;
   }
+  #cob-panel-header button:hover { color: var(--text); }
   #cob-messages {
     flex: 1; overflow-y: auto; padding: 1rem;
     display: flex; flex-direction: column; gap: .65rem;

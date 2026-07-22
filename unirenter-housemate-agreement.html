@@ -445,13 +445,18 @@
   };
 
   function renderAgreement(agreement, members) {
-    var clauses = agreement.clauses || [];
-    var lockedDate = agreement.locked_at
+    // S193 fix: agreement is null whenever a household hasn't locked an
+    // agreement yet (the normal case for /household-card/:token visits).
+    // Previously this threw here and the outer .catch() swallowed it,
+    // showing a misleading "check your connection" error instead of the
+    // members/vibe-only card this function was always meant to render.
+    var clauses = agreement ? (agreement.clauses || []) : [];
+    var lockedDate = (agreement && agreement.locked_at)
       ? new Date(agreement.locked_at).toLocaleDateString('en-AU', { day:'numeric', month:'long', year:'numeric' })
       : '';
 
     var tierNames = { 1:'Quick Agreement', 2:'Full Agreement', 3:'Household Manual' };
-    var tierName  = tierNames[agreement.tier] || 'Full Agreement';
+    var tierName  = agreement ? (tierNames[agreement.tier] || 'Full Agreement') : '';
 
     var publicUrl = window.location.href;
 
