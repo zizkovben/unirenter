@@ -8402,8 +8402,19 @@ function renderMatchCard(p) {
   // "Go to messages"), vs. a genuine back-and-forth ("Message").
   var isAlreadyConnected = !!(p.email && window._connectedEmails && window._connectedEmails.has(p.email.toLowerCase()));
   var hasReply = isAlreadyConnected && window._connectedHasReply[p.email.toLowerCase()];
+  // S194: a pending request FROM this person takes priority over the
+  // ordinary Connect button — clicking Connect here would otherwise
+  // re-send the canned opening line as a confusing duplicate instead of
+  // just accepting what they already sent.
+  var hasPendingInboundRequest = !!(p.email && window._pendingInboundEmails && window._pendingInboundEmails.has(p.email.toLowerCase()));
   var actionsHtml;
-  if (isAlreadyConnected && hasReply) {
+  if (hasPendingInboundRequest) {
+    actionsHtml = `<div style="font-size:12px;color:var(--brand-blue);margin-bottom:10px;">${(p.name||'They')} wants to connect</div>
+    <div class="match-actions">
+      <button class="btn-connect" style="background:#3DAA5C;" onclick="event.stopPropagation();respondToConnectionRequest('${p.email.replace(/'/g, "\\'")}','accept',this,true)">Accept</button>
+      <button class="btn-skip" onclick="event.stopPropagation();respondToConnectionRequest('${p.email.replace(/'/g, "\\'")}','decline',this,true)">Decline</button>
+    </div>`;
+  } else if (isAlreadyConnected && hasReply) {
     actionsHtml = `<div class="match-actions">
       <button class="btn-connect" style="background:#3DAA5C;" onclick="openConversationFor('${p.email.replace(/'/g, "\\'")}')">Message</button>
     </div>`;
@@ -8849,6 +8860,13 @@ async function renderMatches() {
   // old connectWith() success state used to draw. ───────────────────────────
   window._connectedEmails = new Set();
   window._connectedHasReply = {};
+  // S194: separately track people who've already sent *us* a pending
+  // request. Previously only convData.conversations (accepted threads) was
+  // read here, so a match who'd already asked to connect looked identical
+  // to a brand-new match — clicking "Connect" on their card re-sent the
+  // canned opening line as a duplicate instead of just accepting.
+  window._pendingInboundEmails = new Set();
+  window._pendingInboundNames = {};
   if (isVerified && email) {
     try {
       var convRes = await fetch('/api/messages/get?email=' + encodeURIComponent(email), { cache: 'no-store' });
@@ -8859,6 +8877,13 @@ async function renderMatches() {
             var key = c.partner_email.toLowerCase();
             window._connectedEmails.add(key);
             window._connectedHasReply[key] = !!c.has_reply;
+          }
+        });
+        (convData.requests || []).forEach(function(r) {
+          if (r.partner_email) {
+            var rkey = r.partner_email.toLowerCase();
+            window._pendingInboundEmails.add(rkey);
+            window._pendingInboundNames[rkey] = r.display_name || '';
           }
         });
       }
@@ -9205,10 +9230,13 @@ function renderRequestsSection(requests) {
   });
 }
 
-async function respondToConnectionRequest(senderEmail, action, btnEl) {
+async function respondToConnectionRequest(senderEmail, action, btnEl, fromMatchCard) {
   var email = localStorage.getItem('unirenter_email');
   if (!email || !senderEmail) return;
-  var row = btnEl ? btnEl.closest('.msg-contact') : null;
+  // S194: this now fires from two places — the Requests list in Messages
+  // (.msg-contact rows) and a match card's Accept/Decline buttons
+  // (.match-card) — so check for whichever ancestor is actually present.
+  var row = btnEl ? (btnEl.closest('.msg-contact') || btnEl.closest('.match-card')) : null;
   if (row) row.style.opacity = '0.5';
   try {
     var res = await fetch('/api/messages/respond-request', {
@@ -9230,6 +9258,10 @@ async function respondToConnectionRequest(senderEmail, action, btnEl) {
     return;
   }
   loadConversations();
+  // Match card grid has its own copy of connection state (window._pendingInboundEmails
+  // etc.) baked into the rendered cards — refresh it too so the card updates
+  // immediately, whether this was triggered from Matches or Messages.
+  if (typeof renderMatches === 'function') renderMatches();
 }
 
 function toggleArchivedRequests() {
