@@ -9606,7 +9606,17 @@ function msgSetBlockedUi(blocked) {
 }
 
 function renderThread(messages, partnerName) {
-  var myEmail = localStorage.getItem('unirenter_email');
+  // S196: localStorage's unirenter_email is stored exactly as the user
+  // typed it at signup (only trimmed, never lowercased — see index.html's
+  // OTP-verify handler) while every backend endpoint normalizes emails to
+  // lowercase before storing/comparing. A mobile keyboard auto-capitalizing
+  // the first letter was enough to make this comparison silently fail,
+  // rendering a person's own sent messages as if the OTHER person sent
+  // them — with real, confusing downstream effects (looked like an inbound
+  // request when it was actually outbound, then a genuine second message
+  // to someone who'd never replied correctly hit the "already messaged"
+  // guard). Normalize both sides here rather than trusting either source.
+  var myEmail = (localStorage.getItem('unirenter_email') || '').toLowerCase();
   var msgs = document.getElementById('msg-messages');
   if (!msgs) return;
   if (messages.length === 0) {
@@ -9616,7 +9626,7 @@ function renderThread(messages, partnerName) {
   }
   msgs.innerHTML = '';
   messages.forEach(function(m) {
-    var isMe = m.sender_email === myEmail;
+    var isMe = (m.sender_email || '').toLowerCase() === myEmail;
     var div = document.createElement('div');
     div.className = 'chat-msg ' + (isMe ? 'me' : 'them');
     var timeStr = msgRelTime(m.created_at);
@@ -15290,7 +15300,7 @@ function householdFeedRenderList(items, myEmail) {
 }
 
 function householdFeedItemHtml(item, myEmail) {
-  var isMe = item.author_email === myEmail;
+  var isMe = (item.author_email || '').toLowerCase() === (myEmail || '').toLowerCase();
   var name = item.author_name ? item.author_name.split(' ')[0] : (item.author_email ? item.author_email.split('@')[0] : 'Housemate');
   var typeIcon = { chat: '💬', note: '📝', todo: '✅', reminder: '⏰' }[item.type] || '💬';
   var dateStr = item.event_date ? hhTimelineFmtDate(item.event_date) : '';

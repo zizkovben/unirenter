@@ -1859,7 +1859,7 @@ function leaseInitEmail() {
 
 async function leaseSendOTP() {
   const emailInp = document.getElementById('lease-email-input');
-  const email = emailInp ? emailInp.value.trim() : '';
+  const email = emailInp ? emailInp.value.trim().toLowerCase() : '';
   if (!email || !email.includes('@') || !email.includes('.')) {
     showToast('⚠️ Email required', 'Please enter a valid email address.');
     return;

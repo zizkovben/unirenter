@@ -2120,7 +2120,7 @@ function triggerMatchesVerify() {
 }
 
 async function verifyModalSendOTP() {
-  const email = document.getElementById('verify-modal-email-input').value.trim();
+  const email = document.getElementById('verify-modal-email-input').value.trim().toLowerCase();
   if (!email || !email.includes('@') || !email.includes('.')) {
     showToast('⚠️ Enter your email', 'Please enter a valid email address first.');
     return;
@@ -2185,7 +2185,7 @@ async function vmCheckOTP() {
     .map(id => document.getElementById(id).value).join('');
   const status = document.getElementById('verify-modal-status');
   if (entered.length < 6) return;
-  const email = document.getElementById('verify-modal-email-input').value.trim();
+  const email = document.getElementById('verify-modal-email-input').value.trim().toLowerCase();
   status.className = 'verify-status';
   status.textContent = 'Checking…';
   try {
