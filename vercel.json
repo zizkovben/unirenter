@@ -1,3 +1,4 @@
+ON
 {
   "framework": null,
   "buildCommand": "",
@@ -273,6 +274,12 @@
       "source": "/lease-companion",
       "destination": "/dashboard?tab=tenancy",
       "permanent": true
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/keep-alive",
+      "schedule": "0 3 * * 1"
     }
   ]
 }
